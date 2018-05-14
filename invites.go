@@ -51,7 +51,7 @@ func (s *Client) ListInvites(team_id int) (*ListInvitesResponse, error) {
 			return &data, nil
 		}
 
-		fmt.Printf("%s", data.Result)
+		fmt.Printf("%+v", data.Result)
 	}
 
 	return &data, nil
