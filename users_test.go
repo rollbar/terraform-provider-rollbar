@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 )
 
@@ -44,4 +45,17 @@ func TestListUsers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestgetId(t *testing.T) {
+	teardown := setup()
+	defer teardown()
+	// Email is taken from the ./testdata/fixtures/users/users.json
+	user_id, err := client.getId("brian@rollbar.com")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	// This will fail if we get anything rather than a number
+	strconv.Itoa(user_id)
 }
