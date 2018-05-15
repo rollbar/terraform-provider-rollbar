@@ -47,9 +47,14 @@ func TestListUsers(t *testing.T) {
 	}
 }
 
-func TestgetId(t *testing.T) {
+func TestGetId(t *testing.T) {
 	teardown := setup()
 	defer teardown()
+	mux.HandleFunc("/users", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, fixture("users/users.json"))
+	})
 	// Email is taken from the ./testdata/fixtures/users/users.json
 	user_id, err := client.getId("brian@rollbar.com")
 
