@@ -28,7 +28,7 @@ func (s *Client) ListInvites(team_id int) (*ListInvitesResponse, error) {
 	// Looping until we get an empty invitations list [].
 	for i := 1; i < 1000; i++ {
 		page_number := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", apiBaseUrl, team_id, s.ApiKey, page_number)
+		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", s.ApiBaseUrl, team_id, s.ApiKey, page_number)
 		req, new_request_err := http.NewRequest("GET", url, nil)
 
 		if new_request_err != nil {
