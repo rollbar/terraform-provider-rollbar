@@ -8,14 +8,53 @@ import (
 
 const apiBaseUrl string = "https://api.rollbar.com/api/1/"
 
+var apiKey string
+
+type Option func(*Client) error
+
 type Client struct {
-	ApiKey string
+	ApiKey     string
+	ApiBaseUrl string
 }
 
-func NewClient(apikey string) *Client {
-	return &Client{
-		ApiKey: apikey,
+func BaseURL(baseURL string) Option {
+	return func(c *Client) error {
+		c.ApiBaseUrl = baseURL
+		return nil
 	}
+}
+
+func ApiKey(apiKey string) Option {
+	return func(c *Client) error {
+		c.ApiKey = apiKey
+		return nil
+	}
+}
+
+func (c *Client) parseOptions(opts ...Option) error {
+	// Range over each options function and apply it to our API type to
+	// configure it. Options functions are applied in order, with any
+	// conflicting options overriding earlier calls.
+	for _, option := range opts {
+		err := option(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func NewClient(opts ...Option) (*Client, error) {
+	client := &Client{
+		ApiKey:     apiKey,
+		ApiBaseUrl: apiBaseUrl,
+	}
+	if err := client.parseOptions(opts...); err != nil {
+		return nil, err
+	}
+	return client, nil
+
 }
 
 func (s *Client) makeRequest(req *http.Request) ([]byte, error) {
