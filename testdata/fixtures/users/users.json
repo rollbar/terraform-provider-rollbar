@@ -1,0 +1,17 @@
+{
+  "err": 0,
+  "result": {
+    "users": [
+      {
+        "username": "brianr",
+        "id": 1,
+        "email": "brian@rollbar.com"
+      },
+      {
+        "username": "coryvirok",
+        "id": 2,
+        "email": "cory@rollbar.com"
+      }
+    ]
+  }
+}
