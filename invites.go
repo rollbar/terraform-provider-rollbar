@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"regexp"
 )
 
 type ListInvitesResponse struct {
@@ -20,47 +19,38 @@ type ListInvitesResponse struct {
 	}
 }
 
-func (s *Client) ListInvites(team_id int) (*ListInvitesResponse, error) {
+func (s *Client) ListInvites(teamID int) (*ListInvitesResponse, error) {
 	var data ListInvitesResponse
 
 	// Invitation call has pagination.
 	// We assume that we wont get to 1000 pages of invites.
 	// There's a feature request to expire the invitations after some time.
 	// Looping until we get an empty invitations list [].
-	for i := 1; i < 1000; i++ {
-		page_number := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", s.ApiBaseUrl, team_id, s.ApiKey, page_number)
-		req, new_request_err := http.NewRequest("GET", url, nil)
+	// Page=0 and page=1 return the same result.
+	for i := 1; ; i++ {
+		pageNum := i
+		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", s.ApiBaseUrl, teamID, s.ApiKey, pageNum)
+		req, err := http.NewRequest("GET", url, nil)
 
-		if new_request_err != nil {
-			return nil, new_request_err
+		if err != nil {
+			return nil, err
 		}
 
-		bytes, make_request_err := s.makeRequest(req)
+		bytes, err := s.makeRequest(req)
 
-		if make_request_err != nil {
-			return nil, make_request_err
+		if err != nil {
+			return nil, err
 		}
 
-		unmarshal_error := json.Unmarshal(bytes, &data)
+		err = json.Unmarshal(bytes, &data)
 
-		if unmarshal_error != nil {
-			return nil, unmarshal_error
+		if err != nil {
+			return nil, err
 		}
 
 		if len(data.Result) == 0 {
-			return &data, nil
-		}
-
-		// Check if the url is localhost which means that tests
-		// are run and we should stop after the first iteration.
-		re := regexp.MustCompile("127.0.0.1")
-		match := re.FindString(s.ApiBaseUrl)
-		if len(match) != 0 {
-			return &data, nil
+			break
 		}
 	}
-
 	return &data, nil
-
 }
