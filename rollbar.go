@@ -60,22 +60,22 @@ func NewClient(opts ...Option) (*Client, error) {
 func (s *Client) makeRequest(req *http.Request) ([]byte, error) {
 
 	client := &http.Client{}
-	resp, client_err := client.Do(req)
+	resp, err := client.Do(req)
 
-	if client_err != nil {
-		return nil, client_err
+	if err != nil {
+		return nil, err
 	}
 
 	defer resp.Body.Close()
 
-	body, read_body_err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 
-	if read_body_err != nil {
-		return nil, read_body_err
+	if err != nil {
+		return nil, err
 	}
 
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("%s", body)
+		return nil, fmt.Errorf("The http status code is not '200' and is '%d'", resp.StatusCode)
 	}
 
 	return body, nil
