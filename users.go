@@ -35,7 +35,7 @@ func (s *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	var data InviteResponse
 
 	type requestData struct {
-		accessToken string `json:"access_token"`
+		AccessToken string `json:"access_token"`
 		Email       string `json:"email"`
 	}
 
