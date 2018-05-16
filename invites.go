@@ -23,10 +23,9 @@ func (s *Client) ListInvites(teamID int) (*ListInvitesResponse, error) {
 	var data ListInvitesResponse
 
 	// Invitation call has pagination.
-	// We assume that we wont get to 1000 pages of invites.
 	// There's a feature request to expire the invitations after some time.
 	// Looping until we get an empty invitations list [].
-	// Page=0 and page=1 return the same result.
+	// Page=0 and page=1 return the same result that's why we start from page=1
 	for i := 1; ; i++ {
 		pageNum := i
 		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", s.ApiBaseUrl, teamID, s.ApiKey, pageNum)
