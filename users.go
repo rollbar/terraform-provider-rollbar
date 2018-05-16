@@ -31,38 +31,38 @@ type InviteResponse struct {
 	}
 }
 
-func (s *Client) InviteUser(team_id int, email string) (*InviteResponse, error) {
+func (s *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	var data InviteResponse
 
 	type requestData struct {
-		Access_token string `json:"access_token"`
-		Email        string `json:"email"`
+		accessToken string `json:"access_token"`
+		Email       string `json:"email"`
 	}
 
-	url := fmt.Sprintf("%steam/%d/invites", s.ApiBaseUrl, team_id)
-	r := requestData{s.ApiKey, email}
-	b, unmarshal_error := json.Marshal(r)
+	url := fmt.Sprintf("%steam/%d/invites", s.ApiBaseUrl, teamID)
+	reqData := requestData{s.ApiKey, email}
+	b, err := json.Marshal(reqData)
 
-	if unmarshal_error != nil {
-		return nil, unmarshal_error
+	if err != nil {
+		return nil, err
 	}
 
-	req, new_request_err := http.NewRequest("POST", url, bytes.NewBuffer(b))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
 
-	if new_request_err != nil {
-		return nil, new_request_err
+	if err != nil {
+		return nil, err
 	}
 
-	bytes, make_request_err := s.makeRequest(req)
+	bytes, err := s.makeRequest(req)
 
-	if make_request_err != nil {
-		return nil, make_request_err
+	if err != nil {
+		return nil, err
 	}
 
-	unmarshal_error = json.Unmarshal(bytes, &data)
+	err = json.Unmarshal(bytes, &data)
 
-	if unmarshal_error != nil {
-		return nil, unmarshal_error
+	if err != nil {
+		return nil, err
 	}
 	return &data, nil
 }
@@ -71,64 +71,66 @@ func (s *Client) ListUsers() (*ListUsersResponse, error) {
 	var data ListUsersResponse
 
 	url := fmt.Sprintf("%susers?access_token=%s", s.ApiBaseUrl, s.ApiKey)
-	req, new_request_err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url, nil)
 
-	if new_request_err != nil {
-		return nil, new_request_err
+	if err != nil {
+		return nil, err
 	}
 
-	bytes, make_request_err := s.makeRequest(req)
+	bytes, err := s.makeRequest(req)
 
-	if make_request_err != nil {
-		return nil, make_request_err
+	if err != nil {
+		return nil, err
 	}
 
-	unmarshal_error := json.Unmarshal(bytes, &data)
+	err = json.Unmarshal(bytes, &data)
 
-	if unmarshal_error != nil {
-		return nil, unmarshal_error
+	if err != nil {
+		return nil, err
 	}
 
 	return &data, nil
 }
 
+// This response doesn't have pagination so it might break
+// in the future.
 func (s *Client) getId(email string) (int, error) {
-	var user_id int
+	var userID int
 
-	l, list_err := s.ListUsers()
+	l, err := s.ListUsers()
 
-	if list_err != nil {
-		return 0, list_err
+	if err != nil {
+		return 0, err
 	}
 
 	for _, user := range l.Result.Users {
 		if user.Email == email {
-			user_id = user.Id
+			userID = user.Id
 		}
 
 	}
 
-	return user_id, nil
+	return userID, nil
 }
 
-func (s *Client) RemoveUserTeam(email string, team_id int) error {
-	user_id, get_id_err := s.getId(email)
+func (s *Client) RemoveUserTeam(email string, teamID int) error {
+	userID, err := s.getId(email)
 
-	if get_id_err != nil {
-		return get_id_err
+	if err != nil {
+		return err
 	}
 
-	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", s.ApiBaseUrl, team_id, user_id, s.ApiKey)
-	req, new_request_err := http.NewRequest("DELETE", url, nil)
+	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", s.ApiBaseUrl, teamID, userID, s.ApiKey)
+	req, err := http.NewRequest("DELETE", url, nil)
 
-	if new_request_err != nil {
-		return new_request_err
+	if err != nil {
+		return err
 	}
 
-	_, request_err := s.makeRequest(req)
+	_, err = s.makeRequest(req)
 
-	if request_err != nil {
-		return request_err
+	if err != nil {
+		return err
 	}
 
 	return nil
