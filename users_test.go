@@ -2,33 +2,24 @@ package rollbar
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"testing"
 )
 
-func fixture(path string) string {
-	b, err := ioutil.ReadFile("testdata/fixtures/" + path)
-	if err != nil {
-		panic(err)
-	}
-	return string(b)
-}
-
 func TestRemoveUserTeam(t *testing.T) {
 	teardown := setup()
 	defer teardown()
-	handlerUrl := fmt.Sprintf("/team/%s/user/%s", teamID, userID)
-	handlerUrlGet := "/users/"
+	handUrl := fmt.Sprintf("/team/%s/user/%s", teamID, userID)
+	handUrlGet := "/users/"
 
-	mux.HandleFunc(handlerUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/remove_user.json"))
 	})
 
-	mux.HandleFunc(handlerUrlGet, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handUrlGet, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
@@ -44,9 +35,9 @@ func TestRemoveUserTeam(t *testing.T) {
 func TestInviteUser(t *testing.T) {
 	teardown := setup()
 	defer teardown()
-	handlerUrl := fmt.Sprintf("/team/%s/invites", teamID)
+	handUrl := fmt.Sprintf("/team/%s/invites", teamID)
 
-	mux.HandleFunc(handlerUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("teams/invite_user.json"))
@@ -62,9 +53,9 @@ func TestInviteUser(t *testing.T) {
 func TestListUsers(t *testing.T) {
 	teardown := setup()
 	defer teardown()
-	handlerUrl := "/users"
+	handUrl := "/users"
 
-	mux.HandleFunc(handlerUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
@@ -78,8 +69,8 @@ func TestListUsers(t *testing.T) {
 func TestGetId(t *testing.T) {
 	teardown := setup()
 	defer teardown()
-	handlerUrl := "/users"
-	mux.HandleFunc(handlerUrl, func(w http.ResponseWriter, r *http.Request) {
+	handUrl := "/users"
+	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
