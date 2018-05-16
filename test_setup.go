@@ -20,7 +20,7 @@ var (
 func setup() func() {
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
-	client, _ = NewClient(ApiKey("mockkey"), BaseURL(server.URL+"/"))
+	client, _ = NewClient(ApiKey("mockapikey"), BaseURL(server.URL+"/"))
 
 	return func() {
 		server.Close()
