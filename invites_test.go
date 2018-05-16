@@ -19,8 +19,8 @@ func TestListInvites(t *testing.T) {
 
 		// Check if we've hit the second page and return an empty paginated
 		// response thus simulating the apis behaviour.
-		splstr := strings.Split(r.URL.RawQuery, "&")
-		if splstr[1] == "page=2" {
+		splStr := strings.Split(r.URL.RawQuery, "&")
+		if splStr[1] == "page=2" {
 			fmt.Fprint(w, fixture("teams/empty_invites.json"))
 		} else {
 			fmt.Fprint(w, fixture("teams/invites.json"))
