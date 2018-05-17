@@ -12,7 +12,7 @@ type ListUsersResponse struct {
 	Result struct {
 		Users []struct {
 			Username string `json:"username"`
-			Id       int    `json:"id"`
+			ID       int    `json:"id"`
 			Email    string `json:"email"`
 		}
 	}
@@ -21,9 +21,9 @@ type ListUsersResponse struct {
 type InviteResponse struct {
 	Error  int `json:err`
 	Result struct {
-		Id           int    `json:"id"`
-		FromUserId   int    `json:"from_user_id"`
-		TeamId       int    `json:"team_id"`
+		ID           int    `json:"id"`
+		FromUserID   int    `json:"from_user_id"`
+		TeamID       int    `json:"team_id"`
 		ToEmail      string `json:"to_email"`
 		Status       string `json:"status"`
 		DateCreated  int    `json:"date_created"`
@@ -31,7 +31,7 @@ type InviteResponse struct {
 	}
 }
 
-func (s *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
+func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	var data InviteResponse
 
 	type requestData struct {
@@ -39,8 +39,8 @@ func (s *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 		Email       string `json:"email"`
 	}
 
-	url := fmt.Sprintf("%steam/%d/invites", s.ApiBaseUrl, teamID)
-	reqData := requestData{s.ApiKey, email}
+	url := fmt.Sprintf("%steam/%d/invites", c.ApiBaseUrl, teamID)
+	reqData := requestData{c.ApiKey, email}
 	b, err := json.Marshal(reqData)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func (s *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 		return nil, err
 	}
 
-	bytes, err := s.makeRequest(req)
+	bytes, err := c.makeRequest(req)
 
 	if err != nil {
 		return nil, err
@@ -67,17 +67,17 @@ func (s *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	return &data, nil
 }
 
-func (s *Client) ListUsers() (*ListUsersResponse, error) {
+func (c *Client) ListUsers() (*ListUsersResponse, error) {
 	var data ListUsersResponse
 
-	url := fmt.Sprintf("%susers?access_token=%s", s.ApiBaseUrl, s.ApiKey)
+	url := fmt.Sprintf("%susers?access_token=%s", c.ApiBaseUrl, c.ApiKey)
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
 		return nil, err
 	}
 
-	bytes, err := s.makeRequest(req)
+	bytes, err := c.makeRequest(req)
 
 	if err != nil {
 		return nil, err
@@ -94,10 +94,10 @@ func (s *Client) ListUsers() (*ListUsersResponse, error) {
 
 // This response doesn't have pagination so it might break
 // in the future.
-func (s *Client) getId(email string) (int, error) {
+func (c *Client) getID(email string) (int, error) {
 	var userID int
 
-	l, err := s.ListUsers()
+	l, err := c.ListUsers()
 
 	if err != nil {
 		return 0, err
@@ -105,7 +105,7 @@ func (s *Client) getId(email string) (int, error) {
 
 	for _, user := range l.Result.Users {
 		if user.Email == email {
-			userID = user.Id
+			userID = user.ID
 		}
 
 	}
@@ -113,21 +113,21 @@ func (s *Client) getId(email string) (int, error) {
 	return userID, nil
 }
 
-func (s *Client) RemoveUserTeam(email string, teamID int) error {
-	userID, err := s.getId(email)
+func (c *Client) RemoveUserTeam(email string, teamID int) error {
+	userID, err := c.getID(email)
 
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", s.ApiBaseUrl, teamID, userID, s.ApiKey)
+	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", c.ApiBaseUrl, teamID, userID, c.ApiKey)
 	req, err := http.NewRequest("DELETE", url, nil)
 
 	if err != nil {
 		return err
 	}
 
-	_, err = s.makeRequest(req)
+	_, err = c.makeRequest(req)
 
 	if err != nil {
 		return err
