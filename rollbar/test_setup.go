@@ -45,7 +45,7 @@ func fixture(path string) string {
 }
 
 // Another function is used for reading the fixture files
-//because the other returns a string
+// because the other returns a string
 // and a case should be formed and 2 values should be returned
 // which makes it a bit complex.
 func vars(fName string) (*VarsUsers, error) {
