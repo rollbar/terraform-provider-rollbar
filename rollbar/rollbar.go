@@ -40,7 +40,6 @@ func (c *Client) parseOptions(opts ...Option) error {
 
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	client := &Client{
-		// ApiKey:     apiKey,
 		ApiBaseUrl: apiBaseUrl,
 	}
 	if err := client.parseOptions(opts...); err != nil {
