@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	teamID    = "2131231"
-	userID    = "1"
-	userEmail = "brian@rollbar.com"
-	fixPath   = "testdata/fixtures/"
+	teamID     = "2131231"
+	userID     = "1"
+	userEmail  = "brian@rollbar.com"
+	fixPath    = "testdata/fixtures/"
+	mockApiKey = "mockApiKey"
 )
 
 var (
@@ -22,7 +23,7 @@ var (
 func setup() func() {
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
-	client, _ = NewClient(ApiKey("mockapikey"), BaseURL(server.URL+"/"))
+	client, _ = NewClient(mockApiKey, BaseURL(server.URL+"/"))
 
 	return func() {
 		server.Close()
