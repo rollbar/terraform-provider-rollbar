@@ -46,10 +46,9 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 		return nil, err
 	}
 	return client, nil
-
 }
 
-func (s *Client) makeRequest(req *http.Request) ([]byte, error) {
+func (c *Client) makeRequest(req *http.Request) ([]byte, error) {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

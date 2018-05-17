@@ -111,6 +111,10 @@ func TestGetId(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// This will fail if we get anything rather than a int.
-	strconv.Itoa(userID)
+
+	_, err := strconv.Itoa(userID)
+
+	if err != nil {
+		t.Errorf("Expected string, got: %v", userID)
+	}
 }

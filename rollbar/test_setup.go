@@ -37,7 +37,6 @@ func setup() func() {
 }
 
 func fixture(path string) string {
-
 	b, err := ioutil.ReadFile(fixPath + path)
 	if err != nil {
 		panic(err)

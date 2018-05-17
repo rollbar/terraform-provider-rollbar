@@ -107,7 +107,6 @@ func (c *Client) getID(email string) (int, error) {
 		if user.Email == email {
 			userID = user.ID
 		}
-
 	}
 
 	return userID, nil

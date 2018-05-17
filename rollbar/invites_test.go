@@ -32,7 +32,6 @@ func TestListInvites(t *testing.T) {
 		}
 
 		fmt.Fprint(w, fixture(fmt.Sprintf("teams/%s.json", fixtureName)))
-
 	})
 
 	_, err = client.ListInvites(teamID)
