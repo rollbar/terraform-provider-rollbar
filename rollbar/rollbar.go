@@ -24,13 +24,6 @@ func BaseURL(baseURL string) Option {
 	}
 }
 
-func ApiKey(apiKey string) Option {
-	return func(c *Client) error {
-		c.ApiKey = apiKey
-		return nil
-	}
-}
-
 func (c *Client) parseOptions(opts ...Option) error {
 	// Range over each options function and apply it to our API type to
 	// configure it. Options functions are applied in order, with any
@@ -45,9 +38,9 @@ func (c *Client) parseOptions(opts ...Option) error {
 	return nil
 }
 
-func NewClient(opts ...Option) (*Client, error) {
+func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	client := &Client{
-		ApiKey:     apiKey,
+		// ApiKey:     apiKey,
 		ApiBaseUrl: apiBaseUrl,
 	}
 	if err := client.parseOptions(opts...); err != nil {
