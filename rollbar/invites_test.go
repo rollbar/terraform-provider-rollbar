@@ -3,15 +3,22 @@ package rollbar
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"testing"
 )
 
 func TestListInvites(t *testing.T) {
-	var fixtureName string
 	teardown := setup()
 	defer teardown()
-	handUrl := fmt.Sprintf("/team/%s/invites/", teamID)
+
+	var fixtureName string
+	vars, err := vars("users.json")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	teamID := vars.TeamID
+	handUrl := fmt.Sprintf("/team/%d/invites/", teamID)
 
 	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -28,9 +35,7 @@ func TestListInvites(t *testing.T) {
 
 	})
 
-	// team_id should e int for this particular func
-	teamTOI, _ := strconv.Atoi(teamID)
-	_, err := client.ListInvites(teamTOI)
+	_, err = client.ListInvites(teamID)
 
 	if err != nil {
 		t.Fatal(err)
