@@ -76,7 +76,7 @@ func TestGetId(t *testing.T) {
 		fmt.Fprint(w, fixture("users/users.json"))
 	})
 	// Email is taken from the ./testdata/fixtures/users/users.json
-	userID, err := client.getId(userEmail)
+	userID, err := client.getID(userEmail)
 
 	if err != nil {
 		t.Fatal(err)
