@@ -4,9 +4,24 @@ A client written in [go](https://golang.org/) for provisioning rollbar https://r
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-### Prerequisites
+## Usage
+
+```go
+import "https://github.com/babbel/rollbar-go/rollbar"
+```
+Construct a new rollbar client, then use the  services on the client to add or remove users from the Rollbar API. For example:
+
+```go
+client, err := rollbar.NewClient("your_api_key")
+
+// list all invites for a team
+
+invites, err := client.ListInvites("team_id")
+```
+
+## Prerequisites
 
 You will need to have [go](https://golang.org/) up on running on your system.
 
