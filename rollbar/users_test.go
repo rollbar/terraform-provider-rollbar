@@ -3,7 +3,6 @@ package rollbar
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"testing"
 )
 
@@ -106,15 +105,16 @@ func TestGetId(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
 	})
+
 	userID, err = client.getID(userEmail)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, err := strconv.Itoa(userID)
+	varType := fmt.Sprintf("%T", userID)
 
-	if err != nil {
-		t.Errorf("Expected string, got: %v", userID)
+	if varType != "int" {
+		t.Errorf("Expected 'decimal', got: '%T'", userID)
 	}
 }
