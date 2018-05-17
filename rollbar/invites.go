@@ -9,9 +9,9 @@ import (
 type ListInvitesResponse struct {
 	Error  int `json:err`
 	Result []struct {
-		Id           int    `json:"id"`
-		FromUserId   int    `json:"from_user_id"`
-		TeamId       int    `json:"team_id"`
+		ID           int    `json:"id"`
+		FromUserID   int    `json:"from_user_id"`
+		TeamID       int    `json:"team_id"`
 		ToEmail      string `json:"to_email"`
 		Status       string `json:"status"`
 		DateCreated  int    `json:"date_created"`
@@ -19,23 +19,23 @@ type ListInvitesResponse struct {
 	}
 }
 
-func (s *Client) ListInvites(teamID int) (*ListInvitesResponse, error) {
+func (c *Client) ListInvites(teamID int) (*ListInvitesResponse, error) {
 	var data ListInvitesResponse
 
 	// Invitation call has pagination.
 	// There's a feature request to expire the invitations after some time.
 	// Looping until we get an empty invitations list [].
-	// Page=0 and page=1 return the same result that's why we start from page=1
+	// Page=0 and page=1 return the same result.
 	for i := 1; ; i++ {
 		pageNum := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", s.ApiBaseUrl, teamID, s.ApiKey, pageNum)
+		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.ApiBaseUrl, teamID, c.ApiKey, pageNum)
 		req, err := http.NewRequest("GET", url, nil)
 
 		if err != nil {
 			return nil, err
 		}
 
-		bytes, err := s.makeRequest(req)
+		bytes, err := c.makeRequest(req)
 
 		if err != nil {
 			return nil, err
