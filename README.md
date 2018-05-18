@@ -4,7 +4,7 @@
 
 A client written in [go](https://golang.org/) for provisioning rollbar https://rollbar.com. Currently it only supports adding and removing users from teams.
 
-## Usage
+### Usage
 
 ```go
 go get -u "github.com/babbel/rollbar-go/rollbar"
@@ -23,11 +23,11 @@ client, err := rollbar.NewClient("your_api_key")
 invites, err := client.ListInvites("team_id")
 ```
 
-## Prerequisites
+### Prerequisites
 
 You will need to have [go](https://golang.org/), [docker](https://www.docker.com/community-edition#/download) and [docker-compose](https://docs.docker.com/compose/install/) up on running on your system.
 
-## Running the tests
+### Running the tests
 
 All of the methods are tested and the tests can be run with docker-compose or golang's test command:
 
@@ -38,20 +38,20 @@ docker-compose up --build
 go test -v
 ```
 
-## Built With
+### Built With
 
 * [golang](https://golang.org/) - The programming language used.
 * [docker](https://www.docker.com/community-edition) - Docker CE.
 * [docker-compose](https://docs.docker.com/compose/) - Used for building the application.
 
-## Contributing
+### Contributing
 
 Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests to us.
 
-## Authors
+### Authors
 
 * **Nikola Velkovski** - *Initial work* - [parabolic](https://github.com/parabolic)
 
-## License
+### License
 
 This project is licensed under the Mozilla License - see the LICENSE.md file for details.
