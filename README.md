@@ -1,54 +1,58 @@
+[![Build Status](https://travis-ci.org/babbel/rollbar-go.svg?branch=master)](https://travis-ci.org/babbel/rollbar-go)
+
 # rollbar-go
 
-A client written in [go](https://golang.org/) for provisioning rollbar https://rollbar.com.
+A client written in [go](https://golang.org/) for provisioning rollbar https://rollbar.com. Currently it only supports adding and removing users from teams.
 
-## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-## Usage
+### Usage
 
 ```go
-import "https://github.com/babbel/rollbar-go/rollbar"
+go get -u "github.com/babbel/rollbar-go/rollbar"
+```
+
+```go
+import "github.com/babbel/rollbar-go/rollbar"
 ```
 Construct a new rollbar client, then use the  services on the client to add or remove users from the Rollbar API. For example:
 
 ```go
 client, err := rollbar.NewClient("your_api_key")
 
-// list all invites for a team
 
-invites, err := client.ListInvites("team_id")
+// List all invites for a team.
+teamID := 2131551312
+invites, err := client.ListInvites(teamID)
 ```
 
-## Prerequisites
+### Prerequisites
 
-You will need to have [go](https://golang.org/) up on running on your system.
+You will need to have [go](https://golang.org/), [docker](https://www.docker.com/community-edition#/download) and [docker-compose](https://docs.docker.com/compose/install/) up and running on your system.
 
-## Running the tests
+### Running the tests
 
-All of the functions are tested and the tests can be run with golang test capability:
+All of the methods are tested and the tests can be run with docker-compose or golang's test command:
 
+```bash
+docker-compose up --build
 ```
+```bash
 go test -v
 ```
 
-## Built With
+### Built With
 
 * [golang](https://golang.org/) - The programming language used.
+* [docker](https://www.docker.com/community-edition) - Docker CE.
+* [docker-compose](https://docs.docker.com/compose/) - Used for building the application.
 
-## Contributing
+### Contributing
 
 Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests to us.
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags).
-
-## Authors
+### Authors
 
 * **Nikola Velkovski** - *Initial work* - [parabolic](https://github.com/parabolic)
 
-## License
+### License
 
-This project is licensed under the Mozilla License - see the LICENSE.md file for details
+This project is licensed under the Mozilla License - see the LICENSE.md file for details.
