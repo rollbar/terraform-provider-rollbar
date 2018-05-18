@@ -26,7 +26,7 @@ invites, err := client.ListInvites(teamID)
 
 ### Prerequisites
 
-You will need to have [go](https://golang.org/), [docker](https://www.docker.com/community-edition#/download) and [docker-compose](https://docs.docker.com/compose/install/) up on running on your system.
+You will need to have [go](https://golang.org/), [docker](https://www.docker.com/community-edition#/download) and [docker-compose](https://docs.docker.com/compose/install/) up and running on your system.
 
 ### Running the tests
 
