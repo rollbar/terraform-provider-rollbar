@@ -20,7 +20,8 @@ client, err := rollbar.NewClient("your_api_key")
 
 
 // List all invites for a team.
-invites, err := client.ListInvites("team_id")
+teamID := 2131551312
+invites, err := client.ListInvites(teamID)
 ```
 
 ### Prerequisites
