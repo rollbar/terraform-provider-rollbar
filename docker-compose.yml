@@ -1,0 +1,13 @@
+version: "3"
+services:
+  go:
+    build: .
+    volumes:
+      - .:/project
+    command:
+      - /bin/bash
+      - -e
+      - -c
+      - |
+          cd /project
+          go test ./rollbar/ -v
