@@ -8,7 +8,7 @@ import (
 )
 
 type ListUsersResponse struct {
-	Error  int `json:err`
+	Error  int `json:"err"`
 	Result struct {
 		Users []struct {
 			Username string `json:"username"`
@@ -19,7 +19,7 @@ type ListUsersResponse struct {
 }
 
 type InviteResponse struct {
-	Error  int `json:err`
+	Error  int `json:"err"`
 	Result struct {
 		ID           int    `json:"id"`
 		FromUserID   int    `json:"from_user_id"`
