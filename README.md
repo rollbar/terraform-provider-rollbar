@@ -43,7 +43,7 @@ go test -v
 
 * [golang](https://golang.org/) - The programming language used.
 * [docker](https://www.docker.com/community-edition) - Docker CE.
-* [docker-compose](https://docs.docker.com/compose/) - Used for building the application.
+* [docker-compose](https://docs.docker.com/compose/) - Used for testing/building the application.
 
 ### Contributing
 
