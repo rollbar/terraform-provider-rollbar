@@ -7,7 +7,7 @@ import (
 )
 
 type ListInvitesResponse struct {
-	Error  int `json:err`
+	Error  int `json:"err"`
 	Result []struct {
 		ID           int    `json:"id"`
 		FromUserID   int    `json:"from_user_id"`
