@@ -115,6 +115,26 @@ func TestGetId(t *testing.T) {
 	varType := fmt.Sprintf("%T", userID)
 
 	if varType != "int" {
-		t.Errorf("Expected 'decimal', got: '%T'", userID)
+		t.Errorf("Expected 'integer', got: '%T'", userID)
+	}
+}
+
+func GetUser(t *testing.T) {
+
+	teardown := setup()
+	defer teardown()
+
+	vars, err := vars("users.json")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	userEmail := vars.UserEmail
+	userID, err := client.getID(userEmail)
+	varType := fmt.Sprintf("%T", userID)
+
+	if varType != "int" {
+		t.Errorf("Expected 'integer', got: '%T'", userID)
 	}
 }

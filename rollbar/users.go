@@ -112,8 +112,17 @@ func (c *Client) getID(email string) (int, error) {
 	return userID, nil
 }
 
-func (c *Client) RemoveUserTeam(email string, teamID int) error {
+func (c *Client) GetUser(email string) (int, error) {
 	userID, err := c.getID(email)
+	if err != nil {
+		return 0, fmt.Errorf("There was a problem with getting the user id %s", err)
+	}
+	return userID, nil
+
+}
+
+func (c *Client) RemoveUserTeam(email string, teamID int) error {
+	userID, err := c.GetUser(email)
 
 	if err != nil {
 		return err
