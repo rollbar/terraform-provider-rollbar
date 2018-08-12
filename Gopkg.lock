@@ -38,6 +38,7 @@
     "aws/credentials/ec2rolecreds",
     "aws/credentials/endpointcreds",
     "aws/credentials/stscreds",
+    "aws/csm",
     "aws/defaults",
     "aws/ec2metadata",
     "aws/endpoints",
@@ -48,6 +49,8 @@
     "internal/sdkrand",
     "internal/shareddefaults",
     "private/protocol",
+    "private/protocol/eventstream",
+    "private/protocol/eventstream/eventstreamapi",
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
@@ -56,14 +59,14 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "fad131ddc707880428615dc8bc1587b55fb46d74"
-  version = "v1.13.54"
+  revision = "bfc1a07cf158c30c41a3eefba8aae043d0bb5bff"
+  version = "v1.14.8"
 
 [[projects]]
   branch = "master"
   name = "github.com/babbel/rollbar-go"
   packages = ["rollbar"]
-  revision = "1b84e906c94df12e044820a0c4daff39c72e4b91"
+  revision = "d62c45af1a2e27cf2d1b2024f1cd8ed6ea0eb9a3"
 
 [[projects]]
   branch = "master"
@@ -84,6 +87,12 @@
   version = "v3.5.1"
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
+
+[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
@@ -92,8 +101,8 @@
 [[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
-  revision = "6529cf7c58879c08d927016dde4477f18a0634cb"
-  version = "v1.36.0"
+  revision = "06f5f3d67269ccec1fe5fe4134ba6e982984f7f5"
+  version = "v1.37.0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -191,7 +200,7 @@
     "hcldec",
     "hclparse"
   ]
-  revision = "bbbd0ef30d601e5ecf89e492d0842170f144db85"
+  revision = "36446359d27574bf110611001414da561731b62d"
 
 [[projects]]
   branch = "master"
@@ -205,6 +214,12 @@
   revision = "fa9f258a92500514cc8e9c67020487709df92432"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/hashicorp/logutils"
+  packages = ["."]
+  revision = "0dc08b1671f34c4250ce212759ebd880f743d883"
+
+[[projects]]
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -213,8 +228,11 @@
     "config/module",
     "dag",
     "flatmap",
+    "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
+    "helper/logging",
+    "helper/resource",
     "helper/schema",
     "httpclient",
     "moduledeps",
@@ -237,7 +255,7 @@
   branch = "master"
   name = "github.com/hashicorp/yamux"
   packages = ["."]
-  revision = "2658be15c5f05e76244154714161f17e3e77de2e"
+  revision = "3520598351bb3500a49ae9563f5539666ae0a27c"
 
 [[projects]]
   name = "github.com/jmespath/go-jmespath"
@@ -344,7 +362,7 @@
     "cty/json",
     "cty/set"
   ]
-  revision = "d006e4534bc4fbc512383aa98d04d641ea951ba5"
+  revision = "c96d660229f9ad0a16eb5869819ea51e1ed49896"
 
 [[projects]]
   branch = "master"
@@ -360,7 +378,7 @@
     "openpgp/packet",
     "openpgp/s2k"
   ]
-  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
+  revision = "027cca12c2d63e3d62b670d901e8a2c95854feec"
 
 [[projects]]
   branch = "master"
@@ -376,13 +394,13 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "9ef9f5bb98a1fdc41f8cf6c250a4404b4085e389"
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "88eb85aaee56831ad49eaf7aa80d73de9814cde2"
+  revision = "6c888cc515d3ed83fc103cf1d84468aad274b0a7"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -409,7 +427,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "11a468237815f3a3ddf9f7c6e8b6b3b382a24d15"
+  revision = "32ee49c4dd805befd833990acba36cb75042378c"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -441,12 +459,12 @@
     "tap",
     "transport"
   ]
-  revision = "41344da2231b913fa3d983840a57a6b1b7b631a1"
-  version = "v1.12.0"
+  revision = "7a6a684ca69eb4cae85ad0a484f2e531598c047b"
+  version = "v1.12.2"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "776465de5c5632cfe95c4ec120403cfa29705630b44e2e5502985169fb6a498c"
+  inputs-digest = "ff175219e18c6c03ff115c582c34e28b55b5dba0ec066746cf114ea6e3ba0491"
   solver-name = "gps-cdcl"
   solver-version = 1
