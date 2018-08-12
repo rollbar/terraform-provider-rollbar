@@ -2,11 +2,12 @@ package rollbar
 
 import (
 	"fmt"
-	"github.com/babbel/rollbar-go/rollbar"
-	"github.com/hashicorp/terraform/helper/schema"
 	"log"
 	"strconv"
 	"strings"
+
+	"github.com/babbel/rollbar-go/rollbar"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func resourceUser() *schema.Resource {
@@ -69,7 +70,7 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	// This logic is needed so that we can connect the user was invited.
+	// This logic is needed so that we can check if the the user already was invited.
 	// Check if there's an invite for the user
 	for _, invite := range listInvites.Result {
 		// Find the corresponding invite with the provided email.
