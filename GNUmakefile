@@ -1,7 +1,6 @@
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 DEP := $(shell command -v dep 2> /dev/null)
-# DOCKER = ${INSIDE_DOCKER}
 
 default: build
 
@@ -10,7 +9,7 @@ sanitycheck:
 	$(MAKE) fmtcheck
 
 build: sanitycheck
-	go install
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install
 
 test: sanitycheck
 	go test -i $(TEST) || exit 1
@@ -39,11 +38,7 @@ depensure:
 ifndef DEP
   $(error "No dep in $(PATH), install: https://github.com/golang/dep#setup")
 endif
-# ifndef DOCKER
-# 	@sh -c "dep ensure -vendor-only"
-# else
 	@sh -c "dep ensure"
-# endif
 
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
