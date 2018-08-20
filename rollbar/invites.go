@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type Invites struct {
+type Invite struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
 	TeamID       int    `json:"team_id"`
@@ -18,18 +18,18 @@ type Invites struct {
 
 type ListInvitesResponse struct {
 	Error  int `json:"err"`
-	Result []Invites
+	Result []Invite
 }
 
-func (c *Client) ListInvites(teamID int) ([]Invites, error) {
-	var invites []Invites
+func (c *Client) ListInvites(teamID int) ([]Invite, error) {
+	var invites []Invite
 	// Invitation call has pagination.
 	// There's a feature request to expire the invitations after some time.
 	// Looping until we get an empty invitations list [].
 	// Page=0 and page=1 return the same result.
 	for i := 1; ; i++ {
 		var data ListInvitesResponse
-		var dataResponses []Invites
+		var dataResponses []Invite
 
 		pageNum := i
 		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.ApiBaseUrl, teamID, c.ApiKey, pageNum)
