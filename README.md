@@ -63,6 +63,6 @@ In order to test the provider, you can simply run `make test`.
 ```sh
 $ make test
 ```
-We cannot have an acceptance tests until rollbar improves their api.
-We cannot run the acceptange tests for an existing user because creating an
-invitation doesn't yield an userid. A user id is get when a user accepts an invitation.
+We cannot have the acceptance tests until rollbar changes/improves their api.
+The reason is because creating an invitation doesn't yield an userid.
+A user id is created when a user accepts their invitation.
