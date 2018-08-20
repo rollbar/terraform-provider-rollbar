@@ -38,7 +38,7 @@ func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 	email := d.Get("email").(string)
 	teamID := d.Get("team_id").(int)
 
-	log.Printf("[INFO] Inviting user with email: %s", email)
+	log.Printf("Inviting user with email: %s", email)
 	client := **m.(**rollbar.Client)
 	resp, err := client.InviteUser(teamID, email)
 	if err != nil {
@@ -59,6 +59,7 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	teamID := d.Get("team_id").(int)
 	client := **m.(**rollbar.Client)
 
+	log.Println("Getting all the invites")
 	listInvites, err := client.ListInvites(teamID)
 
 	if err != nil {
@@ -71,14 +72,18 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	// This logic is needed so that we can check if the the user already was invited.
-	// Check if there's an invite for the user
-	for _, invite := range listInvites.Result {
+	// Check if there's an active invite for the user or it was already accepted.
+	log.Println("Checking if the user has a pending invitation or if it is accepted.")
+
+	for _, invite := range listInvites {
 		// Find the corresponding invite with the provided email.
 		if invite.ToEmail == email {
 			// Append all the invites into a slice.
 			invites := append(invites, invite.Status)
-			// Get the last invite (they are usually sequential).
+
+			// Get the last invite (they are sequential).
 			lastInv := invites[len(invites)-1]
+
 			// If the invitation is pending that means that the user is invited.
 			if lastInv == "pending" {
 				invited = true
