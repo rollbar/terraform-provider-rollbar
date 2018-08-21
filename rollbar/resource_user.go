@@ -34,12 +34,12 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
+func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	email := d.Get("email").(string)
 	teamID := d.Get("team_id").(int)
 
 	log.Printf("Inviting user with email: %s", email)
-	client := **m.(**rollbar.Client)
+	client := **meta.(**rollbar.Client)
 	resp, err := client.InviteUser(teamID, email)
 	if err != nil {
 		return err
@@ -51,13 +51,13 @@ func resourceUserCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceUserRead(d *schema.ResourceData, m interface{}) error {
+func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	var invites []string
 	invited := false
 	userPresent := false
 	email := d.Id()
 	teamID := d.Get("team_id").(int)
-	client := **m.(**rollbar.Client)
+	client := **meta.(**rollbar.Client)
 
 	log.Println("Getting all the invites")
 	listInvites, err := client.ListInvites(teamID)
@@ -97,7 +97,7 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 		}
 	}
 
-	if userPresent == false {
+	if !userPresent {
 		if invited == false {
 			d.SetId("")
 			return nil
@@ -108,14 +108,14 @@ func resourceUserRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceUserUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceUserDelete(d *schema.ResourceData, m interface{}) error {
+func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 	email := d.Id()
 	teamID := d.Get("team_id").(int)
-	client := **m.(**rollbar.Client)
+	client := **meta.(**rollbar.Client)
 
 	client.RemoveUserTeam(email, teamID)
 
