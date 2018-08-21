@@ -98,7 +98,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if !userPresent {
-		if invited == false {
+		if !invited {
 			d.SetId("")
 			return nil
 		}
