@@ -2,7 +2,6 @@ package rollbar
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -38,7 +37,6 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	email := d.Get("email").(string)
 	teamID := d.Get("team_id").(int)
 
-	log.Printf("Inviting user with email: %s", email)
 	client := **meta.(**rollbar.Client)
 	resp, err := client.InviteUser(teamID, email)
 	if err != nil {
@@ -59,7 +57,6 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	teamID := d.Get("team_id").(int)
 	client := **meta.(**rollbar.Client)
 
-	log.Println("Getting all the invites")
 	listInvites, err := client.ListInvites(teamID)
 
 	if err != nil {
@@ -71,6 +68,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	// This logic is needed so that we can check if the the user already was invited.
 	// Check if there's an active invite for the user or the user has already accepted the invite.
 	for _, invite := range listInvites {
