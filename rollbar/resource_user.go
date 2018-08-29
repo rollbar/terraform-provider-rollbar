@@ -72,9 +72,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	// This logic is needed so that we can check if the the user already was invited.
-	// Check if there's an active invite for the user or it was already accepted.
-	log.Println("Checking if the user has a pending invitation or if it is accepted.")
-
+	// Check if there's an active invite for the user or the user has already accepted the invite.
 	for _, invite := range listInvites {
 		// Find the corresponding invite with the provided email.
 		if invite.ToEmail == email {
@@ -97,11 +95,9 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	if !userPresent {
-		if !invited {
-			d.SetId("")
-			return nil
-		}
+	if !userPresent && !invited {
+		d.SetId("")
+		return nil
 	}
 
 	d.Set("email", email)
