@@ -88,12 +88,6 @@
   version = "v3.5.1"
 
 [[projects]]
-  name = "github.com/davecgh/go-spew"
-  packages = ["spew"]
-  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
-  version = "v1.1.1"
-
-[[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
   revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
@@ -215,12 +209,6 @@
   revision = "fa9f258a92500514cc8e9c67020487709df92432"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/hashicorp/logutils"
-  packages = ["."]
-  revision = "0dc08b1671f34c4250ce212759ebd880f743d883"
-
-[[projects]]
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
@@ -229,11 +217,8 @@
     "config/module",
     "dag",
     "flatmap",
-    "helper/config",
     "helper/hashcode",
     "helper/hilmapstructure",
-    "helper/logging",
-    "helper/resource",
     "helper/schema",
     "httpclient",
     "moduledeps",
@@ -468,6 +453,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ff175219e18c6c03ff115c582c34e28b55b5dba0ec066746cf114ea6e3ba0491"
+  inputs-digest = "95604cbf9b64ba9732d3c77e8b9d251322fd2c64ae773c3520d2c22d4918b363"
   solver-name = "gps-cdcl"
   solver-version = 1
