@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - "1.10.2"
+
+before_install:
+  - make sanitycheck
+
+script:
+  -  make vet
+  -  make test
