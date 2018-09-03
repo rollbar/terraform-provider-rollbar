@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/babbel/terraform-provider-rollbar/rollbar"
 	"github.com/hashicorp/terraform/plugin"
-	"github.com/terraform-providers/terraform-provider-rollbar/rollbar"
 )
 
 func main() {
