@@ -9,7 +9,6 @@ before_install:
 script:
   - make vet
   - make test
-  - ls
 
 before_deploy:
   - GIT_TAG=$(git describe --tags)
@@ -32,5 +31,5 @@ deploy:
   skip_cleanup: true
   file_glob: "true"
   on:
-    branch: "master"
+    # branch: "master"
     tags: true
