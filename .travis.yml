@@ -9,6 +9,7 @@ before_install:
 script:
   - make vet
   - make test
+  - make build
   - echo $GOPATH
   - ls -la $GOPATH
 
