@@ -9,15 +9,28 @@ before_install:
 script:
   - make vet
   - make test
+  - ls
+
+before_deploy:
+  - GIT_TAG=$(git describe --tags)
+  # Build linux binary and zip it.
   - make build
-  - ls -la $GOPATH/bin
+  - mv ${GOPATH}/bin/terraform-provider-rollbar ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  - zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_linux_amd64.zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  - rm ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  # Build mac binary and zip it.
+  - make build-darwin
+  - mv ${GOPATH}/bin/terraform-provider-rollbar ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  - zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_darwin_amd64.zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  - rm ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
 
 deploy:
   provider: releases
-  # file: "./bin/$BINARY_FILE_NAME"
+  file:
+    - ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_linux_amd64.zip
+    - ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_darwin_amd64.zip
   skip_cleanup: true
   file_glob: "true"
-  # name: "$BINARY_FILE_NAME_$TRAVIS_TAG"
   on:
     branch: "master"
     tags: true
