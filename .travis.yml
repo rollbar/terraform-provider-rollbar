@@ -16,12 +16,12 @@ before_deploy:
   - make build
   - mv ${GOPATH}/bin/terraform-provider-rollbar ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
   - zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_linux_amd64.zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
-  - rm ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  #- rm ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
   # Build mac binary and zip it.
   - make build-darwin
-  - mv ${GOPATH}/bin/terraform-provider-rollbar ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
-  - zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_darwin_amd64.zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
-  - rm ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
+  - mv ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar_v${GIT_TAG}
+  - zip ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar_v${GIT_TAG}_darwin_amd64.zip ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar_v${GIT_TAG}
+  #- rm ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar_v${GIT_TAG}
 
 deploy:
   provider: releases
