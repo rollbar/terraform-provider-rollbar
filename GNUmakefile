@@ -9,13 +9,13 @@ sanitycheck:
 	$(MAKE) fmtcheck
 
 
-build-darwin: sanitycheck
+build-darwin:
 	GOOS=darwin GOARCH=amd64 go install
 
-build: sanitycheck
+build:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install
 
-test:
+test: sanitycheck
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
 		xargs -t -n4 go test $(TESTARGS) -timeout=300s -parallel=4
