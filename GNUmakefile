@@ -8,10 +8,14 @@ sanitycheck:
 	$(MAKE) depensure
 	$(MAKE) fmtcheck
 
+
+build-darwin: sanitycheck
+	GOOS=darwin GOARCH=amd64 go install
+
 build: sanitycheck
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install
 
-test: sanitycheck
+test:
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | \
 		xargs -t -n4 go test $(TESTARGS) -timeout=300s -parallel=4
@@ -54,4 +58,4 @@ test-compile: depensure
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build sanitycheck depensure test testacc vet fmt fmtcheck errcheck vendor-status test-compile
+.PHONY: build build-darwin sanitycheck depensure test testacc vet fmt fmtcheck errcheck vendor-status test-compile
