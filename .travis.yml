@@ -5,8 +5,19 @@ go:
 
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-  - dep ensure
 
 script:
-  -  make vet
-  -  make test
+  - make vet
+  - make test
+  - echo $GOPATH
+  - ls -la $GOPATH
+
+deploy:
+  provider: releases
+  # file: "./bin/$BINARY_FILE_NAME"
+  skip_cleanup: true
+  file_glob: "true"
+  # name: "$BINARY_FILE_NAME_$TRAVIS_TAG"
+  on:
+    branch: "master"
+    tags: true
