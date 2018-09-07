@@ -8,6 +8,7 @@ env:
     - LINUX_BINARY_PATH: ${GOPATH}/bin/terraform-provider-rollbar
     - DARWIN_BINARY_PATH: ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar
 
+# Install go dep.
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
@@ -25,6 +26,7 @@ before_deploy:
   - mv ${DARWIN_BINARY_PATH} ${DARWIN_BINARY_PATH}_v${GIT_TAG}
   - zip -j ${DARWIN_BINARY_PATH}_v${GIT_TAG}_darwin_amd64.zip ${DARWIN_BINARY_PATH}_v${GIT_TAG}
 
+# Deploy only when there's a tag on master.
 deploy:
   provider: releases
   api_key: ${GITHUB_API_KEY}
@@ -34,5 +36,5 @@ deploy:
   skip_cleanup: true
   file_glob: "true"
   on:
-    # branch: "master"
+    branch: "master"
     tags: true
