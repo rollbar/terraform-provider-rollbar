@@ -69,11 +69,11 @@ A user id is created when a user accepts their invitation.
 
 Github Releases
 ---------------------------
-In order to push a release to github the feature branch has to merged into master and then a tag needs to be created the same as the provider version and pushed as well.
-e.g.
+In order to push a release to Github the feature branch has to merged into master and then a tag needs to be created with the version name of the provider e.g. **v0.0.1** and pushed.
+
 ```sh
 git checkout master
 git pull origin master
-git tag <semver> -m "release comment"
+git tag v<semver> -m "release comment"
 git push origin master --tags
 ```
