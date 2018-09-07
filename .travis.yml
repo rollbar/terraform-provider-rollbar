@@ -3,6 +3,11 @@ language: go
 go:
   - "1.10.2"
 
+env:
+  global:
+    - LINUX_BINARY_PATH: ${GOPATH}/bin/terraform-provider-rollbar
+    - DARWIN_BINARY_PATH: ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar
+
 before_install:
   - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
@@ -10,24 +15,22 @@ script:
   - make vet
   - make test
 
+# Build and zip the binaries.
 before_deploy:
-  # Set the git tag.
   - GIT_TAG=$(git describe --tags)
-  # Build linux binary and zip it.
   - make build
-  - mv ${GOPATH}/bin/terraform-provider-rollbar ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
-  - zip -j ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_linux_amd64.zip ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}
-  # Build mac binary and zip it.
+  - mv ${LINUX_BINARY_PATH} ${LINUX_BINARY_PATH}_v${GIT_TAG}
+  - zip -j ${LINUX_BINARY_PATH}_v${GIT_TAG}_linux_amd64.zip ${LINUX_BINARY_PATH}_v${GIT_TAG}
   - make build-darwin
-  - mv ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar_v${GIT_TAG}
-  - zip -j ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_darwin_amd64.zip ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar_v${GIT_TAG}
+  - mv ${DARWIN_BINARY_PATH} ${DARWIN_BINARY_PATH}_v${GIT_TAG}
+  - zip -j ${DARWIN_BINARY_PATH}_v${GIT_TAG}_darwin_amd64.zip ${DARWIN_BINARY_PATH}_v${GIT_TAG}
 
 deploy:
   provider: releases
   api_key: ${GITHUB_API_KEY}
   file:
-    - ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_linux_amd64.zip
-    - ${GOPATH}/bin/terraform-provider-rollbar_v${GIT_TAG}_darwin_amd64.zip
+    - ${LINUX_BINARY_PATH}_v${GIT_TAG}_linux_amd64.zip
+    - ${DARWIN_BINARY_PATH}_v${GIT_TAG}_darwin_amd64.zip
   skip_cleanup: true
   file_glob: "true"
   on:
