@@ -16,17 +16,17 @@ Requirements
 
 Building The Provider
 ---------------------
-Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-rollbar`
+Clone repository to: `$GOPATH/src/github.com/babbel/terraform-provider-rollbar`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
-$ git clone git@github.com:terraform-providers/terraform-provider-rollbar
+$ mkdir -p $GOPATH/src/github.com/babbel; cd $GOPATH/src/github.com/babbel
+$ git clone git@github.com:babbel/terraform-provider-rollbar
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-rollbar
+$ cd $GOPATH/src/github.com/babbel/terraform-provider-rollbar
 $ make build
 ```
 
