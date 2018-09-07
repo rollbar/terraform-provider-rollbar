@@ -3,6 +3,7 @@ Terraform Provider
 
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+- [![Build Status](https://travis-ci.org/babbel/terraform-provider-rollbar.svg?branch=master)](https://travis-ci.org/babbel/terraform-provider-rollbar)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
@@ -15,7 +16,6 @@ Requirements
 
 Building The Provider
 ---------------------
-
 Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-rollbar`
 
 ```sh
@@ -66,3 +66,14 @@ $ make test
 We cannot have the acceptance tests until rollbar changes/improves their api.
 The reason is because creating an invitation doesn't yield an userid.
 A user id is created when a user accepts their invitation.
+
+Github Releases
+---------------------------
+In order to push a release to github the feature branch has to merged into master and then a tag needs to be created the same as the provider version and pushed as well.
+e.g.
+```sh
+git checkout master
+git pull origin master
+git tag <semver> -m "release comment"
+git push origin master --tags
+```
