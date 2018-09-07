@@ -12,8 +12,10 @@ sanitycheck:
 build-darwin:
 	GOOS=darwin GOARCH=amd64 go install
 
-build:
+build-linux:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install
+
+build: build-linux
 
 test: sanitycheck
 	go test -i $(TEST) || exit 1
