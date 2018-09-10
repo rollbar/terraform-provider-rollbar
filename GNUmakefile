@@ -8,8 +8,14 @@ sanitycheck:
 	$(MAKE) depensure
 	$(MAKE) fmtcheck
 
-build: sanitycheck
+
+build-darwin:
+	GOOS=darwin GOARCH=amd64 go install
+
+build-linux:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install
+
+build: build-linux
 
 test: sanitycheck
 	go test -i $(TEST) || exit 1
@@ -54,4 +60,4 @@ test-compile: depensure
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build sanitycheck depensure test testacc vet fmt fmtcheck errcheck vendor-status test-compile
+.PHONY: build build-darwin sanitycheck depensure test testacc vet fmt fmtcheck errcheck vendor-status test-compile
