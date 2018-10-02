@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// ListUsersResponse : A data structure for the list users response.
 type ListUsersResponse struct {
 	Error  int `json:"err"`
 	Result struct {
@@ -18,6 +19,7 @@ type ListUsersResponse struct {
 	}
 }
 
+// InviteResponse : A data structure for the list invites response.
 type InviteResponse struct {
 	Error  int `json:"err"`
 	Result struct {
@@ -31,6 +33,7 @@ type InviteResponse struct {
 	}
 }
 
+// InviteUser :  A function for sending an invitation to a user.
 func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	var data InviteResponse
 
@@ -39,8 +42,8 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 		Email       string `json:"email"`
 	}
 
-	url := fmt.Sprintf("%steam/%d/invites", c.ApiBaseUrl, teamID)
-	reqData := requestData{c.ApiKey, email}
+	url := fmt.Sprintf("%steam/%d/invites", c.APIBaseURL, teamID)
+	reqData := requestData{c.APIKEY, email}
 	b, err := json.Marshal(reqData)
 
 	if err != nil {
@@ -67,10 +70,11 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	return &data, nil
 }
 
+// ListUsers : A function for listing the users.
 func (c *Client) ListUsers() (*ListUsersResponse, error) {
 	var data ListUsersResponse
 
-	url := fmt.Sprintf("%susers?access_token=%s", c.ApiBaseUrl, c.ApiKey)
+	url := fmt.Sprintf("%susers?access_token=%s", c.APIBaseURL, c.APIKEY)
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
@@ -112,6 +116,7 @@ func (c *Client) getID(email string) (int, error) {
 	return userID, nil
 }
 
+// GetUser : A function for getting 1 user.
 func (c *Client) GetUser(email string) (int, error) {
 	userID, err := c.getID(email)
 	if err != nil {
@@ -121,6 +126,7 @@ func (c *Client) GetUser(email string) (int, error) {
 
 }
 
+// RemoveUserTeam : A function for removing a user from a team.
 func (c *Client) RemoveUserTeam(email string, teamID int) error {
 	userID, err := c.GetUser(email)
 
@@ -128,7 +134,7 @@ func (c *Client) RemoveUserTeam(email string, teamID int) error {
 		return err
 	}
 
-	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", c.ApiBaseUrl, teamID, userID, c.ApiKey)
+	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", c.APIBaseURL, teamID, userID, c.APIKEY)
 	req, err := http.NewRequest("DELETE", url, nil)
 
 	if err != nil {

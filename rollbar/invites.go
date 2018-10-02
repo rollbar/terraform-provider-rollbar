@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Invite : A data structure for the nested invites from the ListInvitesResponse.
 type Invite struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
@@ -16,11 +17,13 @@ type Invite struct {
 	DateRedeemed int    `json:"date_redeemed"`
 }
 
+// ListInvitesResponse : A data structure for the ListInvites response.
 type ListInvitesResponse struct {
 	Error  int `json:"err"`
 	Result []Invite
 }
 
+// ListInvites : A function to list all the invites.
 func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 	var invites []Invite
 	// Invitation call has pagination.
@@ -32,7 +35,7 @@ func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 		var dataResponses []Invite
 
 		pageNum := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.ApiBaseUrl, teamID, c.ApiKey, pageNum)
+		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.APIBaseURL, teamID, c.APIKEY, pageNum)
 		req, err := http.NewRequest("GET", url, nil)
 
 		if err != nil {
