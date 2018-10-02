@@ -43,7 +43,7 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	}
 
 	url := fmt.Sprintf("%steam/%d/invites", c.APIBaseURL, teamID)
-	reqData := requestData{c.APIKEY, email}
+	reqData := requestData{c.APIKey, email}
 	b, err := json.Marshal(reqData)
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 func (c *Client) ListUsers() (*ListUsersResponse, error) {
 	var data ListUsersResponse
 
-	url := fmt.Sprintf("%susers?access_token=%s", c.APIBaseURL, c.APIKEY)
+	url := fmt.Sprintf("%susers?access_token=%s", c.APIBaseURL, c.APIKey)
 	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
@@ -134,7 +134,7 @@ func (c *Client) RemoveUserTeam(email string, teamID int) error {
 		return err
 	}
 
-	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", c.APIBaseURL, teamID, userID, c.APIKEY)
+	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", c.APIBaseURL, teamID, userID, c.APIKey)
 	req, err := http.NewRequest("DELETE", url, nil)
 
 	if err != nil {

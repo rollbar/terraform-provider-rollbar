@@ -15,7 +15,7 @@ type Option func(*Client) error
 
 // Client : A data structure for the rollbar client.
 type Client struct {
-	APIKEY     string
+	APIKey     string
 	APIBaseURL string
 }
 
@@ -44,7 +44,7 @@ func (c *Client) parseOptions(opts ...Option) error {
 // NewClient : A function for initiating the client.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	client := Client{
-		APIKEY:     apiKey,
+		APIKey:     apiKey,
 		APIBaseURL: apiBaseURL,
 	}
 	if err := client.parseOptions(opts...); err != nil {

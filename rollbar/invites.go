@@ -35,7 +35,7 @@ func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 		var dataResponses []Invite
 
 		pageNum := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.APIBaseURL, teamID, c.APIKEY, pageNum)
+		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.APIBaseURL, teamID, c.APIKey, pageNum)
 		req, err := http.NewRequest("GET", url, nil)
 
 		if err != nil {
