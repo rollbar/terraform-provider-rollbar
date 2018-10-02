@@ -18,9 +18,9 @@ func TestListInvites(t *testing.T) {
 	}
 
 	teamID := vars.TeamID
-	handUrl := fmt.Sprintf("/team/%d/invites/", teamID)
+	handURL := fmt.Sprintf("/team/%d/invites/", teamID)
 
-	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		page := r.URL.Query().Get("pages")

@@ -6,20 +6,23 @@ import (
 	"net/http"
 )
 
-const apiBaseUrl string = "https://api.rollbar.com/api/1/"
+const apiBaseURL string = "https://api.rollbar.com/api/1/"
 
 var apiKey string
 
+// Option : A function to add the base url and other parameters to the client.
 type Option func(*Client) error
 
+// Client : A data structure for the rollbar client.
 type Client struct {
-	ApiKey     string
-	ApiBaseUrl string
+	APIKey     string
+	APIBaseURL string
 }
 
+// BaseURL : A function for construction the rul to the api.
 func BaseURL(baseURL string) Option {
 	return func(c *Client) error {
-		c.ApiBaseUrl = baseURL
+		c.APIBaseURL = baseURL
 		return nil
 	}
 }
@@ -38,15 +41,16 @@ func (c *Client) parseOptions(opts ...Option) error {
 	return nil
 }
 
+// NewClient : A function for initiating the client.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
-	client := &Client{
-		ApiKey:     apiKey,
-		ApiBaseUrl: apiBaseUrl,
+	client := Client{
+		APIKey:     apiKey,
+		APIBaseURL: apiBaseURL,
 	}
 	if err := client.parseOptions(opts...); err != nil {
 		return nil, err
 	}
-	return client, nil
+	return &client, nil
 }
 
 func (c *Client) makeRequest(req *http.Request) ([]byte, error) {

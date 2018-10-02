@@ -20,16 +20,16 @@ func TestRemoveUserTeam(t *testing.T) {
 	userID := vars.UserID
 	userEmail := vars.UserEmail
 
-	handUrl := fmt.Sprintf("/team/%d/user/%d", teamID, userID)
-	handUrlGet := "/users/"
+	handURL := fmt.Sprintf("/team/%d/user/%d", teamID, userID)
+	handURLGet := "/users/"
 
-	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/remove_user.json"))
 	})
 
-	mux.HandleFunc(handUrlGet, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handURLGet, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
@@ -53,9 +53,9 @@ func TestInviteUser(t *testing.T) {
 
 	teamID := vars.TeamID
 	userEmail := vars.UserEmail
-	handUrl := fmt.Sprintf("/team/%d/invites", teamID)
+	handURL := fmt.Sprintf("/team/%d/invites", teamID)
 
-	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("teams/invite_user.json"))
@@ -71,9 +71,9 @@ func TestListUsers(t *testing.T) {
 	teardown := setup()
 	defer teardown()
 
-	handUrl := "/users"
+	handURL := "/users"
 
-	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
@@ -98,9 +98,9 @@ func TestGetId(t *testing.T) {
 
 	userID := vars.UserID
 	userEmail := vars.UserEmail
-	handUrl := "/users"
+	handURL := "/users"
 
-	mux.HandleFunc(handUrl, func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, fixture("users/users.json"))
