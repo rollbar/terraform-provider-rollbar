@@ -34,5 +34,5 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		return nil, err
 	}
 
-	return &client, nil
+	return client, nil
 }

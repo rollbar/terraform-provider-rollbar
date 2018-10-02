@@ -37,7 +37,7 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	email := d.Get("email").(string)
 	teamID := d.Get("team_id").(int)
 
-	client := **meta.(**rollbar.Client)
+	client := meta.(*rollbar.Client)
 	resp, err := client.InviteUser(teamID, email)
 	if err != nil {
 		return err
@@ -55,7 +55,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	userPresent := false
 	email := d.Id()
 	teamID := d.Get("team_id").(int)
-	client := **meta.(**rollbar.Client)
+	client := meta.(*rollbar.Client)
 
 	listInvites, err := client.ListInvites(teamID)
 
@@ -109,7 +109,7 @@ func resourceUserUpdate(d *schema.ResourceData, meta interface{}) error {
 func resourceUserDelete(d *schema.ResourceData, meta interface{}) error {
 	email := d.Id()
 	teamID := d.Get("team_id").(int)
-	client := **meta.(**rollbar.Client)
+	client := meta.(*rollbar.Client)
 
 	client.RemoveUserTeam(email, teamID)
 
