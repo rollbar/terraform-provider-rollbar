@@ -67,7 +67,7 @@
   branch = "master"
   name = "github.com/babbel/rollbar-go"
   packages = ["rollbar"]
-  revision = "893a94abd4fc8a9b1d1f4bea5900a51e6a748aae"
+  revision = "189d83f5858df743c5d3d973a367360b7a402c4f"
 
 [[projects]]
   branch = "master"

@@ -18,6 +18,7 @@ var (
 	client *Client
 )
 
+// VarsUsers : A data structure for the mock response.
 type VarsUsers struct {
 	TeamID    int    `json:"TeamID"`
 	UserID    int    `json:"UserID"`
@@ -25,11 +26,11 @@ type VarsUsers struct {
 }
 
 func setup() func() {
-	const mockApiKey = "mockApiKey"
+	const mockAPIKey = "mockApiKey"
 
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
-	client, _ = NewClient(mockApiKey, BaseURL(server.URL+"/"))
+	client, _ = NewClient(mockAPIKey, BaseURL(server.URL+"/"))
 
 	return func() {
 		server.Close()
