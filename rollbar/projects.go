@@ -67,7 +67,7 @@ func (c *Client) GetProjectByName(name string) (*Project, error) {
 
 	for _, p := range projects {
 		if p.Name == name {
-			project = &p
+			project = p
 			break
 		}
 	}
