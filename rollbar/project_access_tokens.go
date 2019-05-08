@@ -54,3 +54,21 @@ func (c *Client) ListProjectAccessTokens(projectID int) ([]*ProjectAccessToken, 
 
 	return tokens, nil
 }
+
+// GetProjectAccessTokenByProjectIDAndName returns the first project access token from the
+// list-projects-tokens call that matches a given name nad project id. If there is no
+// matching project, return nil.
+func (c *Client) GetProjectAccessTokenByProjectIDAndName(projectID int, name string) (*ProjectAccessToken, error) {
+	tokens, err := c.ListProjectAccessTokens(projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range tokens {
+		if t.Name == name {
+			return t, nil
+		}
+	}
+
+	return nil, nil
+}
