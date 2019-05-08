@@ -25,34 +25,31 @@ func TestListProjects(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := ListProjectsResponse{
-		Error: 0,
-		Result: []Project{
-			{
-				ID:           12112,
-				AccountID:    8608,
-				DateCreated:  1407933721,
-				DateModified: 1457475137,
-				Name:         "",
-			},
-			{
-				ID:           106671,
-				AccountID:    8608,
-				DateCreated:  1489139046,
-				DateModified: 1549293583,
-				Name:         "Client-Config",
-			},
-			{
-				ID:           12116,
-				AccountID:    8608,
-				DateCreated:  1407933922,
-				DateModified: 1556814300,
-				Name:         "My",
-			},
+	expected := []Project{
+		{
+			ID:           12112,
+			AccountID:    8608,
+			DateCreated:  1407933721,
+			DateModified: 1457475137,
+			Name:         "",
+		},
+		{
+			ID:           106671,
+			AccountID:    8608,
+			DateCreated:  1489139046,
+			DateModified: 1549293583,
+			Name:         "Client-Config",
+		},
+		{
+			ID:           12116,
+			AccountID:    8608,
+			DateCreated:  1407933922,
+			DateModified: 1556814300,
+			Name:         "My",
 		},
 	}
 
-	if !reflect.DeepEqual(*response, expected) {
-		t.Errorf("expected response %v, got %v.", *response, expected)
+	if !reflect.DeepEqual(response, expected) {
+		t.Errorf("expected response %v, got %v.", response, expected)
 	}
 }
