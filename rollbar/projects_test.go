@@ -25,7 +25,7 @@ func TestListProjects(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := []Project{
+	expected := []*Project{
 		{
 			ID:           12112,
 			AccountID:    8608,
