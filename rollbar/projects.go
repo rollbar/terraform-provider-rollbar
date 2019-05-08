@@ -58,19 +58,16 @@ func (c *Client) ListProjects() ([]*Project, error) {
 // call that matches a given name. If there is no matching project
 // returns nil.
 func (c *Client) GetProjectByName(name string) (*Project, error) {
-	var project *Project
-
 	projects, err := c.ListProjects()
 	if err != nil {
 		return nil, err
 	}
 
-	for _, p := range projects {
-		if p.Name == name {
-			project = p
-			break
+	for _, project := range projects {
+		if project.Name == name {
+			return project, nil
 		}
 	}
 
-	return project, nil
+	return nil, nil
 }
