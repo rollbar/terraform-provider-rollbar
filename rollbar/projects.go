@@ -12,7 +12,6 @@ type ListProjectsResponse struct {
 	Result []struct {
 		AccountID    int    `json:"account_id"`
 		ID           int    `json:"id"`
-		Email        string `json:"email"`
 		DateCreated  int    `json:"date_created"`
 		DateModified int    `json:"date_modified"`
 		Name         string `json:"name"`
@@ -20,6 +19,7 @@ type ListProjectsResponse struct {
 }
 
 // ListProjects lists the projects for this API Key
+// https://docs.rollbar.com/reference#list-all-projects
 func (c *Client) ListProjects() (*ListProjectsResponse, error) {
 	var data ListProjectsResponse
 
