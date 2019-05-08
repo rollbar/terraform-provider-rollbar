@@ -6,16 +6,19 @@ import (
 	"net/http"
 )
 
+// Project represents a project
+type Project struct {
+	AccountID    int    `json:"account_id"`
+	ID           int    `json:"id"`
+	DateCreated  int    `json:"date_created"`
+	DateModified int    `json:"date_modified"`
+	Name         string `json:"name"`
+}
+
 // ListProjectsResponse represents the list projects response
 type ListProjectsResponse struct {
 	Error  int `json:"err"`
-	Result []struct {
-		AccountID    int    `json:"account_id"`
-		ID           int    `json:"id"`
-		DateCreated  int    `json:"date_created"`
-		DateModified int    `json:"date_modified"`
-		Name         string `json:"name"`
-	}
+	Result []Project
 }
 
 // ListProjects lists the projects for this API Key

@@ -27,13 +27,7 @@ func TestListProjects(t *testing.T) {
 
 	expected := ListProjectsResponse{
 		Error: 0,
-		Result: []struct {
-			AccountID    int    `json:"account_id"`
-			ID           int    `json:"id"`
-			DateCreated  int    `json:"date_created"`
-			DateModified int    `json:"date_modified"`
-			Name         string `json:"name"`
-		}{
+		Result: []Project{
 			{
 				ID:           12112,
 				AccountID:    8608,
