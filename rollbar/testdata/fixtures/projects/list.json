@@ -1,0 +1,28 @@
+{
+  "err": 0,
+  "result": [
+    {
+      "id": 12112,
+      "account_id": 8608,
+      "date_created": 1407933721,
+      "date_modified": 1457475137,
+      "name": null
+    },
+    {
+      "id": 106671,
+      "account_id": 8608,
+      "status": "enabled",
+      "date_created": 1489139046,
+      "date_modified": 1549293583,
+      "name": "Client-Config"
+    },
+    {
+      "id": 12116,
+      "account_id": 8608,
+      "status": "enabled",
+      "date_created": 1407933922,
+      "date_modified": 1556814300,
+      "name": "My"
+    }
+  ]
+}
