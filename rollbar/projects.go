@@ -48,3 +48,24 @@ func (c *Client) ListProjects() ([]Project, error) {
 
 	return data.Result, nil
 }
+
+// GetProjectByName returns the first project from the list-projects
+// call that matches a given name. If there is no matching project
+// returns nil.
+func (c *Client) GetProjectByName(name string) (*Project, error) {
+	var project *Project
+
+	projects, err := c.ListProjects()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, p := range projects {
+		if p.Name == name {
+			project = &p
+			break
+		}
+	}
+
+	return project, nil
+}
