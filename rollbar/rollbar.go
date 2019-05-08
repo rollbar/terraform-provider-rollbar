@@ -17,7 +17,7 @@ type Client struct {
 	APIBaseURL string
 }
 
-// BaseURL : A function for construction the rul to the api.
+// BaseURL : A function for construction the url to the api.
 func BaseURL(baseURL string) Option {
 	return func(c *Client) error {
 		c.APIBaseURL = baseURL
