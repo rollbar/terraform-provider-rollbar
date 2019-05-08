@@ -18,12 +18,12 @@ type Project struct {
 // listProjectsResponse represents the list projects response
 type listProjectsResponse struct {
 	Error  int `json:"err"`
-	Result []Project
+	Result []*Project
 }
 
 // ListProjects lists the projects for this API Key
 // https://docs.rollbar.com/reference#list-all-projects
-func (c *Client) ListProjects() ([]Project, error) {
+func (c *Client) ListProjects() ([]*Project, error) {
 	var data listProjectsResponse
 
 	url := fmt.Sprintf("%sprojects?access_token=%s", c.APIBaseURL, c.APIKey)
@@ -46,7 +46,12 @@ func (c *Client) ListProjects() ([]Project, error) {
 		return nil, err
 	}
 
-	return data.Result, nil
+	projects := []*Project{}
+	for _, p := range data.Result {
+		projects = append(projects, p)
+	}
+
+	return projects, nil
 }
 
 // GetProjectByName returns the first project from the list-projects
