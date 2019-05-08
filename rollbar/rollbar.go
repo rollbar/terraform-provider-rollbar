@@ -8,8 +8,6 @@ import (
 
 const apiBaseURL string = "https://api.rollbar.com/api/1/"
 
-var apiKey string
-
 // Option : A function to add the base url and other parameters to the client.
 type Option func(*Client) error
 
