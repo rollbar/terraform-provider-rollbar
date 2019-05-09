@@ -1,13 +1,10 @@
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
-DEP := $(shell command -v dep 2> /dev/null)
 
 default: build
 
 sanitycheck:
-	$(MAKE) depensure
 	$(MAKE) fmtcheck
-
 
 build-darwin:
 	GOOS=darwin GOARCH=amd64 go install
@@ -40,19 +37,10 @@ fmt:
 fmtcheck:
 	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
 
-depensure:
-ifndef DEP
-  $(error "No dep in $(PATH), install: https://github.com/golang/dep#setup")
-endif
-	@sh -c "dep ensure"
-
 errcheck:
 	@sh -c "'$(CURDIR)/scripts/errcheck.sh'"
 
-vendor-status:
-	@dep status
-
-test-compile: depensure
+test-compile:
 	@if [ "$(TEST)" = "./..." ]; then \
 		echo "ERROR: Set TEST to a specific package. For example,"; \
 		echo "  make test-compile TEST=./aws"; \
@@ -60,4 +48,4 @@ test-compile: depensure
 	fi
 	go test -c $(TEST) $(TESTARGS)
 
-.PHONY: build build-darwin sanitycheck depensure test testacc vet fmt fmtcheck errcheck vendor-status test-compile
+.PHONY: build build-darwin sanitycheck test testacc fmt fmtcheck errcheck test-compile
