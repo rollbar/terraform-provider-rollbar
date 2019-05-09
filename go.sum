@@ -13,6 +13,8 @@ github.com/aws/aws-sdk-go v1.15.15 h1:XAuFGWoS9tAE+iN9g8G5BY428ms9JQj4yfeJDFIyVx
 github.com/aws/aws-sdk-go v1.15.15/go.mod h1:mFuSZ37Z9YOHbQEwBWztmVzqXrEkub65tZoCYDt7FT0=
 github.com/babbel/rollbar-go v0.0.0-20181002150603-189d83f5858d h1:Xal+6Kmr3/a6NFuLr/Z+CGr58ubpFuOY8EPG4D4ta/w=
 github.com/babbel/rollbar-go v0.0.0-20181002150603-189d83f5858d/go.mod h1:Lpo8pCMJ9ZEdMyAJYLiEqmPjl9P3WHddeP52Dxc6X5c=
+github.com/babbel/rollbar-go v0.0.1 h1:nhQUZKwi7oIzUGB+LqRPFQDiSetNQ4jg68O66l3BmTU=
+github.com/babbel/rollbar-go v0.0.1/go.mod h1:Lpo8pCMJ9ZEdMyAJYLiEqmPjl9P3WHddeP52Dxc6X5c=
 github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d h1:xDfNPAt8lFiC1UJrqV3uuy861HCTo708pDMbjHHdCas=
 github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d/go.mod h1:6QX/PXZ00z/TKoufEY6K/a0k6AhaJrQKdFe6OfVXsa4=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=

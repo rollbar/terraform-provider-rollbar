@@ -8,8 +8,6 @@ import (
 
 const apiBaseURL string = "https://api.rollbar.com/api/1/"
 
-var apiKey string
-
 // Option : A function to add the base url and other parameters to the client.
 type Option func(*Client) error
 
@@ -19,7 +17,7 @@ type Client struct {
 	APIBaseURL string
 }
 
-// BaseURL : A function for construction the rul to the api.
+// BaseURL : A function for construction the url to the api.
 func BaseURL(baseURL string) Option {
 	return func(c *Client) error {
 		c.APIBaseURL = baseURL
