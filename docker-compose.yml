@@ -4,6 +4,8 @@ services:
     build: .
     volumes:
       - .:/project
+    environment:
+      - CGO_ENABLED=0
     command:
       - /bin/bash
       - -e
@@ -11,4 +13,3 @@ services:
       - |
           cd /project
           go test ./rollbar/ -v
-          go vet ./rollbar/
