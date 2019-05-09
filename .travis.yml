@@ -9,7 +9,6 @@ env:
     - DARWIN_BINARY_PATH: ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar
 
 script:
-  - make vet
   - make test
 
 # Build and zip the binaries.
