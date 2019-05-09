@@ -1,16 +1,12 @@
 language: go
 
 go:
-  - "1.10.2"
+  - "1.11.x"
 
 env:
   global:
     - LINUX_BINARY_PATH: ${GOPATH}/bin/terraform-provider-rollbar
     - DARWIN_BINARY_PATH: ${GOPATH}/bin/darwin_amd64/terraform-provider-rollbar
-
-# Install go dep.
-before_install:
-  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 script:
   - make vet
