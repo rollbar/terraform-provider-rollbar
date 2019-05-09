@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// Provider is the Terraform Provider for Rollbar
 func Provider() terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -15,6 +16,10 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_APIKEY", nil),
 				Description: "API Key for accessing the rollbar api.",
 			},
+		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"rollbar_project": dataSourceProject(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
