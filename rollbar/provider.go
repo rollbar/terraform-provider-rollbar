@@ -19,7 +19,8 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"rollbar_project": dataSourceProject(),
+			"rollbar_project":              dataSourceProject(),
+			"rollbar_project_access_token": dataSourceProjectAccessToken(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
