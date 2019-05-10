@@ -106,6 +106,18 @@ func (c *Client) post(data []byte, pathComponents ...string) ([]byte, error) {
 
 	return bytes, nil
 }
+
+func (c *Client) delete(pathComponents ...string) error {
+	url := c.url(true, map[string]string{}, pathComponents...)
+
+	_, err := c.makeRequest("DELETE", url, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathComponents ...string) string {
 	query := url.Values{}
 	for key, value := range queryMap {
