@@ -26,10 +26,24 @@ type Client struct {
 	APIBasePath string
 }
 
-// BaseURL : A function for construction the url to the api.
+// BaseURL returns a function for configuring the url inside a Client.
 func BaseURL(baseURL string) Option {
 	return func(c *Client) error {
 		c.APIBaseURL = baseURL
+		var apiURL = &url.URL{}
+		apiURL, err := url.Parse(baseURL)
+		if err != nil {
+			return err
+		}
+
+		c.APIBasePath = apiURL.Path
+		if apiURL.Path == "/" {
+			c.APIBasePath = ""
+		}
+
+		c.APIHost = apiURL.Host
+		c.APIScheme = apiURL.Scheme
+
 		return nil
 	}
 }
