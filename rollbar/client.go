@@ -39,6 +39,20 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	return &client, nil
 }
 
+func (c *Client) parseOptions(opts ...Option) error {
+	// Range over each options function and apply it to our API type to
+	// configure it. Options functions are applied in order, with any
+	// conflicting options overriding earlier calls.
+	for _, option := range opts {
+		err := option(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // BaseURL returns a function for configuring the url inside a Client.
 func BaseURL(baseURL string) Option {
 	return func(c *Client) error {
@@ -58,20 +72,6 @@ func BaseURL(baseURL string) Option {
 
 		return nil
 	}
-}
-
-func (c *Client) parseOptions(opts ...Option) error {
-	// Range over each options function and apply it to our API type to
-	// configure it. Options functions are applied in order, with any
-	// conflicting options overriding earlier calls.
-	for _, option := range opts {
-		err := option(c)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (c *Client) get(pathComponents ...string) ([]byte, error) {
