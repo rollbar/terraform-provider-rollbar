@@ -96,7 +96,7 @@ func (c *Client) getID(email string) (int, error) {
 	return userID, nil
 }
 
-// GetUser is fetches one user.
+// GetUser fetches one user.
 func (c *Client) GetUser(email string) (int, error) {
 	userID, err := c.getID(email)
 	if err != nil {
