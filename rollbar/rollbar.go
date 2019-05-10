@@ -79,10 +79,16 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 }
 
 func (c *Client) makeRequest(req *http.Request) ([]byte, error) {
+func (c *Client) get(pathComponents ...string) ([]byte, error) {
+	return c.getWithQueryParams(map[string]string{}, pathComponents...)
+}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
+func (c *Client) getWithQueryParams(queryParams map[string]string, pathComponents ...string) ([]byte, error) {
+	url := c.url(true, queryParams, pathComponents...)
 
+	bytes, err := c.makeRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
