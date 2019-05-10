@@ -10,9 +10,7 @@ import (
 	"strings"
 )
 
-const apiScheme string = "https"
-const apiHost string = "api.rollbar.com"
-const apiBasePath string = "/api/1"
+const apiURL = "https://api.rollbar.com/api/1"
 
 // Option adds the base url and other parameters to the client.
 type Option func(*Client) error
@@ -27,15 +25,22 @@ type Client struct {
 
 // NewClient is a constructor.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
-	client := Client{
-		APIKey:      apiKey,
-		APIScheme:   apiScheme,
-		APIHost:     apiHost,
-		APIBasePath: apiBasePath,
-	}
-	if err := client.parseOptions(opts...); err != nil {
+	url, err := url.Parse(apiURL)
+	if err != nil {
 		return nil, err
 	}
+
+	client := Client{
+		APIKey:      apiKey,
+		APIScheme:   url.Scheme,
+		APIHost:     url.Host,
+		APIBasePath: url.Path,
+	}
+
+	if err = client.parseOptions(opts...); err != nil {
+		return nil, err
+	}
+
 	return &client, nil
 }
 
