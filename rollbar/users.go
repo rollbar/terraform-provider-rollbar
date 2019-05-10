@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// ListUsersResponse : A data structure for the list users response.
+// ListUsersResponse represents the list users response.
 type ListUsersResponse struct {
 	Error  int `json:"err"`
 	Result struct {
@@ -18,7 +18,7 @@ type ListUsersResponse struct {
 	}
 }
 
-// InviteResponse : A data structure for the list invites response.
+// InviteResponse represents the list invites response.
 type InviteResponse struct {
 	Error  int `json:"err"`
 	Result struct {
@@ -32,7 +32,7 @@ type InviteResponse struct {
 	}
 }
 
-// InviteUser :  A function for sending an invitation to a user.
+// InviteUser sends an invitation to a user.
 func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 	var data InviteResponse
 
@@ -41,10 +41,8 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 		Email       string `json:"email"`
 	}
 
-	url := fmt.Sprintf("%steam/%d/invites", c.APIBaseURL, teamID)
 	reqData := requestData{c.APIKey, email}
 	b, err := json.Marshal(reqData)
-
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +96,7 @@ func (c *Client) getID(email string) (int, error) {
 	return userID, nil
 }
 
-// GetUser : A function for getting 1 user.
+// GetUser is fetches one user.
 func (c *Client) GetUser(email string) (int, error) {
 	userID, err := c.getID(email)
 	if err != nil {
@@ -108,7 +106,7 @@ func (c *Client) GetUser(email string) (int, error) {
 
 }
 
-// RemoveUserTeam : A function for removing a user from a team.
+// RemoveUserTeam is removes a user from a team.
 func (c *Client) RemoveUserTeam(email string, teamID int) error {
 	userID, err := c.GetUser(email)
 	if err != nil {

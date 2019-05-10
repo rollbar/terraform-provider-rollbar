@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// Invite : A data structure for the nested invites from the ListInvitesResponse.
+// Invite represents nested invites from the ListInvitesResponse.
 type Invite struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
@@ -16,13 +16,13 @@ type Invite struct {
 	DateRedeemed int    `json:"date_redeemed"`
 }
 
-// ListInvitesResponse : A data structure for the ListInvites response.
+// ListInvitesResponse represents the ListInvites response.
 type ListInvitesResponse struct {
 	Error  int `json:"err"`
 	Result []Invite
 }
 
-// ListInvites : A function to list all the invites.
+// ListInvites lists all the invites.
 func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 	var invites []Invite
 	// Invitation call has pagination.
