@@ -41,7 +41,7 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 		Email       string `json:"email"`
 	}
 
-	reqData := requestData{c.APIKey, email}
+	reqData := requestData{c.AccessToken, email}
 	b, err := json.Marshal(reqData)
 	if err != nil {
 		return nil, err

@@ -14,10 +14,10 @@ const apiURL = "https://api.rollbar.com/api/1"
 
 // Client represents the rollbar client.
 type Client struct {
-	APIKey      string
-	APIScheme   string
-	APIHost     string
-	APIBasePath string
+	AccessToken string
+	Scheme      string
+	Host        string
+	BasePath    string
 }
 
 // Option adds the base url and other parameters to the client.
@@ -31,10 +31,10 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	}
 
 	client := Client{
-		APIKey:      apiKey,
-		APIScheme:   url.Scheme,
-		APIHost:     url.Host,
-		APIBasePath: url.Path,
+		AccessToken: apiKey,
+		Scheme:      url.Scheme,
+		Host:        url.Host,
+		BasePath:    url.Path,
 	}
 
 	if err = client.parseOptions(opts...); err != nil {
@@ -67,13 +67,13 @@ func BaseURL(baseURL string) Option {
 			return err
 		}
 
-		c.APIBasePath = apiURL.Path
+		c.BasePath = apiURL.Path
 		if apiURL.Path == "/" {
-			c.APIBasePath = ""
+			c.BasePath = ""
 		}
 
-		c.APIHost = apiURL.Host
-		c.APIScheme = apiURL.Scheme
+		c.Host = apiURL.Host
+		c.Scheme = apiURL.Scheme
 
 		return nil
 	}
@@ -107,15 +107,15 @@ func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathCompo
 	}
 
 	if withAccessToken {
-		query.Add("access_token", c.APIKey)
+		query.Add("access_token", c.AccessToken)
 	}
 
-	components := append([]string{c.APIBasePath}, pathComponents...)
+	components := append([]string{c.BasePath}, pathComponents...)
 	path := strings.Join(components, "/")
 
 	u := url.URL{
-		Scheme:   c.APIScheme,
-		Host:     c.APIHost,
+		Scheme:   c.Scheme,
+		Host:     c.Host,
 		Path:     path,
 		RawQuery: query.Encode(),
 	}
