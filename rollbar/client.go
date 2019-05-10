@@ -58,27 +58,6 @@ func (c *Client) parseOptions(opts ...Option) error {
 	return nil
 }
 
-// BaseURL returns a function for configuring the url inside a Client.
-func BaseURL(baseURL string) Option {
-	return func(c *Client) error {
-		var apiURL = &url.URL{}
-		apiURL, err := url.Parse(baseURL)
-		if err != nil {
-			return err
-		}
-
-		c.BasePath = apiURL.Path
-		if apiURL.Path == "/" {
-			c.BasePath = ""
-		}
-
-		c.Host = apiURL.Host
-		c.Scheme = apiURL.Scheme
-
-		return nil
-	}
-}
-
 func (c *Client) get(pathComponents ...string) ([]byte, error) {
 	return c.getWithQueryParams(map[string]string{}, pathComponents...)
 }
