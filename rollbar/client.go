@@ -25,16 +25,16 @@ type Option func(*Client) error
 
 // NewClient is a constructor.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
-	url, err := url.Parse(apiURL)
+	u, err := url.Parse(apiURL)
 	if err != nil {
 		return nil, err
 	}
 
 	client := Client{
 		AccessToken: apiKey,
-		Scheme:      url.Scheme,
-		Host:        url.Host,
-		BasePath:    url.Path,
+		Scheme:      u.Scheme,
+		Host:        u.Host,
+		BasePath:    u.Path,
 	}
 
 	if err = client.parseOptions(opts...); err != nil {
