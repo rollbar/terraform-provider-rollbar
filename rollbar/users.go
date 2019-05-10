@@ -111,20 +111,11 @@ func (c *Client) GetUser(email string) (int, error) {
 // RemoveUserTeam : A function for removing a user from a team.
 func (c *Client) RemoveUserTeam(email string, teamID int) error {
 	userID, err := c.GetUser(email)
-
 	if err != nil {
 		return err
 	}
 
-	url := fmt.Sprintf("%steam/%d/user/%d?access_token=%s", c.APIBaseURL, teamID, userID, c.APIKey)
-	req, err := http.NewRequest("DELETE", url, nil)
-
-	if err != nil {
-		return err
-	}
-
-	_, err = c.makeRequest(req)
-
+	err = c.delete("team", strconv.Itoa(teamID), "user", strconv.Itoa(userID))
 	if err != nil {
 		return err
 	}
