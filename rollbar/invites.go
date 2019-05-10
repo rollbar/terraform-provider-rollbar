@@ -35,15 +35,9 @@ func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 		var dataResponses []Invite
 
 		pageNum := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.APIBaseURL, teamID, c.APIKey, pageNum)
-		req, err := http.NewRequest("GET", url, nil)
+		queryParams := map[string]string{"page": strconv.Itoa(pageNum)}
 
-		if err != nil {
-			return nil, err
-		}
-
-		bytes, err := c.makeRequest(req)
-
+		bytes, err := c.getWithQueryParams(queryParams, "team", strconv.Itoa(teamID), "invites")
 		if err != nil {
 			return nil, err
 		}

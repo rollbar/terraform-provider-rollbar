@@ -1,10 +1,6 @@
 package rollbar
 
-import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-)
+import "encoding/json"
 
 // Project represents a project
 type Project struct {
@@ -26,16 +22,7 @@ type listProjectsResponse struct {
 func (c *Client) ListProjects() ([]*Project, error) {
 	var data listProjectsResponse
 
-	url := fmt.Sprintf("%sprojects?access_token=%s", c.APIBaseURL, c.APIKey)
-
-	req, err := http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	bytes, err := c.makeRequest(req)
-
+	bytes, err := c.get("projects")
 	if err != nil {
 		return nil, err
 	}

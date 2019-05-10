@@ -74,15 +74,7 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 func (c *Client) ListUsers() (*ListUsersResponse, error) {
 	var data ListUsersResponse
 
-	url := fmt.Sprintf("%susers?access_token=%s", c.APIBaseURL, c.APIKey)
-	req, err := http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	bytes, err := c.makeRequest(req)
-
+	bytes, err := c.get("users")
 	if err != nil {
 		return nil, err
 	}
