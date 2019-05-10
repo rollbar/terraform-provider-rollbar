@@ -106,7 +106,7 @@ func (c *Client) GetUser(email string) (int, error) {
 
 }
 
-// RemoveUserTeam is removes a user from a team.
+// RemoveUserTeam removes a user from a team.
 func (c *Client) RemoveUserTeam(email string, teamID int) error {
 	userID, err := c.GetUser(email)
 	if err != nil {
