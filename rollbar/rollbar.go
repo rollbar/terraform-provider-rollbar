@@ -78,13 +78,10 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	return &client, nil
 }
 
-func (c *Client) makeRequest(req *http.Request) ([]byte, error) {
 func (c *Client) get(pathComponents ...string) ([]byte, error) {
 	return c.getWithQueryParams(map[string]string{}, pathComponents...)
 }
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
 func (c *Client) getWithQueryParams(queryParams map[string]string, pathComponents ...string) ([]byte, error) {
 	url := c.url(true, queryParams, pathComponents...)
 
@@ -93,7 +90,7 @@ func (c *Client) getWithQueryParams(queryParams map[string]string, pathComponent
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	return bytes, nil
 func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathComponents ...string) string {
 	query := url.Values{}
 	for key, value := range queryMap {
@@ -116,8 +113,20 @@ func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathCompo
 	return u.String()
 }
 
-	body, err := ioutil.ReadAll(resp.Body)
+func (c *Client) makeRequest(method, url string, body io.Reader) ([]byte, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
 
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -126,5 +135,5 @@ func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathCompo
 		return nil, fmt.Errorf("The http status code is not '200' and is '%d'", resp.StatusCode)
 	}
 
-	return body, nil
+	return responseBody, nil
 }
