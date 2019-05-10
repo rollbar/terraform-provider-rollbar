@@ -91,6 +91,19 @@ func (c *Client) getWithQueryParams(queryParams map[string]string, pathComponent
 	}
 
 	return bytes, nil
+}
+
+func (c *Client) post(data []byte, pathComponents ...string) ([]byte, error) {
+	url := c.url(false, map[string]string{}, pathComponents...)
+	body := bytes.NewBuffer(data)
+
+	bytes, err := c.makeRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+	}
+
+	return bytes, nil
+}
 func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathComponents ...string) string {
 	query := url.Values{}
 	for key, value := range queryMap {
