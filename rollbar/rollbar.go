@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 )
 
 const apiBaseURL string = "https://api.rollbar.com/api/1/"
@@ -72,6 +74,27 @@ func (c *Client) makeRequest(req *http.Request) ([]byte, error) {
 	}
 
 	defer resp.Body.Close()
+func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathComponents ...string) string {
+	query := url.Values{}
+	for key, value := range queryMap {
+		query.Add(key, value)
+	}
+	if withAccessToken {
+		query.Add("access_token", c.APIKey)
+	}
+
+	components := append([]string{c.APIBasePath}, pathComponents...)
+	path := strings.Join(components, "/")
+
+	u := url.URL{
+		Scheme:   c.APIScheme,
+		Host:     c.APIHost,
+		Path:     path,
+		RawQuery: query.Encode(),
+	}
+
+	return u.String()
+}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
