@@ -7,6 +7,9 @@ import (
 )
 
 const apiBaseURL string = "https://api.rollbar.com/api/1/"
+const apiScheme string = "https"
+const apiHost string = "api.rollbar.com"
+const apiBasePath string = "/api/1"
 
 // Option : A function to add the base url and other parameters to the client.
 type Option func(*Client) error
@@ -15,6 +18,10 @@ type Option func(*Client) error
 type Client struct {
 	APIKey     string
 	APIBaseURL string
+	APIKey      string
+	APIScheme   string
+	APIHost     string
+	APIBasePath string
 }
 
 // BaseURL : A function for construction the url to the api.
@@ -44,6 +51,10 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 	client := Client{
 		APIKey:     apiKey,
 		APIBaseURL: apiBaseURL,
+		APIKey:      apiKey,
+		APIScheme:   apiScheme,
+		APIHost:     apiHost,
+		APIBasePath: apiBasePath,
 	}
 	if err := client.parseOptions(opts...); err != nil {
 		return nil, err
