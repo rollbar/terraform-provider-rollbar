@@ -12,9 +12,6 @@ import (
 
 const apiURL = "https://api.rollbar.com/api/1"
 
-// Option adds the base url and other parameters to the client.
-type Option func(*Client) error
-
 // Client represents the rollbar client.
 type Client struct {
 	APIKey      string
@@ -22,6 +19,9 @@ type Client struct {
 	APIHost     string
 	APIBasePath string
 }
+
+// Option adds the base url and other parameters to the client.
+type Option func(*Client) error
 
 // NewClient is a constructor.
 func NewClient(apiKey string, opts ...Option) (*Client, error) {
