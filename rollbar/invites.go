@@ -2,11 +2,10 @@ package rollbar
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"strconv"
 )
 
-// Invite : A data structure for the nested invites from the ListInvitesResponse.
+// Invite represents nested invites from the ListInvitesResponse.
 type Invite struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
@@ -17,13 +16,13 @@ type Invite struct {
 	DateRedeemed int    `json:"date_redeemed"`
 }
 
-// ListInvitesResponse : A data structure for the ListInvites response.
+// ListInvitesResponse represents the ListInvites response.
 type ListInvitesResponse struct {
 	Error  int `json:"err"`
 	Result []Invite
 }
 
-// ListInvites : A function to list all the invites.
+// ListInvites lists all the invites.
 func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 	var invites []Invite
 	// Invitation call has pagination.
@@ -35,15 +34,9 @@ func (c *Client) ListInvites(teamID int) ([]Invite, error) {
 		var dataResponses []Invite
 
 		pageNum := i
-		url := fmt.Sprintf("%steam/%d/invites?access_token=%s&page=%d", c.APIBaseURL, teamID, c.APIKey, pageNum)
-		req, err := http.NewRequest("GET", url, nil)
+		queryParams := map[string]string{"page": strconv.Itoa(pageNum)}
 
-		if err != nil {
-			return nil, err
-		}
-
-		bytes, err := c.makeRequest(req)
-
+		bytes, err := c.getWithQueryParams(queryParams, "team", strconv.Itoa(teamID), "invites")
 		if err != nil {
 			return nil, err
 		}
