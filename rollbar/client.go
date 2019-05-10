@@ -25,6 +25,20 @@ type Client struct {
 	APIBasePath string
 }
 
+// NewClient is a constructor.
+func NewClient(apiKey string, opts ...Option) (*Client, error) {
+	client := Client{
+		APIKey:      apiKey,
+		APIScheme:   apiScheme,
+		APIHost:     apiHost,
+		APIBasePath: apiBasePath,
+	}
+	if err := client.parseOptions(opts...); err != nil {
+		return nil, err
+	}
+	return &client, nil
+}
+
 // BaseURL returns a function for configuring the url inside a Client.
 func BaseURL(baseURL string) Option {
 	return func(c *Client) error {
@@ -58,20 +72,6 @@ func (c *Client) parseOptions(opts ...Option) error {
 	}
 
 	return nil
-}
-
-// NewClient is a constructor.
-func NewClient(apiKey string, opts ...Option) (*Client, error) {
-	client := Client{
-		APIKey:      apiKey,
-		APIScheme:   apiScheme,
-		APIHost:     apiHost,
-		APIBasePath: apiBasePath,
-	}
-	if err := client.parseOptions(opts...); err != nil {
-		return nil, err
-	}
-	return &client, nil
 }
 
 func (c *Client) get(pathComponents ...string) ([]byte, error) {
