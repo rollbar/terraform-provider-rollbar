@@ -49,23 +49,16 @@ func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
-
-	if err != nil {
-		return nil, err
-	}
-
-	bytes, err := c.makeRequest(req)
-
+	bytes, err := c.post(b, "team", strconv.Itoa(teamID), "invites")
 	if err != nil {
 		return nil, err
 	}
 
 	err = json.Unmarshal(bytes, &data)
-
 	if err != nil {
 		return nil, err
 	}
+
 	return &data, nil
 }
 
@@ -79,7 +72,6 @@ func (c *Client) ListUsers() (*ListUsersResponse, error) {
 	}
 
 	err = json.Unmarshal(bytes, &data)
-
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +85,6 @@ func (c *Client) getID(email string) (int, error) {
 	var userID int
 
 	l, err := c.ListUsers()
-
 	if err != nil {
 		return 0, err
 	}
