@@ -2,8 +2,7 @@ package rollbar
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"strconv"
 )
 
 // Invite : A data structure for the nested invites from the ListInvitesResponse.

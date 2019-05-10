@@ -2,8 +2,7 @@ package rollbar
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"strconv"
 )
 
 // ProjectAccessToken represents a project access token

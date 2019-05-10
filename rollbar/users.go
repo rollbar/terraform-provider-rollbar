@@ -1,10 +1,9 @@
 package rollbar
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
+	"strconv"
 )
 
 // ListUsersResponse : A data structure for the list users response.
