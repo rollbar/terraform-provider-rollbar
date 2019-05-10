@@ -85,20 +85,17 @@ func (c *Client) get(pathComponents ...string) ([]byte, error) {
 
 func (c *Client) getWithQueryParams(queryParams map[string]string, pathComponents ...string) ([]byte, error) {
 	url := c.url(true, queryParams, pathComponents...)
-
 	return c.makeRequest("GET", url, nil)
 }
 
 func (c *Client) post(data []byte, pathComponents ...string) ([]byte, error) {
 	url := c.url(false, map[string]string{}, pathComponents...)
 	body := bytes.NewBuffer(data)
-
 	return c.makeRequest("POST", url, body)
 }
 
 func (c *Client) delete(pathComponents ...string) error {
 	url := c.url(true, map[string]string{}, pathComponents...)
-
 	_, err := c.makeRequest("DELETE", url, nil)
 	return err
 }
@@ -108,6 +105,7 @@ func (c *Client) url(withAccessToken bool, queryMap map[string]string, pathCompo
 	for key, value := range queryMap {
 		query.Add(key, value)
 	}
+
 	if withAccessToken {
 		query.Add("access_token", c.APIKey)
 	}
