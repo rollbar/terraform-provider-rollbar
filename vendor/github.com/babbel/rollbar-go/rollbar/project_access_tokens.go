@@ -2,8 +2,7 @@ package rollbar
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/http"
+	"strconv"
 )
 
 // ProjectAccessToken represents a project access token
@@ -27,22 +26,12 @@ type listProjectAccessTokensResponse struct {
 func (c *Client) ListProjectAccessTokens(projectID int) ([]*ProjectAccessToken, error) {
 	var data listProjectAccessTokensResponse
 
-	url := fmt.Sprintf("%sproject/%d/access_tokens/?access_token=%s", c.APIBaseURL, projectID, c.APIKey)
-
-	req, err := http.NewRequest("GET", url, nil)
-
-	if err != nil {
-		return nil, err
-	}
-
-	bytes, err := c.makeRequest(req)
-
+	bytes, err := c.get("project", strconv.Itoa(projectID), "access_tokens")
 	if err != nil {
 		return nil, err
 	}
 
 	err = json.Unmarshal(bytes, &data)
-
 	if err != nil {
 		return nil, err
 	}

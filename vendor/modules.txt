@@ -1,4 +1,4 @@
-# github.com/agext/levenshtein v1.2.1
+# github.com/agext/levenshtein v1.2.2
 github.com/agext/levenshtein
 # github.com/apparentlymart/go-cidr v1.0.0
 github.com/apparentlymart/go-cidr/cidr
@@ -6,7 +6,7 @@ github.com/apparentlymart/go-cidr/cidr
 github.com/apparentlymart/go-textseg/textseg
 # github.com/armon/go-radix v0.0.0-20180808171621-7fddfc383310
 github.com/armon/go-radix
-# github.com/aws/aws-sdk-go v1.15.15
+# github.com/aws/aws-sdk-go v1.15.90
 github.com/aws/aws-sdk-go/aws
 github.com/aws/aws-sdk-go/aws/credentials
 github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds
@@ -16,6 +16,7 @@ github.com/aws/aws-sdk-go/service/s3
 github.com/aws/aws-sdk-go/aws/awserr
 github.com/aws/aws-sdk-go/aws/endpoints
 github.com/aws/aws-sdk-go/internal/sdkio
+github.com/aws/aws-sdk-go/internal/ini
 github.com/aws/aws-sdk-go/internal/shareddefaults
 github.com/aws/aws-sdk-go/aws/client
 github.com/aws/aws-sdk-go/internal/sdkuri
@@ -27,6 +28,7 @@ github.com/aws/aws-sdk-go/aws/csm
 github.com/aws/aws-sdk-go/aws/defaults
 github.com/aws/aws-sdk-go/aws/awsutil
 github.com/aws/aws-sdk-go/aws/signer/v4
+github.com/aws/aws-sdk-go/internal/s3err
 github.com/aws/aws-sdk-go/private/protocol
 github.com/aws/aws-sdk-go/private/protocol/eventstream
 github.com/aws/aws-sdk-go/private/protocol/eventstream/eventstreamapi
@@ -38,7 +40,7 @@ github.com/aws/aws-sdk-go/aws/credentials/endpointcreds
 github.com/aws/aws-sdk-go/private/protocol/query
 github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil
 github.com/aws/aws-sdk-go/private/protocol/query/queryutil
-# github.com/babbel/rollbar-go v0.0.1
+# github.com/babbel/rollbar-go v0.0.2
 github.com/babbel/rollbar-go/rollbar
 # github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d
 github.com/bgentry/go-netrc/netrc
@@ -48,32 +50,30 @@ github.com/bgentry/speakeasy
 github.com/blang/semver
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/go-ini/ini v1.38.1
-github.com/go-ini/ini
-# github.com/golang/protobuf v1.1.0
+# github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/hashicorp/errwrap v0.0.0-20180715044906-d6c0cd880357
+# github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
-# github.com/hashicorp/go-cleanhttp v0.0.0-20171218145408-d5fe4b57a186
+# github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-getter v0.0.0-20180809191950-4bda8fa99001
 github.com/hashicorp/go-getter
 github.com/hashicorp/go-getter/helper/url
 # github.com/hashicorp/go-hclog v0.0.0-20180709165350-ff2cf002a8dd
 github.com/hashicorp/go-hclog
-# github.com/hashicorp/go-multierror v0.0.0-20180717150148-3d5d8f294aa0
+# github.com/hashicorp/go-multierror v1.0.0
 github.com/hashicorp/go-multierror
 # github.com/hashicorp/go-plugin v0.0.0-20180814222501-a4620f9913d1
 github.com/hashicorp/go-plugin
 # github.com/hashicorp/go-safetemp v0.0.0-20180326211150-b1a1dbde6fdc
 github.com/hashicorp/go-safetemp
-# github.com/hashicorp/go-uuid v0.0.0-20180228145832-27454136f036
+# github.com/hashicorp/go-uuid v1.0.1
 github.com/hashicorp/go-uuid
-# github.com/hashicorp/go-version v0.0.0-20180716215031-270f2f71b1ee
+# github.com/hashicorp/go-version v1.0.0
 github.com/hashicorp/go-version
 # github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce
 github.com/hashicorp/hcl
@@ -97,7 +97,7 @@ github.com/hashicorp/hil
 github.com/hashicorp/hil/ast
 github.com/hashicorp/hil/parser
 github.com/hashicorp/hil/scanner
-# github.com/hashicorp/terraform v0.11.8
+# github.com/hashicorp/terraform v0.11.13
 github.com/hashicorp/terraform/plugin
 github.com/hashicorp/terraform/helper/schema
 github.com/hashicorp/terraform/terraform
@@ -122,13 +122,13 @@ github.com/hashicorp/terraform/svchost
 github.com/hashicorp/terraform/svchost/auth
 # github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb
 github.com/hashicorp/yamux
-# github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8
+# github.com/jmespath/go-jmespath v0.0.0-20160803190731-bd40a432e4c7
 github.com/jmespath/go-jmespath
 # github.com/mattn/go-colorable v0.0.9
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.3
+# github.com/mattn/go-isatty v0.0.7
 github.com/mattn/go-isatty
-# github.com/mitchellh/cli v0.0.0-20180414170447-c48282d14eba
+# github.com/mitchellh/cli v1.0.0
 github.com/mitchellh/cli
 # github.com/mitchellh/copystructure v0.0.0-20170525013902-d23ffcb85de3
 github.com/mitchellh/copystructure
@@ -136,7 +136,7 @@ github.com/mitchellh/copystructure
 github.com/mitchellh/go-homedir
 # github.com/mitchellh/go-testing-interface v0.0.0-20171004221916-a61a99592b77
 github.com/mitchellh/go-testing-interface
-# github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7
+# github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap
 # github.com/mitchellh/hashstructure v0.0.0-20170609045927-2bca23e0e452
 github.com/mitchellh/hashstructure
@@ -146,12 +146,12 @@ github.com/mitchellh/mapstructure
 github.com/mitchellh/reflectwalk
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
-# github.com/posener/complete v1.1.1
+# github.com/posener/complete v1.1.2
 github.com/posener/complete
 github.com/posener/complete/cmd/install
 github.com/posener/complete/cmd
 github.com/posener/complete/match
-# github.com/ulikunitz/xz v0.5.4
+# github.com/ulikunitz/xz v0.5.6
 github.com/ulikunitz/xz
 github.com/ulikunitz/xz/internal/xlog
 github.com/ulikunitz/xz/lzma
@@ -184,9 +184,9 @@ golang.org/x/net/http/httpguts
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
-# golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a
+# golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.0
+# golang.org/x/text v0.3.2
 golang.org/x/text/unicode/norm
 golang.org/x/text/transform
 golang.org/x/text/secure/bidirule

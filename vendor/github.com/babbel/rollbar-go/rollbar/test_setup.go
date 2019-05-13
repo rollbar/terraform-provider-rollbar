@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 )
 
 const (
@@ -34,6 +35,27 @@ func setup() func() {
 
 	return func() {
 		server.Close()
+	}
+}
+
+// BaseURL returns a function for configuring the url inside a Client.
+func BaseURL(baseURL string) Option {
+	return func(c *Client) error {
+		var apiURL = &url.URL{}
+		apiURL, err := url.Parse(baseURL)
+		if err != nil {
+			return err
+		}
+
+		c.BasePath = apiURL.Path
+		if apiURL.Path == "/" {
+			c.BasePath = ""
+		}
+
+		c.Host = apiURL.Host
+		c.Scheme = apiURL.Scheme
+
+		return nil
 	}
 }
 
