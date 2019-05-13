@@ -6,8 +6,6 @@ Terraform Provider
 - [![Build Status](https://travis-ci.org/babbel/terraform-provider-rollbar.svg?branch=master)](https://travis-ci.org/babbel/terraform-provider-rollbar)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
-
 Requirements
 ------------
 
