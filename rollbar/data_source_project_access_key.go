@@ -49,7 +49,7 @@ func dataSourceProjectAccessTokenRead(d *schema.ResourceData, meta interface{}) 
 	}
 	if accessToken == nil {
 		d.SetId("")
-		return fmt.Errorf("could not find project access token by project ID %d name %s", projectID, name)
+		return nil
 	}
 
 	id := fmt.Sprintf("%d-%s", accessToken.ProjectID, accessToken.Name)
