@@ -40,7 +40,7 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if project == nil {
 		d.SetId("")
-		return nil
+		return fmt.Errorf("No project with the name %s found", name)
 	}
 
 	id := fmt.Sprintf("%d", project.ID)

@@ -95,7 +95,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 
 	if !userPresent && !invited {
 		d.SetId("")
-		return nil
+		return fmt.Errorf("No user or invitee found with the email %s", email)
 	}
 
 	d.Set("email", email)
