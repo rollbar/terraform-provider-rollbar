@@ -9,8 +9,8 @@ Terraform Provider
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.10.x
-- [Go](https://golang.org/doc/install) 1.11.x+ (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+- [Go](https://golang.org/doc/install) 1.13.x+ (to build the provider plugin)
 
 Building The Provider
 ---------------------
@@ -50,7 +50,7 @@ resource "rollbar_user" "test" {
 Developing the Provider
 ---------------------------
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.11.x+ is *required*).
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13.x+ is *required*).
 
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
