@@ -7,10 +7,10 @@ sanitycheck:
 	$(MAKE) fmtcheck
 
 build-darwin:
-	GOOS=darwin GOARCH=amd64 go install
+	GOOS=darwin GOARCH=amd64 go build
 
 build-linux:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go install
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build
 
 build: build-linux
 
@@ -38,5 +38,9 @@ test-compile:
 		exit 1; \
 	fi
 	go test -c $(TEST) $(TESTARGS)
+
+fail:
+	@echo "Error!" 1>&2
+	@exit 4711
 
 .PHONY: build build-darwin sanitycheck test testacc fmt fmtcheck errcheck test-compile
