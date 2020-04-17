@@ -1,0 +1,105 @@
+# Create a new GitHub release on pushed tag stating with 'v'.
+# Run tests, build and uploads binaries.
+
+name: Release
+
+on:
+  push:
+    tags:
+    - 'v*'
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: sanity-check
+      run: make test
+
+  # See https://github.com/actions/upload-release-asset
+  build:
+    name: Build and Release
+    needs: Test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.13
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: Build Linux
+      run: |
+        make build-linux
+        zip --junk-paths terraform-provider-rollbar-linux terraform-provider-rollbar
+        rm terraform-provider-rollbar
+
+    - name: Build Darwin
+      run: |
+        make build-darwin
+        zip --junk-paths terraform-provider-rollbar-darwin terraform-provider-rollbar
+        rm terraform-provider-rollbar
+
+    - name: Create Release
+      id: create-release 
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset Linux
+      id: upload-release-asset-linux
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: ./terraform-provider-rollbar-linux.zip
+        asset_name: terraform-provider-rollbar-linux.zip
+        asset_content_type: application/zip
+
+    - name: Upload Release Asset Darwin
+      id: upload-release-asset-darwin
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: ./terraform-provider-rollbar-darwin.zip
+        asset_name: terraform-provider-rollbar-darwin.zip
+        asset_content_type: application/zip
