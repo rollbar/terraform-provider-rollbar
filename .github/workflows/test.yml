@@ -18,17 +18,6 @@ jobs:
       with:
         go-version: 1.13
 
-    - name: parse version string
-      id: parse_version
-      run: |
-        export BUILD_VERSION=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
-        export BUILD_NAME=terraform-provider-rollbar_$BUILD_VERSION
-        echo "::set-output name=BUILD_NAME::$BUILD_NAME"
-
-    - name: test output version string
-      run: |
-          echo ${{ steps.parse_version.outputs.BUILD_NAME}}_linux_amd64.zip
-
     - name: check out code into the Go module directory
       uses: actions/checkout@v2
 
