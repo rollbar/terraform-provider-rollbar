@@ -22,7 +22,7 @@ jobs:
       id: parse_version
       run: |
         export FOO=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
-        echo "::set-output foo=$FOO"
+        echo "::set-output foo=FOO::$FOO"
 
     - name: test output version string
       run: |
