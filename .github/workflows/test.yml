@@ -21,7 +21,7 @@ jobs:
     - name: parse version string
       id: parse_version
       run: |
-        ::set-output build_version=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
+        echo ::set-output build_version=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
 
     - name: test output version string
       run: |
