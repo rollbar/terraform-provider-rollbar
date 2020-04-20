@@ -79,14 +79,6 @@ jobs:
         draft: false
         prerelease: true
 
-    - name: parse version string
-      run: |
-          export VERSION_STRING=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
-
-    - name: test output version string
-      run: |
-          echo "lala_$(VERSION_STRING)_dwarin"
-
     - name: upload Release Asset Linux
       uses: actions/upload-release-asset@v1
       env:

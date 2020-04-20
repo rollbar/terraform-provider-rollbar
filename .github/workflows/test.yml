@@ -18,6 +18,14 @@ jobs:
       with:
         go-version: 1.13
 
+    - name: parse version string
+      run: |
+          export VERSION_STRING=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
+
+    - name: test output version string
+      run: |
+          echo "lala_$(VERSION_STRING)_dwarin"
+
     - name: check out code into the Go module directory
       uses: actions/checkout@v2
 
