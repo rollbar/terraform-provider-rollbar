@@ -3,9 +3,10 @@
 name: Test
 
 on:
-  push:
   pull_request:
     branches: [ master ]
+env:
+  GO_VERSION: 1.13
 
 jobs:
 
@@ -17,7 +18,7 @@ jobs:
     - name: set up Go 1.13
       uses: actions/setup-go@v1
       with:
-        go-version: 1.13
+        go-version: {{ jobs.env.GO_VERSION }}
 
     - name: check out code into the Go module directory
       uses: actions/checkout@v2
