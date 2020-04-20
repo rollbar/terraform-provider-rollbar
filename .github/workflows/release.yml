@@ -66,12 +66,6 @@ jobs:
         echo ::set-output name=ZIP_NAME_LINUX::"$BUILD_NAME"_linux_amd64.zip
         echo ::set-output name=ZIP_NAME_DARWIN::"$BUILD_NAME"_darwin_amd64.zip
 
-    - name: test output version string
-      run: |
-          echo ${{ steps.parse_version.outputs.BUILD_NAME}}
-          echo ${{ steps.parse_version.outputs.ZIP_NAME_LINUX}}
-          echo ${{ steps.parse_version.outputs.ZIP_NAME_DARWIN}}
-
     - name: build Linux
       run: |
         make build-linux
