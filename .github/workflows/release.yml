@@ -76,13 +76,13 @@ jobs:
       run: |
         make build-linux
         mv terraform-provider-rollbar ${{ steps.parse_version.outputs.BUILD_NAME }}
-        zip --junk-paths ${{ steps.parse_version.outputs.BUILD_NAME }}_linux_amd64.zip ${{ steps.parse_version.outputs.BUILD_NAME }}
+        zip --junk-paths ${{ steps.parse_version.outputs.BUILD_NAME_LINUX }} ${{ steps.parse_version.outputs.BUILD_NAME }}
 
     - name: build Darwin
       run: |
         make build-darwin
         mv terraform-provider-rollbar ${{ steps.parse_version.outputs.BUILD_NAME }}
-        zip --junk-paths ${{ steps.parse_version.outputs.BUILD_NAME }}_darwin_amd64.zip ${{ steps.parse_version.outputs.BUILD_NAME }}
+        zip --junk-paths ${{ steps.parse_version.outputs.BUILD_NAME_DARWIN }} ${{ steps.parse_version.outputs.BUILD_NAME }}
 
     - name: create release
       id: create_release
@@ -101,8 +101,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./terraform-provider-rollbar-linux.zip
-        asset_name: terraform-provider-rollbar-linux.zip
+        asset_path: ./${{ steps.parse_version.outputs.BUILD_NAME_LINUX }}
+        asset_name: ${{ steps.parse_version.outputs.BUILD_NAME_LINUX }}
+
         asset_content_type: application/zip
 
     - name: Upload Release Asset Darwin
@@ -111,6 +112,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./terraform-provider-rollbar-darwin.zip
-        asset_name: terraform-provider-rollbar-darwin.zip
+        asset_path: ./${{ steps.parse_version.outputs.BUILD_NAME_DARWIN }}
+        asset_name: ${{ steps.parse_version.outputs.BUILD_NAME_DARWIN }}
+
         asset_content_type: application/zip
