@@ -19,7 +19,6 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.13
-      id: go
 
     - name: check out code into the Go module directory
       uses: actions/checkout@v2
@@ -46,7 +45,6 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.13
-      id: go
 
     - name: check out code into the Go module directory
       uses: actions/checkout@v2
@@ -72,7 +70,6 @@ jobs:
         rm terraform-provider-rollbar
 
     - name: create release
-      id: create-release 
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -83,7 +80,6 @@ jobs:
         prerelease: true
 
     - name: upload Release Asset Linux
-      id: upload-release-asset-linux
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -94,7 +90,6 @@ jobs:
         asset_content_type: application/zip
 
     - name: Upload Release Asset Darwin
-      id: upload-release-asset-darwin
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
