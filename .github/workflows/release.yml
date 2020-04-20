@@ -63,26 +63,26 @@ jobs:
         export BUILD_VERSION=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
         export BUILD_NAME=terraform-provider-rollbar_$BUILD_VERSION
         echo "::set-output name=BUILD_NAME::$BUILD_NAME"
-        echo ::set-output name=BUILD_NAME_LINUX::"$BUILD_NAME"_linux_amd64.zip
-        echo ::set-output name=BUILD_NAME_DARWIN::"$BUILD_NAME"_darwin_amd64.zip
+        echo ::set-output name=ZIP_NAME_LINUX::"$BUILD_NAME"_linux_amd64.zip
+        echo ::set-output name=ZIP_NAME_DARWIN::"$BUILD_NAME"_darwin_amd64.zip
 
     - name: test output version string
       run: |
           echo ${{ steps.parse_version.outputs.BUILD_NAME}}
-          echo ${{ steps.parse_version.outputs.BUILD_NAME_LINUX}}
-          echo ${{ steps.parse_version.outputs.BUILD_NAME_DARWIN}}
+          echo ${{ steps.parse_version.outputs.ZIP_NAME_LINUX}}
+          echo ${{ steps.parse_version.outputs.ZIP_NAME_DARWIN}}
 
     - name: build Linux
       run: |
         make build-linux
         mv terraform-provider-rollbar ${{ steps.parse_version.outputs.BUILD_NAME }}
-        zip --junk-paths ${{ steps.parse_version.outputs.BUILD_NAME_LINUX }} ${{ steps.parse_version.outputs.BUILD_NAME }}
+        zip --junk-paths ${{ steps.parse_version.outputs.ZIP_NAME_LINUX }} ${{ steps.parse_version.outputs.BUILD_NAME }}
 
     - name: build Darwin
       run: |
         make build-darwin
         mv terraform-provider-rollbar ${{ steps.parse_version.outputs.BUILD_NAME }}
-        zip --junk-paths ${{ steps.parse_version.outputs.BUILD_NAME_DARWIN }} ${{ steps.parse_version.outputs.BUILD_NAME }}
+        zip --junk-paths ${{ steps.parse_version.outputs.ZIP_NAME_DARWIN }} ${{ steps.parse_version.outputs.BUILD_NAME }}
 
     - name: create release
       id: create_release
@@ -101,8 +101,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.parse_version.outputs.BUILD_NAME_LINUX }}
-        asset_name: ${{ steps.parse_version.outputs.BUILD_NAME_LINUX }}
+        asset_path: ./${{ steps.parse_version.outputs.ZIP_NAME_LINUX }}
+        asset_name: ${{ steps.parse_version.outputs.ZIP_NAME_LINUX }}
 
         asset_content_type: application/zip
 
@@ -112,7 +112,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.parse_version.outputs.BUILD_NAME_DARWIN }}
-        asset_name: ${{ steps.parse_version.outputs.BUILD_NAME_DARWIN }}
+        asset_path: ./${{ steps.parse_version.outputs.ZIP_NAME_DARWIN }}
+        asset_name: ${{ steps.parse_version.outputs.ZIP_NAME_DARWIN }}
 
         asset_content_type: application/zip
