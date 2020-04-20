@@ -21,11 +21,12 @@ jobs:
     - name: parse version string
       id: parse_version
       run: |
-        echo ::set-output build_version=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
+        echo FOO=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
+        echo "::set-output foo=$FOO"
 
     - name: test output version string
       run: |
-          echo lala_${{steps.parse_version.outputs.BUILD_VERSION}}_dwarin
+          echo ${{ steps.parse_version.outputs.FOO }}
 
     - name: check out code into the Go module directory
       uses: actions/checkout@v2
