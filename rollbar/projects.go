@@ -34,9 +34,7 @@ func (c *Client) ListProjects() ([]*Project, error) {
 	}
 
 	projects := []*Project{}
-	for _, p := range data.Result {
-		projects = append(projects, p)
-	}
+	projects = append(projects, data.Result...)
 
 	return projects, nil
 }

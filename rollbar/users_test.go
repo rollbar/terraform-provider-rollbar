@@ -130,8 +130,6 @@ func GetUser(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userEmail := vars.UserEmail
-	userID, err := client.getID(userEmail)
 	varType := fmt.Sprintf("%T", userID)
 
 	if varType != "int" {
