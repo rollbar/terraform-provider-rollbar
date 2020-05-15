@@ -37,9 +37,7 @@ func (c *Client) ListProjectAccessTokens(projectID int) ([]*ProjectAccessToken, 
 	}
 
 	tokens := []*ProjectAccessToken{}
-	for _, t := range data.Result {
-		tokens = append(tokens, t)
-	}
+	tokens = append(tokens, data.Result...)
 
 	return tokens, nil
 }
