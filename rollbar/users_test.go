@@ -96,7 +96,6 @@ func TestGetId(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	userID := vars.UserID
 	userEmail := vars.UserEmail
 	handURL := "/users"
 
@@ -106,25 +105,7 @@ func TestGetId(t *testing.T) {
 		fmt.Fprint(w, fixture("users/users.json"))
 	})
 
-	userID, err = client.getID(userEmail)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	varType := fmt.Sprintf("%T", userID)
-
-	if varType != "int" {
-		t.Errorf("Expected 'integer', got: '%T'", userID)
-	}
-}
-
-func GetUser(t *testing.T) {
-
-	teardown := setup()
-	defer teardown()
-
-	vars, err := vars("users.json")
+	userID, err := client.getID(userEmail)
 
 	if err != nil {
 		t.Fatal(err)
