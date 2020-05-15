@@ -35,15 +35,12 @@ All of the methods are tested and the tests can be run with docker-compose or go
 ```bash
 docker-compose up --build
 ```
+
 ```bash
 go test -v
 ```
 
-### Built With
-
-* [golang](https://golang.org/) - The programming language used.
-* [docker](https://www.docker.com/community-edition) - Docker CE.
-* [docker-compose](https://docs.docker.com/compose/) - Used for testing/building the application.
+Liniting and go vet can be run locally using the makefile.
 
 ### Contributing
 
