@@ -3,7 +3,6 @@ Terraform Provider
 
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- [![Build Status](https://travis-ci.org/babbel/terraform-provider-rollbar.svg?branch=master)](https://travis-ci.org/babbel/terraform-provider-rollbar)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
 Requirements
