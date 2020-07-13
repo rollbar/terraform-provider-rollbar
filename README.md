@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/babbel/rollbar-go.svg?branch=master)](https://travis-ci.org/babbel/rollbar-go)
-
 # rollbar-go
 
 A client written in [go](https://golang.org/) for provisioning rollbar https://rollbar.com. Currently it only supports adding and removing users from teams.
