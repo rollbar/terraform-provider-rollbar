@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/jmcvetta/terraform-provider-rollbar/client"
+	"github.com/jmcvetta/terraform-provider-rollbar/rollbar/client"
 )
 
 const (
