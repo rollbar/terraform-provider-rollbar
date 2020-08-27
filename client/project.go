@@ -1,31 +1,28 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-	"net/url"
+	"github.com/rs/zerolog/log"
+	"path"
 )
 
-// GetCoffees - Returns list of coffees (no auth required)
-func (c *RollbarApiClient) GetProjects() ([]Project, error) {
-	u := c.url + "foo"
-	u := url.Parse("foobar")
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/coffees", c.HostURL), nil)
+// ListProjects queries API for the list of projects
+func (c *RollbarApiClient) ListProjects() ([]Project, error) {
+	url := c.url
+	url.Path = path.Join(url.Path, PathListProjects)
+
+	resp, err := c.resty.R().
+		SetResult(ListProjectsResult{}).
+		Get(url.String())
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := c.doRequest(req)
-	if err != nil {
-		return nil, err
+	lpr := resp.Result().(*ListProjectsResult)
+	if lpr.Err != 0 {
+		log.Error().
+			Int("err", lpr.Err).
+			Msg("Unexpected error listing projects")
 	}
 
-	coffees := []Coffee{}
-	err = json.Unmarshal(body, &coffees)
-	if err != nil {
-		return nil, err
-	}
-
-	return coffees, nil
+	return lpr.Result, nil
 }

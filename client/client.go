@@ -8,8 +8,8 @@ import (
 
 // RollbarApiClient is a client for the Rollbar API
 type RollbarApiClient struct {
-	r   *resty.Client
-	url *url.URL
+	resty *resty.Client
+	url   *url.URL
 }
 
 // NewClient sets up a new Rollbar API client
@@ -31,7 +31,7 @@ func NewClient(apiUrl string, token string) (*RollbarApiClient, error) {
 	if token != "" {
 		r = r.SetHeader("X-Rollbar-Access-Token", token)
 	}
-	c := RollbarApiClient{r: r, url: u}
+	c := RollbarApiClient{resty: r, url: u}
 
 	return &c, nil
 }

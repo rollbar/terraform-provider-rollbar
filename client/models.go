@@ -44,3 +44,8 @@ type Project struct {
 	} `json:"settings_data"`
 	Status string `json:"status"`
 }
+
+type ListProjectsResult struct {
+	Err    int
+	Result []Project
+}
