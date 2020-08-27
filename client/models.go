@@ -2,7 +2,7 @@ package client
 
 // Project is a Rollbar project
 type Project struct {
-	AccountId    string `json:"account_id"`
+	AccountId    int    `json:"account_id"`
 	DateCreated  int    `json:"date_created"`
 	DateModified int    `json:"date_modified"`
 	Id           int    `json:"id"`
