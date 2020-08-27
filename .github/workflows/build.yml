@@ -1,0 +1,38 @@
+name: Backend
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+#    services:
+#      postgres:
+#        image: postgres
+#        env:
+#          POSTGRES_USER: app
+#          POSTGRES_PASSWORD: password
+#          POSTGRES_NAME: app
+#        # Set health checks to wait until postgres has started
+#        options: >-
+#          --health-cmd pg_isready
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#        ports:
+#          - 5432:5432
+
+    steps:
+      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ~/.cache
+            ~/cache
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Build the application
+        run: go build -o app
