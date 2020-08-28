@@ -7,8 +7,12 @@ terraform {
   }
 }
 
+variable "rollbar_token" {
+  type = string
+}
+
 provider "rollbar" {
-  token = "ffe236fdbdcb452b9e31ba5af898f46a"
+  token = var.rollbar_token
 }
 
 # Returns all projects
