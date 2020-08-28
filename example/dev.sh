@@ -28,6 +28,8 @@ rm -vrf .terraform /tmp/rollbar-terraform.log
 # Initialize terraform
 terraform init
 
+set +e
+
 # Test the provider
 terraform apply
 
