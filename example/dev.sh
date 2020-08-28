@@ -13,7 +13,7 @@ clear -x  # Clear the screen but not the scrollback buffer
 (cd .. && make) \
     && rm -vrf .terraform /tmp/rollbar-terraform.log \
     && terraform init \
-    && terraform plan 
+    && terraform apply
 
 # Print the debug log
 cat /tmp/rollbar-terraform.log 
