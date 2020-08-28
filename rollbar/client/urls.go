@@ -9,5 +9,6 @@
 package client
 
 const (
-	PathListProjects = "/api/1/projects"
+	PathProjectList   = "/api/1/projects"
+	PathProjectCreate = "/api/1/projects"
 )

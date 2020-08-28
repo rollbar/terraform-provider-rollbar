@@ -57,3 +57,8 @@ type ListProjectsResult struct {
 	Err    int
 	Result []Project
 }
+
+type CreateProjectResult struct {
+	Err    int
+	Result Project
+}
