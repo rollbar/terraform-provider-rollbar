@@ -19,3 +19,6 @@
 
 # IntelliJ / GoLand
 .idea/
+
+# Vim
+*.swp
