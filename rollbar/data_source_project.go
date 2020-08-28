@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jmcvetta/terraform-provider-rollbar/rollbar/client"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/jeevatkm/go-model.v1"
 	"strconv"
 	"time"
@@ -31,12 +32,16 @@ func dataSourceProjects() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"data_created": &schema.Schema{
+						"date_created": &schema.Schema{
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"date_modified": &schema.Schema{
 							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"status": &schema.Schema{
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
@@ -47,6 +52,7 @@ func dataSourceProjects() *schema.Resource {
 }
 
 func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Debug().Msg("Reading projects data from API")
 	var diags diag.Diagnostics
 	c := m.(*client.RollbarApiClient)
 
@@ -55,18 +61,30 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	projects, err := model.Map(lp)
-	if err != nil {
-		return diag.FromErr(err)
+	projects := make([]map[string]interface{}, 0)
+	for _, v := range lp {
+		m, err := model.Map(v)
+		if err != nil {
+			log.Err(err).
+				Interface("lp", lp).
+				Msg("Error converting to map")
+			return diag.FromErr(err)
+		}
+		projects = append(projects, m)
 	}
 
 	if err := d.Set("projects", projects); err != nil {
+		log.Err(err).
+			Interface("projects", projects).
+			Msg("Error setting resource data")
 		return diag.FromErr(err)
 	}
 
 	// Set resource ID to current timestamp (every resource must have an ID or
 	// it will be destroyed).
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+
+	log.Warn().Msg("Successfully read project list from API.")
 
 	return diags
 }
