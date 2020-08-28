@@ -1,3 +1,11 @@
+#
+# Copyright (c) 2020 Jason McVetta <jmcvetta@protonmail.com>, all rights
+# reserved.
+#
+# NO LICENSE WHATSOEVER IS GRANTED for this software without written contract
+# between author and licensee.
+#
+
 #===============================================================================
 #
 # Convenience script to build & cleanly install provider; run `terraform apply`
