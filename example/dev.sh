@@ -13,15 +13,23 @@
 #
 #===============================================================================
 
+set -e 
 set -x
 
-clear -x  # Clear the screen but not the scrollback buffer
+# Clear the screen but not the scrollback buffer
+clear -x
 
-# Build & cleanly install the latest provider
-(cd .. && make) \
-    && rm -vrf .terraform /tmp/rollbar-terraform.log \
-    && terraform init \
-    && terraform apply
+# Cleanup last run
+rm -vrf .terraform /tmp/rollbar-terraform.log
+
+# Build & install the latest provider
+(cd .. && make)
+
+# Initialize terraform
+terraform init
+
+# Test the provider
+terraform apply
 
 # Print the debug log
 cat /tmp/rollbar-terraform.log 
