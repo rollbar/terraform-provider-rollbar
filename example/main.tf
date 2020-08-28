@@ -1,10 +1,10 @@
 terraform {
-    required_providers {
-        rollbar = {
-            source = "github.com/jmcvetta/rollbar"
-            version = "~> 0.1"
-        }
+  required_providers {
+    rollbar = {
+      source  = "github.com/jmcvetta/rollbar"
+      version = "~> 0.1"
     }
+  }
 }
 
 provider "rollbar" {
