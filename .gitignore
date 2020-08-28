@@ -25,3 +25,4 @@
 
 # Terraform
 terraform.tfstate*
+*.tfvars
