@@ -22,3 +22,6 @@
 
 # Vim
 *.swp
+
+# Terraform
+terraform.tfstate*
