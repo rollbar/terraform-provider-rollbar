@@ -11,4 +11,5 @@ package client
 const (
 	PathProjectList   = "/api/1/projects"
 	PathProjectCreate = "/api/1/projects"
+	PathProjectRead   = "/api/1/project/{project_id}"
 )

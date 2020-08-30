@@ -19,13 +19,13 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 	url.Path = path.Join(url.Path, PathProjectList)
 
 	resp, err := c.resty.R().
-		SetResult(ListProjectsResult{}).
+		SetResult(ProjectListResult{}).
 		Get(url.String())
 	if err != nil {
 		return nil, err
 	}
 
-	lpr := resp.Result().(*ListProjectsResult)
+	lpr := resp.Result().(*ProjectListResult)
 	if lpr.Err != 0 {
 		log.Error().
 			Int("err", lpr.Err).
@@ -39,6 +39,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 // CreateProject creates a new project
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	l := log.With().Str("name", name).Logger()
+	l.Debug().Msg("Creating new project")
 
 	u := c.url
 	u.Path = path.Join(u.Path, PathProjectCreate)
@@ -51,10 +52,45 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		return nil, err
 	}
 
-	cpr := resp.Result().(*CreateProjectResult)
-	if cpr.Err != 0 {
+	pr := resp.Result().(*ProjectResult)
+	if pr.Err != 0 {
 		l.Error().Msg("Unexpected error creating project")
 	}
 
-	return &cpr.Result, nil
+	return &pr.Result, nil
+}
+
+// ReadProject fetches data for the specified Project from the Rollbar API.
+func (c *RollbarApiClient) ReadProject(id string) (*Project, error) {
+	// NOTE: Since the project ID is ultimately an integer, it seems
+	// appropriate that the argument to this function should be an int.
+	// However the ID will be represented as a string in the
+	// schema.ResourceData, and will be consumed as a string by this function
+	// when constructing the URL for the API call.
+	//
+	// Should this client ever be extracted as a library, it would be
+	// appropriate to make argument `id` an integer.  Until then, keeping it
+	// as a string eliminates two needless type conversions.
+	l := log.With().Str("id", id).Logger()
+	l.Debug().Msg("Reading project from API")
+
+	u := c.url
+	u.Path = path.Join(u.Path, PathProjectRead)
+
+	resp, err := c.resty.R().
+		SetPathParams(map[string]string{
+			"id": id,
+		}).
+		Get(u.String())
+	if err != nil {
+		l.Err(err).Msg("Error reading project")
+		return nil, err
+	}
+
+	pr := resp.Result().(*ProjectResult)
+	if pr.Err != 0 {
+		l.Error().Msg("Unexpected error reading project")
+	}
+
+	return &pr.Result, nil
 }

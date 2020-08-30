@@ -53,12 +53,12 @@ type Project struct {
 	Status string `json:"status" model:"status"`
 }
 
-type ListProjectsResult struct {
+type ProjectListResult struct {
 	Err    int
 	Result []Project
 }
 
-type CreateProjectResult struct {
+type ProjectResult struct {
 	Err    int
 	Result Project
 }
