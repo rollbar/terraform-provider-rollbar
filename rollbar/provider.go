@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jmcvetta/terraform-provider-rollbar/rollbar/client"
+	"github.com/jmcvetta/terraform-provider-rollbar/rollbar/project"
 )
 
 const (
@@ -42,7 +43,7 @@ func Provider() *schema.Provider {
 			//"rollbar_project": resourceProject(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"rollbar_projects": dataSourceProjects(),
+			"rollbar_projects": project.DataSource(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
