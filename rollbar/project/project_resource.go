@@ -15,7 +15,7 @@ func resourceProject() *schema.Resource {
 		ReadContext:   resourceProjectRead,
 		UpdateContext: resourceProjectUpdate,
 		DeleteContext: resourceProjectDelete,
-		Schema:        resourceSchemaProject(),
+		Schema:        resourceSchema(),
 	}
 }
 

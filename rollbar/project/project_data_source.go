@@ -22,7 +22,7 @@ import (
 func DataSource() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceProjectsRead,
-		Schema:      dataSourceSchemaProject(),
+		Schema:      dataSourceSchema(),
 	}
 }
 
