@@ -38,9 +38,17 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
+	id := d.Id()
+	l := log.With().Str("id", id).Logger()
+	l.Debug().Msg("Reading project resource")
 
+	c := m.(*client.RollbarApiClient)
+	proj, err := c.ReadProject(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	l.Debug().Interface("project", proj).Send()
 	return diags
 }
 
