@@ -57,6 +57,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
+		SetResult(ProjectResult{}).
 		Post(u.String())
 	if err != nil {
 		l.Err(err).Msg("Error creating project")
@@ -92,6 +93,7 @@ func (c *RollbarApiClient) ReadProject(id string) (*Project, error) {
 		SetPathParams(map[string]string{
 			"id": id,
 		}).
+		SetResult(ProjectResult{}).
 		Get(u.String())
 	if err != nil {
 		l.Err(err).Msg("Error reading project")
