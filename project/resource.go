@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jmcvetta/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/jeevatkm/go-model.v1"
 	"strconv"
 )
 
@@ -53,7 +54,16 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	l.Debug().Interface("project", proj).Send()
+	mProj, err := model.Map(proj)
+	if err != nil {
+		log.Err(err).Send()
+		return diag.FromErr(err)
+	}
+	for k, v := range mProj {
+		d.Set(k, v)
+	}
+	d.SetId(strconv.Itoa(proj.Id))
+
 	return diags
 }
 
