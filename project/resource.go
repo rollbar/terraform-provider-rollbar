@@ -16,7 +16,7 @@ func Resource() *schema.Resource {
 		ReadContext:   resourceProjectRead,
 		//UpdateContext: resourceProjectUpdate,
 		DeleteContext: resourceProjectDelete,
-		Schema:        resourceSchema(),
+		Schema:        resourceSchema,
 	}
 }
 
@@ -60,7 +60,11 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 	for k, v := range mProj {
-		d.Set(k, v)
+		err = d.Set(k, v)
+		if err != nil {
+			log.Err(err).Send()
+			return diag.FromErr(err)
+		}
 	}
 	d.SetId(strconv.Itoa(proj.Id))
 
