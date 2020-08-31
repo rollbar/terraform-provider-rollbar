@@ -40,7 +40,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			//"rollbar_project": resourceProject(),
+			"rollbar_project": project.Resource(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_projects": project.DataSource(),
