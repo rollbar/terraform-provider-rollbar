@@ -6,7 +6,26 @@ BINARY=terraform-provider-${NAME}
 VERSION=0.1
 OS_ARCH=linux_amd64
 
-default: install
+#default: install
+default: dev
+
+dev:
+	set -e 
+	set -x
+	# Clear the screen but not the scrollback buffer
+	clear -x
+	# Cleanup last run
+	rm -vrf .terraform /tmp/rollbar-terraform.log
+	# Build & install the latest provider
+	make install
+	# Initialize terraform
+	(cd example && terraform init)
+	set +e
+	# Test the provider
+	(cd example && terraform apply) || true
+	# Print the debug log
+	cat /tmp/rollbar-terraform.log 
+
 
 build:
 	go build -o ${BINARY}
