@@ -33,7 +33,18 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		return nil, err
 	}
 
-	return lpr.Result, nil
+	// FIXME: After deleting a project through the API, it still shows up in
+	//  the list of projects returned by the API - only with its name set to
+	//  nil. This seemingly undesirable behavior should be fixed on the API
+	//  side. We work around it by removing any result with an empty name.
+	cleaned := make([]Project, 0)
+	for _, proj := range lpr.Result {
+		if proj.Name != "" {
+			cleaned = append(cleaned, proj)
+		}
+	}
+
+	return cleaned, nil
 }
 
 // CreateProject creates a new project
