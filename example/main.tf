@@ -22,3 +22,10 @@ output "all_projects" {
 }
 
 
+resource "rollbar_project" "foo" {
+  name = "Foo"
+}
+
+resource "rollbar_project" "bar" {
+  name = "Bar"
+}
