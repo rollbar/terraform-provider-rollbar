@@ -9,11 +9,11 @@ import (
 	"strconv"
 )
 
-func resourceProject() *schema.Resource {
+func Resource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
-		UpdateContext: resourceProjectUpdate,
+		//UpdateContext: resourceProjectUpdate,
 		DeleteContext: resourceProjectDelete,
 		Schema:        resourceSchema(),
 	}
@@ -34,6 +34,11 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	d.SetId(strconv.Itoa(p.Id))
 
+	moreDiags := resourceProjectRead(ctx, d, m)
+
+	for _, v := range moreDiags {
+		diags = append(diags, v)
+	}
 	return diags
 }
 
