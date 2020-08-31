@@ -15,7 +15,7 @@ dev:
 	# Clear the screen but not the scrollback buffer
 	clear -x
 	# Cleanup last run
-	rm -vrf .terraform /tmp/rollbar-terraform.log
+	rm -vrf example/.terraform /tmp/rollbar-terraform.log
 	# Build & install the latest provider
 	make install
 	# Initialize terraform
