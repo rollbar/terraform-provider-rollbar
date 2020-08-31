@@ -66,10 +66,27 @@ func constructSchema(fields map[string]*schema.Schema) map[string]*schema.Schema
 
 // dataSourceSchema returns the schema for a Terraform data source
 func dataSourceSchema() map[string]*schema.Schema {
-	return constructSchema(dataSourceFields)
+	f := commonFields
+	for k, v := range dataSourceFields {
+		f[k] = v
+	}
+	s := map[string]*schema.Schema{
+		"projects": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: f,
+			},
+		},
+	}
+	return s
 }
 
 // resourceSchema returns the schema for a Terraform resource
 func resourceSchema() map[string]*schema.Schema {
-	return constructSchema(resourceFields)
+	s := commonFields
+	for k, v := range resourceFields {
+		s[k] = v
+	}
+	return s
 }
