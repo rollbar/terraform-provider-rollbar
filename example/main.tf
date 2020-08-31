@@ -18,7 +18,7 @@ provider "rollbar" {
 # Returns all projects
 data "rollbar_projects" "all" {}
 output "all_projects" {
-  value = data.rollbar_projects.all
+  value = data.rollbar_projects.all.projects
 }
 
 

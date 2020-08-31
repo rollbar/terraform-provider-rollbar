@@ -48,9 +48,18 @@ var resourceFields = map[string]*schema.Schema{
 // constructSchema constructs a schema, combining common fields with fields
 // specified in the argument.
 func constructSchema(fields map[string]*schema.Schema) map[string]*schema.Schema {
-	s := commonFields
+	f := commonFields
 	for k, v := range fields {
-		s[k] = v
+		f[k] = v
+	}
+	s := map[string]*schema.Schema{
+		"projects": {
+			Type:     schema.TypeList,
+			Computed: true,
+			Elem: &schema.Resource{
+				Schema: f,
+			},
+		},
 	}
 	return s
 }
