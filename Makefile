@@ -9,18 +9,11 @@ OS_ARCH=linux_amd64
 #default: install
 default: dev
 
-dev:
-	set -e 
-	set -x
-	# Clear the screen but not the scrollback buffer
-	clear -x
+dev: install
 	# Cleanup last run
 	rm -vrf example/.terraform /tmp/rollbar-terraform.log
-	# Build & install the latest provider
-	make install
 	# Initialize terraform
 	(cd example && terraform init)
-	set +e
 	# Test the provider
 	(cd example && terraform apply) || true
 	# Print the debug log
