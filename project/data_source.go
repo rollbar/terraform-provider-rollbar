@@ -12,7 +12,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/jmcvetta/terraform-provider-rollbar/rollbar/client"
+	"github.com/jmcvetta/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/jeevatkm/go-model.v1"
 	"strconv"
