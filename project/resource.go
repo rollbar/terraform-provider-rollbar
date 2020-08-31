@@ -34,6 +34,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 
 	d.SetId(strconv.Itoa(p.Id))
+	d.Set("id", p.Id)
 
 	moreDiags := resourceProjectRead(ctx, d, m)
 

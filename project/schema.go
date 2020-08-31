@@ -38,13 +38,14 @@ var dataSourceSchema = map[string]*schema.Schema{
 }
 
 var resourceSchema = map[string]*schema.Schema{
-	"id": {
-		Type:     schema.TypeInt,
-		Computed: true,
-	},
+	//"id": {
+	//	Type:     schema.TypeInt,
+	//	Required: true,
+	//},
 	"name": {
 		Type:     schema.TypeString,
-		Computed: true,
+		Required: true,
+		ForceNew: true,
 	},
 	"account_id": {
 		Type:     schema.TypeInt,

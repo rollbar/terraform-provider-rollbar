@@ -13,7 +13,7 @@ type Project struct {
 	AccountId    int    `json:"account_id" model:"account_id"`
 	DateCreated  int    `json:"date_created" model:"date_created"`
 	DateModified int    `json:"date_modified" model:"date_modified"`
-	Id           int    `json:"id" model:"id"`
+	Id           int    `json:"id" model:"-"`
 	Name         string `json:"name" model:"name"`
 	//SettingsData struct {
 	//	Grouping struct {
