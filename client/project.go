@@ -10,6 +10,7 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
+	"net/http"
 	"path"
 )
 
@@ -58,10 +59,21 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
 		SetResult(ProjectResult{}).
+		SetError(ErrorResult{}).
 		Post(u.String())
+	log.Debug().Bytes("body", resp.Body()).Msg("Response Body")
 	if err != nil {
 		l.Err(err).Msg("Error creating project")
 		return nil, err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error creating a project")
+		return nil, er
 	}
 
 	pr := resp.Result().(*ProjectResult)
@@ -94,13 +106,25 @@ func (c *RollbarApiClient) ReadProject(id string) (*Project, error) {
 			"id": id,
 		}).
 		SetResult(ProjectResult{}).
+		SetError(ErrorResult{}).
 		Get(u.String())
 	if err != nil {
 		l.Err(err).Msg("Error reading project")
 		return nil, err
 	}
+	log.Debug().Bytes("body", resp.Body()).Msg("Response Body")
+	if resp.StatusCode() != http.StatusOK {
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error creating a project")
+		return nil, er
+	}
 
 	pr := resp.Result().(*ProjectResult)
+	l.Debug().Interface("ProjectResult", pr).Send()
 	if pr.Err != 0 {
 		l.Error().Msg("Unexpected error reading project")
 	}

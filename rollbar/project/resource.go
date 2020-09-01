@@ -16,7 +16,29 @@ func Resource() *schema.Resource {
 		ReadContext:   resourceProjectRead,
 		//UpdateContext: resourceProjectUpdate,
 		DeleteContext: resourceProjectDelete,
-		Schema:        resourceSchema,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"account_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"date_created": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"date_modified": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
 	}
 }
 
@@ -36,9 +58,9 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	d.SetId(strconv.Itoa(p.Id))
 	d.Set("id", p.Id)
 
-	moreDiags := resourceProjectRead(ctx, d, m)
+	readDiags := resourceProjectRead(ctx, d, m)
 
-	for _, v := range moreDiags {
+	for _, v := range readDiags {
 		diags = append(diags, v)
 	}
 	return diags
@@ -47,7 +69,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	id := d.Id()
-	l := log.With().Str("id", id).Logger()
+	l := log.With().Str("id", id).Logger().With().Stack().Logger()
 	l.Debug().Msg("Reading project resource")
 
 	c := m.(*client.RollbarApiClient)
@@ -57,13 +79,14 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 	mProj, err := model.Map(proj)
 	if err != nil {
-		log.Err(err).Send()
+		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	for k, v := range mProj {
+		l.Debug().Interface(k, v).Msg("Set resource data")
 		err = d.Set(k, v)
 		if err != nil {
-			log.Err(err).Send()
+			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 	}

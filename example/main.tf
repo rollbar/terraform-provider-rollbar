@@ -15,11 +15,12 @@ provider "rollbar" {
   token = var.rollbar_token
 }
 
+
 # Returns all projects
-data "rollbar_projects" "all" {}
-output "all_projects" {
-  value = data.rollbar_projects.all.projects
-}
+//data "rollbar_projects" "all" {}
+//output "all_projects" {
+//  value = data.rollbar_projects.all.projects
+//}
 
 
 resource "rollbar_project" "foo" {

@@ -8,12 +8,14 @@
 
 package client
 
+import "fmt"
+
 // Project is a Rollbar project
 type Project struct {
 	AccountId    int    `json:"account_id" model:"account_id"`
 	DateCreated  int    `json:"date_created" model:"date_created"`
 	DateModified int    `json:"date_modified" model:"date_modified"`
-	Id           int    `json:"id" model:"-"`
+	Id           int    `json:"id" model:"id"`
 	Name         string `json:"name" model:"name"`
 	//SettingsData struct {
 	//	Grouping struct {
@@ -54,11 +56,21 @@ type Project struct {
 }
 
 type ProjectListResult struct {
-	Err    int
-	Result []Project
+	Err     int
+	Message string
+	Result  []Project
 }
 
 type ProjectResult struct {
-	Err    int
-	Result Project
+	Err    int     `json:"err"`
+	Result Project `json:"result"`
+}
+
+type ErrorResult struct {
+	Err     int    `json:"err"`
+	Message string `jason:"message"`
+}
+
+func (er ErrorResult) Error() string {
+	return fmt.Sprintf("%v %v", er.Err, er.Message)
 }
