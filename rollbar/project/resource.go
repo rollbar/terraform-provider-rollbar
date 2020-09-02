@@ -68,8 +68,14 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	id := d.Id()
-	l := log.With().Str("id", id).Logger().With().Stack().Logger()
+
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		log.Err(err).Msg("Error converting Id to integer")
+		return diag.FromErr(err)
+	}
+
+	l := log.With().Int("id", id).Logger().With().Stack().Logger()
 	l.Debug().Msg("Reading project resource")
 
 	c := m.(*client.RollbarApiClient)

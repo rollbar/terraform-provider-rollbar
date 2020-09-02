@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"path"
+	"strconv"
 )
 
 // ListProjects queries API for the list of projects
@@ -87,17 +88,8 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 }
 
 // ReadProject fetches data for the specified Project from the Rollbar API.
-func (c *RollbarApiClient) ReadProject(id string) (*Project, error) {
-	// NOTE: Since the project ID is ultimately an integer, it seems
-	// appropriate that the argument to this function should be an int.
-	// However the ID will be represented as a string in the
-	// schema.ResourceData, and will be consumed as a string by this function
-	// when constructing the URL for the API call.
-	//
-	// Should this client ever be extracted as a library, it would be
-	// appropriate to make argument `id` an integer.  Until then, keeping it
-	// as a string eliminates two needless type conversions.
-	l := log.With().Str("id", id).Logger()
+func (c *RollbarApiClient) ReadProject(id int) (*Project, error) {
+	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Reading project from API")
 
 	u := *c.url
@@ -112,7 +104,7 @@ func (c *RollbarApiClient) ReadProject(id string) (*Project, error) {
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
-			"project_id": id,
+			"project_id": strconv.Itoa(id),
 		}).
 		Get(u.String())
 	if err != nil {
