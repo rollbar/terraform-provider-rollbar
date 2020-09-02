@@ -97,7 +97,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		if k == "id" {
 			continue
 		}
-		l.Debug().Interface(k, v).Msg("Set resource data")
+		//l.Debug().Interface(k, v).Msg("Set resource data")
 		err = d.Set(k, v)
 		if err != nil {
 			l.Err(err).Send()

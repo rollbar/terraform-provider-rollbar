@@ -64,7 +64,6 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
 		Post(u)
-	l.Debug().Bytes("body", resp.Body()).Msg("Response Body")
 	if err != nil {
 		l.Err(err).Msg("Error creating project")
 		return nil, err
@@ -112,7 +111,6 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		l.Err(err).Msg("Error reading project")
 		return nil, err
 	}
-	l.Debug().Bytes("body", resp.Body()).Msg("Response Body")
 	if resp.StatusCode() != http.StatusOK {
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -124,7 +122,6 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	}
 
 	pr := resp.Result().(*ProjectResult)
-	l.Debug().Interface("ProjectResult", pr).Send()
 	if pr.Err != 0 {
 		l.Error().Msg("Unexpected error reading project")
 	}
