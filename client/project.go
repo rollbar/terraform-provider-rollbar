@@ -16,7 +16,7 @@ import (
 
 // ListProjects queries API for the list of projects
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
-	u := c.url + PathProjectList
+	u := c.url + pathProjectList
 	l := log.With().
 		Str("url", u).
 		Logger()
@@ -52,7 +52,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 
 // CreateProject creates a new project
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
-	u := c.url + PathProjectCreate
+	u := c.url + pathProjectCreate
 	l := log.With().
 		Str("name", name).
 		Str("url", u).
@@ -89,7 +89,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 // ReadProject fetches data for the specified Project from the Rollbar API.
 func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
-	u := c.url + PathProjectRead
+	u := c.url + pathProjectRead
 
 	l := log.With().
 		Int("projectId", projectId).
