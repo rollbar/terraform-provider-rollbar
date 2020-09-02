@@ -14,8 +14,11 @@ func Resource() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,
-		//UpdateContext: resourceProjectUpdate,
 		DeleteContext: resourceProjectDelete,
+
+		// Projects cannot be updated via API
+		//UpdateContext: resourceProjectUpdate,
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -109,7 +112,6 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
 	return diags
