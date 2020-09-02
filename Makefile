@@ -9,13 +9,28 @@ OS_ARCH=linux_amd64
 #default: install
 default: dev
 
-dev: install
+dev: install _dev_cleanup _dev_init _dev_apply _dev_log
+
+dev_auto_apply: install _dev_cleanup _dev_init _dev_apply_auto _dev_log
+
+dev_no_debug: install _dev_cleanup _dev_init _dev_apply_nodebug
+
+_dev_cleanup:
 	# Cleanup last run
 	rm -vrf example/.terraform /tmp/rollbar-terraform.log
+_dev_init:
 	# Initialize terraform
 	(cd example && terraform init)
+_dev_apply:
 	# Test the provider
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
+_dev_apply_nodebug:
+	# Test the provider
+	(cd example && terraform apply) || true
+_dev_apply_auto:
+	# Test the provider
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
+_dev_log:
 	# Print the debug log
 	cat /tmp/rollbar-terraform.log 
 
