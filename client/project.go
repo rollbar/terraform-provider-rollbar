@@ -96,10 +96,6 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		Logger()
 	l.Debug().Msg("Reading project from API")
 
-	//c.resty.SetDebug(true)
-	//rzl := RestyZeroLogger{l}
-	//c.resty.SetLogger(rzl)
-
 	resp, err := c.resty.R().
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).

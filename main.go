@@ -17,10 +17,6 @@ import (
 	"os"
 )
 
-type Specification struct {
-	Debug bool
-}
-
 func main() {
 	// Configure logging
 	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
