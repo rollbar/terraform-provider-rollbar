@@ -1,3 +1,7 @@
+/*
+ * Package project implements Terraform data source and resources for
+ * projects in the Rollbar API.
+ */
 package project
 
 import "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

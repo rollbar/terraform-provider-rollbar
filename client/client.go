@@ -6,6 +6,9 @@
  * between author and licensee.
  */
 
+/*
+ * Package client is a client library for accessing the Rollbar API.
+ */
 package client
 
 import (

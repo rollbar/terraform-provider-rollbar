@@ -6,6 +6,9 @@
  * between author and licensee.
  */
 
+/*
+ * Package rollbar implements a Terraform provider for the Rollbar API.
+ */
 package rollbar
 
 import (
