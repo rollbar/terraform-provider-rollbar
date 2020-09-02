@@ -126,6 +126,7 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		l.Error().Msg("Unexpected error reading project")
 	}
 
+	l.Debug().Msg("Project successfully read")
 	return &pr.Result, nil
 }
 
@@ -135,17 +136,19 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 		Int("projectId", projectId).
 		Str("url", u).
 		Logger()
+	l.Debug().Msg("Deleting project")
 
 	resp, err := c.resty.R().
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"projectId": strconv.Itoa(projectId),
 		}).
-		Get(u)
+		Delete(u)
 	if err != nil {
 		l.Err(err).Msg("Error deleting project")
 		return err
 	}
+	l.Debug().Bytes("body", resp.Body()).Msg("Response body")
 	if resp.StatusCode() != http.StatusOK {
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -156,6 +159,6 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 		return er
 	}
 
-	// Sucessfully deleted
+	l.Debug().Msg("Project successfully deleted")
 	return nil
 }
