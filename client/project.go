@@ -131,3 +131,34 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 
 	return &pr.Result, nil
 }
+
+func (c *RollbarApiClient) DeleteProject(projectId int) error {
+	u := c.url + pathProjectDelete
+	l := log.With().
+		Int("projectId", projectId).
+		Str("url", u).
+		Logger()
+
+	resp, err := c.resty.R().
+		SetError(ErrorResult{}).
+		SetPathParams(map[string]string{
+			"projectId": strconv.Itoa(projectId),
+		}).
+		Get(u)
+	if err != nil {
+		l.Err(err).Msg("Error deleting project")
+		return err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error creating a project")
+		return er
+	}
+
+	// Sucessfully deleted
+	return nil
+}
