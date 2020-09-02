@@ -15,7 +15,7 @@ dev: install
 	# Initialize terraform
 	(cd example && terraform init)
 	# Test the provider
-	(cd example && terraform apply) || true
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
 	# Print the debug log
 	cat /tmp/rollbar-terraform.log 
 

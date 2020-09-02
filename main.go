@@ -17,20 +17,36 @@ import (
 	"os"
 )
 
+type Specification struct {
+	Debug bool
+}
+
 func main() {
 	// Configure logging
-	f, err := os.OpenFile("/tmp/rollbar-terraform.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Panic().
-			Err(err).
-			Msg("Error opening log file")
-	}
-	defer f.Close()
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: f}).
-		With().Caller().Logger()
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
+		f, err := os.OpenFile("/tmp/rollbar-terraform.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatal().
+				Err(err).
+				Msg("Error opening log file")
+		}
+		defer func() {
+			err := f.Close()
+			if err != nil {
+				log.Fatal().
+					Err(err).
+					Msg("Error closing log file")
+			}
+		}()
+		log.Logger = log.
+			Output(zerolog.ConsoleWriter{Out: f}).
+			With().Caller().
+			Logger()
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
-	// Start plugin
+	}
+
+	// Serve the plugin
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() *schema.Provider {
 			return rollbar.Provider()
