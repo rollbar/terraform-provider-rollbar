@@ -17,7 +17,7 @@ dev_no_debug: install _dev_cleanup _dev_init _dev_apply_nodebug
 
 _dev_cleanup:
 	# Cleanup last run
-	rm -vrf example/.terraform /tmp/rollbar-terraform.log
+	rm -vrf example/.terraform /tmp/terraform-provider-rollbar.log
 _dev_init:
 	# Initialize terraform
 	(cd example && terraform init)
@@ -32,7 +32,7 @@ _dev_apply_auto:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
 _dev_log:
 	# Print the debug log
-	cat /tmp/rollbar-terraform.log 
+	cat /tmp/terraform-provider-rollbar.log
 
 
 build:

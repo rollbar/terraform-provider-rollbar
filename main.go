@@ -24,7 +24,8 @@ type Specification struct {
 func main() {
 	// Configure logging
 	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
-		f, err := os.OpenFile("/tmp/rollbar-terraform.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		p := "/tmp/terraform-provider-rollbar.log"
+		f, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatal().
 				Err(err).
