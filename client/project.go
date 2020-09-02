@@ -9,9 +9,9 @@
 package client
 
 import (
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"strconv"
 )
 
 // ListProjects queries API for the list of projects
@@ -21,13 +21,11 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		Str("path", path).
 		Logger()
 
-	url := c.url
-	url.Path = path
-
+	u := c.url + path
 	resp, err := c.resty.R().
 		SetResult(ProjectListResult{}).
 		SetError(ErrorResult{}).
-		Get(url.String())
+		Get(u)
 	if err != nil {
 		l.Err(err).Send()
 		return nil, err
@@ -56,20 +54,18 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 // CreateProject creates a new project
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	p := "/api/1/projects"
+	u := c.url + p
 	l := log.With().
 		Str("name", name).
 		Str("path", p).
 		Logger()
 	l.Debug().Msg("Creating new project")
 
-	u := *c.url
-	u.Path = p
-
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
-		Post(u.String())
+		Post(u)
 	l.Debug().Bytes("body", resp.Body()).Msg("Response Body")
 	if err != nil {
 		l.Err(err).Msg("Error creating project")
@@ -94,17 +90,16 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 }
 
 // ReadProject fetches data for the specified Project from the Rollbar API.
-func (c *RollbarApiClient) ReadProject(id int) (*Project, error) {
-	p := fmt.Sprintf("/api/1/project/%v", id)
+func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
+	p := "/api/1/project/{projectId}"
+	u := c.url + p
 
 	l := log.With().
-		Int("id", id).
+		Int("projectId", projectId).
 		Str("path", p).
+		Str("url", u).
 		Logger()
 	l.Debug().Msg("Reading project from API")
-
-	u := *c.url
-	u.Path = p
 
 	//c.resty.SetDebug(true)
 	//rzl := RestyZeroLogger{l}
@@ -113,7 +108,10 @@ func (c *RollbarApiClient) ReadProject(id int) (*Project, error) {
 	resp, err := c.resty.R().
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
-		Get(u.String())
+		SetPathParams(map[string]string{
+			"projectId": strconv.Itoa(projectId),
+		}).
+		Get(u)
 	if err != nil {
 		l.Err(err).Msg("Error reading project")
 		return nil, err
