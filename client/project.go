@@ -9,6 +9,7 @@
 package client
 
 import (
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"path"
@@ -89,16 +90,20 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 // ReadProject fetches data for the specified Project from the Rollbar API.
 func (c *RollbarApiClient) ReadProject(id int) (*Project, error) {
-	l := log.With().Int("id", id).Logger()
+	path := fmt.Sprintf("/api/1/project/%v", id)
+
+	l := log.With().
+		Int("id", id).
+		Str("path", path).
+		Logger()
 	l.Debug().Msg("Reading project from API")
 
 	u := *c.url
-	u.Path = path.Join(u.Path, PathProjectRead)
-	l = l.With().Str("path", u.Path).Logger()
+	u.Path = path
 
-	c.resty.SetDebug(true)
-	rzl := RestyZeroLogger{l}
-	c.resty.SetLogger(rzl)
+	//c.resty.SetDebug(true)
+	//rzl := RestyZeroLogger{l}
+	//c.resty.SetLogger(rzl)
 
 	resp, err := c.resty.R().
 		SetResult(ProjectResult{}).
