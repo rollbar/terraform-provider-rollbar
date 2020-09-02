@@ -12,29 +12,32 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
-	"path"
-	"strconv"
 )
 
 // ListProjects queries API for the list of projects
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
+	path := "/api/1/projects"
+	l := log.With().
+		Str("path", path).
+		Logger()
+
 	url := c.url
-	url.Path = path.Join(url.Path, PathProjectList)
+	url.Path = path
 
 	resp, err := c.resty.R().
 		SetResult(ProjectListResult{}).
+		SetError(ErrorResult{}).
 		Get(url.String())
 	if err != nil {
+		l.Err(err).Send()
 		return nil, err
 	}
-
+	if resp.StatusCode() != http.StatusOK {
+		errResp := resp.Error().(*ErrorResult)
+		l.Err(errResp).Send()
+		return nil, errResp
+	}
 	lpr := resp.Result().(*ProjectListResult)
-	if lpr.Err != 0 {
-		log.Error().
-			Int("err", lpr.Err).
-			Msg("Unexpected error listing projects")
-		return nil, err
-	}
 
 	// FIXME: After deleting a project through the API, it still shows up in
 	//  the list of projects returned by the API - only with its name set to
@@ -52,13 +55,15 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 
 // CreateProject creates a new project
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
-	l := log.With().Str("name", name).Logger()
+	p := "/api/1/projects"
+	l := log.With().
+		Str("name", name).
+		Str("path", p).
+		Logger()
 	l.Debug().Msg("Creating new project")
-	//var u url.URL
 
 	u := *c.url
-	u.Path = path.Join(u.Path, PathProjectCreate)
-	l = l.With().Str("path", u.Path).Logger()
+	u.Path = p
 
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
@@ -90,16 +95,16 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 // ReadProject fetches data for the specified Project from the Rollbar API.
 func (c *RollbarApiClient) ReadProject(id int) (*Project, error) {
-	path := fmt.Sprintf("/api/1/project/%v", id)
+	p := fmt.Sprintf("/api/1/project/%v", id)
 
 	l := log.With().
 		Int("id", id).
-		Str("path", path).
+		Str("path", p).
 		Logger()
 	l.Debug().Msg("Reading project from API")
 
 	u := *c.url
-	u.Path = path
+	u.Path = p
 
 	//c.resty.SetDebug(true)
 	//rzl := RestyZeroLogger{l}
@@ -108,9 +113,6 @@ func (c *RollbarApiClient) ReadProject(id int) (*Project, error) {
 	resp, err := c.resty.R().
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
-		SetPathParams(map[string]string{
-			"project_id": strconv.Itoa(id),
-		}).
 		Get(u.String())
 	if err != nil {
 		l.Err(err).Msg("Error reading project")
