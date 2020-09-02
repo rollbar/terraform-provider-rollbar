@@ -52,16 +52,18 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	l := log.With().Str("name", name).Logger()
 	l.Debug().Msg("Creating new project")
+	//var u url.URL
 
-	u := c.url
+	u := *c.url
 	u.Path = path.Join(u.Path, PathProjectCreate)
+	l = l.With().Str("path", u.Path).Logger()
 
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
 		Post(u.String())
-	log.Debug().Bytes("body", resp.Body()).Msg("Response Body")
+	l.Debug().Bytes("body", resp.Body()).Msg("Response Body")
 	if err != nil {
 		l.Err(err).Msg("Error creating project")
 		return nil, err
@@ -98,21 +100,26 @@ func (c *RollbarApiClient) ReadProject(id string) (*Project, error) {
 	l := log.With().Str("id", id).Logger()
 	l.Debug().Msg("Reading project from API")
 
-	u := c.url
+	u := *c.url
 	u.Path = path.Join(u.Path, PathProjectRead)
+	l = l.With().Str("path", u.Path).Logger()
+
+	c.resty.SetDebug(true)
+	rzl := RestyZeroLogger{l}
+	c.resty.SetLogger(rzl)
 
 	resp, err := c.resty.R().
-		SetPathParams(map[string]string{
-			"id": id,
-		}).
 		SetResult(ProjectResult{}).
 		SetError(ErrorResult{}).
+		SetPathParams(map[string]string{
+			"project_id": id,
+		}).
 		Get(u.String())
 	if err != nil {
 		l.Err(err).Msg("Error reading project")
 		return nil, err
 	}
-	log.Debug().Bytes("body", resp.Body()).Msg("Response Body")
+	l.Debug().Bytes("body", resp.Body()).Msg("Response Body")
 	if resp.StatusCode() != http.StatusOK {
 		er := resp.Error().(*ErrorResult)
 		l.Error().
