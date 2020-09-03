@@ -8,7 +8,7 @@ software without written contract between author and licensee.**
 
 ## Status
 
-![Build](https://github.com/jmcvetta/terraform-provider-rollbar/workflows/Build/badge.svg)
+[![Build](https://github.com/jmcvetta/terraform-provider-rollbar/workflows/Build/badge.svg)](https://github.com/jmcvetta/terraform-provider-rollbar/actions)
 
 
 ## Debugging
