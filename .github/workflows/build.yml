@@ -37,6 +37,8 @@ jobs:
             ${{ runner.os }}-go-
       - name: Build the application
         run: go build -o app
+      - name: Install
+        run: make install
       - name: Terraform plan
         run: cd example && terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
         env:
