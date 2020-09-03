@@ -22,7 +22,40 @@ import (
 func dataSourceProjects() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceProjectsRead,
-		Schema:      dataSourceSchema,
+		Schema: map[string]*schema.Schema{
+			"projects": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"account_id": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"date_created": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"date_modified": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"status": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
