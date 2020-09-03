@@ -6,7 +6,7 @@
  * between author and licensee.
  */
 
-package project
+package rollbar
 
 import (
 	"context"
