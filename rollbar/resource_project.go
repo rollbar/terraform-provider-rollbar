@@ -10,7 +10,7 @@ import (
 	"strconv"
 )
 
-func Resource() *schema.Resource {
+func resourceProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
 		ReadContext:   resourceProjectRead,

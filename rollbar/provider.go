@@ -42,10 +42,10 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"rollbar_project": Resource(),
+			"rollbar_project": resourceProject(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"rollbar_projects": DataSource(),
+			"rollbar_projects": dataSourceProjects(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

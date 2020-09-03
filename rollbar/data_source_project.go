@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func DataSource() *schema.Resource {
+func dataSourceProjects() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceProjectsRead,
 		Schema:      dataSourceSchema,
