@@ -27,14 +27,7 @@ func main() {
 				Err(err).
 				Msg("Error opening log file")
 		}
-		defer func() {
-			err := f.Close()
-			if err != nil {
-				log.Fatal().
-					Err(err).
-					Msg("Error closing log file")
-			}
-		}()
+		defer f.Close()
 		log.Logger = log.
 			Output(zerolog.ConsoleWriter{Out: f}).
 			With().Caller().
