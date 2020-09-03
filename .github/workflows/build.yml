@@ -4,6 +4,8 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+  env:
+    ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
 #    services:
 #      postgres:
@@ -23,6 +25,7 @@ jobs:
 
     steps:
       - uses: actions/setup-go@v2
+      - uses: actions/setup-terraform
       - uses: actions/checkout@v2
       - uses: actions/cache@v1
         with:
@@ -36,3 +39,5 @@ jobs:
             ${{ runner.os }}-go-
       - name: Build the application
         run: go build -o app
+      - name: Terraform plan
+        run: cd example && terraform plan
