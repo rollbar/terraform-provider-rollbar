@@ -35,7 +35,11 @@ jobs:
         run: go build -o app
       - name: Install
         run: make install
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./example
       - name: Terraform plan
-        run: cd example && terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        working-directory: ./example
         env:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
