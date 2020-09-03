@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - uses: actions/setup-go@v2
-      - uses: actions/setup-terraform
+      - uses: hashicorp/setup-terraform@v1
       - uses: actions/checkout@v2
       - uses: actions/cache@v1
         with:
