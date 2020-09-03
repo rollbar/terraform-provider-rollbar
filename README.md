@@ -20,3 +20,7 @@ environment variable:
 export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1
 terraform apply   # or any command that calls the Rollbar provider
 ```
+
+Running `make dev` will build and install the provider, then run `terraform
+apply` in the `examples` folder with debug logging enabled, and display the
+logs on completion.
