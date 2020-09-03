@@ -2,8 +2,8 @@
 
 ## License
 
-This is proprietary software.  **No license whatsoever is granted to this
-software without written contract.**
+This is proprietary software.  **NO LICENSE WHATSOEVER is granted to this
+software without written contract between author and licensee.**
 
 
 ## Status
