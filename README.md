@@ -23,6 +23,7 @@ terraform apply   # or any command that calls the Rollbar provider
 
 ### Dev Script
 
-Running `make dev` will build and install the provider, then run `terraform
-apply` in the `examples` folder with debug logging enabled, and display the
-logs on completion.
+Running `make dev` will:
+* Build and install the provider 
+* Run `terraform apply` in the `examples` folder with debug logging enabled
+* Display the logs on completion.
