@@ -57,8 +57,10 @@ install: build
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test: 
-	go test -i $(TEST) || exit 1                                                   
-	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
+	@echo Tests not yet implemented.
+	@#go test -i $(TEST) || exit 1                                                   
+	@#echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
 
 testacc: 
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m   
+	@echo Acceptance tests not yet implemented.
+	@#TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m   
