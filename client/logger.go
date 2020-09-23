@@ -19,15 +19,15 @@ type RestyZeroLogger struct {
 }
 
 func (r RestyZeroLogger) Errorf(format string, v ...interface{}) {
-	msg := fmt.Sprintf(format, v)
+	msg := fmt.Sprintf(format, v...)
 	r.zl.Error().Msg(msg)
 }
 func (r RestyZeroLogger) Warnf(format string, v ...interface{}) {
-	msg := fmt.Sprintf(format, v)
+	msg := fmt.Sprintf(format, v...)
 	r.zl.Warn().Msg(msg)
 }
 
 func (r RestyZeroLogger) Debugf(format string, v ...interface{}) {
-	msg := fmt.Sprintf(format, v)
+	msg := fmt.Sprintf(format, v...)
 	r.zl.Debug().Msg(msg)
 }
