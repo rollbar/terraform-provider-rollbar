@@ -10,20 +10,41 @@ package rollbar
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"os"
+	"github.com/rs/zerolog/log"
 	"testing"
 )
 
-func testAccProviderFactories() map[string]func() (*schema.Provider, error) {
-	return map[string]func() (*schema.Provider, error){
-		"rollbar": func() (*schema.Provider, error) {
-			return Provider(), nil
-		},
-	}
-}
+var testAccProviders map[string]*schema.Provider
+var testAccProviderFactories func(providers *[]*schema.Provider) map[string]func() (*schema.Provider, error)
+var testAccProvider *schema.Provider
+var testAccProviderFunc func() *schema.Provider
 
-func testAccPreCheck(t *testing.T) {
-	if token := os.Getenv("HASHICUPS_USERNAME"); token == "" {
-		t.Fatal("HASHICUPS_USERNAME must be set for acceptance tests")
+func init() {
+	testAccProvider = Provider()
+	testAccProviders = map[string]*schema.Provider{
+		"rollbar": testAccProvider,
 	}
+	testAccProviderFactories = func(providers *[]*schema.Provider) map[string]func() (*schema.Provider, error) {
+		// this is an SDKV2 compatible hack, the "factory" functions are
+		// effectively singletons for the lifecycle of a resource.Test
+		var providerNames = []string{"aws", "awseast", "awswest", "awsalternate", "awsus-east-1", "awsalternateaccountalternateregion", "awsalternateaccountsameregion", "awssameaccountalternateregion", "awsthird"}
+		var factories = make(map[string]func() (*schema.Provider, error), len(providerNames))
+		for _, name := range providerNames {
+			p := Provider()
+			factories[name] = func() (*schema.Provider, error) { //nolint:unparam
+				return p, nil
+			}
+			*providers = append(*providers, p)
+		}
+		return factories
+	}
+	testAccProviderFunc = func() *schema.Provider { return testAccProvider }
+}
+func testAccPreCheck(t *testing.T) {
+	// FIXME: Add preflight check for API credentials
+	log.Warn().Msg("Need to add preflight check for credentials")
+
+	//if token := os.Getenv("HASHICUPS_USERNAME"); token == "" {
+	//	t.Fatal("HASHICUPS_USERNAME must be set for acceptance tests")
+	//}
 }

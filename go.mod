@@ -4,6 +4,8 @@ go 1.14
 
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
+	github.com/apparentlymart/go-cidr v1.1.0 // indirect
+	github.com/aws/aws-sdk-go v1.31.9 // indirect
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/hashicorp/go-hclog v0.14.1 // indirect
@@ -24,5 +26,7 @@ require (
 	golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a // indirect
 	google.golang.org/genproto v0.0.0-20200903010400-9bfcb5116336 // indirect
 	google.golang.org/grpc v1.31.1 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/jeevatkm/go-model.v1 v1.1.0
+	gopkg.in/yaml.v2 v2.2.8 // indirect
 )

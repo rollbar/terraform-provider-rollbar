@@ -14,9 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/jmcvetta/terraform-provider-rollbar/client"
+	"strconv"
 	"testing"
 )
 
+// TestAccRollbarProject tests creation and deletion of a Rollbar project.
 func TestAccRollbarProject(t *testing.T) {
 
 	rn := "rollbar_project.foo"
@@ -25,13 +27,16 @@ func TestAccRollbarProject(t *testing.T) {
 	//description := fmt.Sprintf("Terraform acceptance tests %s", randString)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: testAccProviderFactories(),
-		CheckDestroy:      nil,
+		PreCheck: func() { testAccPreCheck(t) },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    testAccProviders,
+		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRollbarProjectConfig(randString),
-				Check:  resource.ComposeTestCheckFunc(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccRollbarProjectExists(rn, name),
+				),
 			},
 		},
 	})
@@ -46,25 +51,35 @@ func testAccRollbarProjectConfig(randString string) string {
 
 func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
+		// Check terraform config is sane
 		rs, ok := s.RootModule().Resources[rn]
 		if !ok {
 			return fmt.Errorf("Not Found: %s", rn)
 		}
-
-		repoName := rs.Primary.ID
-		if repoName == "" {
-			return fmt.Errorf("No repository name is set")
+		idString := rs.Primary.ID
+		if idString == "" {
+			return fmt.Errorf("No project ID is set")
 		}
-
-		c := testAccProvider.(*client.RollbarApiClient)
-
-		org := testAccProvider.Meta().(*Owner)
-		conn := org.v3client
-		gotRepo, _, err := conn.Repositories.Get(context.TODO(), org.name, repoName)
+		id, err := strconv.Atoi(idString)
 		if err != nil {
 			return err
 		}
-		*repo = *gotRepo
+		name, ok := rs.Primary.Attributes["name"]
+		if !ok {
+			fmt.Errorf("terraform config does not contain project name")
+		}
+
+		// Check that project exists
+		c := testAccProvider.Meta().(*client.RollbarApiClient)
+		proj, err := c.ReadProject(id)
+		if err != nil {
+			return err
+		}
+		if proj.Name != name {
+			fmt.Errorf("project name from API does not match project name in Terraform config")
+		}
+
+		// Success
 		return nil
 	}
 }
