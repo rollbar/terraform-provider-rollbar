@@ -37,20 +37,25 @@ func init() {
 	testAccProviders = map[string]*schema.Provider{
 		"rollbar": testAccProvider,
 	}
-	//testAccProviderFactories = func(providers *[]*schema.Provider) map[string]func() (*schema.Provider, error) {
-	//	// this is an SDKV2 compatible hack, the "factory" functions are
-	//	// effectively singletons for the lifecycle of a resource.Test
-	//	var providerNames = []string{"aws", "awseast", "awswest", "awsalternate", "awsus-east-1", "awsalternateaccountalternateregion", "awsalternateaccountsameregion", "awssameaccountalternateregion", "awsthird"}
-	//	var factories = make(map[string]func() (*schema.Provider, error), len(providerNames))
-	//	for _, name := range providerNames {
-	//		p := Provider()
-	//		factories[name] = func() (*schema.Provider, error) { //nolint:unparam
-	//			return p, nil
-	//		}
-	//		*providers = append(*providers, p)
-	//	}
-	//	return factories
-	//}
+
+	// FIXME: Implement this for use with resource.TestCase.ProviderFactories, as the simpler
+	//  resource.TestCase.Providers is deprecated.
+	/*
+		testAccProviderFactories = func(providers *[]*schema.Provider) map[string]func() (*schema.Provider, error) {
+			// this is an SDKV2 compatible hack, the "factory" functions are
+			// effectively singletons for the lifecycle of a resource.Test
+			var providerNames = []string{"aws", "awseast", "awswest", "awsalternate", "awsus-east-1", "awsalternateaccountalternateregion", "awsalternateaccountsameregion", "awssameaccountalternateregion", "awsthird"}
+			var factories = make(map[string]func() (*schema.Provider, error), len(providerNames))
+			for _, name := range providerNames {
+				p := Provider()
+				factories[name] = func() (*schema.Provider, error) { //nolint:unparam
+					return p, nil
+				}
+				*providers = append(*providers, p)
+			}
+			return factories
+		}
+	*/
 	testAccProviderFunc = func() *schema.Provider { return testAccProvider }
 }
 func testAccPreCheck(t *testing.T) {
