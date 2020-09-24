@@ -21,7 +21,7 @@ func main() {
 	// Configure logging
 	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
 		p := "/tmp/terraform-provider-rollbar.log"
-		f, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		f, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			log.Fatal().
 				Err(err).
