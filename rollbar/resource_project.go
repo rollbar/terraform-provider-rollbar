@@ -70,10 +70,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	d.SetId(strconv.Itoa(p.Id))
 
 	readDiags := resourceProjectRead(ctx, d, m)
-
-	for _, v := range readDiags {
-		diags = append(diags, v)
-	}
+	diags = append(diags, readDiags...)
 	return diags
 }
 
