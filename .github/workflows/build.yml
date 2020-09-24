@@ -21,9 +21,14 @@ jobs:
 #        ports:
 #          - 5432:5432
 
+    env:
+      ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
+
     steps:
       - uses: actions/setup-go@v2
       - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
         with:
@@ -31,6 +36,8 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Download dependencies
+        run: go get
       - name: Build the application
         run: go build -o app
       - name: Install
@@ -43,3 +50,7 @@ jobs:
         working-directory: ./example
         env:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
+      - name: Unit tests
+        run: make test
+      - name: Acceptance tests
+        run: make testacc

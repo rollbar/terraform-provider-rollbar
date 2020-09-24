@@ -8,6 +8,7 @@
 
 package client
 
+// Path components of Rollbar API URLs
 const (
 	pathProjectCreate = "/api/1/projects"
 	pathProjectDelete = "/api/1/project/{projectId}"

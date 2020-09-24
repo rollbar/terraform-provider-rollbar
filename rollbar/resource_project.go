@@ -65,9 +65,9 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	log.Debug().Interface("project", p).Msg("CreateProject() result")
 
 	d.SetId(strconv.Itoa(p.Id))
-	d.Set("id", p.Id)
 
 	readDiags := resourceProjectRead(ctx, d, m)
 
