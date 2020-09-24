@@ -66,7 +66,7 @@ func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc 
 		}
 		name, ok := rs.Primary.Attributes["name"]
 		if !ok {
-			fmt.Errorf("terraform config does not contain project name")
+			return fmt.Errorf("terraform config does not contain project name")
 		}
 
 		// Check that project exists
@@ -76,7 +76,7 @@ func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc 
 			return err
 		}
 		if proj.Name != name {
-			fmt.Errorf("project name from API does not match project name in Terraform config")
+			return fmt.Errorf("project name from API does not match project name in Terraform config")
 		}
 
 		// Success
