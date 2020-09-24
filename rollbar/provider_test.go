@@ -62,5 +62,5 @@ func testAccPreCheck(t *testing.T) {
 	if token := os.Getenv("ROLLBAR_TOKEN"); token == "" {
 		t.Fatal("ROLLBAR_TOKEN must be set for acceptance tests")
 	}
-
+	log.Debug().Msg("Passed preflight check")
 }
