@@ -27,7 +27,7 @@ func main() {
 				Err(err).
 				Msg("Error opening log file")
 		}
-		defer f.Close()
+		defer f.Close() // #nosec
 		log.Logger = log.
 			Output(zerolog.ConsoleWriter{Out: f}).
 			With().Caller().
