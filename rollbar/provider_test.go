@@ -59,10 +59,8 @@ func init() {
 	testAccProviderFunc = func() *schema.Provider { return testAccProvider }
 }
 func testAccPreCheck(t *testing.T) {
-	// FIXME: Add preflight check for API credentials
-	log.Warn().Msg("Need to add preflight check for credentials")
+	if token := os.Getenv("ROLLBAR_TOKEN"); token == "" {
+		t.Fatal("ROLLBAR_TOKEN must be set for acceptance tests")
+	}
 
-	//if token := os.Getenv("HASHICUPS_USERNAME"); token == "" {
-	//	t.Fatal("HASHICUPS_USERNAME must be set for acceptance tests")
-	//}
 }
