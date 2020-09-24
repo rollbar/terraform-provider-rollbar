@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jmcvetta/terraform-provider-rollbar/client"
-	"os"
 )
 
 const (
@@ -46,19 +45,10 @@ func Provider() *schema.Provider {
 // providerConfigure sets up authentication in a Resty HTTP client.
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
-	// Get Rollbar API token from tfvars
 	token := d.Get(schemaKeyToken).(string)
-
-	// If token not set in tfvars, read it from environment variable
-	if token == "" {
-		token = os.Getenv("ROLLBAR_TOKEN")
-	}
-
 	c, err := client.NewClient(token)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
-
 	return c, diags
 }
