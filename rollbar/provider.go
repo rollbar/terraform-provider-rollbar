@@ -16,11 +16,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jmcvetta/terraform-provider-rollbar/client"
+	"os"
 )
 
 const (
 	schemaKeyToken = "token"
-	schemaKeyUrl   = "api_url"
 )
 
 // Provider is a Terraform provider for Rollbar
@@ -31,14 +31,6 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_TOKEN", nil),
-			},
-			schemaKeyUrl: {
-				Type:     schema.TypeString,
-				Optional: true,
-				DefaultFunc: schema.EnvDefaultFunc(
-					"ROLLBAR_API_URL",
-					"https://api.rollbar.com",
-				),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -55,10 +47,15 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
+	// Get Rollbar API token from tfvars
 	token := d.Get(schemaKeyToken).(string)
-	u := d.Get(schemaKeyUrl).(string)
 
-	c, err := client.NewClient(u, token)
+	// If token not set in tfvars, read it from environment variable
+	if token == "" {
+		token = os.Getenv("ROLLBAR_TOKEN")
+	}
+
+	c, err := client.NewClient(token)
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
