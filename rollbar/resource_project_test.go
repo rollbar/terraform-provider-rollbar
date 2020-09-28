@@ -24,7 +24,6 @@ func TestAccRollbarProject(t *testing.T) {
 	rn := "rollbar_project.foo"
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	name := fmt.Sprintf("tf-acc-test-%s", randString)
-	//description := fmt.Sprintf("Terraform acceptance tests %s", randString)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -35,6 +34,7 @@ func TestAccRollbarProject(t *testing.T) {
 			{
 				Config: testAccRollbarProjectConfig(randString),
 				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(rn, "name", name),
 					testAccRollbarProjectExists(rn, name),
 				),
 			},
@@ -63,10 +63,6 @@ func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc 
 		id, err := strconv.Atoi(idString)
 		if err != nil {
 			return err
-		}
-		name, ok := rs.Primary.Attributes["name"]
-		if !ok {
-			return fmt.Errorf("terraform config does not contain project name")
 		}
 
 		// Check that project exists
