@@ -1,5 +1,7 @@
-Terraform Provider
+Terraform Provider 
 ==================
+
+Originally [babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
 
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
