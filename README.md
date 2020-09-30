@@ -1,17 +1,34 @@
-# Terraform provider for Rollbar
+Terraform provider for Rollbar
+==============================
 
-## License
+Originally [babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
 
-This is proprietary software.  **NO LICENSE WHATSOEVER is granted to this
-software without written contract between author and licensee.**
+- Website: https://www.terraform.io
+- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
 
-## Status
+Requirements
+------------
+
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
+- [Go](https://golang.org/doc/install) 1.13.x+ (to build the provider plugin)
+
+
+License
+-------
+
+This is Free Software, released under the terms of the MIT license.
+
+
+Status
+------
 
 [![Build](https://github.com/jmcvetta/terraform-provider-rollbar/workflows/Build/badge.svg)](https://github.com/jmcvetta/terraform-provider-rollbar/actions)
 
 
-## Debugging
+Debugging
+---------
 
 Enable writing debug log to `/tmp/terraform-provider-rollbar.log` by setting an
 environment variable:
