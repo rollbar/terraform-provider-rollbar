@@ -1,16 +1,11 @@
 Terraform provider for Rollbar
 ==============================
 
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
-
-
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
-- [Go](https://golang.org/doc/install) 1.13.x+ (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
+- [Go](https://golang.org/doc/install) 1.13.x
 
 
 License
