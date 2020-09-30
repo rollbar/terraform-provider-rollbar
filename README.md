@@ -1,23 +1,17 @@
 Terraform provider for Rollbar
 ==============================
 
+Status
+------
+
+[![Build](https://github.com/jmcvetta/terraform-provider-rollbar/workflows/Build/badge.svg)](https://github.com/jmcvetta/terraform-provider-rollbar/actions)
+
+
 Requirements
 ------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.13.x
 - [Go](https://golang.org/doc/install) 1.13.x
-
-
-License
--------
-
-This is Free Software, released under the terms of the MIT license.
-
-
-Status
-------
-
-[![Build](https://github.com/jmcvetta/terraform-provider-rollbar/workflows/Build/badge.svg)](https://github.com/jmcvetta/terraform-provider-rollbar/actions)
 
 
 Debugging
@@ -37,6 +31,12 @@ Running `make dev` will:
 * Build and install the provider 
 * Run `terraform apply` in the `examples` folder with debug logging enabled
 * Display the logs on completion.
+
+
+License
+-------
+
+This is Free Software, released under the terms of the MIT license.
 
 
 History
