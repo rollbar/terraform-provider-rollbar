@@ -1,5 +1,6 @@
-version: 1
-update_configs:
-  - package_manager: go:modules
-    directory: /
-    update_schedule: weekly
+version: 2
+updates:
+  - package-ecosystem: "go:modules"
+    directory: "/"
+    schedule:
+      interval: "daily"
