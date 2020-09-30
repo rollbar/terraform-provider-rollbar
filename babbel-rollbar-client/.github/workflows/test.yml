@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.13
+      - name: get dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+
+      - name: install tools
+        run: make tools
+
+      - run: make lint
+      - run: make vet
+      - run: make test

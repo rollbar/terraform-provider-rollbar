@@ -1,0 +1,29 @@
+{
+  "err": 0,
+  "result": [
+    {
+      "project_id": 12116,
+      "access_token": "access-token-12116-1",
+      "name": "post_client_item",
+      "status": "enabled",
+      "date_created": 1407933922,
+      "date_modified": 1407933922
+    },
+    {
+      "project_id": 12116,
+      "access_token": "access-token-12116-2",
+      "name": "post_server_item",
+      "status": "enabled",
+      "date_created": 1407933922,
+      "date_modified": 1439579817
+    },
+    {
+      "project_id": 12116,
+      "access_token": "access-token-12116-3",
+      "name": "write",
+      "status": "enabled",
+      "date_created": 1407933922,
+      "date_modified": 1407933922
+    }
+  ]
+}
