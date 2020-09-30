@@ -1,8 +1,6 @@
 Terraform provider for Rollbar
 ==============================
 
-Originally [babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
-
 - Website: https://www.terraform.io
 - [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
 - Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
@@ -44,3 +42,12 @@ Running `make dev` will:
 * Build and install the provider 
 * Run `terraform apply` in the `examples` folder with debug logging enabled
 * Display the logs on completion.
+
+
+History
+-------
+
+Derived from
+[jmcvetta/terraform-provider-rollbar-jmcvetta](https://github.com/jmcvetta/terraform-provider-rollbar-jmcvetta)
+and
+[babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
