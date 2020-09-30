@@ -37,7 +37,7 @@ Running `make dev` will:
 License
 -------
 
-This is Free Software, released under the terms of the MIT license.
+This is Free Software, released under the terms of the [MIT license](LICENSE).
 
 
 History
