@@ -36,11 +36,6 @@ jobs:
       # Checkout
       - uses: actions/checkout@v2
 
-      - name: Convert Go coverage file to lcov format
-        run: |
-          go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
-
       # Restore cache
       - uses: actions/cache@v2
         with:
@@ -60,7 +55,7 @@ jobs:
       - name: Convert Go coverage file to lcov format
         run: |
           go install github.com/jandelgado/gcov2lcov
-          gcov2lcov -infile coverage.out -outfile lcov.info
+          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
