@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     rollbar = {
-      source  = "github.com/jmcvetta/rollbar"
+      source  = "github.com/rollbar/rollbar"
       version = "~> 0.1"
     }
   }
