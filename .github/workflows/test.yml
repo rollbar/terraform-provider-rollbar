@@ -61,7 +61,7 @@ jobs:
         run: make test
       - name: Convert Go coverage file to lcov format
         run: |
-          go get github.com/jandelgado/gcov2lcov
+          go install github.com/jandelgado/gcov2lcov
           gcov2lcov -infile coverage.out -outfile lcov.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
