@@ -11,7 +11,7 @@ package main
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/jmcvetta/terraform-provider-rollbar/rollbar"
+	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
