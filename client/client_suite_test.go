@@ -2,7 +2,7 @@ package client_test
 
 import (
 	"github.com/jarcoal/httpmock"
-	"github.com/jmcvetta/terraform-provider-rollbar/client"
+	"github.com/rollbar/terraform-provider-rollbar/client"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
