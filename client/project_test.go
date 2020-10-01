@@ -1,12 +1,41 @@
 package client
 
 import (
+	"github.com/jarcoal/httpmock"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Project", func() {
 	It("Lists all projects", func() {
-
+		u := apiUrl + pathProjectList
+		httpmock.RegisterResponder("GET", u, httpmock.NewStringResponder(200, fixture("projects/list.json")))
+		expected := []*Project{
+			{
+				Id:           12112,
+				AccountId:    8608,
+				DateCreated:  1407933721,
+				DateModified: 1457475137,
+				Name:         "",
+			},
+			{
+				Id:           106671,
+				AccountId:    8608,
+				DateCreated:  1489139046,
+				DateModified: 1549293583,
+				Name:         "Client-Config",
+			},
+			{
+				Id:           12116,
+				AccountId:    8608,
+				DateCreated:  1407933922,
+				DateModified: 1556814300,
+				Name:         "My",
+			},
+		}
+		actual, err := c.ListProjects()
+		Expect(err).NotTo(HaveOccurred())
+		Expect(actual).To(Equal(expected))
 	})
 })
 
@@ -23,7 +52,7 @@ func TestListProjects(t *testing.T) {
 		fmt.Fprint(w, fixture("projects/list.json"))
 	})
 
-	response, err := client.ListProjects()
+	response, err := c.ListProjects()
 
 	if err != nil {
 		t.Fatal(err)
@@ -91,7 +120,7 @@ func TestGetProjectByName(t *testing.T) {
 	}
 
 	for _, example := range examples {
-		actual, err := client.GetProjectByName(example.name)
+		actual, err := c.GetProjectByName(example.name)
 		if err != nil {
 			t.Fatal(err)
 		}
