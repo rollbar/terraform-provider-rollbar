@@ -26,14 +26,17 @@ jobs:
       ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
     steps:
-      - uses: actions/setup-go@v2
 
+      # Install Go and Terraform
+      - uses: actions/setup-go@v2
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
 
+      # Checkout
       - uses: actions/checkout@v2
 
+      # Restore cache
       - uses: actions/cache@v2
         with:
           path: ~/go/pkg/mod
@@ -41,21 +44,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
+      # Build
       - name: Download dependencies
         run: go get
       - name: Build the application
         run: go build -o app
-
-      - name: Install
-        run: make install
-      - name: Initialize Terraform
-        run: terraform init
-        working-directory: ./example
-      - name: Terraform plan
-        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
-        working-directory: ./example
-        env:
-          ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
       - name: Unit tests
         run: make test
@@ -68,5 +61,18 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./lcov.info
 
+      # Test provider with real Terraform
+      - name: Install
+        run: make install
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./example
+      - name: Terraform plan
+        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        working-directory: ./example
+        env:
+          ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
+
+      # Acceptance
       - name: Acceptance tests
         run: make testacc
