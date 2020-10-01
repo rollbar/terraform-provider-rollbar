@@ -1,6 +1,6 @@
-TEST?=$$(go list ./... | grep -v 'vendor')
+TEST?=$$(go list ./... | grep -v vendor | grep -v babbel-rollbar-client | grep -v babbel-terraform-provider)
 HOSTNAME=github.com
-NAMESPACE=jmcvetta
+NAMESPACE=rollbar
 NAME=rollbar
 BINARY=terraform-provider-${NAME}
 VERSION=0.1
@@ -57,7 +57,7 @@ install: build
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test: 
-	go test -i $(TEST) || exit 1                                                   
+	go test -race -covermode=atomic -coverprofile=coverage.out $(TEST) || exit 1
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
 
 testacc: 
