@@ -1,13 +1,16 @@
-package client_test
+package client
 
 import (
-	"fmt"
-	"github.com/rollbar/terraform-provider-rollbar/client"
-	"net/http"
-	"reflect"
-	"testing"
+	. "github.com/onsi/ginkgo"
 )
 
+var _ = Describe("Project", func() {
+	It("Lists all projects", func() {
+
+	})
+})
+
+/*
 func TestListProjects(t *testing.T) {
 	teardown := setup()
 	defer teardown()
@@ -98,3 +101,6 @@ func TestGetProjectByName(t *testing.T) {
 		}
 	}
 }
+
+
+ */
