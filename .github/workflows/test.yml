@@ -3,6 +3,7 @@ on: [push]
 
 jobs:
   build:
+    name: Build & Test
     runs-on: ubuntu-latest
 
 #    services:
