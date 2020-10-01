@@ -14,6 +14,7 @@ package client
 import (
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
+	"net/http"
 )
 
 const apiUrl = "https://api.rollbar.com"
@@ -37,4 +38,10 @@ func NewClient(token string) (*RollbarApiClient, error) {
 	c := RollbarApiClient{resty: r}
 
 	return &c, nil
+}
+
+// GetHttpClient allows access to the underlying http.Client object, for use
+// with mocking tools.
+func (c *RollbarApiClient) GetHttpClient() *http.Client {
+	return c.resty.GetClient()
 }
