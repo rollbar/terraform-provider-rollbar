@@ -39,7 +39,7 @@ jobs:
       - name: Convert Go coverage file to lcov format
         run: |
           go install github.com/jandelgado/gcov2lcov
-          ./bin/gcov2lcov -infile coverage.out -outfile lcov.info
+          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
 
       # Restore cache
       - uses: actions/cache@v2
