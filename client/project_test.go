@@ -1,7 +1,8 @@
-package rollbar
+package client_test
 
 import (
 	"fmt"
+	"github.com/rollbar/terraform-provider-rollbar/client"
 	"net/http"
 	"reflect"
 	"testing"
