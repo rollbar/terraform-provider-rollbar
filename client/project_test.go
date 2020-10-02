@@ -4,26 +4,26 @@ import (
 	"github.com/jarcoal/httpmock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/rs/zerolog/log"
 )
 
 var _ = Describe("Project", func() {
 	It("Lists all projects", func() {
 		u := apiUrl + pathProjectList
-		httpmock.RegisterResponder("GET", u, httpmock.NewStringResponder(200, fixture("projects/list.json")))
-		expected := []*Project{
-			{
-				Id:           12112,
-				AccountId:    8608,
-				DateCreated:  1407933721,
-				DateModified: 1457475137,
-				Name:         "",
-			},
+		s := fixture("projects/list.json")
+		stringResponse := httpmock.NewStringResponse(200, s)
+		stringResponse.Header.Add("Content-Type", "application/json")
+		responder := httpmock.ResponderFromResponse(stringResponse)
+		httpmock.RegisterResponder("GET", u, responder)
+
+		expected := []Project{
 			{
 				Id:           106671,
 				AccountId:    8608,
 				DateCreated:  1489139046,
 				DateModified: 1549293583,
 				Name:         "Client-Config",
+				Status:       "enabled",
 			},
 			{
 				Id:           12116,
@@ -31,11 +31,19 @@ var _ = Describe("Project", func() {
 				DateCreated:  1407933922,
 				DateModified: 1556814300,
 				Name:         "My",
+				Status:       "enabled",
 			},
 		}
 		actual, err := c.ListProjects()
 		Expect(err).NotTo(HaveOccurred())
-		Expect(actual).To(Equal(expected))
+		info := httpmock.GetCallCountInfo()
+		log.Debug().
+			Interface("info", info).
+			Interface("actual", actual).
+			Msg("httpmock call count info")
+
+		log.Debug().Interface("expected", expected).Send()
+		Expect(actual).To(ContainElements(expected))
 	})
 })
 
@@ -132,4 +140,4 @@ func TestGetProjectByName(t *testing.T) {
 }
 
 
- */
+*/
