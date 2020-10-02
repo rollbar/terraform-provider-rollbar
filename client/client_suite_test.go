@@ -11,16 +11,10 @@ import (
 
 var c *RollbarApiClient
 
-const (
-	fixPath = "testdata/fixtures/"
-)
-
-
 func TestClient(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Client Suite")
 }
-
 
 var _ = BeforeSuite(func() {
 	var err error
@@ -37,13 +31,12 @@ var _ = AfterSuite(func() {
 	httpmock.DeactivateAndReset()
 })
 
-
 // fixture loads a JSON file from the fixtures folder and returns it as a string
 func fixture(path string) string {
+	const fixPath = "testdata/fixtures/"
 	b, err := ioutil.ReadFile(fixPath + path)
 	if err != nil {
 		panic(err)
 	}
 	return string(b)
 }
-
