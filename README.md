@@ -4,7 +4,7 @@ Terraform provider for Rollbar
 Status
 ------
 
-[![Build & Test](https://github.com/jmcvetta/terraform-provider-rollbar/workflows/Build%20&%20Test/badge.svg)](https://github.com/jmcvetta/terraform-provider-rollbar/actions)
+[![Build & Test](https://github.com/rollbar/terraform-provider-rollbar/workflows/Build%20&%20Test/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions)
 
 
 
