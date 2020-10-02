@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
 	"strconv"
 	"testing"
 )
@@ -36,6 +37,7 @@ func TestAccRollbarProject(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(rn, "name", name),
 					testAccRollbarProjectExists(rn, name),
+					testAccProjectInProjectList(rn),
 				),
 			},
 		},
@@ -73,6 +75,44 @@ func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc 
 		}
 		if proj.Name != name {
 			return fmt.Errorf("project name from API does not match project name in Terraform config")
+		}
+
+		// Success
+		return nil
+	}
+}
+func testAccProjectInProjectList(rn string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		// Check terraform config is sane
+		rs, ok := s.RootModule().Resources[rn]
+		if !ok {
+			return fmt.Errorf("Not Found: %s", rn)
+		}
+		idString := rs.Primary.ID
+		if idString == "" {
+			return fmt.Errorf("No project ID is set")
+		}
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			return err
+		}
+
+		// Check that project exists
+		c := testAccProvider.Meta().(*client.RollbarApiClient)
+		projList, err := c.ListProjects()
+		if err != nil {
+			return err
+		}
+		found := false
+		for _, proj := range projList {
+			if proj.Id == id {
+				found = true
+			}
+		}
+		if !found {
+			msg := "Project not found in project list"
+			log.Debug().Int("id", id).Msg(msg)
+			return fmt.Errorf(msg)
 		}
 
 		// Success
