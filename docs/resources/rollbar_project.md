@@ -25,7 +25,10 @@ The following arguments are supported:
 Attribute Reference
 -------------------
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the created project.
-  * **TODO: is ID exported by default?**
+* `account_id` - ID of account that owns the project
+* `date_created` - Date the project was created
+* `date_modified` - Date the project was last modified
+* `status` - Status of the project
