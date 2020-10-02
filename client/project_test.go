@@ -36,5 +36,6 @@ var _ = Describe("Project", func() {
 		actual, err := c.ListProjects()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(actual).To(ContainElements(expected))
+		Expect(actual).To(HaveLen(len(expected)))
 	})
 })
