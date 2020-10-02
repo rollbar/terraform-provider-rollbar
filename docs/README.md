@@ -34,4 +34,4 @@ WIP
 Resources
 ---------
 
-WIP
+* [`rollbar_project`](resources/rollbar_project.md) - A Rollbar project
