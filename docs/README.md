@@ -29,7 +29,7 @@ The following arguments are supported:
 Data Sources
 ------------
 
-* [`rollbar_projects`](data_source/rollbar_projects.md) - List all projects
+* [`rollbar_projects`](data_source/rollbar_projects.md) - List all Rollbar projects
 
 
 Resources
