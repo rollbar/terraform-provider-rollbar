@@ -37,7 +37,7 @@ func TestAccRollbarProject(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(rn, "name", name),
 					testAccRollbarProjectExists(rn, name),
-					testAccProjectInProjectList(rn),
+					testAccRollbarProjectInProjectList(rn),
 				),
 			},
 		},
@@ -51,6 +51,7 @@ func testAccRollbarProjectConfig(randString string) string {
 	`, randString)
 }
 
+// testAccRollbarProjectExists tests that the newly created project exists
 func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// Check terraform config is sane
@@ -81,7 +82,10 @@ func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc 
 		return nil
 	}
 }
-func testAccProjectInProjectList(rn string) resource.TestCheckFunc {
+
+// testAccRollbarProjectInProjectList tests that the newly created project is
+// present in the list of all projects.
+func testAccRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// Check terraform config is sane
 		rs, ok := s.RootModule().Resources[rn]
