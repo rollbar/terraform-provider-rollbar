@@ -6,7 +6,9 @@
       "account_id": 8608,
       "date_created": 1407933721,
       "date_modified": 1457475137,
-      "name": null
+      "name": null,
+      "DEVELOPER_NOTE": "This item _should_ be skipped by ListProjects()",
+      "FIXME": "This workaround behavior is due to a bug in Rollbar API.  See client/project.go for details"
     },
     {
       "id": 106671,
