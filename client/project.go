@@ -35,6 +35,8 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		return nil, errResp
 	}
 	lpr := resp.Result().(*ProjectListResult)
+	body := string(resp.Body())
+	log.Debug().Str("body", body).Msg("response body")
 
 	// FIXME: After deleting a project through the API, it still shows up in
 	//  the list of projects returned by the API - only with its name set to
