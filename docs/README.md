@@ -29,7 +29,8 @@ The following arguments are supported:
 Data Sources
 ------------
 
-WIP
+* [`rollbar_projects`](data_source/rollbar_projects.md) - List of all projects
+
 
 Resources
 ---------
