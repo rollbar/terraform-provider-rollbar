@@ -56,9 +56,8 @@ type Project struct {
 }
 
 type ProjectListResult struct {
-	Err     int
-	Message string
-	Result  []Project
+	Err    int       `json:"err"`
+	Result []Project `json:"result"`
 }
 
 type ProjectResult struct {
