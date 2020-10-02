@@ -15,6 +15,12 @@ Requirements
 - [Go](https://golang.org/doc/install) 1.14.x
 
 
+Usage
+-----
+
+[See the docs for usage information.](docs/README.md)
+
+
 Debugging
 ---------
 
