@@ -1,6 +1,8 @@
 package client
 
 import (
+	"fmt"
+	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -37,5 +39,31 @@ var _ = Describe("Project", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(actual).To(ContainElements(expected))
 		Expect(actual).To(HaveLen(len(expected)))
+	})
+
+	When("creating a new project", func() {
+		u := apiUrl + pathProjectCreate
+		name := gofakeit.HackerNoun()
+		s := fmt.Sprintf(`
+		{
+			"err": 0,
+			"result": {
+				"id": 101,
+				"name": "%s",
+				"accountId": 202,
+				"dateCreated": 20200712,
+				"dateModified": 20200712
+			}
+		}
+		`, name)
+		stringResponse := httpmock.NewStringResponse(201, s)
+		stringResponse.Header.Add("Content-Type", "application/json")
+		responder := httpmock.ResponderFromResponse(stringResponse)
+		It("is created correctly", func() {
+			httpmock.RegisterResponder("POST", u, responder)
+			_, err := c.CreateProject(name)
+			Expect(err).NotTo(HaveOccurred())
+
+		})
 	})
 })
