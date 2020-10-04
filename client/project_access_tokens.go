@@ -1,12 +1,13 @@
 package client
 
 import (
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 )
 
-// ProjectAccessToken represents a project access token
+// ProjectAccessToken represents a Rollbar project access token
 type ProjectAccessToken struct {
 	ProjectID    int    `json:"project_id"`
 	AccessToken  string `json:"access_token"`
@@ -22,11 +23,8 @@ type listProjectAccessTokensResponse struct {
 	Result []ProjectAccessToken
 }
 
-// ListProjectAccessTokens lists the projects access tokens for a given project id
-// https://docs.rollbar.com/reference#list-all-project-access-tokens
+// ListProjectAccessTokens lists the project's access tokens.
 func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
-	//return []ProjectAccessToken{}, nil
-
 	u := apiUrl + pathPATList
 
 	l := log.With().
@@ -54,24 +52,22 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 	return pats, nil
 }
 
-// GetProjectAccessTokenByProjectIDAndName returns the first project access token from the
-// list-projects-tokens call that matches a given name nad project id. If there is no
-// matching project, return nil.
-func (c *RollbarApiClient) GetProjectAccessTokenByProjectIDAndName(projectID int, name string) (ProjectAccessToken, error) {
-	return ProjectAccessToken{}, nil
-	/*
-		tokens, err := c.ListProjectAccessTokens(projectID)
-		if err != nil {
-			return nil, err
+// ErrPATNotFound is raised when a project access token is not found matching the specified name.
+var ErrPATNotFound = fmt.Errorf("project access token not found matching the specified name")
+
+// ProjectAccessTokenByName returns the first project access token from the that
+// matches a given name. If there is no match it returns error ErrPATNotFound.
+func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) (pat ProjectAccessToken, err error) {
+	tokens, err := c.ListProjectAccessTokens(projectID)
+	if err != nil {
+		return pat, err
+	}
+
+	for _, t := range tokens {
+		if t.Name == name {
+			return t, nil
 		}
+	}
 
-		for _, t := range tokens {
-			if t.Name == name {
-				return t, nil
-			}
-		}
-
-		return nil, nil
-
-	*/
+	return pat, ErrPATNotFound
 }

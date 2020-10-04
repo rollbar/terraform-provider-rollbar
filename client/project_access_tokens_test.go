@@ -10,11 +10,41 @@ import (
 )
 
 var _ = Describe("Project Access Tokens", func() {
+	u := apiUrl + pathPATList
+	projectID := 12116
+	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+	s := fixture("project_access_tokens/list.json")
+	stringResponse := httpmock.NewStringResponse(200, s)
+	stringResponse.Header.Add("Content-Type", "application/json")
+	responder := httpmock.ResponderFromResponse(stringResponse)
+	expected := []ProjectAccessToken{
+		{
+			ProjectID:    projectID,
+			AccessToken:  "access-token-12116-1",
+			Name:         "post_client_item",
+			Status:       "enabled",
+			DateCreated:  1407933922,
+			DateModified: 1407933922,
+		},
+		{
+			ProjectID:    projectID,
+			AccessToken:  "access-token-12116-2",
+			Name:         "post_server_item",
+			Status:       "enabled",
+			DateCreated:  1407933922,
+			DateModified: 1439579817,
+		},
+		{
+			ProjectID:    projectID,
+			AccessToken:  "access-token-12116-3",
+			Name:         "write",
+			Status:       "enabled",
+			DateCreated:  1407933922,
+			DateModified: 1407933922,
+		},
+	}
 
 	Context("getting PATs by project ID", func() {
-		u := apiUrl + pathPATList
-		projectID := 12116
-		u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
 		When("there are no tokens attached to the project", func() {
 			It("lists zero tokens", func() {
@@ -33,38 +63,7 @@ var _ = Describe("Project Access Tokens", func() {
 
 		When("there are tokens attached to the project", func() {
 			It("lists the correct tokens", func() {
-				s := fixture("project_access_tokens/list.json")
-				stringResponse := httpmock.NewStringResponse(200, s)
-				stringResponse.Header.Add("Content-Type", "application/json")
-				responder := httpmock.ResponderFromResponse(stringResponse)
 				httpmock.RegisterResponder("GET", u, responder)
-
-				expected := []ProjectAccessToken{
-					{
-						ProjectID:    projectID,
-						AccessToken:  "access-token-12116-1",
-						Name:         "post_client_item",
-						Status:       "enabled",
-						DateCreated:  1407933922,
-						DateModified: 1407933922,
-					},
-					{
-						ProjectID:    projectID,
-						AccessToken:  "access-token-12116-2",
-						Name:         "post_server_item",
-						Status:       "enabled",
-						DateCreated:  1407933922,
-						DateModified: 1439579817,
-					},
-					{
-						ProjectID:    projectID,
-						AccessToken:  "access-token-12116-3",
-						Name:         "write",
-						Status:       "enabled",
-						DateCreated:  1407933922,
-						DateModified: 1407933922,
-					},
-				}
 				actual, err := c.ListProjectAccessTokens(projectID)
 				log.Debug().
 					Interface("actual", actual).
@@ -79,6 +78,23 @@ var _ = Describe("Project Access Tokens", func() {
 	})
 
 	Context("getting PAT by project ID and name", func() {
+		When("name is not found", func() {
+			It("raises PAT not found error", func() {
+				httpmock.RegisterResponder("GET", u, responder)
+				_, err := c.ProjectAccessTokenByName(projectID, "non-existent name")
+				Expect(err).To(MatchError(ErrPATNotFound))
+			})
+		})
+		When("name is valid", func() {
+			It("returns the correct token", func() {
+				httpmock.RegisterResponder("GET", u, responder)
+				ex := expected[0]
+				actual, err := c.ProjectAccessTokenByName(projectID, ex.Name)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(actual.Name).To(Equal(ex.Name))
+			})
+
+		})
 
 	})
 
@@ -124,7 +140,7 @@ func TestGetProjectAccessTokenByProjectIDAndName(t *testing.T) {
 	}
 
 	for _, example := range examples {
-		actual, err := client.GetProjectAccessTokenByProjectIDAndName(example.projectID, example.name)
+		actual, err := client.ProjectAccessTokenByName(example.projectID, example.name)
 		if err != nil {
 			t.Fatal(err)
 		}
