@@ -1,8 +1,9 @@
 package client
 
 import (
-//"encoding/json"
-//"strconv"
+	"github.com/rs/zerolog/log"
+	"net/http"
+	"strconv"
 )
 
 // ProjectAccessToken represents a project access token
@@ -24,26 +25,33 @@ type listProjectAccessTokensResponse struct {
 // ListProjectAccessTokens lists the projects access tokens for a given project id
 // https://docs.rollbar.com/reference#list-all-project-access-tokens
 func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
-	return []ProjectAccessToken{}, nil
-	/*
-		var data listProjectAccessTokensResponse
+	//return []ProjectAccessToken{}, nil
 
-		bytes, err := c.get("project", strconv.Itoa(projectID), "access_tokens")
-		if err != nil {
-			return nil, err
-		}
+	u := apiUrl + pathPATList
 
-		err = json.Unmarshal(bytes, &data)
-		if err != nil {
-			return nil, err
-		}
+	l := log.With().
+		Str("url", u).
+		Logger()
 
-		tokens := []*ProjectAccessToken{}
-		tokens = append(tokens, data.Result...)
+	resp, err := c.resty.R().
+		SetResult(listProjectAccessTokensResponse{}).
+		SetError(ErrorResult{}).
+		SetPathParams(map[string]string{
+			"projectId": strconv.Itoa(projectID),
+		}).
+		Get(u)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	if resp.StatusCode() != http.StatusOK {
+		errResp := resp.Error().(*ErrorResult)
+		l.Err(errResp).Send()
+		return nil, errResp
+	}
+	pats := resp.Result().(*listProjectAccessTokensResponse).Result
 
-		return tokens, nil
-
-	*/
+	return pats, nil
 }
 
 // GetProjectAccessTokenByProjectIDAndName returns the first project access token from the
