@@ -28,10 +28,10 @@ jobs:
     steps:
 
       # Install Go and Terraform
-      - uses: actions/setup-go@v2
       - uses: hashicorp/setup-terraform@v1
         with:
           terraform_wrapper: false
+      - uses: actions/setup-go@v2
 
       # Checkout
       - uses: actions/checkout@v2
