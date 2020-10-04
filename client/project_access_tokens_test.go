@@ -4,7 +4,6 @@ import (
 	"github.com/jarcoal/httpmock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
 )
@@ -65,11 +64,6 @@ var _ = Describe("Project Access Tokens", func() {
 			It("lists the correct tokens", func() {
 				httpmock.RegisterResponder("GET", u, responder)
 				actual, err := c.ListProjectAccessTokens(projectID)
-				log.Debug().
-					Interface("actual", actual).
-					Interface("expected", expected).
-					Msg("List project access tokens")
-
 				Expect(err).ToNot(HaveOccurred())
 				Expect(actual).To(HaveLen(3))
 				Expect(actual).To(ContainElements(expected))
