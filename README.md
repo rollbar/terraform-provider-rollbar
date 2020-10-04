@@ -5,6 +5,7 @@ Status
 ------
 
 [![Build & Test](https://github.com/rollbar/terraform-provider-rollbar/workflows/Build%20&%20Test/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions)
+[![Coverage Status](https://coveralls.io/repos/github/rollbar/terraform-provider-rollbar/badge.svg?branch=merge-jmcvetta)](https://coveralls.io/github/rollbar/terraform-provider-rollbar?branch=merge-jmcvetta)
 
 
 
