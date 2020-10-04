@@ -123,7 +123,8 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		l.Err(err).Msg("Error creating project")
 		return nil, err
 	}
-	if resp.StatusCode() != http.StatusOK {
+
+	if resp.StatusCode() >= 400 {
 		er := resp.Error().(*ErrorResult)
 		l.Error().
 			Int("StatusCode", resp.StatusCode()).
