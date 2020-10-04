@@ -16,11 +16,11 @@ import (
 
 // Project is a Rollbar project
 type Project struct {
+	Id           int    `json:"id" model:"id"`
+	Name         string `json:"name" model:"name"`
 	AccountId    int    `json:"account_id" model:"account_id"`
 	DateCreated  int    `json:"date_created" model:"date_created"`
 	DateModified int    `json:"date_modified" model:"date_modified"`
-	Id           int    `json:"id" model:"id"`
-	Name         string `json:"name" model:"name"`
 	//SettingsData struct {
 	//	Grouping struct {
 	//		AutoUpgrade    bool     `json:"auto_upgrade"`
