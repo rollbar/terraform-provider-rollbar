@@ -14,4 +14,5 @@ const (
 	pathProjectDelete = "/api/1/project/{projectId}"
 	pathProjectList   = "/api/1/projects"
 	pathProjectRead   = "/api/1/project/{projectId}"
+	pathPATList       = "/api/1/project/{projectId}/access_tokens"
 )

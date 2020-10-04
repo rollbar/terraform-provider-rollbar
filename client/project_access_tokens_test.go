@@ -1,12 +1,40 @@
-package rollbar
+package client
 
 import (
-	"fmt"
-	"net/http"
-	"reflect"
-	"testing"
+	"github.com/jarcoal/httpmock"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
+var _ = Describe("Project Access Tokens", func() {
+	u := apiUrl + pathPATList
+
+	When("There are no tokens attached to the project", func() {
+		It("lists zero tokens", func() {
+			s := `{ "err": 0, "result": [] }`
+			stringResponse := httpmock.NewStringResponse(200, s)
+			stringResponse.Header.Add("Content-Type", "application/json")
+			responder := httpmock.ResponderFromResponse(stringResponse)
+			httpmock.RegisterResponder("GET", u, responder)
+
+			pats, err := c.ListProjectAccessTokens(0) // Project ID doesn't matter
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(pats).To(HaveLen(0))
+		})
+	})
+
+	When("There are tokens attached to the project", func() {
+		s := fixture("project_access_tokens/list.json")
+		stringResponse := httpmock.NewStringResponse(200, s)
+		stringResponse.Header.Add("Content-Type", "application/json")
+		responder := httpmock.ResponderFromResponse(stringResponse)
+		httpmock.RegisterResponder("GET", u, responder)
+
+	})
+})
+
+/*
 func TestListProjectAccessTokens(t *testing.T) {
 	teardown := setup()
 	defer teardown()
@@ -106,3 +134,6 @@ func TestGetProjectAccessTokenByProjectIDAndName(t *testing.T) {
 		}
 	}
 }
+
+
+*/
