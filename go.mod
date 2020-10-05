@@ -26,7 +26,7 @@ require (
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.2
 	github.com/rs/zerolog v1.20.0
-	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/stretchr/testify v1.6.1
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/zclconf/go-cty v1.6.1 // indirect
 	golang.org/x/net v0.0.0-20201002202402-0a1ea396d57c // indirect

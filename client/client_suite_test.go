@@ -2,12 +2,17 @@ package client
 
 import (
 	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+/*
+ * Ginkgo setup
+ */
 
 var c *RollbarApiClient
 
@@ -39,4 +44,35 @@ func fixture(path string) string {
 		panic(err)
 	}
 	return string(b)
+}
+
+/*
+ * Testify setup
+ */
+
+// ClientTestSuite is a Testify test suite for the Rollbar API client
+type ClientTestSuite struct {
+	suite.Suite
+	client *RollbarApiClient
+}
+
+func (s *ClientTestSuite) SetupSuite() {
+	c, err := NewClient("fakeTokenString")
+	Expect(err).NotTo(HaveOccurred())
+	httpmock.ActivateNonDefault(c.GetHttpClient())
+	s.client = c
+}
+
+func (s *ClientTestSuite) TearDownSuite() {
+	httpmock.DeactivateAndReset()
+}
+
+func (s *ClientTestSuite) BeforeTest() {
+	httpmock.Reset()
+}
+
+// TestRollbarClientTestSuite connects the Testify test suite to the 'go test'
+// built-in testing framework.
+func TestRollbarClientTestSuite(t *testing.T) {
+	suite.Run(t, new(ClientTestSuite))
 }
