@@ -16,11 +16,11 @@ import (
 
 // Project is a Rollbar project
 type Project struct {
-	Id           int    `json:"id" model:"id"`
-	Name         string `json:"name" model:"name"`
-	AccountId    int    `json:"account_id" model:"account_id"`
-	DateCreated  int    `json:"date_created" model:"date_created"`
-	DateModified int    `json:"date_modified" model:"date_modified"`
+	Id           int    `json:"id" model:"id" fake:"{number:1,1000000}""`
+	Name         string `json:"name" model:"name" fake:"{hackernoun}"`
+	AccountId    int    `json:"account_id" model:"account_id" fake:"{number:1,1000000}"`
+	DateCreated  int    `json:"date_created" model:"date_created" fake:"{number:1,1000000}"`
+	DateModified int    `json:"date_modified" model:"date_modified" fake:"{number:1,1000000}"`
 	//SettingsData struct {
 	//	Grouping struct {
 	//		AutoUpgrade    bool     `json:"auto_upgrade"`
@@ -56,7 +56,7 @@ type Project struct {
 	//	TimeFormat string `json:"time_format"`
 	//	Timezone   string `json:"timezone"`
 	//} `json:"settings_data"`
-	Status string `json:"status" model:"status"`
+	Status string `json:"status" model:"status" fake:"{randomstring:[enabled,disabled]}"`
 }
 
 type ProjectListResult struct {

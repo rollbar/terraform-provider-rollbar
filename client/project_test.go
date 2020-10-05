@@ -9,7 +9,11 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"strconv"
+	"strings"
 )
+
+var errResult = ErrorResult{Err: 500, Message: "Internal Server Error"}
 
 var _ = Describe("Project", func() {
 	It("Lists all projects", func() {
@@ -49,7 +53,7 @@ var _ = Describe("Project", func() {
 		name := gofakeit.HackerNoun()
 
 		Context("and creation succeeds", func() {
-			s := fmt.Sprintf(fixture("projects/create.json"), name)
+			s := fmt.Sprintf(fixture("projects/read.json"), name)
 			// FIXME: The actual Rollbar API sends http.StatusOK; but it
 			//  _should_ send http.StatusCreated
 			stringResponse := httpmock.NewStringResponse(http.StatusOK, s)
@@ -79,7 +83,7 @@ var _ = Describe("Project", func() {
 		})
 
 		Context("and creation fails", func() {
-			s := fixture("projects/create.json")
+			s := fixture("projects/read.json")
 			// FIXME: The actual Rollbar API sends http.StatusOK; but it
 			//  _should_ send http.StatusCreated
 			stringResponse := httpmock.NewStringResponse(http.StatusInternalServerError, s)
@@ -92,4 +96,32 @@ var _ = Describe("Project", func() {
 			})
 		})
 	})
+
+	When("reading a project", func() {
+		var expected Project
+		gofakeit.Struct(&expected)
+		u := apiUrl + pathProjectRead
+		u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
+
+		Context("and read succeeds", func() {
+			It("has the exepected properties", func() {
+				pr := ProjectResult{Err: 0, Result: expected}
+				responder := httpmock.NewJsonResponderOrPanic(http.StatusOK, pr)
+				httpmock.RegisterResponder("GET", u, responder)
+				actual, err := c.ReadProject(expected.Id)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(actual).To(Equal(&expected))
+			})
+		})
+		Context("and read fails", func() {
+			It("handles the error", func() {
+				responder := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
+				httpmock.RegisterResponder("GET", u, responder)
+				_, err := c.ReadProject(expected.Id)
+				Expect(err).To(MatchError(&errResult))
+			})
+		})
+
+	})
+
 })
