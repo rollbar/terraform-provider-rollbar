@@ -83,48 +83,35 @@ func (s *ClientTestSuite) TestCreateProject() {
 	s.NotNil(err)
 }
 
+func (s *ClientTestSuite) TestReadProject() {
+	var expected Project
+	gofakeit.Struct(&expected)
+	u := apiUrl + pathProjectRead
+	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
+
+	// Success
+	pr := ProjectResult{Err: 0, Result: expected}
+	responder := httpmock.NewJsonResponderOrPanic(http.StatusOK, pr)
+	httpmock.RegisterResponder("GET", u, responder)
+	actual, err := s.client.ReadProject(expected.Id)
+	s.Nil(err)
+	s.Equal(&expected, actual)
+
+	// Not Found
+	er := ErrorResult{Err: 404, Message: "Not Found"}
+	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProject(expected.Id)
+	s.Equal(ErrNotFound, err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProject(expected.Id)
+	s.Equal(err, &errResult500)
+}
+
 var _ = Describe("Project", func() {
-
-	When("reading a project", func() {
-		var expected Project
-		gofakeit.Struct(&expected)
-		u := apiUrl + pathProjectRead
-		u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
-
-		Context("and read succeeds", func() {
-			It("has the exepected properties", func() {
-				pr := ProjectResult{Err: 0, Result: expected}
-				responder := httpmock.NewJsonResponderOrPanic(http.StatusOK, pr)
-				httpmock.RegisterResponder("GET", u, responder)
-				actual, err := c.ReadProject(expected.Id)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(actual).To(Equal(&expected))
-			})
-		})
-		Context("and read fails", func() {
-
-			Context("because project not found", func() {
-				It("returns ErrNotFound", func() {
-					er := ErrorResult{Err: 404, Message: "Not Found"}
-					r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
-					httpmock.RegisterResponder("GET", u, r)
-					_, err := c.ReadProject(expected.Id)
-					Expect(err).To(MatchError(ErrNotFound))
-				})
-			})
-
-			Context("because of internal server error", func() {
-				It("handles the error", func() {
-					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-					httpmock.RegisterResponder("GET", u, r)
-					_, err := c.ReadProject(expected.Id)
-					Expect(err).To(MatchError(&errResult500))
-				})
-			})
-
-		})
-
-	})
 
 	When("deleting a project", func() {
 		delId := gofakeit.Number(0, 1000000)
