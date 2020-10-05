@@ -19,4 +19,5 @@ func (er ErrorResult) Error() string {
 	return fmt.Sprintf("%v %v", er.Err, er.Message)
 }
 
+// ErrNotFound is raised when the API returns a '404 Not Found' error
 var ErrNotFound = fmt.Errorf("entity not found")

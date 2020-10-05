@@ -24,7 +24,6 @@ func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	s.Equal(lpatr.Result, actual)
 }
 
-/*
 // TestGetProjectAccessTokenByProjectIDAndName tests getting a project access
 // token by name.
 func (s *ClientTestSuite) TestGetProjectAccessTokenByProjectIDAndName() {
@@ -32,47 +31,18 @@ func (s *ClientTestSuite) TestGetProjectAccessTokenByProjectIDAndName() {
 	u := apiUrl + pathPATList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, fixture("project_access_tokens/list.json"))
-	})
+	var lpatr listProjectAccessTokensResponse
+	gofakeit.Struct(&lpatr)
+	r := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpatr)
+	httpmock.RegisterResponder("GET", u, r)
 
-	examples := []struct {
-		name      string
-		projectID int
-		expected  *ProjectAccessToken
-	}{
-		{
-			name:      "ProjectDoesNotExist",
-			projectID: projectID,
-			expected:  nil,
-		},
-		{
-			name:      "write",
-			projectID: projectID,
-			expected: &ProjectAccessToken{
-				ProjectID:    projectID,
-				AccessToken:  "access-token-12116-3",
-				Name:         "write",
-				Status:       "enabled",
-				DateCreated:  1407933922,
-				DateModified: 1407933922,
-			},
-		},
-	}
+	// PAT with name exists
+	actual := lpatr.Result[0]
+	expected, err := s.client.ProjectAccessTokenByName(projectID, actual.Name)
+	s.Nil(err)
+	s.Equal(expected, actual)
 
-	for _, example := range examples {
-		actual, err := client.GetProjectAccessTokenByProjectIDAndName(example.projectID, example.name)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if !reflect.DeepEqual(actual, example.expected) {
-			t.Errorf("expected project %v, got %v.", example.expected, actual)
-		}
-	}
+	// PAT with name does not exist
+	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
+	s.Equal(err, ErrNotFound)
 }
-
-
-*/

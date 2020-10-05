@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
@@ -52,12 +51,10 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 	return pats, nil
 }
 
-// ErrPATNotFound is raised when a project access token is not found matching the specified name.
-var ErrPATNotFound = fmt.Errorf("project access token not found matching the specified name")
-
 // ProjectAccessTokenByName returns the first project access token from the that
 // matches a given name. If there is no match it returns error ErrPATNotFound.
-func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) (pat ProjectAccessToken, err error) {
+func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
+	var pat ProjectAccessToken
 	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		return pat, err
@@ -69,5 +66,5 @@ func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) 
 		}
 	}
 
-	return pat, ErrPATNotFound
+	return pat, ErrNotFound
 }
