@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
-	. "github.com/onsi/gomega"
 	"net/http"
 	"strconv"
 	"strings"
@@ -14,7 +13,6 @@ import (
 var errResult500 = ErrorResult{Err: 500, Message: "Internal Server Error"}
 
 func (s *ClientTestSuite) TestListProjects() {
-	g := NewGomegaWithT(s.T())
 	u := apiUrl + pathProjectList
 
 	// Success
@@ -43,7 +41,7 @@ func (s *ClientTestSuite) TestListProjects() {
 	}
 	actual, err := s.client.ListProjects()
 	s.Nil(err)
-	g.Expect(actual).To(ContainElements(expected))
+	s.Subset(actual, expected)
 	s.Len(actual, len(expected))
 
 	// Internal Server Error
