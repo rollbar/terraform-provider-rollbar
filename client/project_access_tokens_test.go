@@ -1,4 +1,4 @@
-package rollbar
+package client
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestListProjectAccessTokens(t *testing.T) {
+func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	teardown := setup()
 	defer teardown()
 
@@ -58,7 +58,7 @@ func TestListProjectAccessTokens(t *testing.T) {
 	}
 }
 
-func TestGetProjectAccessTokenByProjectIDAndName(t *testing.T) {
+func (s *ClientTestSuite) TestGetProjectAccessTokenByProjectIDAndName() {
 	teardown := setup()
 	defer teardown()
 
