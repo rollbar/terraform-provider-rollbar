@@ -24,7 +24,11 @@ func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	s.Nil(err)
 	s.Equal(lpatr.Result, actual)
 
-	// Invalid project ID
+	// Unreachable server
+	httpmock.Reset()
+	_, err = s.client.ListProjectAccessTokens(projectID)
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
 }
 
 // TestProjectAccessTokenByName tests getting a project access token by name.
@@ -53,4 +57,12 @@ func (s *ClientTestSuite) TestProjectAccessTokenByName() {
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
+		ErrorResult{Err: 500, Message: "Internal Server Error"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
 }
