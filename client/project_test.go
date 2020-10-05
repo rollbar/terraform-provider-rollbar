@@ -170,8 +170,13 @@ var _ = Describe("Project", func() {
 		})
 
 		Context("and delete fails", func() {
-			It("handles the error", func() {
-
+			Context("because of internal server error", func() {
+				It("handles the error", func() {
+					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
+					httpmock.RegisterResponder("DELETE", urlDel, r)
+					err := c.DeleteProject(delId)
+					Expect(err).To(MatchError(errResult))
+				})
 			})
 		})
 
