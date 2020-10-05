@@ -135,10 +135,6 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	}
 
 	pr := resp.Result().(*ProjectResult)
-	if pr.Err != 0 {
-		l.Error().Msg("Unexpected error creating project")
-	}
-
 	return &pr.Result, nil
 }
 
