@@ -136,4 +136,45 @@ var _ = Describe("Project", func() {
 
 	})
 
+	When("deleting a project", func() {
+		delId := gofakeit.Number(0, 1000000)
+		urlDel := apiUrl + pathProjectDelete
+		urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
+		urlList := apiUrl + pathProjectList
+
+		Context("and delete succeeds", func() {
+			It("is not included in project list", func() {
+				plr := ProjectListResult{}
+				for len(plr.Result) < 3 {
+					var p Project
+					gofakeit.Struct(&p)
+					if p.Id != delId {
+						plr.Result = append(plr.Result, p)
+					}
+				}
+				listResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, plr)
+				delResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, nil)
+				httpmock.RegisterResponder("GET", urlList, listResponder)
+				httpmock.RegisterResponder("DELETE", urlDel, delResponder)
+				err := c.DeleteProject(delId)
+				Expect(err).NotTo(HaveOccurred())
+				projList, err := c.ListProjects()
+				Expect(err).NotTo(HaveOccurred())
+				for _, proj := range projList {
+					Expect(proj.Id).NotTo(Equal(delId))
+				}
+				for _, count := range httpmock.GetCallCountInfo() {
+					Expect(count).To(Equal(1))
+				}
+			})
+		})
+
+		Context("and delete fails", func() {
+			It("handles the error", func() {
+
+			})
+		})
+
+	})
+
 })
