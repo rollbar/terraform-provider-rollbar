@@ -52,14 +52,6 @@ jobs:
 
       - name: Unit tests
         run: make test
-      - name: Convert Go coverage file to lcov format
-        run: |
-          go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
-      - uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
 
       # Test provider with real Terraform
       - name: Install
@@ -76,3 +68,11 @@ jobs:
       # Acceptance
       - name: Acceptance tests
         run: make testacc
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
+      - uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
