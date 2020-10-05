@@ -18,3 +18,5 @@ type ErrorResult struct {
 func (er ErrorResult) Error() string {
 	return fmt.Sprintf("%v %v", er.Err, er.Message)
 }
+
+var ErrNotFound = fmt.Errorf("entity not found")

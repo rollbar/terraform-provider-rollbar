@@ -193,7 +193,14 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 		return err
 	}
 	l.Debug().Bytes("body", resp.Body()).Msg("Response body")
-	if resp.StatusCode() != http.StatusOK {
+	switch resp.StatusCode() {
+	case http.StatusNotFound:
+		l.Warn().Msg("Project not found")
+		return ErrNotFound
+	case http.StatusOK:
+		l.Debug().Msg("Project successfully deleted")
+		return nil
+	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
 			Int("StatusCode", resp.StatusCode()).
@@ -202,7 +209,4 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 			Msg("Error creating a project")
 		return er
 	}
-
-	l.Debug().Msg("Project successfully deleted")
-	return nil
 }
