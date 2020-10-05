@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
@@ -22,6 +23,10 @@ func TestClient(t *testing.T) {
 }
 
 var _ = BeforeSuite(func() {
+	// Seed gofakeit random generator
+	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
+
+	// Setup RollbarApiClient and enable mocking
 	var err error
 	c, err = NewClient("fakeTokenString")
 	Expect(err).NotTo(HaveOccurred())
@@ -57,8 +62,12 @@ type ClientTestSuite struct {
 }
 
 func (s *ClientTestSuite) SetupSuite() {
+	// Seed gofakeit random generator
+	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
+
+	// Setup RollbarApiClient and enable mocking
 	c, err := NewClient("fakeTokenString")
-	Expect(err).NotTo(HaveOccurred())
+	s.Nil(err)
 	httpmock.ActivateNonDefault(c.GetHttpClient())
 	s.client = c
 }
