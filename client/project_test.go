@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
-	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"net/http"
 	"strconv"
@@ -111,61 +110,46 @@ func (s *ClientTestSuite) TestReadProject() {
 	s.Equal(err, &errResult500)
 }
 
-var _ = Describe("Project", func() {
+func (s *ClientTestSuite) TestDeleteProject() {
+	delId := gofakeit.Number(0, 1000000)
+	urlDel := apiUrl + pathProjectDelete
+	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
+	urlList := apiUrl + pathProjectList
 
-	When("deleting a project", func() {
-		delId := gofakeit.Number(0, 1000000)
-		urlDel := apiUrl + pathProjectDelete
-		urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
-		urlList := apiUrl + pathProjectList
+	// Success
+	plr := ProjectListResult{}
+	for len(plr.Result) < 3 {
+		var p Project
+		gofakeit.Struct(&p)
+		if p.Id != delId {
+			plr.Result = append(plr.Result, p)
+		}
+	}
+	listResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, plr)
+	delResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, nil)
+	httpmock.RegisterResponder("GET", urlList, listResponder)
+	httpmock.RegisterResponder("DELETE", urlDel, delResponder)
+	err := s.client.DeleteProject(delId)
+	s.Nil(err)
+	projList, err := s.client.ListProjects()
+	s.Nil(err)
+	for _, proj := range projList {
+		s.NotEqual(delId, proj.Id)
+	}
+	for _, count := range httpmock.GetCallCountInfo() {
+		s.Equal(1, count)
+	}
 
-		Context("and delete succeeds", func() {
-			It("is not included in project list", func() {
-				plr := ProjectListResult{}
-				for len(plr.Result) < 3 {
-					var p Project
-					gofakeit.Struct(&p)
-					if p.Id != delId {
-						plr.Result = append(plr.Result, p)
-					}
-				}
-				listResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, plr)
-				delResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, nil)
-				httpmock.RegisterResponder("GET", urlList, listResponder)
-				httpmock.RegisterResponder("DELETE", urlDel, delResponder)
-				err := c.DeleteProject(delId)
-				Expect(err).NotTo(HaveOccurred())
-				projList, err := c.ListProjects()
-				Expect(err).NotTo(HaveOccurred())
-				for _, proj := range projList {
-					Expect(proj.Id).NotTo(Equal(delId))
-				}
-				for _, count := range httpmock.GetCallCountInfo() {
-					Expect(count).To(Equal(1))
-				}
-			})
-		})
+	// Project not found
+	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
+		ErrorResult{Err: 404, Message: "Not Found"})
+	httpmock.RegisterResponder("DELETE", urlDel, r)
+	err = s.client.DeleteProject(delId)
+	s.Equal(ErrNotFound, err)
 
-		Context("and delete fails", func() {
-			Context("because of internal server error", func() {
-				It("handles the error", func() {
-					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-					httpmock.RegisterResponder("DELETE", urlDel, r)
-					err := c.DeleteProject(delId)
-					Expect(err).To(MatchError(&errResult500))
-				})
-			})
-			Context("because the project was not found", func() {
-				It("returns ErrNotFound", func() {
-					er := ErrorResult{Err: 404, Message: "Not Found"}
-					r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
-					httpmock.RegisterResponder("DELETE", urlDel, r)
-					err := c.DeleteProject(delId)
-					Expect(err).To(MatchError(ErrNotFound))
-				})
-			})
-		})
-
-	})
-
-})
+	// Internal Server Error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
+	httpmock.RegisterResponder("DELETE", urlDel, r)
+	err = s.client.DeleteProject(delId)
+	s.Equal(&errResult500, err)
+}
