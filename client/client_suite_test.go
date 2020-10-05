@@ -6,40 +6,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"testing"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
-
-/*
- * Ginkgo setup
- */
-
-var c *RollbarApiClient
-
-func TestClient(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Client Suite")
-}
-
-var _ = BeforeSuite(func() {
-	// Seed gofakeit random generator
-	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
-
-	// Setup RollbarApiClient and enable mocking
-	var err error
-	c, err = NewClient("fakeTokenString")
-	Expect(err).NotTo(HaveOccurred())
-	httpmock.ActivateNonDefault(c.GetHttpClient())
-})
-
-var _ = BeforeEach(func() {
-	httpmock.Reset()
-})
-
-var _ = AfterSuite(func() {
-	httpmock.DeactivateAndReset()
-})
 
 // fixture loads a JSON file from the fixtures folder and returns it as a string
 func fixture(path string) string {
