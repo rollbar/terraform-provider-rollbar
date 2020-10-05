@@ -1,22 +1,32 @@
-package client
+package rollbar
 
 import (
-	"github.com/jarcoal/httpmock"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"strconv"
-	"strings"
+	"fmt"
+	"net/http"
+	"reflect"
+	"testing"
 )
 
-var _ = Describe("Project Access Tokens", func() {
-	u := apiUrl + pathPATList
+func TestListProjectAccessTokens(t *testing.T) {
+	teardown := setup()
+	defer teardown()
+
 	projectID := 12116
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
-	s := fixture("project_access_tokens/list.json")
-	stringResponse := httpmock.NewStringResponse(200, s)
-	stringResponse.Header.Add("Content-Type", "application/json")
-	responder := httpmock.ResponderFromResponse(stringResponse)
-	expected := []ProjectAccessToken{
+	handURL := fmt.Sprintf("/project/%d/access_tokens/", projectID)
+
+	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, fixture("project_access_tokens/list.json"))
+	})
+
+	actual, err := client.ListProjectAccessTokens(projectID)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expected := []*ProjectAccessToken{
 		{
 			ProjectID:    projectID,
 			AccessToken:  "access-token-12116-1",
@@ -43,58 +53,10 @@ var _ = Describe("Project Access Tokens", func() {
 		},
 	}
 
-	Context("getting PATs by project ID", func() {
-
-		When("there are no tokens attached to the project", func() {
-			It("lists zero tokens", func() {
-				s := `{ "err": 0, "result": [] }`
-				stringResponse := httpmock.NewStringResponse(200, s)
-				stringResponse.Header.Add("Content-Type", "application/json")
-				responder := httpmock.ResponderFromResponse(stringResponse)
-				httpmock.RegisterResponder("GET", u, responder)
-
-				pats, err := c.ListProjectAccessTokens(projectID) // Project ID doesn't matter
-
-				Expect(err).ToNot(HaveOccurred())
-				Expect(pats).To(HaveLen(0))
-			})
-		})
-
-		When("there are tokens attached to the project", func() {
-			It("lists the correct tokens", func() {
-				httpmock.RegisterResponder("GET", u, responder)
-				actual, err := c.ListProjectAccessTokens(projectID)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(actual).To(HaveLen(3))
-				Expect(actual).To(ContainElements(expected))
-			})
-		})
-	})
-
-	Context("getting PAT by project ID and name", func() {
-		When("name is not found", func() {
-			It("raises PAT not found error", func() {
-				httpmock.RegisterResponder("GET", u, responder)
-				_, err := c.ProjectAccessTokenByName(projectID, "non-existent name")
-				Expect(err).To(MatchError(ErrPATNotFound))
-			})
-		})
-		When("name is valid", func() {
-			It("returns the correct token", func() {
-				httpmock.RegisterResponder("GET", u, responder)
-				ex := expected[0]
-				actual, err := c.ProjectAccessTokenByName(projectID, ex.Name)
-				Expect(err).NotTo(HaveOccurred())
-				Expect(actual.Name).To(Equal(ex.Name))
-			})
-
-		})
-
-	})
-
-})
-
-/*
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("expected response %v, got %v.", expected, actual)
+	}
+}
 
 func TestGetProjectAccessTokenByProjectIDAndName(t *testing.T) {
 	teardown := setup()
@@ -134,7 +96,7 @@ func TestGetProjectAccessTokenByProjectIDAndName(t *testing.T) {
 	}
 
 	for _, example := range examples {
-		actual, err := client.ProjectAccessTokenByName(example.projectID, example.name)
+		actual, err := client.GetProjectAccessTokenByProjectIDAndName(example.projectID, example.name)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -144,6 +106,3 @@ func TestGetProjectAccessTokenByProjectIDAndName(t *testing.T) {
 		}
 	}
 }
-
-
-*/
