@@ -1,0 +1,10 @@
+{
+  "err": 0,
+  "result": {
+    "id": 101,
+    "name": "%s",
+    "accountId": 202,
+    "dateCreated": 20200712,
+    "dateModified": 20200712
+  }
+}
