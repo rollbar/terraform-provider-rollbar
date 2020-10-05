@@ -24,9 +24,8 @@ func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	s.Equal(lpatr.Result, actual)
 }
 
-// TestGetProjectAccessTokenByProjectIDAndName tests getting a project access
-// token by name.
-func (s *ClientTestSuite) TestGetProjectAccessTokenByProjectIDAndName() {
+// TestProjectAccessTokenByName tests getting a project access token by name.
+func (s *ClientTestSuite) TestProjectAccessTokenByName() {
 	projectID := 12116
 	u := apiUrl + pathPATList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
