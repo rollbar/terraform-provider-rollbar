@@ -43,5 +43,10 @@ func (s *ClientTestSuite) TestProjectAccessTokenByName() {
 
 	// PAT with name does not exist
 	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
-	s.Equal(err, ErrNotFound)
+	s.Equal(ErrNotFound, err)
+
+	// Invalid projectID
+	_, err = s.client.ProjectAccessTokenByName(-500, "this-name-does-not-exist")
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
 }
