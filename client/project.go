@@ -170,10 +170,6 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	}
 
 	pr := resp.Result().(*ProjectResult)
-	if pr.Err != 0 {
-		l.Error().Msg("Unexpected error reading project")
-	}
-
 	l.Debug().Msg("Project successfully read")
 	return &pr.Result, nil
 }
