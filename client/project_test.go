@@ -13,52 +13,49 @@ import (
 	"strings"
 )
 
-var errResult = ErrorResult{Err: 500, Message: "Internal Server Error"}
+var errResult500 = ErrorResult{Err: 500, Message: "Internal Server Error"}
+
+func (s *ClientTestSuite) TestListProjects() {
+	g := NewGomegaWithT(s.T())
+	u := apiUrl + pathProjectList
+
+	// Success
+	stringResponse := httpmock.NewStringResponse(200,
+		fixture("projects/list.json"))
+	stringResponse.Header.Add("Content-Type", "application/json")
+	r := httpmock.ResponderFromResponse(stringResponse)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []Project{
+		{
+			Id:           106671,
+			AccountId:    8608,
+			DateCreated:  1489139046,
+			DateModified: 1549293583,
+			Name:         "Client-Config",
+			Status:       "enabled",
+		},
+		{
+			Id:           12116,
+			AccountId:    8608,
+			DateCreated:  1407933922,
+			DateModified: 1556814300,
+			Name:         "My",
+			Status:       "enabled",
+		},
+	}
+	actual, err := s.client.ListProjects()
+	s.Nil(err)
+	g.Expect(actual).To(ContainElements(expected))
+	s.Len(actual, len(expected))
+
+	// Internal Server Error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ListProjects()
+	s.NotNil(err)
+}
 
 var _ = Describe("Project", func() {
-	When("list succeeds", func() {
-		u := apiUrl + pathProjectList
-
-		It("lists all projects", func() {
-			s := fixture("projects/list.json")
-			stringResponse := httpmock.NewStringResponse(200, s)
-			stringResponse.Header.Add("Content-Type", "application/json")
-			responder := httpmock.ResponderFromResponse(stringResponse)
-			httpmock.RegisterResponder("GET", u, responder)
-
-			expected := []Project{
-				{
-					Id:           106671,
-					AccountId:    8608,
-					DateCreated:  1489139046,
-					DateModified: 1549293583,
-					Name:         "Client-Config",
-					Status:       "enabled",
-				},
-				{
-					Id:           12116,
-					AccountId:    8608,
-					DateCreated:  1407933922,
-					DateModified: 1556814300,
-					Name:         "My",
-					Status:       "enabled",
-				},
-			}
-			actual, err := c.ListProjects()
-			Expect(err).NotTo(HaveOccurred())
-			Expect(actual).To(ContainElements(expected))
-			Expect(actual).To(HaveLen(len(expected)))
-		})
-
-		When("list fails", func() {
-			responder := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
-			It("handles the error", func() {
-				httpmock.RegisterResponder("GET", u, responder)
-				_, err := c.ListProjects()
-				Expect(err).To(MatchError(&errResult))
-			})
-		})
-	})
 
 	When("creating a new project", func() {
 		u := apiUrl + pathProjectCreate
@@ -139,10 +136,10 @@ var _ = Describe("Project", func() {
 
 			Context("because of internal server error", func() {
 				It("handles the error", func() {
-					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
+					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
 					httpmock.RegisterResponder("GET", u, r)
 					_, err := c.ReadProject(expected.Id)
-					Expect(err).To(MatchError(&errResult))
+					Expect(err).To(MatchError(&errResult500))
 				})
 			})
 
@@ -186,10 +183,10 @@ var _ = Describe("Project", func() {
 		Context("and delete fails", func() {
 			Context("because of internal server error", func() {
 				It("handles the error", func() {
-					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
+					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
 					httpmock.RegisterResponder("DELETE", urlDel, r)
 					err := c.DeleteProject(delId)
-					Expect(err).To(MatchError(&errResult))
+					Expect(err).To(MatchError(&errResult500))
 				})
 			})
 			Context("because the project was not found", func() {
