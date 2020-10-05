@@ -175,7 +175,16 @@ var _ = Describe("Project", func() {
 					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
 					httpmock.RegisterResponder("DELETE", urlDel, r)
 					err := c.DeleteProject(delId)
-					Expect(err).To(MatchError(errResult))
+					Expect(err).To(MatchError(&errResult))
+				})
+			})
+			Context("because the project was not found", func() {
+				It("returns ErrNotFound", func() {
+					er := ErrorResult{Err: 404, Message: "Not Found"}
+					r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
+					httpmock.RegisterResponder("DELETE", urlDel, r)
+					err := c.DeleteProject(delId)
+					Expect(err).To(MatchError(ErrNotFound))
 				})
 			})
 		})
