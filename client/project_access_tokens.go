@@ -41,30 +41,44 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 		l.Err(err).Send()
 		return nil, err
 	}
-	if resp.StatusCode() != http.StatusOK {
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		pats := resp.Result().(*listProjectAccessTokensResponse).Result
+		return pats, nil
+	case http.StatusNotFound:
+		l.Warn().Msg("Project not found")
+		return nil, ErrNotFound
+	default:
 		errResp := resp.Error().(*ErrorResult)
-		l.Err(errResp).Send()
+		l.Err(errResp).Msg("Unexpected error")
 		return nil, errResp
 	}
-	pats := resp.Result().(*listProjectAccessTokensResponse).Result
-
-	return pats, nil
 }
 
 // ProjectAccessTokenByName returns the first project access token from the that
 // matches a given name. If there is no match it returns error ErrPATNotFound.
 func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
+	l := log.With().
+		Int("projectID", projectID).
+		Str("name", name).
+		Logger()
+	l.Debug().Msg("Get project access token by name")
+
 	var pat ProjectAccessToken
 	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
+		l.Err(err).
+			Msg("Error listing project access tokens")
 		return pat, err
 	}
 
 	for _, t := range tokens {
+		l.Debug().Msg("Found project access token with matching name")
 		if t.Name == name {
 			return t, nil
 		}
 	}
 
+	l.Warn().Msg("Could not find project access token with matching name")
 	return pat, ErrNotFound
 }

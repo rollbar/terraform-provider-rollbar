@@ -19,9 +19,12 @@ func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	r := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpatr)
 	httpmock.RegisterResponder("GET", u, r)
 
+	// Valid project ID
 	actual, err := s.client.ListProjectAccessTokens(projectID)
 	s.Nil(err)
 	s.Equal(lpatr.Result, actual)
+
+	// Invalid project ID
 }
 
 // TestProjectAccessTokenByName tests getting a project access token by name.
@@ -45,8 +48,9 @@ func (s *ClientTestSuite) TestProjectAccessTokenByName() {
 	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
-	// Invalid projectID
-	_, err = s.client.ProjectAccessTokenByName(-500, "this-name-does-not-exist")
-	s.NotNil(err)
-	s.NotEqual(ErrNotFound, err)
+	// Project ID not found
+	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, ErrorResult{Err: 404, Message: "Not Found"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
+	s.Equal(ErrNotFound, err)
 }
