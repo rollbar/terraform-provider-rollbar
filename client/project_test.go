@@ -51,6 +51,11 @@ func (s *ClientTestSuite) TestListProjects() {
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ListProjects()
 	s.NotNil(err)
+
+	// Server unreachable
+	httpmock.Reset()
+	_, err = s.client.ListProjects()
+	s.NotNil(err)
 }
 
 func (s *ClientTestSuite) TestCreateProject() {
@@ -78,6 +83,11 @@ func (s *ClientTestSuite) TestCreateProject() {
 	// Internal server error
 	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
 	httpmock.RegisterResponder("POST", u, r)
+	_, err = s.client.CreateProject(name)
+	s.NotNil(err)
+
+	// Server unreachable
+	httpmock.Reset()
 	_, err = s.client.CreateProject(name)
 	s.NotNil(err)
 }
@@ -108,6 +118,11 @@ func (s *ClientTestSuite) TestReadProject() {
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadProject(expected.Id)
 	s.Equal(err, &errResult500)
+
+	// Server unreachable
+	httpmock.Reset()
+	_, err = s.client.ReadProject(expected.Id)
+	s.NotNil(err)
 }
 
 func (s *ClientTestSuite) TestDeleteProject() {
@@ -152,4 +167,9 @@ func (s *ClientTestSuite) TestDeleteProject() {
 	httpmock.RegisterResponder("DELETE", urlDel, r)
 	err = s.client.DeleteProject(delId)
 	s.Equal(&errResult500, err)
+
+	// Server unreachable
+	httpmock.Reset()
+	err = s.client.DeleteProject(delId)
+	s.NotNil(err)
 }
