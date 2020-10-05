@@ -7,6 +7,7 @@ import (
 	"testing"
 )
 
+// TestListProjectAccessTokens tests listing  project access tokens.
 func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	teardown := setup()
 	defer teardown()
@@ -58,6 +59,8 @@ func (s *ClientTestSuite) TestListProjectAccessTokens() {
 	}
 }
 
+// TestGetProjectAccessTokenByProjectIDAndName tests getting a project access
+// token by name.
 func (s *ClientTestSuite) TestGetProjectAccessTokenByProjectIDAndName() {
 	teardown := setup()
 	defer teardown()
