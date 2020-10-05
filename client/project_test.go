@@ -126,12 +126,26 @@ var _ = Describe("Project", func() {
 			})
 		})
 		Context("and read fails", func() {
-			It("handles the error", func() {
-				responder := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
-				httpmock.RegisterResponder("GET", u, responder)
-				_, err := c.ReadProject(expected.Id)
-				Expect(err).To(MatchError(&errResult))
+
+			Context("because project not found", func() {
+				It("returns ErrNotFound", func() {
+					er := ErrorResult{Err: 404, Message: "Not Found"}
+					r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
+					httpmock.RegisterResponder("GET", u, r)
+					_, err := c.ReadProject(expected.Id)
+					Expect(err).To(MatchError(ErrNotFound))
+				})
 			})
+
+			Context("because of internal server error", func() {
+				It("handles the error", func() {
+					r := httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult)
+					httpmock.RegisterResponder("GET", u, r)
+					_, err := c.ReadProject(expected.Id)
+					Expect(err).To(MatchError(&errResult))
+				})
+			})
+
 		})
 
 	})

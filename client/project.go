@@ -159,7 +159,15 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		l.Err(err).Msg("Error reading project")
 		return nil, err
 	}
-	if resp.StatusCode() != http.StatusOK {
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		pr := resp.Result().(*ProjectResult)
+		l.Debug().Msg("Project successfully read")
+		return &pr.Result, nil
+	case http.StatusNotFound:
+		l.Warn().Msg("Project not found")
+		return nil, ErrNotFound
+	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
 			Int("StatusCode", resp.StatusCode()).
@@ -168,10 +176,6 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 			Msg("Error creating a project")
 		return nil, er
 	}
-
-	pr := resp.Result().(*ProjectResult)
-	l.Debug().Msg("Project successfully read")
-	return &pr.Result, nil
 }
 
 func (c *RollbarApiClient) DeleteProject(projectId int) error {
