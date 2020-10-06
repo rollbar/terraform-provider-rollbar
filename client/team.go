@@ -103,7 +103,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 }
 
-// ReadTeam gets a Rollbar team.
+// ReadTeam reads a Rollbar team from the API.
 func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	var t Team
 	l := log.With().
