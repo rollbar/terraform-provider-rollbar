@@ -97,11 +97,11 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 }
 
 type teamCreateResult struct {
-	Err    int  `json:"err"`
-	Result Team `json:"result"`
+	Err    int
+	Result Team
 }
 
 type teamListResult struct {
-	Err    int    `json:"err"`
-	Result []Team `json:"result"`
+	Err    int
+	Result []Team
 }
