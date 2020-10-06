@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Team represents a Rollbar team
 type Team struct {
 	ID          int             `json:"id"`
 	AccountID   int             `json:"account_id"`
@@ -15,14 +16,17 @@ type Team struct {
 	AccessLevel TeamAccessLevel `json:"access_level"`
 }
 
+// TeamAccessLevel represents the Rollbar team access level.
 type TeamAccessLevel string
 
+// Possible values for team access level
 const (
 	TeamAccessStandard = TeamAccessLevel("standard")
 	TeamAccessLight    = TeamAccessLevel("light")
 	TeamAccessView     = TeamAccessLevel("view")
 )
 
+// CreateTeam creates a new Rollbar team.
 func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team, error) {
 	var t Team
 	l := log.With().
@@ -68,6 +72,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 	}
 }
 
+// ListTeams lists all Rollbar teams
 func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	var teams []Team
 	u := apiUrl + pathTeamList
@@ -98,6 +103,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 }
 
+// ReadTeam gets a Rollbar team.
 func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	var t Team
 	l := log.With().
@@ -139,6 +145,10 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	}
 
 }
+
+/*
+ * Containers for unmarshalling API results
+ */
 
 type teamCreateResult struct {
 	Err    int
