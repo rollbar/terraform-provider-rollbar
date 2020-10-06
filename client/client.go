@@ -19,7 +19,7 @@ import (
 
 const apiUrl = "https://api.rollbar.com"
 
-// RollbarApiClient is a c for the Rollbar API
+// RollbarApiClient is a client for the Rollbar API
 type RollbarApiClient struct {
 	resty *resty.Client
 }
