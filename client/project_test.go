@@ -97,7 +97,7 @@ func (s *Suite) TestReadProject() {
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
 
 	// Success
-	pr := ProjectResult{Err: 0, Result: expected}
+	pr := projectResponse{Err: 0, Result: expected}
 	responder := httpmock.NewJsonResponderOrPanic(http.StatusOK, pr)
 	httpmock.RegisterResponder("GET", u, responder)
 	actual, err := s.client.ReadProject(expected.Id)
@@ -130,7 +130,7 @@ func (s *Suite) TestDeleteProject() {
 	urlList := apiUrl + pathProjectList
 
 	// Success
-	plr := ProjectListResult{}
+	plr := projectListResponse{}
 	for len(plr.Result) < 3 {
 		var p Project
 		gofakeit.Struct(&p)

@@ -17,7 +17,7 @@ func (s *Suite) TestRestyZeroLogger() {
 
 	// Debug log
 	s.client.resty.SetDebug(true)
-	lpr := ProjectListResult{}
+	lpr := projectListResponse{}
 	rOk := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpr)
 	httpmock.RegisterResponder("GET", u, rOk)
 	_, err := s.client.ListProjects()

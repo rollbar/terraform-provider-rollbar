@@ -59,16 +59,6 @@ type Project struct {
 	Status string `json:"status" model:"status" fake:"{randomstring:[enabled,disabled]}"`
 }
 
-type ProjectListResult struct {
-	Err    int       `json:"err"`
-	Result []Project `json:"result"`
-}
-
-type ProjectResult struct {
-	Err    int     `json:"err"`
-	Result Project `json:"result"`
-}
-
 // ListProjects queries API for the list of projects
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 	u := apiUrl + pathProjectList
@@ -77,7 +67,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		Logger()
 
 	resp, err := c.resty.R().
-		SetResult(ProjectListResult{}).
+		SetResult(projectListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
@@ -89,7 +79,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		l.Err(errResp).Send()
 		return nil, errResp
 	}
-	lpr := resp.Result().(*ProjectListResult)
+	lpr := resp.Result().(*projectListResponse)
 
 	// FIXME: After deleting a project through the API, it still shows up in
 	//  the list of projects returned by the API - only with its name set to
@@ -116,7 +106,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
-		SetResult(ProjectResult{}).
+		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
 	if err != nil {
@@ -134,7 +124,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		return nil, er
 	}
 
-	pr := resp.Result().(*ProjectResult)
+	pr := resp.Result().(*projectResponse)
 	return &pr.Result, nil
 }
 
@@ -149,7 +139,7 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	l.Debug().Msg("Reading project from API")
 
 	resp, err := c.resty.R().
-		SetResult(ProjectResult{}).
+		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"projectId": strconv.Itoa(projectId),
@@ -161,7 +151,7 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	}
 	switch resp.StatusCode() {
 	case http.StatusOK:
-		pr := resp.Result().(*ProjectResult)
+		pr := resp.Result().(*projectResponse)
 		l.Debug().Msg("Project successfully read")
 		return &pr.Result, nil
 	case http.StatusNotFound:
@@ -213,4 +203,18 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 			Msg("Error creating a project")
 		return er
 	}
+}
+
+/*
+ * Containers for unmarshalling API responses
+ */
+
+type projectListResponse struct {
+	Err    int       `json:"err"`
+	Result []Project `json:"result"`
+}
+
+type projectResponse struct {
+	Err    int     `json:"err"`
+	Result Project `json:"result"`
 }
