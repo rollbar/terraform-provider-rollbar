@@ -39,7 +39,7 @@ func NewClient(token string) (*RollbarApiClient, error) {
 	}
 
 	// Configure Resty to use Zerolog for logging
-	r.SetLogger(RestyZeroLogger{log.Logger})
+	r.SetLogger(restyZeroLogger{log.Logger})
 
 	// Rollbar client
 	c := RollbarApiClient{resty: r}
