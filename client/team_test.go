@@ -3,6 +3,8 @@ package client
 import (
 	"github.com/jarcoal/httpmock"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 func (s *Suite) TestCreateTeam() {
@@ -88,6 +90,43 @@ func (s *Suite) TestListTeams() {
 	s.NotNil(err)
 }
 
+func (s *Suite) TestReadTeam() {
+	// Setup API mock
+	teamId := 676974
+	u := apiUrl + pathTeamRead
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamId))
+	expected := Team{
+		ID:          676974,
+		AccountID:   317418,
+		Name:        "foobar",
+		AccessLevel: TeamAccessStandard,
+	}
+	sr := httpmock.NewStringResponse(http.StatusOK, teamReadResponse)
+	sr.Header.Add("Content-Type", "application/json")
+	r := httpmock.ResponderFromResponse(sr)
+	httpmock.RegisterResponder("GET", u, r)
+
+	// Successful create
+	actual, err := s.client.ReadTeam(teamId)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	// Invalid ID
+	_, err = s.client.ReadTeam(0)
+	s.NotNil(err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadTeam(teamId)
+	s.NotNil(err)
+
+	// Server unreachable
+	httpmock.Reset()
+	_, err = s.client.CreateTeam("foobar", TeamAccessStandard)
+	s.NotNil(err)
+}
+
 const teamCreateResponse = `
 {
     "err": 0,
@@ -124,6 +163,17 @@ const teamListResponse = `
         }
     ]
 }
+`
 
+const teamReadResponse = `
+{
+    "err": 0,
+    "result": {
+        "access_level": "standard",
+        "account_id": 317418,
+        "id": 676974,
+        "name": "foobar"
+    }
+}
 
 `

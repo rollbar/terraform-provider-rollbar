@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type Team struct {
@@ -49,11 +51,11 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 		// FIXME: currently API returns `200 OK` on successful create; but it
 		//  should instead return `201 Created`.
 		//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
+		r := resp.Result().(*teamCreateResult)
+		t = r.Result
 		l.Debug().
 			Interface("team", t).
 			Msg("Successfully created new team")
-		tcr := resp.Result().(*teamCreateResult)
-		t = tcr.Result
 		return t, nil
 	default:
 		er := resp.Error().(*ErrorResult)
@@ -79,11 +81,11 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 	switch resp.StatusCode() {
 	case http.StatusOK:
+		r := resp.Result().(*teamListResult)
+		teams = r.Result
 		log.Debug().
 			Interface("teams", teams).
 			Msg("Successfully listed teams")
-		tlr := resp.Result().(*teamListResult)
-		teams = tlr.Result
 		return teams, nil
 	default:
 		er := resp.Error().(*ErrorResult)
@@ -96,6 +98,48 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 }
 
+func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
+	var t Team
+	l := log.With().
+		Int("id", id).
+		Logger()
+	l.Debug().Msg("Reading team")
+
+	// Sanity check
+	if id == 0 {
+		return t, fmt.Errorf("id must be non-zero")
+	}
+
+	u := apiUrl + pathTeamRead
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
+	resp, err := c.resty.R().
+		SetResult(teamReadResult{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	if err != nil {
+		l.Err(err).Msg("Error creating team")
+		return t, err
+	}
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		r := resp.Result().(*teamReadResult)
+		t = r.Result
+		l.Debug().
+			Interface("team", t).
+			Msg("Successfully read team")
+		return t, nil
+	default:
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error reading team")
+		return t, er
+	}
+
+}
+
 type teamCreateResult struct {
 	Err    int
 	Result Team
@@ -104,4 +148,9 @@ type teamCreateResult struct {
 type teamListResult struct {
 	Err    int
 	Result []Team
+}
+
+type teamReadResult struct {
+	Err    int
+	Result Team
 }
