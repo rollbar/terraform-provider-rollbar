@@ -12,8 +12,8 @@ import "fmt"
 
 // ErrorResult represents an error result returned by Rollbar API.
 type ErrorResult struct {
-	Err     int    `json:"err"`
-	Message string `jason:"message"`
+	Err     int
+	Message string
 }
 
 func (er ErrorResult) Error() string {

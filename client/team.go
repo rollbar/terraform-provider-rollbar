@@ -10,9 +10,9 @@ import (
 
 // Team represents a Rollbar team.
 type Team struct {
-	ID          int             `json:"id"`
-	AccountID   int             `json:"account_id"`
-	Name        string          `json:"name"`
+	ID          int
+	AccountID   int `json:"account_id"`
+	Name        string
 	AccessLevel TeamAccessLevel `json:"access_level"`
 }
 

@@ -16,12 +16,12 @@ import (
 
 // Project represents a Rollbar project.
 type Project struct {
-	Id           int    `json:"id" model:"id" fake:"{number:1,1000000}""`
-	Name         string `json:"name" model:"name" fake:"{hackernoun}"`
+	Id           int    `model:"id" fake:"{number:1,1000000}""`
+	Name         string `model:"name" fake:"{hackernoun}"`
 	AccountId    int    `json:"account_id" model:"account_id" fake:"{number:1,1000000}"`
 	DateCreated  int    `json:"date_created" model:"date_created" fake:"{number:1,1000000}"`
 	DateModified int    `json:"date_modified" model:"date_modified" fake:"{number:1,1000000}"`
-	Status       string `json:"status" model:"status" fake:"{randomstring:[enabled,disabled]}"`
+	Status       string `model:"status" fake:"{randomstring:[enabled,disabled]}"`
 }
 
 // FIXME: finish implementing the entire set of Project fields

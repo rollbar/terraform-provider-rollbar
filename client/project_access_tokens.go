@@ -10,8 +10,8 @@ import (
 type ProjectAccessToken struct {
 	ProjectID    int    `json:"project_id" fake:"{number1,1000000}"`
 	AccessToken  string `json:"access_token"`
-	Name         string `json:"name" fake:"{hackernoun}"`
-	Status       string `json:"status" fake:"{randomwords:[enabled,disabled]}"`
+	Name         string `fake:"{hackernoun}"`
+	Status       string `fake:"{randomwords:[enabled,disabled]}"`
 	DateCreated  int    `json:"date_created"`
 	DateModified int    `json:"date_modified"`
 }
@@ -19,7 +19,7 @@ type ProjectAccessToken struct {
 // listProjectAccessTokensResponse represents the list-project-access-tokens
 // response.
 type listProjectAccessTokensResponse struct {
-	Error  int `json:"err"`
+	Error  int
 	Result []ProjectAccessToken
 }
 
