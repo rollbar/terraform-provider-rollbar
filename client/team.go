@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Team represents a Rollbar team
+// Team represents a Rollbar team.
 type Team struct {
 	ID          int             `json:"id"`
 	AccountID   int             `json:"account_id"`
@@ -72,7 +72,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 	}
 }
 
-// ListTeams lists all Rollbar teams
+// ListTeams lists all Rollbar teams.
 func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	var teams []Team
 	u := apiUrl + pathTeamList

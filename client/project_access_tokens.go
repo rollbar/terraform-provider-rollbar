@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// ProjectAccessToken represents a Rollbar project access token
+// ProjectAccessToken represents a Rollbar project access token.
 type ProjectAccessToken struct {
 	ProjectID    int    `json:"project_id" fake:"{number1,1000000}"`
 	AccessToken  string `json:"access_token"`
@@ -16,13 +16,15 @@ type ProjectAccessToken struct {
 	DateModified int    `json:"date_modified"`
 }
 
-// listProjectAccessTokensResponse represents the list-project-access-tokens response
+// listProjectAccessTokensResponse represents the list-project-access-tokens
+// response.
 type listProjectAccessTokensResponse struct {
 	Error  int `json:"err"`
 	Result []ProjectAccessToken
 }
 
-// ListProjectAccessTokens lists the project's access tokens.
+// ListProjectAccessTokens lists the Rollbar project access tokens for the
+// specified Rollbar project.
 func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
 	u := apiUrl + pathPATList
 
@@ -56,7 +58,7 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 }
 
 // ProjectAccessTokenByName returns the first project access token from the that
-// matches a given name. If there is no match it returns error ErrPATNotFound.
+// matches a given name.
 func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
 	l := log.With().
 		Int("projectID", projectID).

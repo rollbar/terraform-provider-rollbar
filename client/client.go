@@ -19,12 +19,12 @@ import (
 
 const apiUrl = "https://api.rollbar.com"
 
-// RollbarApiClient is a client for the Rollbar API
+// RollbarApiClient is a client for the Rollbar API.
 type RollbarApiClient struct {
 	resty *resty.Client
 }
 
-// NewClient sets up a new Rollbar API client
+// NewClient sets up a new Rollbar API client.
 func NewClient(token string) (*RollbarApiClient, error) {
 	log.Debug().Msg("Initializing Rollbar client")
 
@@ -46,7 +46,7 @@ func NewClient(token string) (*RollbarApiClient, error) {
 	return &c, nil
 }
 
-// GetHttpClient allows access to the underlying http.Client object, for use
+// GetHttpClient allows access to the underlying http.Client object.  Useful
 // with mocking tools.
 func (c *RollbarApiClient) GetHttpClient() *http.Client {
 	return c.resty.GetClient()

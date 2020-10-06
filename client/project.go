@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-// Project is a Rollbar project
+// Project represents a Rollbar project.
 type Project struct {
 	Id           int    `json:"id" model:"id" fake:"{number:1,1000000}""`
 	Name         string `json:"name" model:"name" fake:"{hackernoun}"`
@@ -61,7 +61,7 @@ type Project struct {
 	} `json:"settings_data"`
 */
 
-// ListProjects queries API for the list of projects
+// ListProjects lists all Rollbar projects.
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 	u := apiUrl + pathProjectList
 	l := log.With().
@@ -97,7 +97,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 	return cleaned, nil
 }
 
-// CreateProject creates a new project
+// CreateProject creates a new Rollbar project.
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	u := apiUrl + pathProjectCreate
 	l := log.With().
@@ -130,7 +130,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	return &pr.Result, nil
 }
 
-// ReadProject fetches data for the specified Project from the Rollbar API.
+// ReadProject a Rollbar project from the API.
 func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	u := apiUrl + pathProjectRead
 
@@ -170,6 +170,7 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	}
 }
 
+// DeleteProject deletes a Rollbar project.
 func (c *RollbarApiClient) DeleteProject(projectId int) error {
 	u := apiUrl + pathProjectDelete
 	l := log.With().
