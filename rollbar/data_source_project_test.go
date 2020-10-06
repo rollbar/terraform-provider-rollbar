@@ -15,8 +15,7 @@ func TestAccRollbarProjectsDataSource(t *testing.T) {
 	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-		//ProviderFactories: testAccProviderFactories(),
+		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
