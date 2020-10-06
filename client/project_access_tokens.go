@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
@@ -14,13 +15,6 @@ type ProjectAccessToken struct {
 	Status       string `fake:"{randomwords:[enabled,disabled]}"`
 	DateCreated  int    `json:"date_created"`
 	DateModified int    `json:"date_modified"`
-}
-
-// listProjectAccessTokensResponse represents the list-project-access-tokens
-// response.
-type listProjectAccessTokensResponse struct {
-	Error  int
-	Result []ProjectAccessToken
 }
 
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
@@ -84,4 +78,17 @@ func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, name string) (P
 
 	l.Warn().Msg("Could not find project access token with matching name")
 	return pat, ErrNotFound
+}
+
+func (c *RollbarApiClient) DeleteProjectAccessToken(token string) error {
+	return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
+}
+
+/*
+ * Containers for unmarshalling Rollbar API responses
+ */
+
+type listProjectAccessTokensResponse struct {
+	Error  int
+	Result []ProjectAccessToken
 }

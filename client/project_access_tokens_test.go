@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// TestListProjectAccessTokens tests listing  project access tokens.
+// TestListProjectAccessTokens tests listing Rollbar project access tokens.
 func (s *Suite) TestListProjectAccessTokens() {
 	projectID := 12116
 	u := apiUrl + pathPATList
@@ -31,8 +31,9 @@ func (s *Suite) TestListProjectAccessTokens() {
 	s.NotEqual(ErrNotFound, err)
 }
 
-// TestProjectAccessTokenByName tests getting a project access token by name.
-func (s *Suite) TestProjectAccessTokenByName() {
+// TestReadProjectAccessToken tests reading a Rollbar project access token from
+// the API.
+func (s *Suite) TestReadProjectAccessToken() {
 	projectID := 12116
 	u := apiUrl + pathPATList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
@@ -65,6 +66,12 @@ func (s *Suite) TestProjectAccessTokenByName() {
 	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
 	s.NotNil(err)
 	s.NotEqual(ErrNotFound, err)
+}
+
+// TestDeleteProjectAccessToken tests deleting a Rollbar project access token.
+func (s *Suite) TestDeleteProjectAccessToken() {
+	err := s.client.DeleteProjectAccessToken("does_not_matter")
+	s.NotNil(err) // Delete PAT is not yet implemented in Rollbar API
 }
 
 /*
