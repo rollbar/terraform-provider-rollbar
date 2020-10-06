@@ -43,7 +43,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 	u := apiUrl + pathTeamCreate
 	resp, err := c.resty.R().
 		SetBody(map[string]interface{}{"name": name}).
-		SetResult(teamCreateResult{}).
+		SetResult(teamCreateResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
 	if err != nil {
@@ -55,7 +55,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 		// FIXME: currently API returns `200 OK` on successful create; but it
 		//  should instead return `201 Created`.
 		//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-		r := resp.Result().(*teamCreateResult)
+		r := resp.Result().(*teamCreateResponse)
 		t = r.Result
 		l.Debug().
 			Interface("team", t).
@@ -77,7 +77,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	var teams []Team
 	u := apiUrl + pathTeamList
 	resp, err := c.resty.R().
-		SetResult(teamListResult{}).
+		SetResult(teamListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
@@ -86,7 +86,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 	switch resp.StatusCode() {
 	case http.StatusOK:
-		r := resp.Result().(*teamListResult)
+		r := resp.Result().(*teamListResponse)
 		teams = r.Result
 		log.Debug().
 			Interface("teams", teams).
@@ -119,7 +119,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	u := apiUrl + pathTeamRead
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
 	resp, err := c.resty.R().
-		SetResult(teamReadResult{}).
+		SetResult(teamReadResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
@@ -128,7 +128,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	}
 	switch resp.StatusCode() {
 	case http.StatusOK:
-		r := resp.Result().(*teamReadResult)
+		r := resp.Result().(*teamReadResponse)
 		t = r.Result
 		l.Debug().
 			Interface("team", t).
@@ -184,20 +184,20 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 }
 
 /*
- * Containers for unmarshalling API results
+ * Containers for unmarshalling API responses
  */
 
-type teamCreateResult struct {
+type teamCreateResponse struct {
 	Err    int
 	Result Team
 }
 
-type teamListResult struct {
+type teamListResponse struct {
 	Err    int
 	Result []Team
 }
 
-type teamReadResult struct {
+type teamReadResponse struct {
 	Err    int
 	Result Team
 }

@@ -21,7 +21,7 @@ func (s *Suite) TestCreateTeam() {
 	// FIXME: currently API returns `200 OK` on successful create; but it should
 	//  instead return `201 Created`.
 	//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-	sr := httpmock.NewStringResponse(http.StatusOK, teamCreateResponse)
+	sr := httpmock.NewStringResponse(http.StatusOK, teamCreateJsonResponse)
 	sr.Header.Add("Content-Type", "application/json")
 	//r := httpmock.ResponderFromResponse(sr)
 	r := func(req *http.Request) (*http.Response, error) {
@@ -80,7 +80,7 @@ func (s *Suite) TestListTeams() {
 			Name:        "Owners",
 		},
 	}
-	sr := httpmock.NewStringResponse(http.StatusOK, teamListResponse)
+	sr := httpmock.NewStringResponse(http.StatusOK, teamListJsonResponse)
 	sr.Header.Add("Content-Type", "application/json")
 	r := httpmock.ResponderFromResponse(sr)
 	httpmock.RegisterResponder("GET", u, r)
@@ -113,7 +113,7 @@ func (s *Suite) TestReadTeam() {
 		Name:        "foobar",
 		AccessLevel: TeamAccessStandard,
 	}
-	sr := httpmock.NewStringResponse(http.StatusOK, teamReadResponse)
+	sr := httpmock.NewStringResponse(http.StatusOK, teamReadJsonResponse)
 	sr.Header.Add("Content-Type", "application/json")
 	r := httpmock.ResponderFromResponse(sr)
 	httpmock.RegisterResponder("GET", u, r)
@@ -173,7 +173,7 @@ func (s *Suite) TestDeleteTeam() {
  * Actual recorded responses from API (06 Oct 2020)
  */
 
-const teamCreateResponse = `
+const teamCreateJsonResponse = `
 {
     "err": 0,
     "result": {
@@ -185,7 +185,7 @@ const teamCreateResponse = `
 }
 `
 
-const teamListResponse = `
+const teamListJsonResponse = `
 {
     "err": 0,
     "result": [
@@ -211,7 +211,7 @@ const teamListResponse = `
 }
 `
 
-const teamReadResponse = `
+const teamReadJsonResponse = `
 {
     "err": 0,
     "result": {
