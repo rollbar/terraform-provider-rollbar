@@ -16,4 +16,5 @@ const (
 	pathProjectRead   = "/api/1/project/{projectId}"
 	pathPATList       = "/api/1/project/{projectId}/access_tokens"
 	pathTeamCreate    = "/api/1/teams"
+	pathTeamList      = "/api/1/teams"
 )

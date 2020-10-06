@@ -61,12 +61,47 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 			Int("StatusCode", resp.StatusCode()).
 			Str("Status", resp.Status()).
 			Interface("ErrorResult", er).
-			Msg("Error creating a project")
+			Msg("Error creating team")
 		return t, er
+	}
+}
+
+func (c *RollbarApiClient) ListTeams() ([]Team, error) {
+	var teams []Team
+	u := apiUrl + pathTeamList
+	resp, err := c.resty.R().
+		SetResult(teamListResult{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	if err != nil {
+		log.Err(err).Msg("Error listing teams")
+		return teams, err
+	}
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		log.Debug().
+			Interface("teams", teams).
+			Msg("Successfully listed teams")
+		tlr := resp.Result().(*teamListResult)
+		teams = tlr.Result
+		return teams, nil
+	default:
+		er := resp.Error().(*ErrorResult)
+		log.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error listing teams")
+		return teams, er
 	}
 }
 
 type teamCreateResult struct {
 	Err    int  `json:"err"`
 	Result Team `json:"result"`
+}
+
+type teamListResult struct {
+	Err    int    `json:"err"`
+	Result []Team `json:"result"`
 }
