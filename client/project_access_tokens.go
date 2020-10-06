@@ -57,20 +57,20 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 	}
 }
 
-// ProjectAccessTokenByName returns the first project access token from the that
-// matches a given name.
-func (c *RollbarApiClient) ProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
+// ReadProjectAccessToken reads a Rollbar project access token from the API.  It
+// returns the first token that matches `name`.
+func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, name string) (ProjectAccessToken, error) {
 	l := log.With().
 		Int("projectID", projectID).
 		Str("name", name).
 		Logger()
-	l.Debug().Msg("Get project access token by name")
+	l.Debug().Msg("Reading project access token")
 
 	var pat ProjectAccessToken
 	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		l.Err(err).
-			Msg("Error listing project access tokens")
+			Msg("Error reading project access token")
 		return pat, err
 	}
 

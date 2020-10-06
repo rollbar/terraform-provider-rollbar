@@ -44,25 +44,25 @@ func (s *Suite) TestProjectAccessTokenByName() {
 
 	// PAT with name exists
 	actual := lpatr.Result[0]
-	expected, err := s.client.ProjectAccessTokenByName(projectID, actual.Name)
+	expected, err := s.client.ReadProjectAccessToken(projectID, actual.Name)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
 	// PAT with name does not exist
-	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
 	// Project ID not found
 	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, ErrorResult{Err: 404, Message: "Not Found"})
 	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
 	// Internal server error
 	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
 		ErrorResult{Err: 500, Message: "Internal Server Error"})
 	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ProjectAccessTokenByName(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
 	s.NotNil(err)
 	s.NotEqual(ErrNotFound, err)
 }
