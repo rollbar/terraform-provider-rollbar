@@ -24,7 +24,7 @@ type RollbarApiClient struct {
 	resty *resty.Client
 }
 
-// NewClient sets up a new Rollbar API c
+// NewClient sets up a new Rollbar API client
 func NewClient(token string) (*RollbarApiClient, error) {
 	log.Debug().Msg("Initializing Rollbar client")
 
