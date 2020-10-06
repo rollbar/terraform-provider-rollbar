@@ -11,7 +11,6 @@ func (s *Suite) TestRestyZeroLogger() {
 	// For the most part we're just testing that nothing blows up.  No panics
 	// means the test is passing.
 
-	EnableRestyZerolog(s.client.resty)
 	s.client.resty.EnableTrace()
 
 	u := apiUrl + pathProjectList

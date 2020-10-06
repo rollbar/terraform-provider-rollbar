@@ -28,15 +28,21 @@ type RollbarApiClient struct {
 func NewClient(token string) (*RollbarApiClient, error) {
 	log.Debug().Msg("Initializing Rollbar client")
 
+	// New Resty HTTP client
+	r := resty.New()
+
 	// Authentication
-	r := resty.New() // HTTP c
 	if token != "" {
 		r = r.SetHeader("X-Rollbar-Access-Token", token)
 	} else {
 		log.Warn().Msg("Rollbar API token not set")
 	}
-	c := RollbarApiClient{resty: r}
 
+	// Configure Resty to use Zerolog for logging
+	r.SetLogger(RestyZeroLogger{log.Logger})
+
+	// Rollbar client
+	c := RollbarApiClient{resty: r}
 	return &c, nil
 }
 
