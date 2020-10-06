@@ -9,7 +9,7 @@ import (
 )
 
 // TestListProjectAccessTokens tests listing  project access tokens.
-func (s *ClientTestSuite) TestListProjectAccessTokens() {
+func (s *Suite) TestListProjectAccessTokens() {
 	projectID := 12116
 	u := apiUrl + pathPATList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
@@ -32,7 +32,7 @@ func (s *ClientTestSuite) TestListProjectAccessTokens() {
 }
 
 // TestProjectAccessTokenByName tests getting a project access token by name.
-func (s *ClientTestSuite) TestProjectAccessTokenByName() {
+func (s *Suite) TestProjectAccessTokenByName() {
 	projectID := 12116
 	u := apiUrl + pathPATList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))

@@ -22,13 +22,13 @@ func fixture(path string) string {
  * Testify setup
  */
 
-// ClientTestSuite is a Testify test suite for the Rollbar API client
-type ClientTestSuite struct {
+// Suite is a Testify test suite for the Rollbar API client
+type Suite struct {
 	suite.Suite
 	client *RollbarApiClient
 }
 
-func (s *ClientTestSuite) SetupSuite() {
+func (s *Suite) SetupSuite() {
 	// Seed gofakeit random generator
 	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
 
@@ -39,16 +39,16 @@ func (s *ClientTestSuite) SetupSuite() {
 	s.client = c
 }
 
-func (s *ClientTestSuite) TearDownSuite() {
+func (s *Suite) TearDownSuite() {
 	httpmock.DeactivateAndReset()
 }
 
-func (s *ClientTestSuite) BeforeTest() {
+func (s *Suite) BeforeTest() {
 	httpmock.Reset()
 }
 
 // TestRollbarClientTestSuite connects the Testify test suite to the 'go test'
 // built-in testing framework.
 func TestRollbarClientTestSuite(t *testing.T) {
-	suite.Run(t, new(ClientTestSuite))
+	suite.Run(t, new(Suite))
 }

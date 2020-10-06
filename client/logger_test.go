@@ -7,7 +7,7 @@ import (
 )
 
 // TestRestyZeroLogger tests Resty trace logging using Zerolog as the logger.
-func (s *ClientTestSuite) TestRestyZeroLogger() {
+func (s *Suite) TestRestyZeroLogger() {
 	// For the most part we're just testing that nothing blows up.  No panics
 	// means the test is passing.
 

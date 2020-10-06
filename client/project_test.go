@@ -12,7 +12,7 @@ import (
 
 var errResult500 = ErrorResult{Err: 500, Message: "Internal Server Error"}
 
-func (s *ClientTestSuite) TestListProjects() {
+func (s *Suite) TestListProjects() {
 	u := apiUrl + pathProjectList
 
 	// Success
@@ -56,7 +56,7 @@ func (s *ClientTestSuite) TestListProjects() {
 	s.NotNil(err)
 }
 
-func (s *ClientTestSuite) TestCreateProject() {
+func (s *Suite) TestCreateProject() {
 	u := apiUrl + pathProjectCreate
 	name := gofakeit.HackerNoun()
 
@@ -90,7 +90,7 @@ func (s *ClientTestSuite) TestCreateProject() {
 	s.NotNil(err)
 }
 
-func (s *ClientTestSuite) TestReadProject() {
+func (s *Suite) TestReadProject() {
 	var expected Project
 	gofakeit.Struct(&expected)
 	u := apiUrl + pathProjectRead
@@ -123,7 +123,7 @@ func (s *ClientTestSuite) TestReadProject() {
 	s.NotNil(err)
 }
 
-func (s *ClientTestSuite) TestDeleteProject() {
+func (s *Suite) TestDeleteProject() {
 	delId := gofakeit.Number(0, 1000000)
 	urlDel := apiUrl + pathProjectDelete
 	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
