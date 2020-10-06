@@ -130,7 +130,8 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	return &pr.Result, nil
 }
 
-// ReadProject a Rollbar project from the API.
+// ReadProject a Rollbar project from the API. If no matching project is found,
+// returns error ErrNotFound.
 func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	u := apiUrl + pathProjectRead
 
@@ -170,7 +171,8 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	}
 }
 
-// DeleteProject deletes a Rollbar project.
+// DeleteProject deletes a Rollbar project. If no matching project is found,
+// returns error ErrNotFound.
 func (c *RollbarApiClient) DeleteProject(projectId int) error {
 	u := apiUrl + pathProjectDelete
 	l := log.With().

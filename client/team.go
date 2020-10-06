@@ -103,7 +103,8 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 }
 
-// ReadTeam reads a Rollbar team from the API.
+// ReadTeam reads a Rollbar team from the API. If no matching team is found,
+// returns error ErrNotFound.
 func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	var t Team
 	l := log.With().
@@ -146,7 +147,8 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 
 }
 
-// DeleteTeam deletes a Rollbar team.
+// DeleteTeam deletes a Rollbar team. If no matching team is found, returns
+// error ErrNotFound.
 func (c *RollbarApiClient) DeleteTeam(id int) error {
 	l := log.With().
 		Int("id", id).
