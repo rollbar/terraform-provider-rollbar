@@ -146,6 +146,43 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 
 }
 
+// DeleteTeam deletes a Rollbar team.
+func (c *RollbarApiClient) DeleteTeam(id int) error {
+	l := log.With().
+		Int("id", id).
+		Logger()
+	l.Debug().Msg("Deleting team")
+
+	// Sanity check
+	if id == 0 {
+		return fmt.Errorf("id must be non-zero")
+	}
+
+	u := apiUrl + pathTeamDelete
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
+	resp, err := c.resty.R().
+		SetError(ErrorResult{}).
+		Delete(u)
+	if err != nil {
+		l.Err(err).Msg("Error deleting team")
+		return err
+	}
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		l.Debug().Msg("Successfully deleted team")
+		return nil
+	default:
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error deleting team")
+		return er
+	}
+
+}
+
 /*
  * Containers for unmarshalling API results
  */
