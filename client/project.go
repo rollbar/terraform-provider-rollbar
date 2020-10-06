@@ -21,43 +21,45 @@ type Project struct {
 	AccountId    int    `json:"account_id" model:"account_id" fake:"{number:1,1000000}"`
 	DateCreated  int    `json:"date_created" model:"date_created" fake:"{number:1,1000000}"`
 	DateModified int    `json:"date_modified" model:"date_modified" fake:"{number:1,1000000}"`
-	//SettingsData struct {
-	//	Grouping struct {
-	//		AutoUpgrade    bool     `json:"auto_upgrade"`
-	//		RecentVersions []string `json:"recent_versions"`
-	//	} `json:"grouping"`
-	//	Integrations struct {
-	//		Asana       interface{} `json:"asana"`
-	//		AzureDevops interface{} `json:"azuredevops"`
-	//		Bitbucket   interface{} `json:"bitbucket"`
-	//		/*
-	//			"campfire": {},
-	//			"ciscospark": {},
-	//			"clubhouse": {},
-	//			"datadog": {},
-	//			"email": {
-	//				"enabled": true
-	//			},
-	//			"flowdock": {},
-	//			"github": {},
-	//			"gitlab": {},
-	//			"hipchat": {},
-	//			"jira": {},
-	//			"lightstep": {},
-	//			"pagerduty": {},
-	//			"pivotal": {},
-	//			"slack": {},
-	//			"sprintly": {},
-	//			"trello": {},
-	//			"victorops": {},
-	//			"webhook": {}
-	//		*/
-	//	} `json:"integrations"`
-	//	TimeFormat string `json:"time_format"`
-	//	Timezone   string `json:"timezone"`
-	//} `json:"settings_data"`
-	Status string `json:"status" model:"status" fake:"{randomstring:[enabled,disabled]}"`
+	Status       string `json:"status" model:"status" fake:"{randomstring:[enabled,disabled]}"`
 }
+
+// FIXME: finish implementing the entire set of Project fields
+/*
+	SettingsData struct {
+		Grouping struct {
+			AutoUpgrade    bool     `json:"auto_upgrade"`
+			RecentVersions []string `json:"recent_versions"`
+		} `json:"grouping"`
+		Integrations struct {
+			Asana       interface{} `json:"asana"`
+			AzureDevops interface{} `json:"azuredevops"`
+			Bitbucket   interface{} `json:"bitbucket"`
+				//"campfire": {},
+				//"ciscospark": {},
+				//"clubhouse": {},
+				//"datadog": {},
+				//"email": {
+				//	"enabled": true
+				//},
+				//"flowdock": {},
+				//"github": {},
+				//"gitlab": {},
+				//"hipchat": {},
+				//"jira": {},
+				//"lightstep": {},
+				//"pagerduty": {},
+				//"pivotal": {},
+				//"slack": {},
+				//"sprintly": {},
+				//"trello": {},
+				//"victorops": {},
+				//"webhook": {}
+		} `json:"integrations"`
+		TimeFormat string `json:"time_format"`
+		Timezone   string `json:"timezone"`
+	} `json:"settings_data"`
+*/
 
 // ListProjects queries API for the list of projects
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
