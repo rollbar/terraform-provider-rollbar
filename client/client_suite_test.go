@@ -14,7 +14,7 @@ import (
 // fixture loads a JSON file from the fixtures folder and returns it as a string
 func fixture(path string) string {
 	const fixPath = "testdata/fixtures/"
-	b, err := ioutil.ReadFile(fixPath + path)
+	b, err := ioutil.ReadFile(fixPath + path) // #nosec
 	if err != nil {
 		panic(err)
 	}
