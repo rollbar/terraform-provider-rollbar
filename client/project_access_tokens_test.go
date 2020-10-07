@@ -1,8 +1,10 @@
 package client
 
 import (
+	"encoding/json"
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,10 +13,10 @@ import (
 // TestListProjectAccessTokens tests listing Rollbar project access tokens.
 func (s *Suite) TestListProjectAccessTokens() {
 	projectID := 12116
-	u := apiUrl + pathPATList
+	u := apiUrl + pathPatList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	var lpatr listProjectAccessTokensResponse
+	var lpatr patListResponse
 	gofakeit.Struct(&lpatr)
 	r := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpatr)
 	httpmock.RegisterResponder("GET", u, r)
@@ -35,10 +37,10 @@ func (s *Suite) TestListProjectAccessTokens() {
 // the API.
 func (s *Suite) TestReadProjectAccessToken() {
 	projectID := 12116
-	u := apiUrl + pathPATList
+	u := apiUrl + pathPatList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	var lpatr listProjectAccessTokensResponse
+	var lpatr patListResponse
 	gofakeit.Struct(&lpatr)
 	r := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpatr)
 	httpmock.RegisterResponder("GET", u, r)
@@ -74,10 +76,44 @@ func (s *Suite) TestDeleteProjectAccessToken() {
 	s.NotNil(err) // Delete PAT is not yet implemented in Rollbar API
 }
 
+func (s *Suite) TestCreateProjectAccessToken() {
+	projID := 411334
+
+	patArgs := ProjectAccessTokenArgs{
+		ProjectID: projID,
+		Name:      "foobar",
+		Scopes:    []ProjectAccessTokenScope{PATScopeRead, PATScopeWrite},
+	}
+	u := apiUrl + pathPatCreate
+	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
+	rs, err := httpmock.NewJsonResponse(http.StatusOK, patCreateJsonResponse)
+	s.Nil(err)
+	var r httpmock.Responder
+	r = func(req *http.Request) (*http.Response, error) {
+		args := ProjectAccessTokenArgs{}
+		err := json.NewDecoder(req.Body).Decode(&args)
+		log.Debug().
+			Interface("args", args).
+			Msg("arguments sent to API")
+		s.Nil(err)
+		s.Equal(patArgs.Name, args.Name)
+		s.Equal(patArgs.Scopes, args.Scopes)
+		return rs, nil
+	}
+	httpmock.RegisterResponder("POST", u, r)
+	t, err := s.client.CreateProjectAccessToken(patArgs)
+	s.Nil(err)
+	s.NotEmpty(t.AccessToken)
+	s.Equal(patArgs.Name, t.Name)
+	s.Equal(patArgs.Scopes, t.Scopes)
+	s.Equal(patArgs.ProjectID, t.ProjectID)
+}
+
 /*
  * Actual recorded responses from Rollbar API
  */
 
+// language=JSON
 const patListJsonResponse = `
 {
     "err": 0,
@@ -146,8 +182,32 @@ const patListJsonResponse = `
 }
 `
 
+// language=JSON
 const patUpdateJsonResponse = `
 {
     "err": 0
+}
+`
+
+// language=JSON
+const patCreateJsonResponse = `
+{
+    "err": 0,
+    "result": {
+        "access_token": "ae9f890512bc4e03ba7084811caa96f8",
+        "cur_rate_limit_window_count": 0,
+        "cur_rate_limit_window_start": 1601987929,
+        "date_created": 1601987929,
+        "date_modified": 1601987929,
+        "name": "foobar",
+        "project_id": 411334,
+        "rate_limit_window_count": null,
+        "rate_limit_window_size": null,
+        "scopes": [
+            "read",
+            "write"
+        ],
+        "status": "enabled"
+    }
 }
 `
