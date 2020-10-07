@@ -11,14 +11,23 @@ import (
 	"testing"
 )
 
-// fixture loads a JSON file from the fixtures folder and returns it as a string
-func fixture(path string) string {
-	const fixPath = "testdata/fixtures/"
-	b, err := ioutil.ReadFile(fixPath + path) // #nosec
+// fixtureResponder creates an httpmock.Responder based on a fixture file
+// loaded from folder client/testdata/.
+func fixtureResponder(fixturePath string, status int) *httpmock.Responder {
+	const fixtureFolder = "testdata/fixtures/"
+	b, err := ioutil.ReadFile(fixtureFolder + fixturePath) // #nosec
 	if err != nil {
-		panic(err)
+		log.Fatal().
+			Err(err).
+			Str("fixtureFolder", fixtureFolder).
+			Str("fixturePath", fixturePath).
+			Msg("Error loading fixture")
 	}
-	return string(b)
+	s := string(b)
+	rs := httpmock.NewStringResponse(status, s)
+	rs.Header.Add("Content-Type", "application/json")
+	r := httpmock.ResponderFromResponse(rs)
+	return &r
 }
 
 /*
