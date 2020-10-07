@@ -83,7 +83,6 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		return nil, ErrUnauthorized
 	case http.StatusOK:
 		l.Debug().Msg("Successfully listed projects")
-		break
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
