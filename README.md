@@ -43,6 +43,13 @@ export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1
 terraform apply   # or any command that calls the Rollbar provider
 ```
 
+This is necessary because Terraform providers aren’t _actually_ plugins - they
+don’t get loaded into the running Terraform process.  Rather a provider is a
+stand alone program that is started as a child processes and communicates with
+Terraform via gRPC.  Anything that child process writes to stdout/stderr is
+lost.  So if we want debug logging we must write to a file.
+
+
 ### Dev Script
 
 Running `make dev` will:
