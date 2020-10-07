@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
 	"net/http"
@@ -16,27 +15,26 @@ func (s *Suite) TestListProjects() {
 	u := apiUrl + pathProjectList
 
 	// Success
-	stringResponse := httpmock.NewStringResponse(200,
-		fixture("projects/list.json"))
+	stringResponse := httpmock.NewStringResponse(200, projectListJsonResponse)
 	stringResponse.Header.Add("Content-Type", "application/json")
 	r := httpmock.ResponderFromResponse(stringResponse)
 	httpmock.RegisterResponder("GET", u, r)
 	expected := []Project{
 		{
-			Id:           106671,
-			AccountId:    8608,
-			DateCreated:  1489139046,
-			DateModified: 1549293583,
-			Name:         "Client-Config",
+			Id:           411704,
+			Name:         "bar",
+			AccountId:    317418,
 			Status:       "enabled",
+			DateCreated:  1602085345,
+			DateModified: 1602085345,
 		},
 		{
-			Id:           12116,
-			AccountId:    8608,
-			DateCreated:  1407933922,
-			DateModified: 1556814300,
-			Name:         "My",
+			Id:           411703,
+			Name:         "foo",
+			AccountId:    317418,
 			Status:       "enabled",
+			DateCreated:  1602085340,
+			DateModified: 1602085340,
 		},
 	}
 	actual, err := s.client.ListProjects()
@@ -65,13 +63,12 @@ func (s *Suite) TestListProjects() {
 
 func (s *Suite) TestCreateProject() {
 	u := apiUrl + pathProjectCreate
-	name := gofakeit.HackerNoun()
+	name := "baz"
 
 	// Success
-	f := fmt.Sprintf(fixture("projects/read.json"), name)
 	// FIXME: The actual Rollbar API sends http.StatusOK; but it
 	//  _should_ send http.StatusCreated
-	stringResponse := httpmock.NewStringResponse(http.StatusOK, f)
+	stringResponse := httpmock.NewStringResponse(http.StatusOK, projectCreateJsonResponse)
 	stringResponse.Header.Add("Content-Type", "application/json")
 	r := func(req *http.Request) (*http.Response, error) {
 		p := Project{}
@@ -199,3 +196,145 @@ func (s *Suite) TestDeleteProject() {
 	err = s.client.DeleteProject(delId)
 	s.Equal(ErrUnauthorized, err)
 }
+
+// Contains several deleted projects to test workaround of API bug.
+// See https://github.com/rollbar/terraform-provider-rollbar/issues/23
+// language=json
+const projectListJsonResponse = `
+{
+  "err": 0,
+  "result": [
+    {
+      "id": 411692,
+      "account_id": 317418,
+      "settings_data": {
+        "integrations": {
+          "jira": {},
+          "clubhouse": {},
+          "bitbucket": {},
+          "github": {},
+          "trello": {},
+          "slack": {},
+          "datadog": {},
+          "pagerduty": {},
+          "gitlab": {},
+          "webhook": {},
+          "victorops": {},
+          "ciscospark": {},
+          "asana": {},
+          "pivotal": {},
+          "campfire": {},
+          "azuredevops": {},
+          "sprintly": {},
+          "hipchat": {},
+          "lightstep": {},
+          "email": {},
+          "flowdock": {}
+        },
+        "grouping": {
+          "auto_upgrade": true,
+          "recent_versions": [
+            "5.0.0"
+          ]
+        }
+      },
+      "date_created": 1602083693,
+      "date_modified": 1602083695,
+      "name": null
+    },
+    {
+      "id": 411701,
+      "account_id": 317418,
+      "settings_data": {
+        "integrations": {
+          "jira": {},
+          "clubhouse": {},
+          "bitbucket": {},
+          "github": {},
+          "trello": {},
+          "slack": {},
+          "datadog": {},
+          "pagerduty": {},
+          "gitlab": {},
+          "webhook": {},
+          "victorops": {},
+          "ciscospark": {},
+          "asana": {},
+          "pivotal": {},
+          "campfire": {},
+          "azuredevops": {},
+          "sprintly": {},
+          "hipchat": {},
+          "lightstep": {},
+          "email": {},
+          "flowdock": {}
+        },
+        "grouping": {
+          "auto_upgrade": true,
+          "recent_versions": [
+            "5.0.0"
+          ]
+        }
+      },
+      "date_created": 1602084945,
+      "date_modified": 1602085330,
+      "name": null
+    },
+    {
+      "id": 411704,
+      "account_id": 317418,
+      "status": "enabled",
+      "settings_data": {
+        "grouping": {
+          "auto_upgrade": true,
+          "recent_versions": [
+            "5.0.0"
+          ]
+        }
+      },
+      "date_created": 1602085345,
+      "date_modified": 1602085345,
+      "name": "bar"
+    },
+    {
+      "id": 411703,
+      "account_id": 317418,
+      "status": "enabled",
+      "settings_data": {
+        "grouping": {
+          "auto_upgrade": true,
+          "recent_versions": [
+            "5.0.0"
+          ]
+        }
+      },
+      "date_created": 1602085340,
+      "date_modified": 1602085340,
+      "name": "foo"
+    }
+  ]
+}
+`
+
+// language=json
+const projectCreateJsonResponse = `
+{
+    "err": 0,
+    "result": {
+        "account_id": 317418,
+        "date_created": 1602086539,
+        "date_modified": 1602086539,
+        "id": 411708,
+        "name": "baz",
+        "settings_data": {
+            "grouping": {
+                "auto_upgrade": true,
+                "recent_versions": [
+                    "5.0.0"
+                ]
+            }
+        },
+        "status": "enabled"
+    }
+}
+`
