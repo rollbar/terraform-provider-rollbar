@@ -16,7 +16,7 @@ import (
 
 // Project represents a Rollbar project.
 type Project struct {
-	Id           int    `model:"id" fake:"{number:1,1000000}""`
+	Id           int    `model:"id" fake:"{number:1,1000000}"`
 	Name         string `model:"name" fake:"{hackernoun}"`
 	AccountId    int    `json:"account_id" model:"account_id" fake:"{number:1,1000000}"`
 	DateCreated  int    `json:"date_created" model:"date_created" fake:"{number:1,1000000}"`
