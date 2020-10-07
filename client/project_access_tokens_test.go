@@ -86,8 +86,8 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	}
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
-	rs, err := httpmock.NewJsonResponse(http.StatusOK, patCreateJsonResponse)
-	s.Nil(err)
+	rs := httpmock.NewStringResponse(http.StatusOK, patCreateJsonResponse)
+	rs.Header.Add("Content-Type", "application/json")
 	var r httpmock.Responder
 	r = func(req *http.Request) (*http.Response, error) {
 		args := ProjectAccessTokenArgs{}
