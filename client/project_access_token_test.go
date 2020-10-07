@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -16,15 +15,75 @@ func (s *Suite) TestListProjectAccessTokens() {
 	u := apiUrl + pathPatList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	var lpatr patListResponse
-	gofakeit.Struct(&lpatr)
-	r := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpatr)
+	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// Valid project ID
+	expected := []ProjectAccessToken{
+		{
+			AccessToken: "80f235b890c34ca49bcea692c2b90421",
+			//"cur_rate_limit_window_count": null,
+			//"cur_rate_limit_window_start": null,
+			DateCreated:          1601982124,
+			DateModified:         1601982124,
+			Name:                 "post_client_item",
+			ProjectID:            411334,
+			RateLimitWindowCount: nil,
+			RateLimitWindowSize:  nil,
+			Scopes: []ProjectAccessTokenScope{
+				PATScopePostClientItem,
+			},
+			Status: "enabled",
+		},
+		{
+			AccessToken: "8d4b7e0e6a1a498db82cffd1eda93376",
+			//"cur_rate_limit_window_count": null,
+			//"cur_rate_limit_window_start": null,
+			DateCreated:          1601982124,
+			DateModified:         1601982124,
+			Name:                 "post_server_item",
+			ProjectID:            411334,
+			RateLimitWindowCount: nil,
+			RateLimitWindowSize:  nil,
+			Scopes: []ProjectAccessTokenScope{
+				PATScopePostServerItem,
+			},
+			Status: "enabled",
+		},
+		{
+			AccessToken: "90b2521327a647f9aa80ef6d84427485",
+			//"cur_rate_limit_window_count": null,
+			//"cur_rate_limit_window_start": null,
+			DateCreated:          1601982124,
+			DateModified:         1601982124,
+			Name:                 "read",
+			ProjectID:            411334,
+			RateLimitWindowCount: nil,
+			RateLimitWindowSize:  nil,
+			Scopes: []ProjectAccessTokenScope{
+				PATScopeRead,
+			},
+			Status: "enabled",
+		},
+		{
+			AccessToken: "d6d4b456f72048dfb8a933afe3ac66f6",
+			//"cur_rate_limit_window_count": null,
+			//"cur_rate_limit_window_start": null,
+			DateCreated:          1601982124,
+			DateModified:         1601982124,
+			Name:                 "write",
+			ProjectID:            411334,
+			RateLimitWindowCount: nil,
+			RateLimitWindowSize:  nil,
+			Scopes: []ProjectAccessTokenScope{
+				PATScopeWrite,
+			},
+			Status: "enabled",
+		},
+	}
 	actual, err := s.client.ListProjectAccessTokens(projectID)
 	s.Nil(err)
-	s.Equal(lpatr.Result, actual)
+	s.Equal(expected, actual)
 
 	// Unreachable server
 	httpmock.Reset()
@@ -43,18 +102,30 @@ func (s *Suite) TestListProjectAccessTokens() {
 // TestReadProjectAccessToken tests reading a Rollbar project access token from
 // the API.
 func (s *Suite) TestReadProjectAccessToken() {
-	projectID := 12116
+	projectID := 411334
 	u := apiUrl + pathPatList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	var lpatr patListResponse
-	gofakeit.Struct(&lpatr)
-	r := httpmock.NewJsonResponderOrPanic(http.StatusOK, lpatr)
+	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// PAT with name exists
-	actual := lpatr.Result[0]
-	expected, err := s.client.ReadProjectAccessToken(projectID, actual.Name)
+	expected := ProjectAccessToken{
+		AccessToken: "80f235b890c34ca49bcea692c2b90421",
+		//"cur_rate_limit_window_count": null,
+		//"cur_rate_limit_window_start": null,
+		DateCreated:          1601982124,
+		DateModified:         1601982124,
+		Name:                 "post_client_item",
+		ProjectID:            projectID,
+		RateLimitWindowCount: nil,
+		RateLimitWindowSize:  nil,
+		Scopes: []ProjectAccessTokenScope{
+			PATScopePostClientItem,
+		},
+		Status: "enabled",
+	}
+	actual, err := s.client.ReadProjectAccessToken(projectID, expected.Name)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
@@ -100,8 +171,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	}
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
-	rs := httpmock.NewStringResponse(http.StatusOK, patCreateJsonResponse)
-	rs.Header.Add("Content-Type", "application/json")
+	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
 	var r httpmock.Responder
 	r = func(req *http.Request) (*http.Response, error) {
 		args := ProjectAccessTokenArgs{}
@@ -175,106 +245,3 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	s.NotEqual(ErrNotFound, err)
 
 }
-
-/*
- * Actual recorded responses from Rollbar API
- */
-
-// language=JSON
-const patListJsonResponse = `
-{
-    "err": 0,
-    "result": [
-        {
-            "access_token": "80f235b890c34ca49bcea692c2b90421",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "post_client_item",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "post_client_item"
-            ],
-            "status": "enabled"
-        },
-        {
-            "access_token": "8d4b7e0e6a1a498db82cffd1eda93376",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "post_server_item",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "post_server_item"
-            ],
-            "status": "enabled"
-        },
-        {
-            "access_token": "90b2521327a647f9aa80ef6d84427485",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "read",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "read"
-            ],
-            "status": "enabled"
-        },
-        {
-            "access_token": "d6d4b456f72048dfb8a933afe3ac66f6",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "write",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "write"
-            ],
-            "status": "enabled"
-        }
-    ]
-}
-`
-
-// language=JSON
-const patUpdateJsonResponse = `
-{
-    "err": 0
-}
-`
-
-// language=JSON
-const patCreateJsonResponse = `
-{
-    "err": 0,
-    "result": {
-        "access_token": "ae9f890512bc4e03ba7084811caa96f8",
-        "cur_rate_limit_window_count": 0,
-        "cur_rate_limit_window_start": 1601987929,
-        "date_created": 1601987929,
-        "date_modified": 1601987929,
-        "name": "foobar",
-        "project_id": 411334,
-        "rate_limit_window_count": null,
-        "rate_limit_window_size": null,
-        "scopes": [
-            "read",
-            "write"
-        ],
-        "status": "enabled"
-    }
-}
-`

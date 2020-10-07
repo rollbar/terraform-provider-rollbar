@@ -1,0 +1,19 @@
+{
+  "err": 0,
+  "result": {
+    "access_token": "ae9f890512bc4e03ba7084811caa96f8",
+    "cur_rate_limit_window_count": 0,
+    "cur_rate_limit_window_start": 1601987929,
+    "date_created": 1601987929,
+    "date_modified": 1601987929,
+    "name": "foobar",
+    "project_id": 411334,
+    "rate_limit_window_count": null,
+    "rate_limit_window_size": null,
+    "scopes": [
+      "read",
+      "write"
+    ],
+    "status": "enabled"
+  }
+}

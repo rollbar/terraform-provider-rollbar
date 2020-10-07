@@ -2,7 +2,6 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
 	"net/http"
@@ -16,27 +15,24 @@ func (s *Suite) TestListProjects() {
 	u := apiUrl + pathProjectList
 
 	// Success
-	stringResponse := httpmock.NewStringResponse(200,
-		fixture("projects/list.json"))
-	stringResponse.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(stringResponse)
+	r := responderFromFixture("project/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	expected := []Project{
 		{
-			Id:           106671,
-			AccountId:    8608,
-			DateCreated:  1489139046,
-			DateModified: 1549293583,
-			Name:         "Client-Config",
+			Id:           411704,
+			Name:         "bar",
+			AccountId:    317418,
 			Status:       "enabled",
+			DateCreated:  1602085345,
+			DateModified: 1602085345,
 		},
 		{
-			Id:           12116,
-			AccountId:    8608,
-			DateCreated:  1407933922,
-			DateModified: 1556814300,
-			Name:         "My",
+			Id:           411703,
+			Name:         "foo",
+			AccountId:    317418,
 			Status:       "enabled",
+			DateCreated:  1602085340,
+			DateModified: 1602085340,
 		},
 	}
 	actual, err := s.client.ListProjects()
@@ -65,20 +61,18 @@ func (s *Suite) TestListProjects() {
 
 func (s *Suite) TestCreateProject() {
 	u := apiUrl + pathProjectCreate
-	name := gofakeit.HackerNoun()
+	name := "baz"
 
 	// Success
-	f := fmt.Sprintf(fixture("projects/read.json"), name)
 	// FIXME: The actual Rollbar API sends http.StatusOK; but it
 	//  _should_ send http.StatusCreated
-	stringResponse := httpmock.NewStringResponse(http.StatusOK, f)
-	stringResponse.Header.Add("Content-Type", "application/json")
+	rs := responseFromFixture("project/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
 		p := Project{}
 		err := json.NewDecoder(req.Body).Decode(&p)
 		s.Nil(err)
 		s.Equal(name, p.Name)
-		return stringResponse, nil
+		return rs, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
 	proj, err := s.client.CreateProject(name)
@@ -105,22 +99,27 @@ func (s *Suite) TestCreateProject() {
 }
 
 func (s *Suite) TestReadProject() {
-	var expected Project
-	gofakeit.Struct(&expected)
+	expected := Project{
+		AccountId:    317418,
+		DateCreated:  1602086539,
+		DateModified: 1602086539,
+		Id:           411708,
+		Name:         "baz",
+		Status:       "enabled",
+	}
 	u := apiUrl + pathProjectRead
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
 
 	// Success
-	pr := projectResponse{Err: 0, Result: expected}
-	responder := httpmock.NewJsonResponderOrPanic(http.StatusOK, pr)
-	httpmock.RegisterResponder("GET", u, responder)
+	r := responderFromFixture("project/read.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
 	actual, err := s.client.ReadProject(expected.Id)
 	s.Nil(err)
 	s.Equal(&expected, actual)
 
 	// Not Found
 	er := ErrorResult{Err: 404, Message: "Not Found"}
-	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
+	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadProject(expected.Id)
 	s.Equal(ErrNotFound, err)
@@ -148,34 +147,15 @@ func (s *Suite) TestDeleteProject() {
 	delId := gofakeit.Number(0, 1000000)
 	urlDel := apiUrl + pathProjectDelete
 	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
-	urlList := apiUrl + pathProjectList
 
 	// Success
-	plr := projectListResponse{}
-	for len(plr.Result) < 3 {
-		var p Project
-		gofakeit.Struct(&p)
-		if p.Id != delId {
-			plr.Result = append(plr.Result, p)
-		}
-	}
-	listResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, plr)
-	delResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, nil)
-	httpmock.RegisterResponder("GET", urlList, listResponder)
-	httpmock.RegisterResponder("DELETE", urlDel, delResponder)
+	r := responderFromFixture("project/delete.json", http.StatusOK)
+	httpmock.RegisterResponder("DELETE", urlDel, r)
 	err := s.client.DeleteProject(delId)
 	s.Nil(err)
-	projList, err := s.client.ListProjects()
-	s.Nil(err)
-	for _, proj := range projList {
-		s.NotEqual(delId, proj.Id)
-	}
-	for _, count := range httpmock.GetCallCountInfo() {
-		s.Equal(1, count)
-	}
 
 	// Project not found
-	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
+	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
 		ErrorResult{Err: 404, Message: "Not Found"})
 	httpmock.RegisterResponder("DELETE", urlDel, r)
 	err = s.client.DeleteProject(delId)
