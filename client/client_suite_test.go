@@ -13,7 +13,7 @@ import (
 
 // fixtureResponder creates an httpmock.Responder based on a fixture file
 // loaded from folder 'client/fixtures/'.
-func fixtureResponder(fixturePath string, status int) *httpmock.Responder {
+func fixtureResponder(fixturePath string, status int) httpmock.Responder {
 	const fixtureFolder = "fixtures/"
 	b, err := ioutil.ReadFile(fixtureFolder + fixturePath) // #nosec
 	if err != nil {
@@ -27,7 +27,7 @@ func fixtureResponder(fixturePath string, status int) *httpmock.Responder {
 	rs := httpmock.NewStringResponse(status, s)
 	rs.Header.Add("Content-Type", "application/json")
 	r := httpmock.ResponderFromResponse(rs)
-	return &r
+	return r
 }
 
 /*
