@@ -9,8 +9,8 @@ import (
 
 // ProjectAccessToken represents a Rollbar project access token.
 type ProjectAccessToken struct {
-	Name                 string `fake:"{hackernoun}"`
-	ProjectID            int    `json:"project_id" fake:"{number1,1000000}"`
+	Name                 string
+	ProjectID            int    `json:"project_id"`
 	AccessToken          string `json:"access_token"`
 	Scopes               []ProjectAccessTokenScope
 	Status               Status
