@@ -31,6 +31,13 @@ func (s *Suite) TestListProjectAccessTokens() {
 	_, err = s.client.ListProjectAccessTokens(projectID)
 	s.NotNil(err)
 	s.NotEqual(ErrNotFound, err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ListProjectAccessTokens(projectID)
+	s.Equal(ErrUnauthorized, err)
 }
 
 // TestReadProjectAccessToken tests reading a Rollbar project access token from
@@ -68,6 +75,13 @@ func (s *Suite) TestReadProjectAccessToken() {
 	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
 	s.NotNil(err)
 	s.NotEqual(ErrNotFound, err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
+	s.Equal(ErrUnauthorized, err)
 }
 
 // TestDeleteProjectAccessToken tests deleting a Rollbar project access token.
@@ -79,7 +93,7 @@ func (s *Suite) TestDeleteProjectAccessToken() {
 func (s *Suite) TestCreateProjectAccessToken() {
 	projID := 411334
 
-	patArgs := ProjectAccessTokenArgs{
+	args := ProjectAccessTokenArgs{
 		ProjectID: projID,
 		Name:      "foobar",
 		Scopes:    []ProjectAccessTokenScope{PATScopeRead, PATScopeWrite},
@@ -96,17 +110,70 @@ func (s *Suite) TestCreateProjectAccessToken() {
 			Interface("args", args).
 			Msg("arguments sent to API")
 		s.Nil(err)
-		s.Equal(patArgs.Name, args.Name)
-		s.Equal(patArgs.Scopes, args.Scopes)
+		s.Equal(args.Name, args.Name)
+		s.Equal(args.Scopes, args.Scopes)
 		return rs, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
-	t, err := s.client.CreateProjectAccessToken(patArgs)
+
+	//
+	// Sanity Checks
+	//
+	// Invalid project ID
+	badArgs := args
+	badArgs.ProjectID = 0
+	_, err := s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	badArgs = args
+	badArgs.ProjectID = -234
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid project name
+	badArgs = args
+	badArgs.Name = ""
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// No scopes specified
+	badArgs = args
+	badArgs.Scopes = []ProjectAccessTokenScope{}
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+
+	// Success
+	t, err := s.client.CreateProjectAccessToken(args)
 	s.Nil(err)
 	s.NotEmpty(t.AccessToken)
-	s.Equal(patArgs.Name, t.Name)
-	s.Equal(patArgs.Scopes, t.Scopes)
-	s.Equal(patArgs.ProjectID, t.ProjectID)
+	s.Equal(args.Name, t.Name)
+	s.Equal(args.Scopes, t.Scopes)
+	s.Equal(args.ProjectID, t.ProjectID)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("POST", u, r)
+	_, err = s.client.CreateProjectAccessToken(args)
+	s.Equal(ErrUnauthorized, err)
+
+	// Unreachable server
+	httpmock.Reset()
+	_, err = s.client.CreateProjectAccessToken(args)
+	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("POST", u, r)
+	_, err = s.client.CreateProjectAccessToken(args)
+	s.Equal(ErrUnauthorized, err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
+		ErrorResult{Err: 500, Message: "Internal Server Error"})
+	httpmock.RegisterResponder("POST", u, r)
+	_, err = s.client.CreateProjectAccessToken(args)
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
+
 }
 
 /*

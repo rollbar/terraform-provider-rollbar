@@ -61,6 +61,9 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 			Interface("team", t).
 			Msg("Successfully created new team")
 		return t, nil
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return t, ErrUnauthorized
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -74,6 +77,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 
 // ListTeams lists all Rollbar teams.
 func (c *RollbarApiClient) ListTeams() ([]Team, error) {
+	log.Debug().Msg("Listing all teams")
 	var teams []Team
 	u := apiUrl + pathTeamList
 	resp, err := c.resty.R().
@@ -92,6 +96,9 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 			Interface("teams", teams).
 			Msg("Successfully listed teams")
 		return teams, nil
+	case http.StatusUnauthorized:
+		log.Warn().Msg("Unauthorized")
+		return teams, ErrUnauthorized
 	default:
 		er := resp.Error().(*ErrorResult)
 		log.Error().
@@ -135,6 +142,9 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 			Interface("team", t).
 			Msg("Successfully read team")
 		return t, nil
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return t, ErrUnauthorized
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -173,6 +183,9 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 	case http.StatusOK:
 		l.Debug().Msg("Successfully deleted team")
 		return nil
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return ErrUnauthorized
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().

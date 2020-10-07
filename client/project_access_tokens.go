@@ -47,6 +47,9 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 	case http.StatusNotFound:
 		l.Warn().Msg("Project not found")
 		return nil, ErrNotFound
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return nil, ErrUnauthorized
 	default:
 		errResp := resp.Error().(*ErrorResult)
 		l.Err(errResp).Msg("Unexpected error")
@@ -119,7 +122,7 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 	var pat ProjectAccessToken
 
 	// Sanity checks
-	if args.ProjectID == 0 {
+	if args.ProjectID <= 0 {
 		err := fmt.Errorf("project ID cannot be blank")
 		l.Err(err).Msg("Failed sanity check")
 		return pat, err
@@ -176,6 +179,9 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 			Interface("token", pat).
 			Msg("Successfully created new project access token")
 		return pat, nil
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return pat, ErrUnauthorized
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -185,8 +191,6 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 			Msg("Error creating project access token")
 		return pat, er
 	}
-
-	return pat, nil
 }
 
 /*
