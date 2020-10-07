@@ -1,0 +1,23 @@
+{
+  "err": 0,
+  "result": [
+    {
+      "access_level": "everyone",
+      "account_id": 317418,
+      "id": 662037,
+      "name": "Everyone"
+    },
+    {
+      "access_level": "standard",
+      "account_id": 317418,
+      "id": 676974,
+      "name": "foobar"
+    },
+    {
+      "access_level": "owner",
+      "account_id": 317418,
+      "id": 662036,
+      "name": "Owners"
+    }
+  ]
+}

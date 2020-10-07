@@ -15,9 +15,7 @@ func (s *Suite) TestListProjects() {
 	u := apiUrl + pathProjectList
 
 	// Success
-	stringResponse := httpmock.NewStringResponse(200, projectListJsonResponse)
-	stringResponse.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(stringResponse)
+	r := responderFromFixture("project/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	expected := []Project{
 		{
@@ -68,14 +66,13 @@ func (s *Suite) TestCreateProject() {
 	// Success
 	// FIXME: The actual Rollbar API sends http.StatusOK; but it
 	//  _should_ send http.StatusCreated
-	stringResponse := httpmock.NewStringResponse(http.StatusOK, projectCreateJsonResponse)
-	stringResponse.Header.Add("Content-Type", "application/json")
+	rs := responseFromFixture("project/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
 		p := Project{}
 		err := json.NewDecoder(req.Body).Decode(&p)
 		s.Nil(err)
 		s.Equal(name, p.Name)
-		return stringResponse, nil
+		return rs, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
 	proj, err := s.client.CreateProject(name)
@@ -114,16 +111,15 @@ func (s *Suite) TestReadProject() {
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
 
 	// Success
-	pr := projectResponse{Err: 0, Result: expected}
-	responder := httpmock.NewJsonResponderOrPanic(http.StatusOK, pr)
-	httpmock.RegisterResponder("GET", u, responder)
+	r := responderFromFixture("project/read.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
 	actual, err := s.client.ReadProject(expected.Id)
 	s.Nil(err)
 	s.Equal(&expected, actual)
 
 	// Not Found
 	er := ErrorResult{Err: 404, Message: "Not Found"}
-	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
+	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadProject(expected.Id)
 	s.Equal(ErrNotFound, err)
@@ -153,9 +149,7 @@ func (s *Suite) TestDeleteProject() {
 	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
 
 	// Success
-	rs := httpmock.NewStringResponse(http.StatusOK, projectDeleteJsonResponse)
-	rs.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(rs)
+	r := responderFromFixture("project/delete.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", urlDel, r)
 	err := s.client.DeleteProject(delId)
 	s.Nil(err)
@@ -185,175 +179,3 @@ func (s *Suite) TestDeleteProject() {
 	err = s.client.DeleteProject(delId)
 	s.Equal(ErrUnauthorized, err)
 }
-
-// Contains several deleted projects to test workaround of API bug.
-// See https://github.com/rollbar/terraform-provider-rollbar/issues/23
-// language=json
-const projectListJsonResponse = `
-{
-  "err": 0,
-  "result": [
-    {
-      "id": 411692,
-      "account_id": 317418,
-      "settings_data": {
-        "integrations": {
-          "jira": {},
-          "clubhouse": {},
-          "bitbucket": {},
-          "github": {},
-          "trello": {},
-          "slack": {},
-          "datadog": {},
-          "pagerduty": {},
-          "gitlab": {},
-          "webhook": {},
-          "victorops": {},
-          "ciscospark": {},
-          "asana": {},
-          "pivotal": {},
-          "campfire": {},
-          "azuredevops": {},
-          "sprintly": {},
-          "hipchat": {},
-          "lightstep": {},
-          "email": {},
-          "flowdock": {}
-        },
-        "grouping": {
-          "auto_upgrade": true,
-          "recent_versions": [
-            "5.0.0"
-          ]
-        }
-      },
-      "date_created": 1602083693,
-      "date_modified": 1602083695,
-      "name": null
-    },
-    {
-      "id": 411701,
-      "account_id": 317418,
-      "settings_data": {
-        "integrations": {
-          "jira": {},
-          "clubhouse": {},
-          "bitbucket": {},
-          "github": {},
-          "trello": {},
-          "slack": {},
-          "datadog": {},
-          "pagerduty": {},
-          "gitlab": {},
-          "webhook": {},
-          "victorops": {},
-          "ciscospark": {},
-          "asana": {},
-          "pivotal": {},
-          "campfire": {},
-          "azuredevops": {},
-          "sprintly": {},
-          "hipchat": {},
-          "lightstep": {},
-          "email": {},
-          "flowdock": {}
-        },
-        "grouping": {
-          "auto_upgrade": true,
-          "recent_versions": [
-            "5.0.0"
-          ]
-        }
-      },
-      "date_created": 1602084945,
-      "date_modified": 1602085330,
-      "name": null
-    },
-    {
-      "id": 411704,
-      "account_id": 317418,
-      "status": "enabled",
-      "settings_data": {
-        "grouping": {
-          "auto_upgrade": true,
-          "recent_versions": [
-            "5.0.0"
-          ]
-        }
-      },
-      "date_created": 1602085345,
-      "date_modified": 1602085345,
-      "name": "bar"
-    },
-    {
-      "id": 411703,
-      "account_id": 317418,
-      "status": "enabled",
-      "settings_data": {
-        "grouping": {
-          "auto_upgrade": true,
-          "recent_versions": [
-            "5.0.0"
-          ]
-        }
-      },
-      "date_created": 1602085340,
-      "date_modified": 1602085340,
-      "name": "foo"
-    }
-  ]
-}
-`
-
-// language=json
-const projectCreateJsonResponse = `
-{
-    "err": 0,
-    "result": {
-        "account_id": 317418,
-        "date_created": 1602086539,
-        "date_modified": 1602086539,
-        "id": 411708,
-        "name": "baz",
-        "settings_data": {
-            "grouping": {
-                "auto_upgrade": true,
-                "recent_versions": [
-                    "5.0.0"
-                ]
-            }
-        },
-        "status": "enabled"
-    }
-}
-`
-
-// language=json
-const projectReadJsonResponse = `
-{
-    "err": 0,
-    "result": {
-        "account_id": 317418,
-        "date_created": 1602086539,
-        "date_modified": 1602086539,
-        "id": 411708,
-        "name": "baz",
-        "settings_data": {
-            "grouping": {
-                "auto_upgrade": true,
-                "recent_versions": [
-                    "5.0.0"
-                ]
-            }
-        },
-        "status": "enabled"
-    }
-}
-`
-
-// language=json
-const projectDeleteJsonResponse = `
-{
-    "err": 0
-}
-`

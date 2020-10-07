@@ -21,9 +21,7 @@ func (s *Suite) TestCreateTeam() {
 	// FIXME: currently API returns `200 OK` on successful create; but it should
 	//  instead return `201 Created`.
 	//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-	sr := httpmock.NewStringResponse(http.StatusOK, teamCreateJsonResponse)
-	sr.Header.Add("Content-Type", "application/json")
-	//r := httpmock.ResponderFromResponse(sr)
+	sr := responseFromFixture("team/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
 		type body struct {
 			Name string
@@ -87,9 +85,7 @@ func (s *Suite) TestListTeams() {
 			Name:        "Owners",
 		},
 	}
-	sr := httpmock.NewStringResponse(http.StatusOK, teamListJsonResponse)
-	sr.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(sr)
+	r := responderFromFixture("team/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// Successful list
@@ -127,9 +123,7 @@ func (s *Suite) TestReadTeam() {
 		Name:        "foobar",
 		AccessLevel: TeamAccessStandard,
 	}
-	sr := httpmock.NewStringResponse(http.StatusOK, teamReadJsonResponse)
-	sr.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(sr)
+	r := responderFromFixture("team/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// Successful create
@@ -165,9 +159,7 @@ func (s *Suite) TestDeleteTeam() {
 	teamId := 676974
 	u := apiUrl + pathTeamDelete
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamId))
-	sr := httpmock.NewStringResponse(http.StatusOK, teamDeleteResponse)
-	sr.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(sr)
+	r := responderFromFixture("team/delete.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
 
 	// Successful delete
@@ -196,64 +188,3 @@ func (s *Suite) TestDeleteTeam() {
 	err = s.client.DeleteTeam(teamId)
 	s.Equal(ErrUnauthorized, err)
 }
-
-/*
- * Actual recorded responses from API (06 Oct 2020)
- */
-
-const teamCreateJsonResponse = `
-{
-    "err": 0,
-    "result": {
-        "access_level": "standard",
-        "account_id": 317418,
-        "id": 676974,
-        "name": "foobar"
-    }
-}
-`
-
-const teamListJsonResponse = `
-{
-    "err": 0,
-    "result": [
-        {
-            "access_level": "everyone",
-            "account_id": 317418,
-            "id": 662037,
-            "name": "Everyone"
-        },
-        {
-            "access_level": "standard",
-            "account_id": 317418,
-            "id": 676974,
-            "name": "foobar"
-        },
-        {
-            "access_level": "owner",
-            "account_id": 317418,
-            "id": 662036,
-            "name": "Owners"
-        }
-    ]
-}
-`
-
-const teamReadJsonResponse = `
-{
-    "err": 0,
-    "result": {
-        "access_level": "standard",
-        "account_id": 317418,
-        "id": 676974,
-        "name": "foobar"
-    }
-}
-
-`
-
-const teamDeleteResponse = `
-{
-    "err": 0
-}
-`
