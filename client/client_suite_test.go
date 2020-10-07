@@ -3,8 +3,11 @@ package client
 import (
 	"github.com/brianvoe/gofakeit/v5"
 	"github.com/jarcoal/httpmock"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -29,6 +32,13 @@ type Suite struct {
 }
 
 func (s *Suite) SetupSuite() {
+	// Pretty logging
+	log.Logger = log.
+		Output(zerolog.ConsoleWriter{Out: os.Stderr}).
+		With().Caller().
+		Logger()
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
 	// Seed gofakeit random generator
 	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
 
