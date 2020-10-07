@@ -7,13 +7,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"testing"
 )
 
-// fixtureResponder creates an httpmock.Responder based on a fixture file
-// loaded from folder 'client/fixtures/'.
-func fixtureResponder(fixturePath string, status int) httpmock.Responder {
+func loadFixture(fixturePath string) string {
 	const fixtureFolder = "fixtures/"
 	b, err := ioutil.ReadFile(fixtureFolder + fixturePath) // #nosec
 	if err != nil {
@@ -24,8 +23,22 @@ func fixtureResponder(fixturePath string, status int) httpmock.Responder {
 			Msg("Error loading fixture")
 	}
 	s := string(b)
+	return s
+}
+
+// responseFromFixture creates an http.Response based on a fixture file loaded
+// from folder 'client/fixtures/'.
+func responseFromFixture(fixturePath string, status int) *http.Response {
+	s := loadFixture(fixturePath)
 	rs := httpmock.NewStringResponse(status, s)
 	rs.Header.Add("Content-Type", "application/json")
+	return rs
+}
+
+// responderFromFixture creates an httpmock.Responder based on a fixture file
+// loaded from folder 'client/fixtures/'.
+func responderFromFixture(fixturePath string, status int) httpmock.Responder {
+	rs := responseFromFixture(fixturePath, status)
 	r := httpmock.ResponderFromResponse(rs)
 	return r
 }

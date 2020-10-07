@@ -2,28 +2,64 @@
   "err": 0,
   "result": [
     {
-      "project_id": 12116,
-      "access_token": "access-token-12116-1",
+      "access_token": "80f235b890c34ca49bcea692c2b90421",
+      "cur_rate_limit_window_count": null,
+      "cur_rate_limit_window_start": null,
+      "date_created": 1601982124,
+      "date_modified": 1601982124,
       "name": "post_client_item",
-      "status": "enabled",
-      "date_created": 1407933922,
-      "date_modified": 1407933922
+      "project_id": 411334,
+      "rate_limit_window_count": null,
+      "rate_limit_window_size": null,
+      "scopes": [
+        "post_client_item"
+      ],
+      "status": "enabled"
     },
     {
-      "project_id": 12116,
-      "access_token": "access-token-12116-2",
+      "access_token": "8d4b7e0e6a1a498db82cffd1eda93376",
+      "cur_rate_limit_window_count": null,
+      "cur_rate_limit_window_start": null,
+      "date_created": 1601982124,
+      "date_modified": 1601982124,
       "name": "post_server_item",
-      "status": "enabled",
-      "date_created": 1407933922,
-      "date_modified": 1439579817
+      "project_id": 411334,
+      "rate_limit_window_count": null,
+      "rate_limit_window_size": null,
+      "scopes": [
+        "post_server_item"
+      ],
+      "status": "enabled"
     },
     {
-      "project_id": 12116,
-      "access_token": "access-token-12116-3",
+      "access_token": "90b2521327a647f9aa80ef6d84427485",
+      "cur_rate_limit_window_count": null,
+      "cur_rate_limit_window_start": null,
+      "date_created": 1601982124,
+      "date_modified": 1601982124,
+      "name": "read",
+      "project_id": 411334,
+      "rate_limit_window_count": null,
+      "rate_limit_window_size": null,
+      "scopes": [
+        "read"
+      ],
+      "status": "enabled"
+    },
+    {
+      "access_token": "d6d4b456f72048dfb8a933afe3ac66f6",
+      "cur_rate_limit_window_count": null,
+      "cur_rate_limit_window_start": null,
+      "date_created": 1601982124,
+      "date_modified": 1601982124,
       "name": "write",
-      "status": "enabled",
-      "date_created": 1407933922,
-      "date_modified": 1407933922
+      "project_id": 411334,
+      "rate_limit_window_count": null,
+      "rate_limit_window_size": null,
+      "scopes": [
+        "write"
+      ],
+      "status": "enabled"
     }
   ]
 }

@@ -15,9 +15,7 @@ func (s *Suite) TestListProjectAccessTokens() {
 	u := apiUrl + pathPatList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	rs := httpmock.NewStringResponse(http.StatusOK, patListJsonResponse)
-	rs.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(rs)
+	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// Valid project ID
@@ -108,9 +106,7 @@ func (s *Suite) TestReadProjectAccessToken() {
 	u := apiUrl + pathPatList
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
 
-	rs := httpmock.NewStringResponse(http.StatusOK, patListJsonResponse)
-	rs.Header.Add("Content-Type", "application/json")
-	r := httpmock.ResponderFromResponse(rs)
+	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// PAT with name exists
@@ -175,8 +171,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	}
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
-	rs := httpmock.NewStringResponse(http.StatusOK, patCreateJsonResponse)
-	rs.Header.Add("Content-Type", "application/json")
+	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
 	var r httpmock.Responder
 	r = func(req *http.Request) (*http.Response, error) {
 		args := ProjectAccessTokenArgs{}
@@ -250,106 +245,3 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	s.NotEqual(ErrNotFound, err)
 
 }
-
-/*
- * Actual recorded responses from Rollbar API
- */
-
-// language=JSON
-const patListJsonResponse = `
-{
-    "err": 0,
-    "result": [
-        {
-            "access_token": "80f235b890c34ca49bcea692c2b90421",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "post_client_item",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "post_client_item"
-            ],
-            "status": "enabled"
-        },
-        {
-            "access_token": "8d4b7e0e6a1a498db82cffd1eda93376",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "post_server_item",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "post_server_item"
-            ],
-            "status": "enabled"
-        },
-        {
-            "access_token": "90b2521327a647f9aa80ef6d84427485",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "read",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "read"
-            ],
-            "status": "enabled"
-        },
-        {
-            "access_token": "d6d4b456f72048dfb8a933afe3ac66f6",
-            "cur_rate_limit_window_count": null,
-            "cur_rate_limit_window_start": null,
-            "date_created": 1601982124,
-            "date_modified": 1601982124,
-            "name": "write",
-            "project_id": 411334,
-            "rate_limit_window_count": null,
-            "rate_limit_window_size": null,
-            "scopes": [
-                "write"
-            ],
-            "status": "enabled"
-        }
-    ]
-}
-`
-
-// language=JSON
-const patUpdateJsonResponse = `
-{
-    "err": 0
-}
-`
-
-// language=JSON
-const patCreateJsonResponse = `
-{
-    "err": 0,
-    "result": {
-        "access_token": "ae9f890512bc4e03ba7084811caa96f8",
-        "cur_rate_limit_window_count": 0,
-        "cur_rate_limit_window_start": 1601987929,
-        "date_created": 1601987929,
-        "date_modified": 1601987929,
-        "name": "foobar",
-        "project_id": 411334,
-        "rate_limit_window_count": null,
-        "rate_limit_window_size": null,
-        "scopes": [
-            "read",
-            "write"
-        ],
-        "status": "enabled"
-    }
-}
-`
