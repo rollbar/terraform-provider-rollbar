@@ -12,9 +12,9 @@ import (
 )
 
 // fixtureResponder creates an httpmock.Responder based on a fixture file
-// loaded from folder client/testdata/.
+// loaded from folder 'client/fixtures/'.
 func fixtureResponder(fixturePath string, status int) *httpmock.Responder {
-	const fixtureFolder = "testdata/fixtures/"
+	const fixtureFolder = "fixtures/"
 	b, err := ioutil.ReadFile(fixtureFolder + fixturePath) // #nosec
 	if err != nil {
 		log.Fatal().
