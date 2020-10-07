@@ -1,6 +1,14 @@
 Terraform provider for Rollbar
 ==============================
 
+The Rollbar provider is used to interact with Rollbar resources.
+
+The provider allows you to manage your Rollbar account's projects, members, and
+teams easily. It needs to be configured with the proper credentials before it
+can be used.
+
+
+
 Status
 ------
 
