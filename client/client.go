@@ -51,3 +51,12 @@ func NewClient(token string) (*RollbarApiClient, error) {
 func (c *RollbarApiClient) GetHttpClient() *http.Client {
 	return c.resty.GetClient()
 }
+
+// Status represents the enabled or disabled status of an entity.
+type Status string
+
+// Possible values for status
+const (
+	StatusEnabled  = Status("enabled")
+	StatusDisabled = Status("disabled")
+)
