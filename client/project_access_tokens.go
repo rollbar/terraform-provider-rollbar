@@ -14,10 +14,10 @@ type ProjectAccessToken struct {
 	AccessToken          string `json:"access_token"`
 	Scopes               []ProjectAccessTokenScope
 	Status               Status
-	RateLimitWindowSize  int `json:"rate_limit_window_size"`
-	RateLimitWindowCount int `json:"rate_limit_window_count"`
-	DateCreated          int `json:"date_created"`
-	DateModified         int `json:"date_modified"`
+	RateLimitWindowSize  *int `json:"rate_limit_window_size"`
+	RateLimitWindowCount *int `json:"rate_limit_window_count"`
+	DateCreated          int  `json:"date_created"`
+	DateModified         int  `json:"date_modified"`
 }
 
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
@@ -95,10 +95,10 @@ type ProjectAccessTokenScope string
 
 // Possible values forproject access token scope
 const (
-	PATScopeWrite            = ProjectAccessTokenScope("write")
-	PATScopeRead             = ProjectAccessTokenScope("read")
-	PATScopePostServerItem   = ProjectAccessTokenScope("post_server_item")
-	PATScopePostClientServer = ProjectAccessTokenScope("post_client_server")
+	PATScopeWrite          = ProjectAccessTokenScope("write")
+	PATScopeRead           = ProjectAccessTokenScope("read")
+	PATScopePostServerItem = ProjectAccessTokenScope("post_server_item")
+	PATScopePostClientItem = ProjectAccessTokenScope("post_client_item")
 )
 
 // ProjectAccessTokenArgs encapsulates the required and optional arguments for creating and

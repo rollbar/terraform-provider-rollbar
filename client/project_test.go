@@ -102,8 +102,14 @@ func (s *Suite) TestCreateProject() {
 }
 
 func (s *Suite) TestReadProject() {
-	var expected Project
-	gofakeit.Struct(&expected)
+	expected := Project{
+		AccountId:    317418,
+		DateCreated:  1602086539,
+		DateModified: 1602086539,
+		Id:           411708,
+		Name:         "baz",
+		Status:       "enabled",
+	}
 	u := apiUrl + pathProjectRead
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
 
@@ -145,34 +151,17 @@ func (s *Suite) TestDeleteProject() {
 	delId := gofakeit.Number(0, 1000000)
 	urlDel := apiUrl + pathProjectDelete
 	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
-	urlList := apiUrl + pathProjectList
 
 	// Success
-	plr := projectListResponse{}
-	for len(plr.Result) < 3 {
-		var p Project
-		gofakeit.Struct(&p)
-		if p.Id != delId {
-			plr.Result = append(plr.Result, p)
-		}
-	}
-	listResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, plr)
-	delResponder := httpmock.NewJsonResponderOrPanic(http.StatusOK, nil)
-	httpmock.RegisterResponder("GET", urlList, listResponder)
-	httpmock.RegisterResponder("DELETE", urlDel, delResponder)
+	rs := httpmock.NewStringResponse(http.StatusOK, projectDeleteJsonResponse)
+	rs.Header.Add("Content-Type", "application/json")
+	r := httpmock.ResponderFromResponse(rs)
+	httpmock.RegisterResponder("DELETE", urlDel, r)
 	err := s.client.DeleteProject(delId)
 	s.Nil(err)
-	projList, err := s.client.ListProjects()
-	s.Nil(err)
-	for _, proj := range projList {
-		s.NotEqual(delId, proj.Id)
-	}
-	for _, count := range httpmock.GetCallCountInfo() {
-		s.Equal(1, count)
-	}
 
 	// Project not found
-	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
+	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
 		ErrorResult{Err: 404, Message: "Not Found"})
 	httpmock.RegisterResponder("DELETE", urlDel, r)
 	err = s.client.DeleteProject(delId)
@@ -336,5 +325,35 @@ const projectCreateJsonResponse = `
         },
         "status": "enabled"
     }
+}
+`
+
+// language=json
+const projectReadJsonResponse = `
+{
+    "err": 0,
+    "result": {
+        "account_id": 317418,
+        "date_created": 1602086539,
+        "date_modified": 1602086539,
+        "id": 411708,
+        "name": "baz",
+        "settings_data": {
+            "grouping": {
+                "auto_upgrade": true,
+                "recent_versions": [
+                    "5.0.0"
+                ]
+            }
+        },
+        "status": "enabled"
+    }
+}
+`
+
+// language=json
+const projectDeleteJsonResponse = `
+{
+    "err": 0
 }
 `
