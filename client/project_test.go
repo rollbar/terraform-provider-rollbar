@@ -54,6 +54,13 @@ func (s *Suite) TestListProjects() {
 	httpmock.Reset()
 	_, err = s.client.ListProjects()
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ListProjects()
+	s.Equal(ErrUnauthorized, err)
 }
 
 func (s *Suite) TestCreateProject() {
@@ -88,6 +95,13 @@ func (s *Suite) TestCreateProject() {
 	httpmock.Reset()
 	_, err = s.client.CreateProject(name)
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("POST", u, r)
+	_, err = s.client.CreateProject(name)
+	s.Equal(ErrUnauthorized, err)
 }
 
 func (s *Suite) TestReadProject() {
@@ -121,6 +135,13 @@ func (s *Suite) TestReadProject() {
 	httpmock.Reset()
 	_, err = s.client.ReadProject(expected.Id)
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProject(expected.Id)
+	s.Equal(ErrUnauthorized, err)
 }
 
 func (s *Suite) TestDeleteProject() {
@@ -170,4 +191,11 @@ func (s *Suite) TestDeleteProject() {
 	httpmock.Reset()
 	err = s.client.DeleteProject(delId)
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("DELETE", urlDel, r)
+	err = s.client.DeleteProject(delId)
+	s.Equal(ErrUnauthorized, err)
 }

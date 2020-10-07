@@ -20,5 +20,8 @@ func (er ErrorResult) Error() string {
 	return fmt.Sprintf("%v %v", er.Err, er.Message)
 }
 
-// ErrNotFound is raised when the API returns a '404 Not Found' error.
+// ErrNotFound is returned when the API returns a '404 Not Found' error.
 var ErrNotFound = fmt.Errorf("entity not found")
+
+// ErrUnauthorized is returned when the API returns a '401 Unauthorized' error.
+var ErrUnauthorized = fmt.Errorf("unauthorized")

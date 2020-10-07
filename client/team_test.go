@@ -55,6 +55,13 @@ func (s *Suite) TestCreateTeam() {
 	httpmock.Reset()
 	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("POST", u, r)
+	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
+	s.Equal(ErrUnauthorized, err)
 }
 
 func (s *Suite) TestListTeams() {
@@ -100,6 +107,13 @@ func (s *Suite) TestListTeams() {
 	httpmock.Reset()
 	_, err = s.client.ListTeams()
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ListTeams()
+	s.Equal(ErrUnauthorized, err)
 }
 
 func (s *Suite) TestReadTeam() {
@@ -137,6 +151,13 @@ func (s *Suite) TestReadTeam() {
 	httpmock.Reset()
 	_, err = s.client.ReadTeam(teamId)
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadTeam(teamId)
+	s.Equal(ErrUnauthorized, err)
 }
 
 func (s *Suite) TestDeleteTeam() {
@@ -167,6 +188,13 @@ func (s *Suite) TestDeleteTeam() {
 	httpmock.Reset()
 	err = s.client.DeleteTeam(teamId)
 	s.NotNil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("DELETE", u, r)
+	err = s.client.DeleteTeam(teamId)
+	s.Equal(ErrUnauthorized, err)
 }
 
 /*

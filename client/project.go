@@ -76,13 +76,25 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		l.Err(err).Send()
 		return nil, err
 	}
-	if resp.StatusCode() != http.StatusOK {
-		errResp := resp.Error().(*ErrorResult)
-		l.Err(errResp).Send()
-		return nil, errResp
-	}
-	lpr := resp.Result().(*projectListResponse)
 
+	switch resp.StatusCode() {
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return nil, ErrUnauthorized
+	case http.StatusOK:
+		l.Debug().Msg("Successfully listed projects")
+		break
+	default:
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error creating a project")
+		return nil, er
+	}
+
+	lpr := resp.Result().(*projectListResponse)
 	// FIXME: After deleting a project through the API, it still shows up in
 	//  the list of projects returned by the API - only with its name set to
 	//  nil. This seemingly undesirable behavior should be fixed on the API
@@ -116,7 +128,15 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode() >= 400 {
+	switch resp.StatusCode() {
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return nil, ErrUnauthorized
+	case http.StatusOK:
+		l.Debug().Msg("Project successfully created")
+		pr := resp.Result().(*projectResponse)
+		return &pr.Result, nil
+	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
 			Int("StatusCode", resp.StatusCode()).
@@ -125,9 +145,6 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 			Msg("Error creating a project")
 		return nil, er
 	}
-
-	pr := resp.Result().(*projectResponse)
-	return &pr.Result, nil
 }
 
 // ReadProject a Rollbar project from the API. If no matching project is found,
@@ -160,6 +177,9 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	case http.StatusNotFound:
 		l.Warn().Msg("Project not found")
 		return nil, ErrNotFound
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return nil, ErrUnauthorized
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -196,6 +216,9 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 	case http.StatusNotFound:
 		l.Warn().Msg("Project not found")
 		return ErrNotFound
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return ErrUnauthorized
 	case http.StatusOK:
 		l.Debug().Msg("Project successfully deleted")
 		return nil
