@@ -16,12 +16,12 @@ import (
 
 // Project represents a Rollbar project.
 type Project struct {
-	Id           int    `model:"id"`
-	Name         string `model:"name"`
-	AccountId    int    `json:"account_id" model:"account_id"`
-	DateCreated  int    `json:"date_created" model:"date_created"`
-	DateModified int    `json:"date_modified" model:"date_modified"`
-	Status       string `model:"status"`
+	Id           int    `model:"id" mapstructure:"id"`
+	Name         string `model:"name" mapstructure:"name"`
+	AccountId    int    `json:"account_id" model:"account_id" mapstructure:"account_id"`
+	DateCreated  int    `json:"date_created" model:"date_created" mapstructure:"date_created"`
+	DateModified int    `json:"date_modified" model:"date_modified" mapstructure:"date_modified"`
+	Status       string `model:"status" mapstructure:"status"`
 }
 
 // FIXME: finish implementing the entire set of Project fields
