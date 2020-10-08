@@ -2,9 +2,10 @@ package rollbar
 
 import (
 	"fmt"
-
-	"github.com/babbel/rollbar-go/rollbar"
-	"github.com/hashicorp/terraform/helper/schema"
+	//"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rollbar/terraform-provider-rollbar/client"
+	//"github.com/rs/zerolog/log"
 )
 
 func dataSourceProject() *schema.Resource {
@@ -33,19 +34,26 @@ func dataSourceProject() *schema.Resource {
 func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
-	client := meta.(*rollbar.Client)
-	project, err := client.GetProjectByName(name)
+	c := meta.(*client.RollbarApiClient)
+	//project, err := client.GetProjectByName(name)
+	pl, err := c.ListProjects()
 	if err != nil {
 		return err
+	}
+	var project *client.Project
+	for _, p := range pl {
+		if p.Name == name {
+			project = &p
+		}
 	}
 	if project == nil {
 		d.SetId("")
 		return fmt.Errorf("No project with the name %s found", name)
 	}
 
-	id := fmt.Sprintf("%d", project.ID)
+	id := fmt.Sprintf("%d", project.Id)
 	d.SetId(id)
-	d.Set("account_id", project.AccountID)
+	d.Set("account_id", project.AccountId)
 	d.Set("date_created", project.DateCreated)
 
 	return nil

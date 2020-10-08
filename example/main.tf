@@ -30,3 +30,12 @@ resource "rollbar_project" "foo" {
 resource "rollbar_project" "bar" {
   name = "Bar"
 }
+
+data "rollbar_project" "foo" {
+  name = "Foo"
+  depends_on = [rollbar_project.foo]
+}
+
+output "project_foo" {
+  value = data.rollbar_project.foo
+}
