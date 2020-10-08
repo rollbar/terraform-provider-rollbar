@@ -21,7 +21,7 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/mitchellh/mapstructure v1.3.3 // indirect
+	github.com/mitchellh/mapstructure v1.3.3
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.20.0
 	github.com/stretchr/testify v1.6.1
@@ -31,6 +31,5 @@ require (
 	golang.org/x/sys v0.0.0-20201004230629-f6757f270073 // indirect
 	google.golang.org/genproto v0.0.0-20201002142447-3860012362da // indirect
 	google.golang.org/grpc v1.32.0 // indirect
-	gopkg.in/jeevatkm/go-model.v1 v1.1.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

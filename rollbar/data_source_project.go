@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/jeevatkm/go-model.v1"
+	//"gopkg.in/jeevatkm/go-model.v1"
 	"strconv"
 	"time"
 )
@@ -60,27 +60,14 @@ func dataSourceProjects() *schema.Resource {
 }
 
 func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Debug().Msg("Reading projects data from API")
+	log.Debug().Msg("Reading project list from API")
 	var diags diag.Diagnostics
 	c := m.(*client.RollbarApiClient)
 
-	lp, err := c.ListProjects()
+	projects, err := c.ListProjects()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	projects := make([]map[string]interface{}, 0)
-	for _, v := range lp {
-		m, err := model.Map(v)
-		if err != nil {
-			log.Err(err).
-				Interface("lp", lp).
-				Msg("Error converting to map")
-			return diag.FromErr(err)
-		}
-		projects = append(projects, m)
-	}
-
 	if err := d.Set("projects", projects); err != nil {
 		log.Err(err).
 			Interface("projects", projects).
@@ -93,6 +80,5 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
 	log.Warn().Msg("Successfully read project list from API.")
-
 	return diags
 }

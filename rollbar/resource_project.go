@@ -12,9 +12,9 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/jeevatkm/go-model.v1"
 	"strconv"
 )
 
@@ -93,7 +93,8 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	mProj, err := model.Map(proj)
+	var mProj map[string]interface{}
+	err = mapstructure.Decode(proj, &mProj)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
