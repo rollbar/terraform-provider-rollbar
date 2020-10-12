@@ -22,7 +22,7 @@ func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRollbarProjectAccessTokensDataSourceConfig(name),
+				Config: testAccRollbarProjectAccessTokensDataSourceConfig(name, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
@@ -33,9 +33,34 @@ func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
 			},
 		},
 	})
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRollbarProjectAccessTokensDataSourceConfig(name, "post"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(rn, "project_id"),
+					testAccCheckProjectAccessTokensDataSourceExists(rn),
+
+					// By default Rollbar provisions a new project with 4 access tokens.
+					resource.TestCheckResourceAttr(rn, "access_tokens.#", "2"),
+				),
+			},
+		},
+	})
 }
 
-func testAccRollbarProjectAccessTokensDataSourceConfig(projName string) string {
+// testAccRollbarProjectAccessTokensDataSourceConfig generates Terraform
+// configuration for resource `rollbar_project_access_tokens`. If `prefix` is
+// not empty, it will be supplied as the `prefix` argument to the data source.
+func testAccRollbarProjectAccessTokensDataSourceConfig(projName string, prefix string) string {
+	var configPrefix string
+	if prefix != "" {
+		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)
+	}
 	// language=terraform
 	return fmt.Sprintf(`
 		resource "rollbar_project" "test" {
@@ -44,12 +69,15 @@ func testAccRollbarProjectAccessTokensDataSourceConfig(projName string) string {
 	
 		data "rollbar_project_access_tokens" "test" {
 			project_id = rollbar_project.test.id
-			#prefix = "post"
 			depends_on = [rollbar_project.test]
+			%s
 		}
-	`, projName)
+	`, projName, configPrefix)
 }
 
+// testAccCheckProjectAccessTokensDataSourceExists checks that the data source's
+// ID is set in Terraform state.
+// FIXME: This is repeated all over the place.  We need a DRY solution
 func testAccCheckProjectAccessTokensDataSourceExists(rn string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[rn]
