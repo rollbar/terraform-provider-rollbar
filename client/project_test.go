@@ -141,6 +141,13 @@ func (s *Suite) TestReadProject() {
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadProject(expected.Id)
 	s.Equal(ErrUnauthorized, err)
+
+	// Deleted project API bug
+	// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/23
+	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProject(expected.Id)
+	s.Equal(ErrNotFound, err)
 }
 
 func (s *Suite) TestDeleteProject() {
