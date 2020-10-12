@@ -25,7 +25,7 @@ type RollbarApiClient struct {
 }
 
 // NewClient sets up a new Rollbar API client.
-func NewClient(token string) (*RollbarApiClient, error) {
+func NewClient(token string) *RollbarApiClient {
 	log.Debug().Msg("Initializing Rollbar client")
 
 	// New Resty HTTP client
@@ -43,7 +43,7 @@ func NewClient(token string) (*RollbarApiClient, error) {
 
 	// Rollbar client
 	c := RollbarApiClient{resty: r}
-	return &c, nil
+	return &c
 }
 
 // GetHttpClient allows access to the underlying http.Client object.  Useful

@@ -10,8 +10,7 @@ import (
 func (s *Suite) TestClientNoToken() {
 	var buf bytes.Buffer
 	log.Logger = log.Logger.Output(&buf)
-	_, err := NewClient("") // Valid, but probably not what you want, thus warn
-	s.Nil(err)
+	NewClient("") // Valid, but probably not what you want, thus warn
 	bs := buf.String()
 	s.NotZero(bs)
 	s.Contains(bs, "warn")

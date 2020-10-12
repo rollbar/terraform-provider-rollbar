@@ -65,8 +65,7 @@ func (s *Suite) SetupSuite() {
 	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
 
 	// Setup RollbarApiClient and enable mocking
-	c, err := NewClient("fakeTokenString")
-	s.Nil(err)
+	c := NewClient("fakeTokenString")
 	httpmock.ActivateNonDefault(c.GetHttpClient())
 	s.client = c
 }

@@ -47,9 +47,6 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	token := d.Get(schemaKeyToken).(string)
-	c, err := client.NewClient(token)
-	if err != nil {
-		return nil, diag.FromErr(err)
-	}
+	c := client.NewClient(token)
 	return c, diags
 }

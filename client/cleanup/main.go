@@ -15,10 +15,7 @@ func main() {
 	log.Info().Msg("Cleaning up orphaned Rollbar projects from failed acceptance test runs.")
 
 	token := os.Getenv("ROLLBAR_TOKEN")
-	c, err := client.NewClient(token)
-	if err != nil {
-		log.Fatal().Err(err).Send()
-	}
+	c := client.NewClient(token)
 
 	projects, err := c.ListProjects()
 	if err != nil {
