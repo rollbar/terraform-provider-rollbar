@@ -27,11 +27,11 @@ func main() {
 			Str("name", p.Name).
 			Int("id", p.Id).
 			Logger()
-		err = c.DeleteProject(p.Id)
-		if err != nil {
-			l.Fatal().Err(err).Send()
-		}
 		if strings.HasPrefix(p.Name, "tf-acc-test-") {
+			err = c.DeleteProject(p.Id)
+			if err != nil {
+				l.Fatal().Err(err).Send()
+			}
 			l.Info().Msg("Deleted project")
 		}
 	}
