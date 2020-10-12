@@ -27,7 +27,8 @@ func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
 
-					// By default Rollbar provisions a new project with 4 access tokens.
+					// By default Rollbar provisions a new project with 4 access
+					// tokens.
 					resource.TestCheckResourceAttr(rn, "access_tokens.#", "4"),
 				),
 			},
@@ -45,7 +46,8 @@ func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
 
-					// By default Rollbar provisions a new project with 4 access tokens.
+					// By default Rollbar provisions a new project with 4 access
+					// tokens, 2 of whose names beging with "post".
 					resource.TestCheckResourceAttr(rn, "access_tokens.#", "2"),
 				),
 			},
