@@ -40,13 +40,14 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	var project *client.Project
+	var project client.Project
+	var found bool
 	for _, p := range pl {
 		if p.Name == name {
-			project = &p
+			project = p
 		}
 	}
-	if project == nil {
+	if !found {
 		d.SetId("")
 		return fmt.Errorf("No project with the name %s found", name)
 	}
