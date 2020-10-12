@@ -7,7 +7,8 @@ import (
 	"testing"
 )
 
-// TestAccRollbarProjectsDataSource tests creation and deletion of a Rollbar project.
+// TestAccRollbarProjectsDataSource tests listing of all projects with
+// `rollbar_projects` data source.
 func TestAccRollbarProjectsDataSource(t *testing.T) {
 
 	rn := "data.rollbar_projects.all"
