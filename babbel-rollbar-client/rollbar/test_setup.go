@@ -60,6 +60,7 @@ func BaseURL(baseURL string) Option {
 }
 
 func fixture(path string) string {
+	// scan:ignore
 	b, err := ioutil.ReadFile(fixPath + path)
 	if err != nil {
 		panic(err)
