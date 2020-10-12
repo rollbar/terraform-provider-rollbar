@@ -35,20 +35,22 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
 	c := meta.(*client.RollbarApiClient)
-	//project, err := client.GetProjectByName(name)
 	pl, err := c.ListProjects()
 	if err != nil {
 		return err
 	}
-	var project *client.Project
+
+	var project client.Project
+	var found bool
 	for _, p := range pl {
 		if p.Name == name {
-			project = &p
+			found = true
+			project = p
 		}
 	}
-	if project == nil {
+	if !found {
 		d.SetId("")
-		return fmt.Errorf("No project with the name %s found", name)
+		return fmt.Errorf("no project with the name %s found", name)
 	}
 
 	id := fmt.Sprintf("%d", project.Id)

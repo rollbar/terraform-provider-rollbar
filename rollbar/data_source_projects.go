@@ -79,6 +79,6 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 	// it will be destroyed).
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
 
-	log.Warn().Msg("Successfully read project list from API.")
+	log.Debug().Msg("Successfully read project list from API.")
 	return diags
 }

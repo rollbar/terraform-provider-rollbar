@@ -27,3 +27,6 @@
 terraform.tfstate*
 *.tfvars
 .terraform/
+
+# ShiftLeft Scan reports
+reports/

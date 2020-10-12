@@ -82,7 +82,6 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		l.Warn().Msg("Unauthorized")
 		return nil, ErrUnauthorized
 	case http.StatusOK:
-		l.Debug().Msg("Successfully listed projects")
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -105,6 +104,9 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		}
 	}
 
+	l.Debug().
+		Int("count", len(cleaned)).
+		Msg("Successfully listed projects")
 	return cleaned, nil
 }
 
@@ -171,6 +173,12 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 	switch resp.StatusCode() {
 	case http.StatusOK:
 		pr := resp.Result().(*projectResponse)
+		// FIXME: This is a workaround for a known bug in the API
+		//  https://github.com/rollbar/terraform-provider-rollbar/issues/23
+		if pr.Result.Name == "" {
+			l.Warn().Msg("Project not found")
+			return nil, ErrNotFound
+		}
 		l.Debug().Msg("Project successfully read")
 		return &pr.Result, nil
 	case http.StatusNotFound:

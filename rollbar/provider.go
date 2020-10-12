@@ -36,8 +36,9 @@ func Provider() *schema.Provider {
 			"rollbar_project": resourceProject(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"rollbar_project":  dataSourceProject(),
-			"rollbar_projects": dataSourceProjects(),
+			"rollbar_project":               dataSourceProject(),
+			"rollbar_projects":              dataSourceProjects(),
+			"rollbar_project_access_tokens": dataSourceProjectAccessTokens(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

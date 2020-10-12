@@ -62,3 +62,6 @@ test:
 
 testacc: 
 	TF_ACC=1 go test -covermode=atomic -coverprofile=coverage.out $(TEST) -v $(TESTARGS) -timeout 120m   
+
+slscan:
+	./.slscan.sh
