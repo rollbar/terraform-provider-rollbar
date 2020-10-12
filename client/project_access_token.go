@@ -9,17 +9,17 @@ import (
 
 // ProjectAccessToken represents a Rollbar project access token.
 type ProjectAccessToken struct {
-	Name                    string
-	ProjectID               int    `json:"project_id" mapstructure:"project_id"`
-	AccessToken             string `json:"access_token" mapstructure:"access_token"`
-	Scopes                  []ProjectAccessTokenScope
-	Status                  Status
-	RateLimitWindowSize     *int `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
-	RateLimitWindowCount    *int `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
-	CurRateLimitWindowCount *int `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
-	CurRateLimitWindowStart *int `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
-	DateCreated             int  `json:"date_created" mapstructure:"date_created"`
-	DateModified            int  `json:"date_modified" mapstructure:"date_modified"`
+	Name                    string                    `mapstructure:"name"`
+	ProjectID               int                       `json:"project_id" mapstructure:"project_id"`
+	AccessToken             string                    `json:"access_token" mapstructure:"access_token"`
+	Scopes                  []ProjectAccessTokenScope `mapstructure:"scopes"`
+	Status                  Status                    `mapstructure:"status"`
+	RateLimitWindowSize     *int                      `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
+	RateLimitWindowCount    *int                      `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
+	CurRateLimitWindowCount *int                      `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
+	CurRateLimitWindowStart *int                      `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
+	DateCreated             int                       `json:"date_created" mapstructure:"date_created"`
+	DateModified            int                       `json:"date_modified" mapstructure:"date_modified"`
 }
 
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
