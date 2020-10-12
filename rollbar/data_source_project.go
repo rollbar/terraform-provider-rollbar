@@ -35,11 +35,11 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
 	c := meta.(*client.RollbarApiClient)
-	//project, err := client.GetProjectByName(name)
 	pl, err := c.ListProjects()
 	if err != nil {
 		return err
 	}
+
 	var project *client.Project
 	for _, p := range pl {
 		if p.Name == name {
