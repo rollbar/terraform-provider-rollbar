@@ -8,8 +8,8 @@ import (
 	"testing"
 )
 
-// TestAccRollbarProjectAccessTokensDataSource tests reading a project with
-// `rollbar_project` data source.
+// TestAccRollbarProjectAccessTokensDataSource tests reading project access
+// tokens with `rollbar_project_access_tokens` data source.
 func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
 
 	rn := "data.rollbar_project_access_tokens.test"
