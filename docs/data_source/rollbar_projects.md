@@ -27,6 +27,8 @@ This data source accepts no arguments.
 Attribute Reference
 -------------------
 
+In addition to all arguments above, the following attributes are exported:
+
 * `id` - ID of project
 * `name` - Name of project
 * `account_id` - ID of account that owns the project
