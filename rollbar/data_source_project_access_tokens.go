@@ -7,6 +7,7 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,6 +22,10 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 			"project_id": {
 				Type:     schema.TypeInt,
 				Required: true,
+			},
+			"prefix": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			// Computed fields
@@ -84,8 +89,11 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 // dataSourceProjectAccessTokensRead reads project access token data from Rollbar
 func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projId := d.Get("project_id").(int)
+	var prefix string
+	prefix, _ = d.Get("prefix").(string)
 	l := log.With().
-		Int("projId", projId).
+		Int("project_id", projId).
+		Str("prefix", prefix).
 		Logger()
 	l.Debug().Msg("Reading project access token data from Rollbar")
 
@@ -95,7 +103,18 @@ func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	err = d.Set("access_tokens", tokens)
+	var filtered []client.ProjectAccessToken
+	if prefix == "" {
+		filtered = tokens
+	} else {
+		for _, t := range tokens {
+			if strings.HasPrefix(t.Name, prefix) {
+				filtered = append(filtered, t)
+			}
+		}
+	}
+
+	err = d.Set("access_tokens", filtered)
 	if err != nil {
 		log.Err(err).
 			Interface("access_tokens", tokens).

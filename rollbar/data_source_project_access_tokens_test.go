@@ -44,6 +44,7 @@ func testAccRollbarProjectAccessTokensDataSourceConfig(projName string) string {
 	
 		data "rollbar_project_access_tokens" "test" {
 			project_id = rollbar_project.test.id
+			#prefix = "post"
 			depends_on = [rollbar_project.test]
 		}
 	`, projName)
