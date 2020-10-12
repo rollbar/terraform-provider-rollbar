@@ -44,6 +44,7 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	var found bool
 	for _, p := range pl {
 		if p.Name == name {
+			found = true
 			project = p
 		}
 	}
