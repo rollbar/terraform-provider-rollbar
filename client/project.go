@@ -82,7 +82,6 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		l.Warn().Msg("Unauthorized")
 		return nil, ErrUnauthorized
 	case http.StatusOK:
-		l.Debug().Msg("Successfully listed projects")
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().
@@ -105,6 +104,9 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		}
 	}
 
+	l.Debug().
+		Int("count", len(cleaned)).
+		Msg("Successfully listed projects")
 	return cleaned, nil
 }
 
