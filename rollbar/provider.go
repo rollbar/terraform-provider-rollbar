@@ -38,6 +38,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_project":               dataSourceProject(),
 			"rollbar_projects":              dataSourceProjects(),
+			"rollbar_project_access_token":  dataSourceProjectAccessToken(),
 			"rollbar_project_access_tokens": dataSourceProjectAccessTokens(),
 		},
 		ConfigureContextFunc: providerConfigure,
