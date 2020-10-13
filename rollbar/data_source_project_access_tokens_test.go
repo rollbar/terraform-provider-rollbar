@@ -17,7 +17,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.testAccRollbarProjectAccessTokensDataSourceConfig(""),
+				Config: s.configDataSourceProjectAccessTokens(""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
@@ -36,7 +36,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.testAccRollbarProjectAccessTokensDataSourceConfig("post"),
+				Config: s.configDataSourceProjectAccessTokens("post"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
@@ -50,16 +50,16 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 	})
 }
 
-// testAccRollbarProjectAccessTokensDataSourceConfig generates Terraform
+// configDataSourceProjectAccessTokens generates Terraform
 // configuration for resource `rollbar_project_access_tokens`. If `prefix` is
 // not empty, it will be supplied as the `prefix` argument to the data source.
-func (s *Suite) testAccRollbarProjectAccessTokensDataSourceConfig(prefix string) string {
+func (s *Suite) configDataSourceProjectAccessTokens(prefix string) string {
 	var configPrefix string
 	if prefix != "" {
 		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)
 	}
-	// language=terraform
-	return fmt.Sprintf(`
+	// language=hcl
+	tmpl := `
 		resource "rollbar_project" "test" {
 		  name         = "%s"
 		}
@@ -69,7 +69,8 @@ func (s *Suite) testAccRollbarProjectAccessTokensDataSourceConfig(prefix string)
 			depends_on = [rollbar_project.test]
 			%s
 		}
-	`, s.projectName, configPrefix)
+	`
+	return fmt.Sprintf(tmpl, s.projectName, configPrefix)
 }
 
 // testAccCheckProjectAccessTokensDataSourceExists checks that the data source's
