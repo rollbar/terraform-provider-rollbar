@@ -2,7 +2,6 @@ package rollbar_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -10,10 +9,7 @@ import (
 // TestAccRollbarProjectAccessTokensDataSource tests reading project access
 // tokens with `rollbar_project_access_tokens` data source.
 func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
-
 	rn := "data.rollbar_project_access_tokens.test"
-	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
@@ -21,7 +17,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRollbarProjectAccessTokensDataSourceConfig(name, ""),
+				Config: s.testAccRollbarProjectAccessTokensDataSourceConfig(""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
@@ -40,7 +36,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRollbarProjectAccessTokensDataSourceConfig(name, "post"),
+				Config: s.testAccRollbarProjectAccessTokensDataSourceConfig("post"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					testAccCheckProjectAccessTokensDataSourceExists(rn),
@@ -57,7 +53,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 // testAccRollbarProjectAccessTokensDataSourceConfig generates Terraform
 // configuration for resource `rollbar_project_access_tokens`. If `prefix` is
 // not empty, it will be supplied as the `prefix` argument to the data source.
-func testAccRollbarProjectAccessTokensDataSourceConfig(projName string, prefix string) string {
+func (s *Suite) testAccRollbarProjectAccessTokensDataSourceConfig(prefix string) string {
 	var configPrefix string
 	if prefix != "" {
 		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)
@@ -73,7 +69,7 @@ func testAccRollbarProjectAccessTokensDataSourceConfig(projName string, prefix s
 			depends_on = [rollbar_project.test]
 			%s
 		}
-	`, projName, configPrefix)
+	`, s.projectName, configPrefix)
 }
 
 // testAccCheckProjectAccessTokensDataSourceExists checks that the data source's

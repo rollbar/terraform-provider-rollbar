@@ -9,6 +9,8 @@
 package rollbar_test
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
@@ -23,6 +25,9 @@ type Suite struct {
 	suite.Suite
 	provider  *schema.Provider
 	providers map[string]*schema.Provider
+
+	// The following variables are populated before each test by SetupTest():
+	projectName string // Name of a Rollbar project
 }
 
 func (s *Suite) SetupSuite() {
@@ -48,6 +53,11 @@ func (s *Suite) preCheck() {
 	token := os.Getenv("ROLLBAR_TOKEN")
 	s.NotEmpty(token, "ROLLBAR_TOKEN must be set for acceptance tests")
 	log.Debug().Msg("Passed preflight check")
+}
+
+func (s *Suite) SetupTest() {
+	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	s.projectName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
 
 func TestSuite(t *testing.T) {

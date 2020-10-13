@@ -10,7 +10,6 @@ package rollbar_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -20,10 +19,7 @@ import (
 
 // TestAccRollbarProject tests creation and deletion of a Rollbar project.
 func (s *Suite) TestAccRollbarProject() {
-
 	rn := "rollbar_project.foo"
-	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
@@ -32,10 +28,10 @@ func (s *Suite) TestAccRollbarProject() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.testAccRollbarProjectConfig(randString),
+				Config: s.testAccRollbarProjectConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(rn, "name", name),
-					s.testAccRollbarProjectExists(rn, name),
+					resource.TestCheckResourceAttr(rn, "name", s.projectName),
+					s.testAccRollbarProjectExists(rn, s.projectName),
 					s.testAccRollbarProjectInProjectList(rn),
 				),
 			},
@@ -43,12 +39,12 @@ func (s *Suite) TestAccRollbarProject() {
 	})
 }
 
-func (s *Suite) testAccRollbarProjectConfig(randString string) string {
+func (s *Suite) testAccRollbarProjectConfig() string {
 	return fmt.Sprintf(`
 		resource "rollbar_project" "foo" {
-		  name         = "tf-acc-test-%s"
+		  name         = "%s"
 		}
-	`, randString)
+	`, s.projectName)
 }
 
 // testAccRollbarProjectExists tests that the newly created project exists
