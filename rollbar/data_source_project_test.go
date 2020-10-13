@@ -1,29 +1,24 @@
-package rollbar
+package rollbar_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 // TestAccRollbarProjectDataSource tests reading a project with
 // `rollbar_project` data source.
-func TestAccRollbarProjectDataSource(t *testing.T) {
-
+func (s *Suite) TestAccRollbarProjectDataSource() {
 	rn := "data.rollbar_project.test"
-	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRollbarProjectDataSourceConfig(name),
+				Config: s.configDataSourceRollbarProject(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(rn, "name", name),
+					resource.TestCheckResourceAttr(rn, "name", s.projectName),
 					resource.TestCheckResourceAttrSet(rn, "id"),
 					resource.TestCheckResourceAttrSet(rn, "account_id"),
 					resource.TestCheckResourceAttrSet(rn, "date_created"),
@@ -33,8 +28,9 @@ func TestAccRollbarProjectDataSource(t *testing.T) {
 	})
 }
 
-func testAccRollbarProjectDataSourceConfig(projName string) string {
-	return fmt.Sprintf(`
+func (s *Suite) configDataSourceRollbarProject() string {
+	// language=hcl
+	tmpl := `
 		resource "rollbar_project" "test" {
 		  name         = "%s"
 		}
@@ -43,5 +39,6 @@ func testAccRollbarProjectDataSourceConfig(projName string) string {
 			name = "%s"
 			depends_on = [rollbar_project.test]
 		}
-	`, projName, projName)
+	`
+	return fmt.Sprintf(tmpl, s.projectName, s.projectName)
 }

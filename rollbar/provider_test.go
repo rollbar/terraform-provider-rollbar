@@ -6,22 +6,34 @@
  * between author and licensee.
  */
 
-package rollbar
+package rollbar_test
 
 import (
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/suite"
 	"os"
+	"strconv"
 	"testing"
 )
 
-var testAccProviders map[string]*schema.Provider
-var testAccProviderFactories func(providers *[]*schema.Provider) map[string]func() (*schema.Provider, error)
-var testAccProvider *schema.Provider
-var testAccProviderFunc func() *schema.Provider
+// Suite is the acceptance testing suite.
+type Suite struct {
+	suite.Suite
+	provider  *schema.Provider
+	providers map[string]*schema.Provider
 
-func init() {
+	// The following variables are populated before each test by SetupTest():
+	projectName string // Name of a Rollbar project
+}
+
+func (s *Suite) SetupSuite() {
 	// Log to console
 	log.Logger = log.
 		With().Caller().
@@ -33,34 +45,61 @@ func init() {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 
 	// Setup testing
-	testAccProvider = Provider()
-	testAccProviders = map[string]*schema.Provider{
-		"rollbar": testAccProvider,
+	s.provider = rollbar.Provider()
+	s.providers = map[string]*schema.Provider{
+		"rollbar": s.provider,
+	}
+}
+
+// preCheck ensures we are ready to run the test
+func (s *Suite) preCheck() {
+	token := os.Getenv("ROLLBAR_TOKEN")
+	s.NotEmpty(token, "ROLLBAR_TOKEN must be set for acceptance tests")
+	log.Debug().Msg("Passed preflight check")
+}
+
+func (s *Suite) SetupTest() {
+	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	s.projectName = fmt.Sprintf("tf-acc-test-%s", randString)
+}
+
+func TestSuite(t *testing.T) {
+	suite.Run(t, new(Suite))
+}
+
+// getResourceIDString returns the ID string of a resource.
+func (s *Suite) getResourceIDString(ts *terraform.State, resourceName string) (string, error) {
+	var id string
+	rs, ok := ts.RootModule().Resources[resourceName]
+	if !ok {
+		return id, fmt.Errorf("can't find resource: %s", resourceName)
 	}
 
-	// FIXME: Implement this for use with resource.TestCase.ProviderFactories, as the simpler
-	//  resource.TestCase.Providers is deprecated.
-	/*
-		testAccProviderFactories = func(providers *[]*schema.Provider) map[string]func() (*schema.Provider, error) {
-			// this is an SDKV2 compatible hack, the "factory" functions are
-			// effectively singletons for the lifecycle of a resource.Test
-			var providerNames = []string{"aws", "awseast", "awswest", "awsalternate", "awsus-east-1", "awsalternateaccountalternateregion", "awsalternateaccountsameregion", "awssameaccountalternateregion", "awsthird"}
-			var factories = make(map[string]func() (*schema.Provider, error), len(providerNames))
-			for _, name := range providerNames {
-				p := Provider()
-				factories[name] = func() (*schema.Provider, error) { //nolint:unparam
-					return p, nil
-				}
-				*providers = append(*providers, p)
-			}
-			return factories
-		}
-	*/
-	testAccProviderFunc = func() *schema.Provider { return testAccProvider }
-}
-func testAccPreCheck(t *testing.T) {
-	if token := os.Getenv("ROLLBAR_TOKEN"); token == "" {
-		t.Fatal("ROLLBAR_TOKEN must be set for acceptance tests")
+	if rs.Primary.ID == "" {
+		return id, fmt.Errorf("resource ID not set")
 	}
-	log.Debug().Msg("Passed preflight check")
+	return rs.Primary.ID, nil
+}
+
+// getResourceIDInt returns the ID of a resource as an integer.
+func (s *Suite) getResourceIDInt(ts *terraform.State, resourceName string) (int, error) {
+	var id int
+	idString, err := s.getResourceIDString(ts, resourceName)
+	if err != nil {
+		return id, err
+	}
+	id, err = strconv.Atoi(idString)
+	if err != nil {
+		return id, err
+	}
+	return id, nil
+}
+
+// checkResourceStateSanity checks that the resource is present in the Terraform
+// state, and that its ID is set.
+func (s *Suite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		_, err := s.getResourceIDString(ts, rn)
+		return err
+	}
 }

@@ -6,70 +6,57 @@
  * between author and licensee.
  */
 
-package rollbar
+package rollbar_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"testing"
 )
 
 // TestAccRollbarProject tests creation and deletion of a Rollbar project.
-func TestAccRollbarProject(t *testing.T) {
-
+func (s *Suite) TestAccRollbarProject() {
 	rn := "rollbar_project.foo"
-	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
-		Providers:    testAccProviders,
+		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRollbarProjectConfig(randString),
+				Config: s.configResourceRollbarProject(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(rn, "name", name),
-					testAccRollbarProjectExists(rn, name),
-					testAccRollbarProjectInProjectList(rn),
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", s.projectName),
+					s.checkRollbarProjectExists(rn, s.projectName),
+					s.checkRollbarProjectInProjectList(rn),
 				),
 			},
 		},
 	})
 }
-func testAccRollbarProjectConfig(randString string) string {
-	return fmt.Sprintf(`
+
+func (s *Suite) configResourceRollbarProject() string {
+	// language=hcl
+	tmpl := `
 		resource "rollbar_project" "foo" {
-		  name         = "tf-acc-test-%s"
+		  name         = "%s"
 		}
-	`, randString)
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
 }
 
-// testAccRollbarProjectExists tests that the newly created project exists
-func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// Check terraform config is sane
-		rs, ok := s.RootModule().Resources[rn]
-		if !ok {
-			return fmt.Errorf("Not Found: %s", rn)
-		}
-		idString := rs.Primary.ID
-		if idString == "" {
-			return fmt.Errorf("No project ID is set")
-		}
-		id, err := strconv.Atoi(idString)
+// checkRollbarProjectExists tests that the newly created project exists
+func (s *Suite) checkRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {
 			return err
 		}
-
-		// Check that project exists
-		c := testAccProvider.Meta().(*client.RollbarApiClient)
+		c := s.provider.Meta().(*client.RollbarApiClient)
 		proj, err := c.ReadProject(id)
 		if err != nil {
 			return err
@@ -77,32 +64,19 @@ func testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc 
 		if proj.Name != name {
 			return fmt.Errorf("project name from API does not match project name in Terraform config")
 		}
-
-		// Success
 		return nil
 	}
 }
 
-// testAccRollbarProjectInProjectList tests that the newly created project is
+// checkRollbarProjectInProjectList tests that the newly created project is
 // present in the list of all projects.
-func testAccRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		// Check terraform config is sane
-		rs, ok := s.RootModule().Resources[rn]
-		if !ok {
-			return fmt.Errorf("Not Found: %s", rn)
-		}
-		idString := rs.Primary.ID
-		if idString == "" {
-			return fmt.Errorf("No project ID is set")
-		}
-		id, err := strconv.Atoi(idString)
+func (s *Suite) checkRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {
 			return err
 		}
-
-		// Check that project exists
-		c := testAccProvider.Meta().(*client.RollbarApiClient)
+		c := s.provider.Meta().(*client.RollbarApiClient)
 		projList, err := c.ListProjects()
 		if err != nil {
 			return err
@@ -118,8 +92,6 @@ func testAccRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
 			log.Debug().Int("id", id).Msg(msg)
 			return fmt.Errorf(msg)
 		}
-
-		// Success
 		return nil
 	}
 }
