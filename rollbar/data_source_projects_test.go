@@ -3,6 +3,7 @@ package rollbar_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"strconv"
 )
@@ -11,23 +12,6 @@ import (
 // `rollbar_projects` data source.
 func (s *Suite) TestAccRollbarProjectsDataSource() {
 	rn := "data.rollbar_projects.all"
-
-	// How many projects should we expect in the project list, after our TF
-	// config creates one more project?  There's no guarantee that the Rollbar
-	// account will have either zero or non-zero project count when test is run.
-	c := s.provider.Meta().(*client.RollbarApiClient)
-	pl, err := c.ListProjects()
-	s.Nil(err)
-	currentProjectCount := len(pl)
-	expectedCount := strconv.Itoa(currentProjectCount + 1)
-
-	// Construct the name of the TF resource that should represent the
-	// newly-created Rollbar project.
-	//
-	// FIXME: This relies on the API always returning projects in ascending
-	//  order of ID.  This API behavior is not documented or guarnateed.
-	index := strconv.Itoa(currentProjectCount) // index counting begins at 0; so no need to add 1 to project count
-	projectNameResource := fmt.Sprintf("projects.%s.name", index)
 
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
@@ -38,8 +22,7 @@ func (s *Suite) TestAccRollbarProjectsDataSource() {
 				Config: s.configDataSourceRollbarProjects(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "projects.#"),
-					resource.TestCheckResourceAttr(rn, "projects.#", expectedCount),
-					resource.TestCheckResourceAttr(rn, projectNameResource, s.projectName),
+					s.checkRollbarProjectInProjectDataSource(rn),
 				),
 			},
 		},
@@ -58,4 +41,37 @@ func (s *Suite) configDataSourceRollbarProjects() string {
 		}
 	`
 	return fmt.Sprintf(tmpl, s.projectName)
+}
+
+// checkRollbarProjectInProjectDataSource tests that newly created project is in
+// the list of all projects returned by data source `rollbar_projects`.
+func (s *Suite) checkRollbarProjectInProjectDataSource(rn string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		// How many projects should we expect in the project list?
+		c := s.provider.Meta().(*client.RollbarApiClient)
+		pl, err := c.ListProjects()
+		s.Nil(err)
+		expectedCount := strconv.Itoa(len(pl))
+		err = resource.TestCheckResourceAttr(rn, "projects.#", expectedCount)(ts)
+		if err != nil {
+			return err
+		}
+
+		// Does our project appear as expected in the data source output?
+		//
+		// FIXME: This relies on the API always returning projects in ascending
+		//  order of ID.  This API behavior is not documented or guarnateed.
+		//
+		// Construct the name of the TF resource that should represent the
+		// newly-created Rollbar project. Indexes begin at 0, so we must
+		// subtract one from the total item count to get the index of the final
+		// project in the list.
+		index := strconv.Itoa(len(pl) - 1)
+		projectNameResource := fmt.Sprintf("projects.%s.name", index)
+		err = resource.TestCheckResourceAttr(rn, projectNameResource, s.projectName)(ts)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 }
