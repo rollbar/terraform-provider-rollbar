@@ -10,7 +10,7 @@ import (
 
 // TestAccRollbarProjectsDataSource tests listing of all projects with
 // `rollbar_projects` data source.
-func (s *Suite) TestAccRollbarProjectsDataSource() {
+func (s *AccSuite) TestAccRollbarProjectsDataSource() {
 	rn := "data.rollbar_projects.all"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -29,7 +29,7 @@ func (s *Suite) TestAccRollbarProjectsDataSource() {
 	})
 }
 
-func (s *Suite) configDataSourceRollbarProjects() string {
+func (s *AccSuite) configDataSourceRollbarProjects() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
@@ -45,7 +45,7 @@ func (s *Suite) configDataSourceRollbarProjects() string {
 
 // checkRollbarProjectInProjectDataSource tests that newly created project is in
 // the list of all projects returned by data source `rollbar_projects`.
-func (s *Suite) checkRollbarProjectInProjectDataSource(rn string) resource.TestCheckFunc {
+func (s *AccSuite) checkRollbarProjectInProjectDataSource(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		// How many projects should we expect in the project list?
 		c := s.provider.Meta().(*client.RollbarApiClient)

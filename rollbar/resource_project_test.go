@@ -17,7 +17,7 @@ import (
 )
 
 // TestAccRollbarProject tests creation and deletion of a Rollbar project.
-func (s *Suite) TestAccRollbarProject() {
+func (s *AccSuite) TestAccRollbarProject() {
 	rn := "rollbar_project.foo"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -39,7 +39,7 @@ func (s *Suite) TestAccRollbarProject() {
 	})
 }
 
-func (s *Suite) configResourceRollbarProject() string {
+func (s *AccSuite) configResourceRollbarProject() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "foo" {
@@ -50,7 +50,7 @@ func (s *Suite) configResourceRollbarProject() string {
 }
 
 // checkRollbarProjectExists tests that the newly created project exists
-func (s *Suite) checkRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
+func (s *AccSuite) checkRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {
@@ -70,7 +70,7 @@ func (s *Suite) checkRollbarProjectExists(rn string, name string) resource.TestC
 
 // checkRollbarProjectInProjectList tests that the newly created project is
 // present in the list of all projects.
-func (s *Suite) checkRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
+func (s *AccSuite) checkRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 
 // TestAccRollbarProjectDataSource tests reading a project with
 // `rollbar_project` data source.
-func (s *Suite) TestAccRollbarProjectDataSource() {
+func (s *AccSuite) TestAccRollbarProjectDataSource() {
 	rn := "data.rollbar_project.test"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -28,7 +28,7 @@ func (s *Suite) TestAccRollbarProjectDataSource() {
 	})
 }
 
-func (s *Suite) configDataSourceRollbarProject() string {
+func (s *AccSuite) configDataSourceRollbarProject() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
