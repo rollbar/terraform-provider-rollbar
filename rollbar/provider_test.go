@@ -21,9 +21,8 @@ import (
 // Suite is the acceptance testing suite.
 type Suite struct {
 	suite.Suite
-	provider     *schema.Provider
-	providers    map[string]*schema.Provider
-	providerFunc func() *schema.Provider
+	provider  *schema.Provider
+	providers map[string]*schema.Provider
 }
 
 func (s *Suite) SetupSuite() {
@@ -42,7 +41,6 @@ func (s *Suite) SetupSuite() {
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
 	}
-	s.providerFunc = func() *schema.Provider { return s.provider }
 }
 
 // preCheck ensures we are ready to run the test
