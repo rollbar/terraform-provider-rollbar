@@ -7,7 +7,7 @@ import (
 
 // TestAccRollbarProjectAccessTokensDataSource tests reading project access
 // tokens with `rollbar_project_access_tokens` data source.
-func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
+func (s *AccSuite) TestAccRollbarProjectAccessTokensDataSource() {
 	rn := "data.rollbar_project_access_tokens.test"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -52,7 +52,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 // configDataSourceRollbarProjectAccessTokens generates Terraform configuration
 // for resource `rollbar_project_access_tokens`. If `prefix` is not empty, it
 // will be supplied as the `prefix` argument to the data source.
-func (s *Suite) configDataSourceRollbarProjectAccessTokens(prefix string) string {
+func (s *AccSuite) configDataSourceRollbarProjectAccessTokens(prefix string) string {
 	var configPrefix string
 	if prefix != "" {
 		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)

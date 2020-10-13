@@ -23,8 +23,8 @@ import (
 	"testing"
 )
 
-// Suite is the acceptance testing suite.
-type Suite struct {
+// AccSuite is the acceptance testing suite.
+type AccSuite struct {
 	suite.Suite
 	provider  *schema.Provider
 	providers map[string]*schema.Provider
@@ -33,7 +33,7 @@ type Suite struct {
 	projectName string // Name of a Rollbar project
 }
 
-func (s *Suite) SetupSuite() {
+func (s *AccSuite) SetupSuite() {
 	// Log to console
 	log.Logger = log.
 		With().Caller().
@@ -52,23 +52,23 @@ func (s *Suite) SetupSuite() {
 }
 
 // preCheck ensures we are ready to run the test
-func (s *Suite) preCheck() {
+func (s *AccSuite) preCheck() {
 	token := os.Getenv("ROLLBAR_TOKEN")
 	s.NotEmpty(token, "ROLLBAR_TOKEN must be set for acceptance tests")
 	log.Debug().Msg("Passed preflight check")
 }
 
-func (s *Suite) SetupTest() {
+func (s *AccSuite) SetupTest() {
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	s.projectName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
 
-func TestSuite(t *testing.T) {
-	suite.Run(t, new(Suite))
+func TestAccSuite(t *testing.T) {
+	suite.Run(t, new(AccSuite))
 }
 
 // getResourceIDString returns the ID string of a resource.
-func (s *Suite) getResourceIDString(ts *terraform.State, resourceName string) (string, error) {
+func (s *AccSuite) getResourceIDString(ts *terraform.State, resourceName string) (string, error) {
 	var id string
 	rs, ok := ts.RootModule().Resources[resourceName]
 	if !ok {
@@ -82,7 +82,7 @@ func (s *Suite) getResourceIDString(ts *terraform.State, resourceName string) (s
 }
 
 // getResourceIDInt returns the ID of a resource as an integer.
-func (s *Suite) getResourceIDInt(ts *terraform.State, resourceName string) (int, error) {
+func (s *AccSuite) getResourceIDInt(ts *terraform.State, resourceName string) (int, error) {
 	var id int
 	idString, err := s.getResourceIDString(ts, resourceName)
 	if err != nil {
@@ -97,7 +97,7 @@ func (s *Suite) getResourceIDInt(ts *terraform.State, resourceName string) (int,
 
 // checkResourceStateSanity checks that the resource is present in the Terraform
 // state, and that its ID is set.
-func (s *Suite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
+func (s *AccSuite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		_, err := s.getResourceIDString(ts, rn)
 		return err
