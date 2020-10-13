@@ -40,11 +40,13 @@ func (s *Suite) TestAccRollbarProject() {
 }
 
 func (s *Suite) configResourceRollbarProject() string {
-	return fmt.Sprintf(`
+	// language=hcl
+	tmpl := `
 		resource "rollbar_project" "foo" {
 		  name         = "%s"
 		}
-	`, s.projectName)
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
 }
 
 // checkRollbarProjectExists tests that the newly created project exists

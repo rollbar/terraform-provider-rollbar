@@ -28,7 +28,8 @@ func (s *Suite) TestAccRollbarProjectsDataSource() {
 }
 
 func (s *Suite) configDataSourceRollbarProjects() string {
-	return fmt.Sprintf(`
+	// language=hcl
+	tmpl := `
 		resource "rollbar_project" "test" {
 		  name         = "%s"
 		}
@@ -36,5 +37,6 @@ func (s *Suite) configDataSourceRollbarProjects() string {
 		data "rollbar_projects" "all" {
 			depends_on = [rollbar_project.test]
 		}
-	`, s.projectName)
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
 }
