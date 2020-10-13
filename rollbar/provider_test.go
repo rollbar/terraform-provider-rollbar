@@ -19,6 +19,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
 	"os"
+	"strconv"
 	"testing"
 )
 
@@ -66,19 +67,39 @@ func TestSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
+// getResourceIDString returns the ID string of a resource.
+func (s *Suite) getResourceIDString(ts *terraform.State, resourceName string) (string, error) {
+	var id string
+	rs, ok := ts.RootModule().Resources[resourceName]
+	if !ok {
+		return id, fmt.Errorf("can't find resource: %s", resourceName)
+	}
+
+	if rs.Primary.ID == "" {
+		return id, fmt.Errorf("resource ID not set")
+	}
+	return rs.Primary.ID, nil
+}
+
+// getResourceIDInt returns the ID of a resource as an integer.
+func (s *Suite) getResourceIDInt(ts *terraform.State, resourceName string) (int, error) {
+	var id int
+	idString, err := s.getResourceIDString(ts, resourceName)
+	if err != nil {
+		return id, err
+	}
+	id, err = strconv.Atoi(idString)
+	if err != nil {
+		return id, err
+	}
+	return id, nil
+}
+
 // checkResourceStateSanity checks that the resource is present in the Terraform
 // state, and that its ID is set.
 func (s *Suite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[rn]
-		if !ok {
-			return fmt.Errorf("can't find resource: %s", rn)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("resource ID not set")
-		}
-
-		return nil
+	return func(ts *terraform.State) error {
+		_, err := s.getResourceIDString(ts, rn)
+		return err
 	}
 }

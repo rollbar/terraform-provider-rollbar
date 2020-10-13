@@ -14,7 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 // TestAccRollbarProject tests creation and deletion of a Rollbar project.
@@ -51,21 +50,10 @@ func (s *Suite) testAccRollbarProjectConfig() string {
 // testAccRollbarProjectExists tests that the newly created project exists
 func (s *Suite) testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
-		// Check terraform config is sane
-		rs, ok := ts.RootModule().Resources[rn]
-		if !ok {
-			return fmt.Errorf("Not Found: %s", rn)
-		}
-		idString := rs.Primary.ID
-		if idString == "" {
-			return fmt.Errorf("No project ID is set")
-		}
-		id, err := strconv.Atoi(idString)
+		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {
 			return err
 		}
-
-		// Check that project exists
 		c := s.provider.Meta().(*client.RollbarApiClient)
 		proj, err := c.ReadProject(id)
 		if err != nil {
@@ -74,8 +62,6 @@ func (s *Suite) testAccRollbarProjectExists(rn string, name string) resource.Tes
 		if proj.Name != name {
 			return fmt.Errorf("project name from API does not match project name in Terraform config")
 		}
-
-		// Success
 		return nil
 	}
 }
@@ -84,21 +70,10 @@ func (s *Suite) testAccRollbarProjectExists(rn string, name string) resource.Tes
 // present in the list of all projects.
 func (s *Suite) testAccRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
-		// Check terraform config is sane
-		rs, ok := ts.RootModule().Resources[rn]
-		if !ok {
-			return fmt.Errorf("Not Found: %s", rn)
-		}
-		idString := rs.Primary.ID
-		if idString == "" {
-			return fmt.Errorf("No project ID is set")
-		}
-		id, err := strconv.Atoi(idString)
+		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {
 			return err
 		}
-
-		// Check that project exists
 		c := s.provider.Meta().(*client.RollbarApiClient)
 		projList, err := c.ListProjects()
 		if err != nil {
@@ -115,8 +90,6 @@ func (s *Suite) testAccRollbarProjectInProjectList(rn string) resource.TestCheck
 			log.Debug().Int("id", id).Msg(msg)
 			return fmt.Errorf(msg)
 		}
-
-		// Success
 		return nil
 	}
 }
