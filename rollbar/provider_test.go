@@ -63,7 +63,7 @@ func (s *Suite) SetupTest() {
 	s.projectName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
 
-func TestSuite(t *testing.T) {
+func TestAccSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
