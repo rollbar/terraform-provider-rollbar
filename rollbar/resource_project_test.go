@@ -27,19 +27,19 @@ func (s *Suite) TestAccRollbarProject() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.testAccRollbarProjectConfig(),
+				Config: s.configResourceRollbarProject(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttr(rn, "name", s.projectName),
-					s.testAccRollbarProjectExists(rn, s.projectName),
-					s.testAccRollbarProjectInProjectList(rn),
+					s.checkRollbarProjectExists(rn, s.projectName),
+					s.checkRollbarProjectInProjectList(rn),
 				),
 			},
 		},
 	})
 }
 
-func (s *Suite) testAccRollbarProjectConfig() string {
+func (s *Suite) configResourceRollbarProject() string {
 	return fmt.Sprintf(`
 		resource "rollbar_project" "foo" {
 		  name         = "%s"
@@ -47,8 +47,8 @@ func (s *Suite) testAccRollbarProjectConfig() string {
 	`, s.projectName)
 }
 
-// testAccRollbarProjectExists tests that the newly created project exists
-func (s *Suite) testAccRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
+// checkRollbarProjectExists tests that the newly created project exists
+func (s *Suite) checkRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {
@@ -66,9 +66,9 @@ func (s *Suite) testAccRollbarProjectExists(rn string, name string) resource.Tes
 	}
 }
 
-// testAccRollbarProjectInProjectList tests that the newly created project is
+// checkRollbarProjectInProjectList tests that the newly created project is
 // present in the list of all projects.
-func (s *Suite) testAccRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
+func (s *Suite) checkRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		if err != nil {

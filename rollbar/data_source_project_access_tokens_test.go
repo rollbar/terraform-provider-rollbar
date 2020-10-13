@@ -16,7 +16,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceProjectAccessTokens(""),
+				Config: s.configDataSourceRollbarProjectAccessTokens(""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					s.checkResourceStateSanity(rn),
@@ -35,7 +35,7 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceProjectAccessTokens("post"),
+				Config: s.configDataSourceRollbarProjectAccessTokens("post"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					s.checkResourceStateSanity(rn),
@@ -49,10 +49,10 @@ func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 	})
 }
 
-// configDataSourceProjectAccessTokens generates Terraform
-// configuration for resource `rollbar_project_access_tokens`. If `prefix` is
-// not empty, it will be supplied as the `prefix` argument to the data source.
-func (s *Suite) configDataSourceProjectAccessTokens(prefix string) string {
+// configDataSourceRollbarProjectAccessTokens generates Terraform configuration
+// for resource `rollbar_project_access_tokens`. If `prefix` is not empty, it
+// will be supplied as the `prefix` argument to the data source.
+func (s *Suite) configDataSourceRollbarProjectAccessTokens(prefix string) string {
 	var configPrefix string
 	if prefix != "" {
 		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)

@@ -16,7 +16,7 @@ func (s *Suite) TestAccRollbarProjectsDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.testAccRollbarProjectsDataSourceConfig(),
+				Config: s.configDataSourceRollbarProjects(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "projects.#"),
 					resource.TestCheckResourceAttr(rn, "projects.#", "1"),
@@ -27,7 +27,7 @@ func (s *Suite) TestAccRollbarProjectsDataSource() {
 	})
 }
 
-func (s *Suite) testAccRollbarProjectsDataSourceConfig() string {
+func (s *Suite) configDataSourceRollbarProjects() string {
 	return fmt.Sprintf(`
 		resource "rollbar_project" "test" {
 		  name         = "%s"
