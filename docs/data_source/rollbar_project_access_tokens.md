@@ -8,7 +8,7 @@ belonging to a Rollbar project.
 Example Usage
 -------------
 
-To retrieve info about all projects:
+To retrieve info about all tokens:
 
 ```hcl-terraform
 resource "rollbar_project" "test" {
@@ -29,7 +29,7 @@ Argument Reference
 ------------------
 
 * `project_id` - (Required) ID of a Rollbar project
-* `prefix` - (Optional) Project name begins with this prefix
+* `prefix` - (Optional) Name of the token begins with this prefix
 
 
 Attribute Reference
