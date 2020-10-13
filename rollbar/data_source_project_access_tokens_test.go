@@ -1,24 +1,23 @@
-package rollbar
+package rollbar_test
 
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 // TestAccRollbarProjectAccessTokensDataSource tests reading project access
 // tokens with `rollbar_project_access_tokens` data source.
-func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
+func (s *Suite) TestAccRollbarProjectAccessTokensDataSource() {
 
 	rn := "data.rollbar_project_access_tokens.test"
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
@@ -35,9 +34,9 @@ func TestAccRollbarProjectAccessTokensDataSource(t *testing.T) {
 		},
 	})
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{

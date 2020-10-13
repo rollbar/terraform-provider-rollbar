@@ -1,23 +1,22 @@
-package rollbar
+package rollbar_test
 
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 // TestAccRollbarProjectsDataSource tests listing of all projects with
 // `rollbar_projects` data source.
-func TestAccRollbarProjectsDataSource(t *testing.T) {
+func (s *Suite) TestAccRollbarProjectsDataSource() {
 
 	rn := "data.rollbar_projects.all"
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	name := fmt.Sprintf("tf-acc-test-%s", randString)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{

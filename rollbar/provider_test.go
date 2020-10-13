@@ -18,15 +18,15 @@ import (
 	"testing"
 )
 
-// AcceptanceSuite is the acceptance testing suite.
-type AcceptanceSuite struct {
+// Suite is the acceptance testing suite.
+type Suite struct {
 	suite.Suite
 	provider     *schema.Provider
 	providers    map[string]*schema.Provider
 	providerFunc func() *schema.Provider
 }
 
-func (s *AcceptanceSuite) SetupSuite() {
+func (s *Suite) SetupSuite() {
 	// Log to console
 	log.Logger = log.
 		With().Caller().
@@ -46,12 +46,12 @@ func (s *AcceptanceSuite) SetupSuite() {
 }
 
 // preCheck ensures we are ready to run the test
-func (s *AcceptanceSuite) preCheck() {
+func (s *Suite) preCheck() {
 	token := os.Getenv("ROLLBAR_TOKEN")
 	s.NotEmpty(token, "ROLLBAR_TOKEN must be set for acceptance tests")
 	log.Debug().Msg("Passed preflight check")
 }
 
 func TestSuite(t *testing.T) {
-	suite.Run(t, new(AcceptanceSuite))
+	suite.Run(t, new(Suite))
 }
