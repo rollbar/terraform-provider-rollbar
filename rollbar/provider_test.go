@@ -11,7 +11,9 @@ package rollbar_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -62,4 +64,21 @@ func (s *Suite) SetupTest() {
 
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
+}
+
+// checkResourceStateSanity checks that the resource is present in the Terraform
+// state, and that its ID is set.
+func (s *Suite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[rn]
+		if !ok {
+			return fmt.Errorf("can't find resource: %s", rn)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("resource ID not set")
+		}
+
+		return nil
+	}
 }

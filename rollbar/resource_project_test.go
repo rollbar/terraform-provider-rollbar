@@ -30,6 +30,7 @@ func (s *Suite) TestAccRollbarProject() {
 			{
 				Config: s.testAccRollbarProjectConfig(),
 				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttr(rn, "name", s.projectName),
 					s.testAccRollbarProjectExists(rn, s.projectName),
 					s.testAccRollbarProjectInProjectList(rn),
