@@ -275,6 +275,12 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	badArgs.Scopes = []Scope{derpScope}
 	_, err = s.client.CreateProjectAccessToken(badArgs)
 	s.NotNil(err)
+	// Invalid status
+	badArgs = args
+	derpStatus := Status("derp!")
+	badArgs.Status = derpStatus
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
 
 	// Success
 	t, err := s.client.CreateProjectAccessToken(args)
