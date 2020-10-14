@@ -224,7 +224,7 @@ func (s *Suite) TestDeleteProjectAccessToken() {
 func (s *Suite) TestCreateProjectAccessToken() {
 	projID := 411334
 
-	args := ProjectAccessTokenArgs{
+	args := ProjectAccessTokenCreateArgs{
 		ProjectID: projID,
 		Name:      "foobar",
 		Scopes:    []Scope{ScopeRead, ScopeWrite},
@@ -235,14 +235,14 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
 	var r httpmock.Responder
 	r = func(req *http.Request) (*http.Response, error) {
-		args := ProjectAccessTokenArgs{}
-		err := json.NewDecoder(req.Body).Decode(&args)
+		a := ProjectAccessTokenCreateArgs{}
+		err := json.NewDecoder(req.Body).Decode(&a)
 		log.Debug().
-			Interface("args", args).
+			Interface("args", a).
 			Msg("arguments sent to API")
 		s.Nil(err)
-		s.Equal(args.Name, args.Name)
-		s.Equal(args.Scopes, args.Scopes)
+		s.Equal(args.Name, a.Name)
+		s.Equal(args.Scopes, a.Scopes)
 		return rs, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
@@ -302,13 +302,6 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	_, err = s.client.CreateProjectAccessToken(args)
 	s.NotNil(err)
 
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateProjectAccessToken(args)
-	s.Equal(ErrUnauthorized, err)
-
 	// Internal server error
 	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
 		ErrorResult{Err: 500, Message: "Internal Server Error"})
@@ -316,5 +309,75 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	_, err = s.client.CreateProjectAccessToken(args)
 	s.NotNil(err)
 	s.NotEqual(ErrNotFound, err)
+}
 
+func (s *Suite) TestUpdateProjectAccessToken() {
+	projID := 411334
+	accessToken := "055ab702454e40798fd22bdac249eb2e" // Doesn't actually matter for this test
+
+	args := ProjectAccessTokenUpdateArgs{
+		ProjectID:            projID,
+		AccessToken:          accessToken,
+		RateLimitWindowSize:  1000,
+		RateLimitWindowCount: 2500,
+	}
+	u := apiUrl + pathPatUpdate
+	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
+	u = strings.ReplaceAll(u, "{accessToken}", accessToken)
+	rs := responseFromFixture("project_access_token/update.json", http.StatusOK)
+	var r httpmock.Responder
+	r = func(req *http.Request) (*http.Response, error) {
+		a := ProjectAccessTokenUpdateArgs{}
+		err := json.NewDecoder(req.Body).Decode(&a)
+		log.Debug().
+			Interface("args", args).
+			Msg("arguments sent to API")
+		s.Nil(err)
+		s.Equal(args.RateLimitWindowCount, a.RateLimitWindowCount)
+		s.Equal(args.RateLimitWindowSize, a.RateLimitWindowSize)
+		return rs, nil
+	}
+	httpmock.RegisterResponder("PATCH", u, r)
+
+	//
+	// Sanity Checks
+	//
+	// Invalid project ID
+	badArgs := args
+	badArgs.ProjectID = 0
+	err := s.client.UpdateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	badArgs = args
+	badArgs.ProjectID = -234
+	err = s.client.UpdateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid access token
+	badArgs = args
+	badArgs.AccessToken = ""
+	err = s.client.UpdateProjectAccessToken(badArgs)
+	s.NotNil(err)
+
+	// Success
+	err = s.client.UpdateProjectAccessToken(args)
+	s.Nil(err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("PATCH", u, r)
+	err = s.client.UpdateProjectAccessToken(args)
+	s.Equal(ErrUnauthorized, err)
+
+	// Unreachable server
+	httpmock.Reset()
+	err = s.client.UpdateProjectAccessToken(args)
+	s.NotNil(err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
+		ErrorResult{Err: 500, Message: "Internal Server Error"})
+	httpmock.RegisterResponder("PATCH", u, r)
+	err = s.client.UpdateProjectAccessToken(args)
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
 }

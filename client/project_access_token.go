@@ -33,10 +33,9 @@ const (
 	ScopePostClientItem = Scope("post_client_item")
 )
 
-// ProjectAccessTokenArgs encapsulates the required and optional arguments for
-// creating and updating Rollbar project access tokens.
-type ProjectAccessTokenArgs struct {
-	// Required
+// ProjectAccessTokenUpdateArgs encapsulates arguments for creating a Rollbar
+// project access token.
+type ProjectAccessTokenCreateArgs struct {
 	ProjectID            int     `json:"-"`
 	Name                 string  `json:"name"`
 	Scopes               []Scope `json:"scopes"`
@@ -46,7 +45,7 @@ type ProjectAccessTokenArgs struct {
 }
 
 // sanityCheck checks that the arguments are sane.
-func (args *ProjectAccessTokenArgs) sanityCheck() error {
+func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 	l := log.With().
 		Interface("args", args).
 		Logger()
@@ -88,6 +87,36 @@ func (args *ProjectAccessTokenArgs) sanityCheck() error {
 		return err
 	}
 	return nil
+}
+
+// ProjectAccessTokenUpdateArgs encapsulates the required and optional arguments
+// for creating a Rollbar project access token.
+//
+// Currently not all attributes can be updated.
+//  https://github.com/rollbar/terraform-provider-rollbar/issues/41
+type ProjectAccessTokenUpdateArgs struct {
+	ProjectID            int    `json:"-"`
+	AccessToken          string `json:"-"`
+	RateLimitWindowSize  uint   `json:"rate_limit_window_size"`
+	RateLimitWindowCount uint   `json:"rate_limit_window_count"`
+}
+
+// sanityCheck checks that the arguments are sane.
+func (args *ProjectAccessTokenUpdateArgs) sanityCheck() error {
+	l := log.With().
+		Interface("args", args).
+		Logger()
+	if args.ProjectID <= 0 {
+		err := fmt.Errorf("project ID cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if args.AccessToken == "" {
+		err := fmt.Errorf("access token cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	return nil // Sanity check passed
 }
 
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
@@ -193,7 +222,7 @@ func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string)
 }
 
 // CreateProjectAccessToken creates a Rollbar project access token.
-func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs) (ProjectAccessToken, error) {
+func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreateArgs) (ProjectAccessToken, error) {
 	l := log.With().
 		Interface("args", args).
 		Logger()
@@ -243,16 +272,65 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 	}
 }
 
+// UpdateProjectAccessToken updates a Rollbar project access token.
+func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdateArgs) error {
+	l := log.With().
+		Interface("args", args).
+		Logger()
+
+	err := args.sanityCheck()
+	if err != nil {
+		l.Err(err).Msg("Arguments to update project access token failed sanity check.")
+		return err
+	}
+
+	u := apiUrl + pathPatUpdate
+	resp, err := c.resty.R().
+		SetPathParams(map[string]string{
+			"projectId":   strconv.Itoa(args.ProjectID),
+			"accessToken": args.AccessToken,
+		}).
+		SetBody(args).
+		SetResult(patUpdateResponse{}).
+		SetError(ErrorResult{}).
+		Patch(u)
+	if err != nil {
+		l.Err(err).Msg("Error updating project access token")
+		return err
+	}
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		l.Debug().
+			Msg("Successfully updated project access token")
+		return nil
+	case http.StatusUnauthorized:
+		l.Warn().Msg("Unauthorized")
+		return ErrUnauthorized
+	default:
+		er := resp.Error().(*ErrorResult)
+		l.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error updating project access token")
+		return er
+	}
+}
+
 /*
  * Containers for unmarshalling Rollbar API responses
  */
 
 type patListResponse struct {
-	Error  int
+	Error  int `json:"err"`
 	Result []ProjectAccessToken
 }
 
 type patCreateResponse struct {
-	Error  int
+	Error  int `json:"err"`
 	Result ProjectAccessToken
+}
+
+type patUpdateResponse struct {
+	Error int `json:"err"`
 }

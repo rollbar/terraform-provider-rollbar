@@ -100,7 +100,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Creating new project access token")
 
 	c := m.(*client.RollbarApiClient)
-	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenArgs{
+	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:      name,
 		ProjectID: projectId,
 		Scopes:    scopes,
