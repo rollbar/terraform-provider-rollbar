@@ -33,6 +33,63 @@ const (
 	ScopePostClientItem = Scope("post_client_item")
 )
 
+// ProjectAccessTokenArgs encapsulates the required and optional arguments for
+// creating and updating Rollbar project access tokens.
+type ProjectAccessTokenArgs struct {
+	// Required
+	ProjectID            int     `json:"-"`
+	Name                 string  `json:"name"`
+	Scopes               []Scope `json:"scopes"`
+	Status               Status  `json:"status"`
+	RateLimitWindowSize  uint    `json:"rate_limit_window_size"`
+	RateLimitWindowCount uint    `json:"rate_limit_window_count"`
+}
+
+// sanityCheck checks that the arguments are sane.
+func (args *ProjectAccessTokenArgs) sanityCheck() error {
+	l := log.With().
+		Interface("args", args).
+		Logger()
+	if args.ProjectID <= 0 {
+		err := fmt.Errorf("project ID cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if args.Name == "" {
+		err := fmt.Errorf("name cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if len(args.Scopes) < 1 {
+		err := fmt.Errorf("at least one scope must be specified")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	for _, s := range args.Scopes {
+		switch s {
+		case ScopeRead, ScopeWrite, ScopePostClientItem, ScopePostServerItem:
+			// Passed sanity check
+		default:
+			// FIXME: Default switch case needs test coverage.
+			//  https://github.com/rollbar/terraform-provider-rollbar/issues/39
+			err := fmt.Errorf("invalid scope")
+			l.Err(err).Msg("Failed sanity check")
+			return err
+		}
+	}
+	switch args.Status {
+	case StatusEnabled, StatusDisabled:
+		// Passed sanity check
+	default:
+		// FIXME: Default switch case needs test coverage.
+		//  https://github.com/rollbar/terraform-provider-rollbar/issues/39
+		err := fmt.Errorf("invalid status")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	return nil
+}
+
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
 // specified Rollbar project.
 func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
@@ -132,53 +189,6 @@ func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string)
 	return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
 }
 
-// ProjectAccessTokenArgs encapsulates the required and optional arguments for creating and
-// updating Rollbar project access tokens.
-type ProjectAccessTokenArgs struct {
-	// Required
-	ProjectID int `json:"-"`
-	Name      string
-	Scopes    []Scope
-	// Optional - ignored if pointer is nil
-	Status               *Status
-	RateLimitWindowSize  *int `json:"rate_limit_window_size"`
-	RateLimitWindowCount *int `json:"rate_limit_window_count"`
-}
-
-func (args *ProjectAccessTokenArgs) sanityCheck() error {
-	l := log.With().
-		Interface("args", args).
-		Logger()
-	if args.ProjectID <= 0 {
-		err := fmt.Errorf("project ID cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return err
-	}
-	if args.Name == "" {
-		err := fmt.Errorf("name cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return err
-	}
-	if len(args.Scopes) < 1 {
-		err := fmt.Errorf("at least one scope must be specified")
-		l.Err(err).Msg("Failed sanity check")
-		return err
-	}
-	for _, s := range args.Scopes {
-		switch s {
-		case ScopeRead, ScopeWrite, ScopePostClientItem, ScopePostServerItem:
-			// Passed sanity check
-		default:
-			// FIXME: Default switch case needs test coverage.
-			//  https://github.com/rollbar/terraform-provider-rollbar/issues/39
-			err := fmt.Errorf("invalid scope")
-			l.Err(err).Msg("Failed sanity check")
-			return err
-		}
-	}
-	return nil
-}
-
 // CreateProjectAccessToken creates a Rollbar project access token.
 func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs) (ProjectAccessToken, error) {
 	l := log.With().
@@ -193,6 +203,8 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 	}
 
 	u := apiUrl + pathPatCreate
+	//c.resty.SetLogger(restyZeroLogger{log.Logger})
+	c.resty.SetDebug(true) // FIXME: debug only
 	resp, err := c.resty.R().
 		SetPathParams(map[string]string{
 			"projectId": strconv.Itoa(args.ProjectID),
