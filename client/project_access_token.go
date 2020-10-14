@@ -186,7 +186,9 @@ func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name stri
 }
 
 func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string) error {
-	return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
+	//return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
+	log.Warn().Msg("Deleting project access tokens not yet implemented by Rollbar API.")
+	return nil
 }
 
 // CreateProjectAccessToken creates a Rollbar project access token.
@@ -203,8 +205,6 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 	}
 
 	u := apiUrl + pathPatCreate
-	//c.resty.SetLogger(restyZeroLogger{log.Logger})
-	c.resty.SetDebug(true) // FIXME: debug only
 	resp, err := c.resty.R().
 		SetPathParams(map[string]string{
 			"projectId": strconv.Itoa(args.ProjectID),
