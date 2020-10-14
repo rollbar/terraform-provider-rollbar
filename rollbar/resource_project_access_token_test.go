@@ -32,7 +32,7 @@ func (s *AccSuite) TestAccRollbarProjectAccessToken() {
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttrSet(rn, "access_token"),
-					s.checkRollbarProjectAccessTokenExists(rn),
+					s.checkRollbarProjectAccessToken(rn),
 					//s.checkRollbarProjectAccessTokenInTokenList(rn),
 				),
 			},
@@ -57,8 +57,8 @@ func (s *AccSuite) configResourceRollbarProjectAccessToken() string {
 	return fmt.Sprintf(tmpl, s.projectName)
 }
 
-// checkRollbarProjectAccessTokenExists tests that the newly created project exists
-func (s *AccSuite) checkRollbarProjectAccessTokenExists(resourceName string) resource.TestCheckFunc {
+// checkRollbarProjectAccessToken tests that the newly created project exists
+func (s *AccSuite) checkRollbarProjectAccessToken(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		accessToken, err := s.getResourceIDString(ts, resourceName)
 		if err != nil {
@@ -73,8 +73,6 @@ func (s *AccSuite) checkRollbarProjectAccessTokenExists(resourceName string) res
 		if err != nil {
 			return err
 		}
-		name := rs.Primary.Attributes["name"]
-		scopes := rs.Primary.Attributes["scopes"]
 		c := s.provider.Meta().(*client.RollbarApiClient)
 		pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 		if err != nil {
@@ -83,11 +81,23 @@ func (s *AccSuite) checkRollbarProjectAccessTokenExists(resourceName string) res
 		if pat.AccessToken != accessToken {
 			return fmt.Errorf("access token from API does not match access token in Terraform config")
 		}
+		name := rs.Primary.Attributes["name"]
 		if pat.Name != name {
 			return fmt.Errorf("token name from API does not match token name in Terraform config")
 		}
+		scopesCount, err := strconv.Atoi(rs.Primary.Attributes["scopes.#"])
+		if err != nil {
+			return err
+		}
+		var scopes []client.Scope
+		for i := 0; i < scopesCount; i++ {
+			attr := "scopes." + strconv.Itoa(i)
+			scopeString := rs.Primary.Attributes[attr]
+			s := client.Scope(scopeString)
+			scopes = append(scopes, s)
+		}
 		if !assert.ObjectsAreEqual(pat.Scopes, scopes) {
-			return fmt.Errorf("token scopes from API do not match token scopes in Terraform config")
+			return fmt.Errorf("token scopesCount from API do not match token scopesCount in Terraform config")
 
 		}
 		return nil
