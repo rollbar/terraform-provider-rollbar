@@ -73,7 +73,36 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 // ReadProjectAccessToken reads a Rollbar project access token from the API.  It
 // returns the first token that matches `name`. If no matching token is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, name string) (ProjectAccessToken, error) {
+func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, token string) (ProjectAccessToken, error) {
+	l := log.With().
+		Int("projectID", projectID).
+		Str("token", token).
+		Logger()
+	l.Debug().Msg("Reading project access token")
+
+	var pat ProjectAccessToken
+	tokens, err := c.ListProjectAccessTokens(projectID)
+	if err != nil {
+		l.Err(err).
+			Msg("Error listing project access tokens")
+		return pat, err
+	}
+
+	for _, t := range tokens {
+		l.Debug().Msg("Found matching project access token")
+		if t.AccessToken == token {
+			return t, nil
+		}
+	}
+
+	l.Warn().Msg("Could not find matching project access token")
+	return pat, ErrNotFound
+}
+
+// ReadProjectAccessTokenByName reads a Rollbar project access token from the
+// API.  It returns the first token that matches `name`. If no matching token is
+// found, returns error ErrNotFound.
+func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
 	l := log.With().
 		Int("projectID", projectID).
 		Str("name", name).

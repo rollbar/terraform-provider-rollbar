@@ -109,6 +109,63 @@ func (s *Suite) TestReadProjectAccessToken() {
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
+	accessToken := "80f235b890c34ca49bcea692c2b90421"
+	// PAT exists
+	expected := ProjectAccessToken{
+		AccessToken: accessToken,
+		//"cur_rate_limit_window_count": null,
+		//"cur_rate_limit_window_start": null,
+		DateCreated:          1601982124,
+		DateModified:         1601982124,
+		Name:                 "post_client_item",
+		ProjectID:            projectID,
+		RateLimitWindowCount: nil,
+		RateLimitWindowSize:  nil,
+		Scopes: []Scope{
+			ScopePostClientItem,
+		},
+		Status: "enabled",
+	}
+	actual, err := s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	// PAT does not exist
+	_, err = s.client.ReadProjectAccessToken(projectID, "does-not-exist")
+	s.Equal(ErrNotFound, err)
+
+	// Not found
+	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, ErrorResult{Err: 404, Message: "Not Found"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
+	s.Equal(ErrNotFound, err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
+		ErrorResult{Err: 500, Message: "Internal Server Error"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
+	s.Equal(ErrUnauthorized, err)
+}
+
+// TestReadProjectAccessTokenByName tests reading a Rollbar project access token
+// from the API.
+func (s *Suite) TestReadProjectAccessTokenByName() {
+	projectID := 411334
+	u := apiUrl + pathPatList
+	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+
+	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
 	// PAT with name exists
 	expected := ProjectAccessToken{
 		AccessToken: "80f235b890c34ca49bcea692c2b90421",
@@ -125,25 +182,25 @@ func (s *Suite) TestReadProjectAccessToken() {
 		},
 		Status: "enabled",
 	}
-	actual, err := s.client.ReadProjectAccessToken(projectID, expected.Name)
+	actual, err := s.client.ReadProjectAccessTokenByName(projectID, expected.Name)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
 	// PAT with name does not exist
-	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
 	// Project ID not found
 	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, ErrorResult{Err: 404, Message: "Not Found"})
 	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
 	// Internal server error
 	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
 		ErrorResult{Err: 500, Message: "Internal Server Error"})
 	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.NotNil(err)
 	s.NotEqual(ErrNotFound, err)
 
@@ -151,7 +208,7 @@ func (s *Suite) TestReadProjectAccessToken() {
 	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
 		ErrorResult{Err: 401, Message: "Unauthorized"})
 	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessToken(projectID, "this-name-does-not-exist")
+	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrUnauthorized, err)
 }
 
