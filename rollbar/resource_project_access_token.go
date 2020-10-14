@@ -27,12 +27,47 @@ func resourceProjectAccessToken() *schema.Resource {
 		UpdateContext: resourceProjectAccessTokenUpdate,
 
 		Schema: map[string]*schema.Schema{
+			// Required fields
+			"project_id": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
-			"account_id": {
+			"scopes": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+
+			// Optional fields
+			"rate_limit_window_count": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"rate_limit_window_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+
+			// FIXME: Is status field optional or computed?
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
+			// Computed fields
+			"access_token": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"cur_rate_limit_window_count": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"cur_rate_limit_window_start": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -42,10 +77,6 @@ func resourceProjectAccessToken() *schema.Resource {
 			},
 			"date_modified": {
 				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"status": {
-				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
