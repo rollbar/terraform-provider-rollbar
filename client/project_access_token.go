@@ -116,6 +116,40 @@ type ProjectAccessTokenArgs struct {
 	RateLimitWindowCount *int `json:"rate_limit_window_count"`
 }
 
+func (args *ProjectAccessTokenArgs) sanityCheck() error {
+	l := log.With().
+		Interface("args", args).
+		Logger()
+	if args.ProjectID <= 0 {
+		err := fmt.Errorf("project ID cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if args.Name == "" {
+		err := fmt.Errorf("name cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if len(args.Scopes) < 1 {
+		err := fmt.Errorf("at least one scope must be specified")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	for _, s := range args.Scopes {
+		switch s {
+		case ScopeRead, ScopeWrite, ScopePostClientItem, ScopePostServerItem:
+			// Passed sanity check
+		default:
+			// FIXME: Default switch case needs test coverage.
+			//  https://github.com/rollbar/terraform-provider-rollbar/issues/39
+			err := fmt.Errorf("invalid scope")
+			l.Err(err).Msg("Failed sanity check")
+			return err
+		}
+	}
+	return nil
+}
+
 // CreateProjectAccessToken creates a Rollbar project access token.
 func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs) (ProjectAccessToken, error) {
 	l := log.With().
@@ -123,39 +157,11 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenArgs)
 		Logger()
 	var pat ProjectAccessToken
 
-	// Sanity checks
-	if args.ProjectID <= 0 {
-		err := fmt.Errorf("project ID cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
+	err := args.sanityCheck()
+	if err != nil {
+		l.Err(err).Msg("Arguments to create project access token failed sanity check.")
 		return pat, err
 	}
-	if args.Name == "" {
-		err := fmt.Errorf("name cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return pat, err
-	}
-	if len(args.Scopes) < 1 {
-		err := fmt.Errorf("at least one scope must be specified")
-		l.Err(err).Msg("Failed sanity check")
-		return pat, err
-	}
-
-	/*
-		// Build request body from arguments
-		body := map[string]interface{}{
-			"name":  args.Name,
-			"scope": args.Scope,
-		}
-		if args.Status != nil {
-			body["status"] = *args.Status
-		}
-		if args.RateLimitWindowCount != nil {
-			body["rate_limit_window_count"] = *args.RateLimitWindowCount
-		}
-		if args.RateLimitWindowSize != nil {
-			body["rate_limit_window_size"] = *args.RateLimitWindowSize
-		}
-	*/
 
 	u := apiUrl + pathPatCreate
 	resp, err := c.resty.R().
