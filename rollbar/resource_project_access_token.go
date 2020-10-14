@@ -84,23 +84,36 @@ func resourceProjectAccessToken() *schema.Resource {
 }
 
 func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Fatal().Msg("Not yet implemented")
 	var diags diag.Diagnostics
 
+	projectId := d.Get("project_id").(int)
 	name := d.Get("name").(string)
-	log.Debug().Str("name", name).
-		Msg("Creating new project")
+	scopeStrings := d.Get("name").([]string)
+	var scopes []client.Scope
+	for _, st := range scopeStrings {
+		sc := client.Scope(st)
+		scopes = append(scopes, sc)
+	}
+	l := log.With().
+		Int("project_id", projectId).
+		Str("name", name).
+		Interface("scopes", scopes).
+		Logger()
+	l.Debug().Msg("Creating new project access token")
 
 	c := m.(*client.RollbarApiClient)
-	p, err := c.CreateProject(name)
+	t, err := c.CreateProjectAccessToken(client.ProjectAccessTokenArgs{
+		Name:      name,
+		ProjectID: projectId,
+		Scopes:    scopes,
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	log.Debug().Interface("project", p).Msg("CreateProject() result")
 
-	d.SetId(strconv.Itoa(p.Id))
+	d.SetId(t.AccessToken)
 
-	readDiags := resourceProjectRead(ctx, d, m)
+	readDiags := resourceProjectAccessTokenRead(ctx, d, m)
 	diags = append(diags, readDiags...)
 	return diags
 }
