@@ -214,7 +214,7 @@ func (s *Suite) TestReadProjectAccessTokenByName() {
 
 // TestDeleteProjectAccessToken tests deleting a Rollbar project access token.
 func (s *Suite) TestDeleteProjectAccessToken() {
-	err := s.client.DeleteProjectAccessToken("does_not_matter")
+	err := s.client.DeleteProjectAccessToken(1234, "does_not_matter")
 	s.NotNil(err) // Delete PAT is not yet implemented in Rollbar API
 }
 

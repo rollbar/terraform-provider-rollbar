@@ -128,7 +128,7 @@ func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name stri
 	return pat, ErrNotFound
 }
 
-func (c *RollbarApiClient) DeleteProjectAccessToken(token string) error {
+func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string) error {
 	return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
 }
 
