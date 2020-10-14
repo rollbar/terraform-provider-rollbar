@@ -30,8 +30,8 @@ func (s *Suite) TestListProjectAccessTokens() {
 			ProjectID:            411334,
 			RateLimitWindowCount: nil,
 			RateLimitWindowSize:  nil,
-			Scopes: []ProjectAccessTokenScope{
-				PATScopePostClientItem,
+			Scopes: []Scope{
+				ScopePostClientItem,
 			},
 			Status: "enabled",
 		},
@@ -45,8 +45,8 @@ func (s *Suite) TestListProjectAccessTokens() {
 			ProjectID:            411334,
 			RateLimitWindowCount: nil,
 			RateLimitWindowSize:  nil,
-			Scopes: []ProjectAccessTokenScope{
-				PATScopePostServerItem,
+			Scopes: []Scope{
+				ScopePostServerItem,
 			},
 			Status: "enabled",
 		},
@@ -60,8 +60,8 @@ func (s *Suite) TestListProjectAccessTokens() {
 			ProjectID:            411334,
 			RateLimitWindowCount: nil,
 			RateLimitWindowSize:  nil,
-			Scopes: []ProjectAccessTokenScope{
-				PATScopeRead,
+			Scopes: []Scope{
+				ScopeRead,
 			},
 			Status: "enabled",
 		},
@@ -75,8 +75,8 @@ func (s *Suite) TestListProjectAccessTokens() {
 			ProjectID:            411334,
 			RateLimitWindowCount: nil,
 			RateLimitWindowSize:  nil,
-			Scopes: []ProjectAccessTokenScope{
-				PATScopeWrite,
+			Scopes: []Scope{
+				ScopeWrite,
 			},
 			Status: "enabled",
 		},
@@ -120,8 +120,8 @@ func (s *Suite) TestReadProjectAccessToken() {
 		ProjectID:            projectID,
 		RateLimitWindowCount: nil,
 		RateLimitWindowSize:  nil,
-		Scopes: []ProjectAccessTokenScope{
-			PATScopePostClientItem,
+		Scopes: []Scope{
+			ScopePostClientItem,
 		},
 		Status: "enabled",
 	}
@@ -167,7 +167,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	args := ProjectAccessTokenArgs{
 		ProjectID: projID,
 		Name:      "foobar",
-		Scopes:    []ProjectAccessTokenScope{PATScopeRead, PATScopeWrite},
+		Scopes:    []Scope{ScopeRead, ScopeWrite},
 	}
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
@@ -205,7 +205,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	s.NotNil(err)
 	// No scopes specified
 	badArgs = args
-	badArgs.Scopes = []ProjectAccessTokenScope{}
+	badArgs.Scopes = []Scope{}
 	_, err = s.client.CreateProjectAccessToken(badArgs)
 	s.NotNil(err)
 

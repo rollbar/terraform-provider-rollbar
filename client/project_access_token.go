@@ -9,18 +9,29 @@ import (
 
 // ProjectAccessToken represents a Rollbar project access token.
 type ProjectAccessToken struct {
-	Name                    string                    `mapstructure:"name"`
-	ProjectID               int                       `json:"project_id" mapstructure:"project_id"`
-	AccessToken             string                    `json:"access_token" mapstructure:"access_token"`
-	Scopes                  []ProjectAccessTokenScope `mapstructure:"scopes"`
-	Status                  Status                    `mapstructure:"status"`
-	RateLimitWindowSize     *int                      `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
-	RateLimitWindowCount    *int                      `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
-	CurRateLimitWindowCount *int                      `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
-	CurRateLimitWindowStart *int                      `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
-	DateCreated             int                       `json:"date_created" mapstructure:"date_created"`
-	DateModified            int                       `json:"date_modified" mapstructure:"date_modified"`
+	Name                    string  `mapstructure:"name"`
+	ProjectID               int     `json:"project_id" mapstructure:"project_id"`
+	AccessToken             string  `json:"access_token" mapstructure:"access_token"`
+	Scopes                  []Scope `mapstructure:"scopes"`
+	Status                  Status  `mapstructure:"status"`
+	RateLimitWindowSize     *int    `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
+	RateLimitWindowCount    *int    `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
+	CurRateLimitWindowCount *int    `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
+	CurRateLimitWindowStart *int    `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
+	DateCreated             int     `json:"date_created" mapstructure:"date_created"`
+	DateModified            int     `json:"date_modified" mapstructure:"date_modified"`
 }
+
+// Scope represents the scope of a Rollbar project access token.
+type Scope string
+
+// Possible values forproject access token scope
+const (
+	ScopeWrite          = Scope("write")
+	ScopeRead           = Scope("read")
+	ScopePostServerItem = Scope("post_server_item")
+	ScopePostClientItem = Scope("post_client_item")
+)
 
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
 // specified Rollbar project.
@@ -92,24 +103,13 @@ func (c *RollbarApiClient) DeleteProjectAccessToken(token string) error {
 	return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
 }
 
-// ProjectAccessTokenScope represents the scope of a Rollbar project access token.
-type ProjectAccessTokenScope string
-
-// Possible values forproject access token scope
-const (
-	PATScopeWrite          = ProjectAccessTokenScope("write")
-	PATScopeRead           = ProjectAccessTokenScope("read")
-	PATScopePostServerItem = ProjectAccessTokenScope("post_server_item")
-	PATScopePostClientItem = ProjectAccessTokenScope("post_client_item")
-)
-
 // ProjectAccessTokenArgs encapsulates the required and optional arguments for creating and
 // updating Rollbar project access tokens.
 type ProjectAccessTokenArgs struct {
 	// Required
 	ProjectID int `json:"-"`
 	Name      string
-	Scopes    []ProjectAccessTokenScope
+	Scopes    []Scope
 	// Optional - ignored if pointer is nil
 	Status               *Status
 	RateLimitWindowSize  *int `json:"rate_limit_window_size"`
