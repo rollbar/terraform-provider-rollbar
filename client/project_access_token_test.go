@@ -208,6 +208,12 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	badArgs.Scopes = []Scope{}
 	_, err = s.client.CreateProjectAccessToken(badArgs)
 	s.NotNil(err)
+	// Invalid scope
+	badArgs = args
+	derpScope := Scope("derp!")
+	badArgs.Scopes = []Scope{derpScope}
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
 
 	// Success
 	t, err := s.client.CreateProjectAccessToken(args)
