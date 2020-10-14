@@ -33,7 +33,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"rollbar_project": resourceProject(),
+			"rollbar_project":              resourceProject(),
+			"rollbar_project_access_token": resourceProjectAccessToken(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_project":               dataSourceProject(),
