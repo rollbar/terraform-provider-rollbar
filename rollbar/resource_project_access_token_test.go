@@ -14,16 +14,16 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/assert"
+	"strconv"
 )
 
 // TestAccRollbarProject tests creation and deletion of a Rollbar project.
 func (s *AccSuite) TestAccRollbarProjectAccessToken() {
-	log.Fatal().Msg("Not yet implemented")
-	rn := "rollbar_project.foo"
+	rn := "rollbar_project_access_token.test"
 
 	resource.Test(s.T(), resource.TestCase{
-		PreCheck: func() { s.preCheck() },
-		//ProviderFactories: testAccProviderFactories(),
+		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -31,9 +31,9 @@ func (s *AccSuite) TestAccRollbarProjectAccessToken() {
 				Config: s.configResourceRollbarProjectAccessToken(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", s.projectName),
-					s.checkRollbarProjectAccessTokenExists(rn, s.projectName),
-					s.checkRollbarProjectAccessTokenInTokenList(rn),
+					resource.TestCheckResourceAttrSet(rn, "access_token"),
+					s.checkRollbarProjectAccessTokenExists(rn),
+					//s.checkRollbarProjectAccessTokenInTokenList(rn),
 				),
 			},
 		},
@@ -41,31 +41,54 @@ func (s *AccSuite) TestAccRollbarProjectAccessToken() {
 }
 
 func (s *AccSuite) configResourceRollbarProjectAccessToken() string {
-	log.Fatal().Msg("Not yet implemented")
 	// language=hcl
 	tmpl := `
-		resource "rollbar_project" "foo" {
+		resource "rollbar_project" "test" {
 		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
 		}
 	`
 	return fmt.Sprintf(tmpl, s.projectName)
 }
 
 // checkRollbarProjectAccessTokenExists tests that the newly created project exists
-func (s *AccSuite) checkRollbarProjectAccessTokenExists(rn string, name string) resource.TestCheckFunc {
-	log.Fatal().Msg("Not yet implemented")
+func (s *AccSuite) checkRollbarProjectAccessTokenExists(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
-		id, err := s.getResourceIDInt(ts, rn)
+		accessToken, err := s.getResourceIDString(ts, resourceName)
 		if err != nil {
 			return err
 		}
+		rs, ok := ts.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", resourceName)
+		}
+		projectIDString := rs.Primary.Attributes["project_id"]
+		projectID, err := strconv.Atoi(projectIDString)
+		if err != nil {
+			return err
+		}
+		name := rs.Primary.Attributes["name"]
+		scopes := rs.Primary.Attributes["scopes"]
 		c := s.provider.Meta().(*client.RollbarApiClient)
-		proj, err := c.ReadProject(id)
+		pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 		if err != nil {
 			return err
 		}
-		if proj.Name != name {
-			return fmt.Errorf("project name from API does not match project name in Terraform config")
+		if pat.AccessToken != accessToken {
+			return fmt.Errorf("access token from API does not match access token in Terraform config")
+		}
+		if pat.Name != name {
+			return fmt.Errorf("token name from API does not match token name in Terraform config")
+		}
+		if !assert.ObjectsAreEqual(pat.Scopes, scopes) {
+			return fmt.Errorf("token scopes from API do not match token scopes in Terraform config")
+
 		}
 		return nil
 	}

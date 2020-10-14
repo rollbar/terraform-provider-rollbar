@@ -15,11 +15,9 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 func resourceProjectAccessToken() *schema.Resource {
-	log.Fatal().Msg("Not yet implemented")
 	return &schema.Resource{
 		CreateContext: resourceProjectAccessTokenCreate,
 		ReadContext:   resourceProjectAccessTokenRead,
@@ -41,6 +39,10 @@ func resourceProjectAccessToken() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 
 			// Optional fields
 			"rate_limit_window_count": {
@@ -50,12 +52,6 @@ func resourceProjectAccessToken() *schema.Resource {
 			"rate_limit_window_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
-			},
-
-			// FIXME: Is status field optional or computed?
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			// Computed fields
@@ -88,30 +84,33 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 
 	projectId := d.Get("project_id").(int)
 	name := d.Get("name").(string)
-	scopeStrings := d.Get("name").([]string)
+	scopesInterface := d.Get("scopes").([]interface{})
 	var scopes []client.Scope
-	for _, st := range scopeStrings {
-		sc := client.Scope(st)
-		scopes = append(scopes, sc)
+	for _, v := range scopesInterface {
+		s := v.(string)
+		scopes = append(scopes, client.Scope(s))
 	}
+	status := client.Status(d.Get("status").(string))
 	l := log.With().
 		Int("project_id", projectId).
 		Str("name", name).
 		Interface("scopes", scopes).
+		Interface("status", status).
 		Logger()
 	l.Debug().Msg("Creating new project access token")
 
 	c := m.(*client.RollbarApiClient)
-	t, err := c.CreateProjectAccessToken(client.ProjectAccessTokenArgs{
+	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenArgs{
 		Name:      name,
 		ProjectID: projectId,
 		Scopes:    scopes,
+		Status:    status,
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(t.AccessToken)
+	d.SetId(pat.AccessToken)
 
 	readDiags := resourceProjectAccessTokenRead(ctx, d, m)
 	diags = append(diags, readDiags...)
@@ -119,42 +118,33 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Fatal().Msg("Not yet implemented")
 	var diags diag.Diagnostics
 
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		log.Err(err).Msg("Error converting Id to integer")
-		return diag.FromErr(err)
-	}
-
+	accessToken := d.Id()
+	projectId := d.Get("project_id").(int)
 	l := log.With().
-		Int("id", id).
+		Str("accessToken", accessToken).
 		Logger()
 	l.Debug().Msg("Reading project resource")
 
 	c := m.(*client.RollbarApiClient)
-	proj, err := c.ReadProject(id)
+	pat, err := c.ReadProjectAccessToken(projectId, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	var mProj map[string]interface{}
-	err = mapstructure.Decode(proj, &mProj)
+	var mPat map[string]interface{}
+	err = mapstructure.Decode(pat, &mPat)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	for k, v := range mProj {
-		if k == "id" {
-			continue
-		}
+	for k, v := range mPat {
 		err = d.Set(k, v)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 	}
-	d.SetId(strconv.Itoa(proj.Id))
 
 	return diags
 }
@@ -165,22 +155,19 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Fatal().Msg("Not yet implemented")
 	var diags diag.Diagnostics
 
-	projectId, err := strconv.Atoi(d.Id())
-	if err != nil {
-		log.Err(err).Msg("Error converting Id to integer")
-		return diag.FromErr(err)
-	}
+	accessToken := d.Id()
+	projectId := d.Get("project_id").(int)
 
 	l := log.With().
 		Int("projectId", projectId).
+		Str("accessToken", accessToken).
 		Logger()
 	l.Debug().Msg("Deleting project")
 
 	c := m.(*client.RollbarApiClient)
-	err = c.DeleteProject(projectId)
+	err := c.DeleteProjectAccessToken(projectId, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
