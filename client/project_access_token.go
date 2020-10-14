@@ -186,7 +186,8 @@ func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name stri
 }
 
 func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string) error {
-	//return fmt.Errorf("delete PAT not yet implemented by Rollbar API")
+	// FIXME: Implement this functionality when the API is ready!
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
 	log.Warn().Msg("Deleting project access tokens not yet implemented by Rollbar API.")
 	return nil
 }

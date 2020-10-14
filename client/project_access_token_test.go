@@ -214,8 +214,11 @@ func (s *Suite) TestReadProjectAccessTokenByName() {
 
 // TestDeleteProjectAccessToken tests deleting a Rollbar project access token.
 func (s *Suite) TestDeleteProjectAccessToken() {
+	// FIXME: actually test this
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
 	err := s.client.DeleteProjectAccessToken(1234, "does_not_matter")
-	s.NotNil(err) // Delete PAT is not yet implemented in Rollbar API
+	s.Nil(err)
+	log.Warn().Msg("Delete project access token is not yet implemented in Rollbar API")
 }
 
 func (s *Suite) TestCreateProjectAccessToken() {
@@ -225,6 +228,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 		ProjectID: projID,
 		Name:      "foobar",
 		Scopes:    []Scope{ScopeRead, ScopeWrite},
+		Status:    StatusEnabled,
 	}
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
