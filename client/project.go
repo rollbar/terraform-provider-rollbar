@@ -103,9 +103,9 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 			cleaned = append(cleaned, proj)
 		}
 	}
-
 	l.Debug().
-		Int("count", len(cleaned)).
+		Int("raw_projects", len(lpr.Result)).
+		Int("cleaned_projects", len(cleaned)).
 		Msg("Successfully listed projects")
 	return cleaned, nil
 }
