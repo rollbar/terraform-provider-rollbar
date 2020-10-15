@@ -1,0 +1,18 @@
+name: reviewdog
+on: [push, pull_request]
+jobs:
+  reviewdog:
+    name: reviewdog
+    runs-on: ubuntu-latest
+    steps:
+      # ...
+      - uses: reviewdog/action-setup@v1
+        with:
+          reviewdog_version: latest # Optional. [latest,nightly,v.X.Y.Z]
+      - name: Run reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          reviewdog -reporter=github-pr-check -runners=golint,govet,go-consistent,golangci-lint,
+          # or
+          #reviewdog -reporter=github-pr-review -runners=golint,govet
