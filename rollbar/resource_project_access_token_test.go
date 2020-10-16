@@ -33,7 +33,7 @@ import (
 
 // TestAccProjectAccessToken tests creation and deletion of a Rollbar project.
 func (s *AccSuite) TestAccProjectAccessToken() {
-	rn := "rollbar_project_access_token.test"
+	rn := "rollbar_project_access_token.test" // Resource name
 
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
@@ -48,6 +48,12 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 					s.checkProjectAccessToken(rn),
 					s.checkProjectAccessTokenInTokenList(rn),
 				),
+			},
+			{
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateIdFunc: importIdProjectAccessToken(rn),
+				ImportStateVerify: true,
 			},
 			{
 				Config: s.configResourceProjectAccessTokenUpdatedRateLimit(),
@@ -163,5 +169,18 @@ func (s *AccSuite) checkProjectAccessTokenInTokenList(rn string) resource.TestCh
 		}
 		s.True(found, "project access token not found in project access token list")
 		return nil
+	}
+}
+
+func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc {
+	return func(s *terraform.State) (string, error) {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("Not found: %s", resourceName)
+		}
+		projectId := rs.Primary.Attributes["project_id"]
+		accessToken := rs.Primary.ID
+
+		return fmt.Sprintf("%s/%s", projectId, accessToken), nil
 	}
 }

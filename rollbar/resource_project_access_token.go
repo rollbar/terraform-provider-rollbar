@@ -24,11 +24,14 @@ package rollbar
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"strconv"
+	"strings"
 )
 
 func resourceProjectAccessToken() *schema.Resource {
@@ -37,6 +40,10 @@ func resourceProjectAccessToken() *schema.Resource {
 		ReadContext:   resourceProjectAccessTokenRead,
 		DeleteContext: resourceProjectAccessTokenDelete,
 		UpdateContext: resourceProjectAccessTokenUpdate,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceProjectAccessTokenImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			// Required fields
@@ -208,4 +215,27 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	}
 
 	return diags
+}
+
+func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	l := log.With().Str("id", d.Id()).Logger()
+	l.Debug().Msg("Importing resource rollbar project access token")
+	idParts := strings.Split(d.Id(), "/")
+	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+		return nil, fmt.Errorf("Unexpected format of ID (%q), expected PROJECT-ID/ACCESS-TOKEN", d.Id())
+	}
+	projectIdString := idParts[0]
+	accessToken := idParts[1]
+	projectId, err := strconv.Atoi(projectIdString)
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
+	l.Debug().
+		Int("project_id", projectId).
+		Str("access_token", accessToken).
+		Send()
+	d.Set("project_id", projectId)
+	d.SetId(accessToken)
+	return []*schema.ResourceData{d}, nil
 }
