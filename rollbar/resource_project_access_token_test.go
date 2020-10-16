@@ -47,7 +47,7 @@ func (s *AccSuite) TestAccRollbarProjectAccessToken() {
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttrSet(rn, "access_token"),
 					s.checkRollbarProjectAccessToken(rn),
-					//s.checkRollbarProjectAccessTokenInTokenList(rn),
+					s.checkRollbarProjectAccessTokenInTokenList(rn),
 				),
 			},
 		},
@@ -118,30 +118,35 @@ func (s *AccSuite) checkRollbarProjectAccessToken(resourceName string) resource.
 	}
 }
 
-// checkRollbarProjectAccessTokenInProjectList tests that the newly created project is
-// present in the list of all projects.
+// checkRollbarProjectAccessTokenInProjectList tests that the newly created
+// Rollbar project access token is present in the list of all project access
+// tokens.
 func (s *AccSuite) checkRollbarProjectAccessTokenInTokenList(rn string) resource.TestCheckFunc {
-	log.Fatal().Msg("Not yet implemented")
 	return func(ts *terraform.State) error {
-		id, err := s.getResourceIDInt(ts, rn)
+		accessToken, err := s.getResourceIDString(ts, rn)
 		if err != nil {
 			return err
 		}
+		projectID, err := s.getResourceAttrInt(ts, rn, "project_id")
+		if err != nil {
+			return err
+		}
+
 		c := s.provider.Meta().(*client.RollbarApiClient)
-		projList, err := c.ListProjects()
+		pats, err := c.ListProjectAccessTokens(projectID)
 		if err != nil {
 			return err
 		}
 		found := false
-		for _, proj := range projList {
-			if proj.Id == id {
+		for _, t := range pats {
+			if t.AccessToken == accessToken {
 				found = true
 			}
 		}
 		if !found {
-			msg := "Project not found in project list"
-			log.Debug().Int("id", id).Msg(msg)
-			return fmt.Errorf(msg)
+			err := fmt.Errorf("project access token not found in project access token list")
+			log.Err(err).Str("accessToken", accessToken).Send()
+			return err
 		}
 		return nil
 	}
