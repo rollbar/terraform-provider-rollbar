@@ -10,29 +10,35 @@ OS_ARCH=linux_amd64
 default: dev
 
 dev: install _dev_cleanup _dev_init _dev_apply _dev_log
+plan: install _dev_cleanup _dev_init _dev_plan
 
 dev_auto_apply: install _dev_cleanup _dev_init _dev_apply_auto _dev_log
 
 dev_no_debug: install _dev_cleanup _dev_init _dev_apply_nodebug
 
+
 _dev_cleanup:
 	# Cleanup last run
-	rm -vrf example/jmcvetta/.terraform /tmp/terraform-provider-rollbar.log
+	rm -vrf example/.terraform /tmp/terraform-provider-rollbar.log
 _dev_init:
 	# Initialize terraform
-	(cd example/jmcvetta && terraform init)
+	(cd example && terraform init)
 _dev_apply:
 	# Test the provider
-	(cd example/jmcvetta && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
 _dev_apply_nodebug:
 	# Test the provider
-	(cd example/jmcvetta && terraform apply) || true
+	(cd example && terraform apply) || true
 _dev_apply_auto:
 	# Test the provider
-	(cd example/jmcvetta && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
 _dev_log:
 	# Print the debug log
 	cat /tmp/terraform-provider-rollbar.log
+
+_dev_plan:
+	# Test the provider
+	(cd example && terraform plan)
 
 
 build:
