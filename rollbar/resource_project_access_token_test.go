@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 )
@@ -110,30 +109,19 @@ func (s *AccSuite) checkRollbarProjectAccessToken(resourceName string) resource.
 func (s *AccSuite) checkRollbarProjectAccessTokenInTokenList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		accessToken, err := s.getResourceIDString(ts, rn)
-		if err != nil {
-			return err
-		}
+		s.Nil(err)
 		projectID, err := s.getResourceAttrInt(ts, rn, "project_id")
-		if err != nil {
-			return err
-		}
-
+		s.Nil(err)
 		c := s.provider.Meta().(*client.RollbarApiClient)
 		pats, err := c.ListProjectAccessTokens(projectID)
-		if err != nil {
-			return err
-		}
+		s.Nil(err)
 		found := false
 		for _, t := range pats {
 			if t.AccessToken == accessToken {
 				found = true
 			}
 		}
-		if !found {
-			err := fmt.Errorf("project access token not found in project access token list")
-			log.Err(err).Str("accessToken", accessToken).Send()
-			return err
-		}
+		s.True(found, "project access token not found in project access token list")
 		return nil
 	}
 }

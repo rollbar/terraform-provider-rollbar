@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"github.com/rs/zerolog/log"
 )
 
 // TestAccRollbarProject tests creation and deletion of a Rollbar project.
@@ -53,17 +52,11 @@ func (s *AccSuite) configResourceRollbarProject() string {
 func (s *AccSuite) checkRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
-		if err != nil {
-			return err
-		}
+		s.Nil(err)
 		c := s.provider.Meta().(*client.RollbarApiClient)
 		proj, err := c.ReadProject(id)
-		if err != nil {
-			return err
-		}
-		if proj.Name != name {
-			return fmt.Errorf("project name from API does not match project name in Terraform config")
-		}
+		s.Nil(err)
+		s.Equal(name, proj.Name, "project name from API does not match project name in Terraform config")
 		return nil
 	}
 }
@@ -73,25 +66,17 @@ func (s *AccSuite) checkRollbarProjectExists(rn string, name string) resource.Te
 func (s *AccSuite) checkRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
-		if err != nil {
-			return err
-		}
+		s.Nil(err)
 		c := s.provider.Meta().(*client.RollbarApiClient)
 		projList, err := c.ListProjects()
-		if err != nil {
-			return err
-		}
+		s.Nil(err)
 		found := false
 		for _, proj := range projList {
 			if proj.Id == id {
 				found = true
 			}
 		}
-		if !found {
-			msg := "Project not found in project list"
-			log.Debug().Int("id", id).Msg(msg)
-			return fmt.Errorf(msg)
-		}
+		s.True(found, "Project not found in project list")
 		return nil
 	}
 }
