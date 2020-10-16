@@ -41,6 +41,10 @@ func resourceProject() *schema.Resource {
 		// Projects cannot be updated via API
 		//UpdateContext: resourceProjectUpdate,
 
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
