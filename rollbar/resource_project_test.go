@@ -48,6 +48,11 @@ func (s *AccSuite) TestAccProject() {
 					s.checkProjectInProjectList(rn),
 				),
 			},
+			{
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
