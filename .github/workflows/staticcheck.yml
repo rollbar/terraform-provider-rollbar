@@ -1,4 +1,4 @@
-name: reviewdog
+name: staticcheck
 on: [pull_request]
 jobs:
   staticcheck:
