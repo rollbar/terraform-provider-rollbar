@@ -36,10 +36,10 @@ type ProjectAccessToken struct {
 	AccessToken             string  `json:"access_token" mapstructure:"access_token"`
 	Scopes                  []Scope `mapstructure:"scopes"`
 	Status                  Status  `mapstructure:"status"`
-	RateLimitWindowSize     *int    `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
-	RateLimitWindowCount    *int    `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
-	CurRateLimitWindowCount *int    `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
-	CurRateLimitWindowStart *int    `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
+	RateLimitWindowSize     int     `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
+	RateLimitWindowCount    int     `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
+	CurRateLimitWindowCount int     `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
+	CurRateLimitWindowStart int     `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
 	DateCreated             int     `json:"date_created" mapstructure:"date_created"`
 	DateModified            int     `json:"date_modified" mapstructure:"date_modified"`
 }
@@ -62,8 +62,8 @@ type ProjectAccessTokenCreateArgs struct {
 	Name                 string  `json:"name"`
 	Scopes               []Scope `json:"scopes"`
 	Status               Status  `json:"status"`
-	RateLimitWindowSize  uint    `json:"rate_limit_window_size"`
-	RateLimitWindowCount uint    `json:"rate_limit_window_count"`
+	RateLimitWindowSize  int     `json:"rate_limit_window_size"`
+	RateLimitWindowCount int     `json:"rate_limit_window_count"`
 }
 
 // sanityCheck checks that the arguments are sane.
@@ -108,7 +108,17 @@ func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 		l.Err(err).Msg("Failed sanity check")
 		return err
 	}
-	return nil
+	if args.RateLimitWindowCount < 0 {
+		err := fmt.Errorf("rate limit window count must be zero or greater")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if args.RateLimitWindowSize < 0 {
+		err := fmt.Errorf("rate limit window size must be zero or greater")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	return nil // Sanity check passed
 }
 
 // ProjectAccessTokenUpdateArgs encapsulates the required and optional arguments
@@ -119,8 +129,8 @@ func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 type ProjectAccessTokenUpdateArgs struct {
 	ProjectID            int    `json:"-"`
 	AccessToken          string `json:"-"`
-	RateLimitWindowSize  uint   `json:"rate_limit_window_size"`
-	RateLimitWindowCount uint   `json:"rate_limit_window_count"`
+	RateLimitWindowSize  int    `json:"rate_limit_window_size"`
+	RateLimitWindowCount int    `json:"rate_limit_window_count"`
 }
 
 // sanityCheck checks that the arguments are sane.
@@ -135,6 +145,16 @@ func (args *ProjectAccessTokenUpdateArgs) sanityCheck() error {
 	}
 	if args.AccessToken == "" {
 		err := fmt.Errorf("access token cannot be blank")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if args.RateLimitWindowCount < 0 {
+		err := fmt.Errorf("rate limit window count must be zero or greater")
+		l.Err(err).Msg("Failed sanity check")
+		return err
+	}
+	if args.RateLimitWindowSize < 0 {
+		err := fmt.Errorf("rate limit window size must be zero or greater")
 		l.Err(err).Msg("Failed sanity check")
 		return err
 	}
