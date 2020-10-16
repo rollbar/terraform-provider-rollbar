@@ -63,13 +63,14 @@ func resourceProjectAccessToken() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
-			"status": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
-			},
 
 			// Optional fields
+			"status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "enabled",
+				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+			},
 			"rate_limit_window_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
