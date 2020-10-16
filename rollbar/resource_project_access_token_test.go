@@ -49,6 +49,14 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 					s.checkProjectAccessTokenInTokenList(rn),
 				),
 			},
+			{
+				Config: s.configResourceProjectAccessTokenUpdatedRateLimit(),
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttrSet(rn, "access_token"),
+					s.checkProjectAccessToken(rn),
+				),
+			},
 		},
 	})
 }
@@ -65,6 +73,25 @@ func (s *AccSuite) configResourceProjectAccessToken() string {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+		}
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
+}
+
+func (s *AccSuite) configResourceProjectAccessTokenUpdatedRateLimit() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+			rate_limit_window_size = 500
+			rate_limit_window_count = 500
 		}
 	`
 	return fmt.Sprintf(tmpl, s.projectName)
