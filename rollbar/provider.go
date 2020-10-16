@@ -32,17 +32,17 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 )
 
-const (
-	schemaKeyToken = "token"
-)
+const schemaKeyToken = "api_key"
 
-// Provider is a Terraform provider for Rollbar
+// Provider is a Terraform provider for Rollbar.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			schemaKeyToken: {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				// FIXME: Should the environment variable be ROLLBAR_API_KEY to
+				//  match the name of this field?
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_TOKEN", nil),
 			},
 		},
