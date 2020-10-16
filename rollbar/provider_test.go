@@ -103,3 +103,36 @@ func (s *AccSuite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
 		return err
 	}
 }
+
+// getResourceAttrString returns the string value of a named attribute of a
+// Terraform state resource.
+func (s *AccSuite) getResourceAttrString(ts *terraform.State, resourceName string, attribute string) (string, error) {
+	rs, ok := ts.RootModule().Resources[resourceName]
+	if !ok {
+		err := fmt.Errorf("can't find resource: %s", resourceName)
+		log.Err(err).Send()
+		return "", err
+	}
+	value, ok := rs.Primary.Attributes[attribute]
+	if !ok {
+		err := fmt.Errorf("can't find attribute: %s", attribute)
+		log.Err(err).Send()
+		return "", err
+	}
+	return value, nil
+}
+
+// getResourceAttrInt returns the integer value of a named attribute of a
+// Terraform state resource.
+func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, attribute string) (int, error) {
+	value, err := s.getResourceAttrString(ts, resourceName, attribute)
+	if err != nil {
+		return 0, err
+	}
+	i, err := strconv.Atoi(value)
+	if err != nil {
+		log.Err(err).Send()
+		return 0, err
+	}
+	return i, nil
+}
