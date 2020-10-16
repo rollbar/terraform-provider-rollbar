@@ -2,7 +2,7 @@ terraform {
   required_providers {
     rollbar = {
       source  = "github.com/rollbar/rollbar"
-      version = "~> 0.1"
+      version = "~> 0.2"
     }
   }
 }
@@ -12,7 +12,7 @@ variable "rollbar_token" {
 }
 
 provider "rollbar" {
-  token = var.rollbar_token
+  api_key = var.rollbar_token
 }
 
 
