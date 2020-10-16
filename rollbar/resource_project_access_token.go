@@ -235,7 +235,11 @@ func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceDat
 		Int("project_id", projectId).
 		Str("access_token", accessToken).
 		Send()
-	d.Set("project_id", projectId)
+	err = d.Set("project_id", projectId)
+	if err != nil {
+		log.Err(err).Send()
+		return nil, err
+	}
 	d.SetId(accessToken)
 	return []*schema.ResourceData{d}, nil
 }
