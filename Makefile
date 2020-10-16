@@ -3,17 +3,19 @@ HOSTNAME=github.com
 NAMESPACE=rollbar
 NAME=rollbar
 BINARY=terraform-provider-${NAME}
-VERSION=0.1
+VERSION=0.2.0
 OS_ARCH=linux_amd64
 
 #default: install
 default: dev
 
 dev: install _dev_cleanup _dev_init _dev_apply _dev_log
+plan: install _dev_cleanup _dev_init _dev_plan
 
 dev_auto_apply: install _dev_cleanup _dev_init _dev_apply_auto _dev_log
 
 dev_no_debug: install _dev_cleanup _dev_init _dev_apply_nodebug
+
 
 _dev_cleanup:
 	# Cleanup last run
@@ -33,6 +35,10 @@ _dev_apply_auto:
 _dev_log:
 	# Print the debug log
 	cat /tmp/terraform-provider-rollbar.log
+
+_dev_plan:
+	# Test the provider
+	(cd example && terraform plan)
 
 
 build:
