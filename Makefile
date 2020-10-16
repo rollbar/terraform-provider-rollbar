@@ -3,7 +3,7 @@ HOSTNAME=github.com
 NAMESPACE=rollbar
 NAME=rollbar
 BINARY=terraform-provider-${NAME}
-VERSION=0.1
+VERSION=0.2.0
 OS_ARCH=linux_amd64
 
 #default: install
@@ -17,19 +17,19 @@ dev_no_debug: install _dev_cleanup _dev_init _dev_apply_nodebug
 
 _dev_cleanup:
 	# Cleanup last run
-	rm -vrf example/.terraform /tmp/terraform-provider-rollbar.log
+	rm -vrf example/jmcvetta/.terraform /tmp/terraform-provider-rollbar.log
 _dev_init:
 	# Initialize terraform
-	(cd example && terraform init)
+	(cd example/jmcvetta && terraform init)
 _dev_apply:
 	# Test the provider
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
+	(cd example/jmcvetta && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
 _dev_apply_nodebug:
 	# Test the provider
-	(cd example && terraform apply) || true
+	(cd example/jmcvetta && terraform apply) || true
 _dev_apply_auto:
 	# Test the provider
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
+	(cd example/jmcvetta && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
 _dev_log:
 	# Print the debug log
 	cat /tmp/terraform-provider-rollbar.log
