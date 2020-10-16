@@ -43,29 +43,35 @@ func resourceProjectAccessToken() *schema.Resource {
 			"project_id": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 			"scopes": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 			"status": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 
 			// Optional fields
 			"rate_limit_window_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  0,
 			},
 			"rate_limit_window_size": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  0,
 			},
 
 			// Computed fields
@@ -164,8 +170,23 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Fatal().Msg("Not yet implemented")
-	return resourceProjectRead(ctx, d, m)
+	accessToken := d.Id()
+	projectID := d.Get("project_id").(int)
+	size := d.Get("rate_limit_window_size").(int)
+	count := d.Get("rate_limit_window_count").(int)
+	args := client.ProjectAccessTokenUpdateArgs{
+		ProjectID:            projectID,
+		AccessToken:          accessToken,
+		RateLimitWindowSize:  size,
+		RateLimitWindowCount: count,
+	}
+	c := m.(*client.RollbarApiClient)
+	err := c.UpdateProjectAccessToken(args)
+	if err != nil {
+		log.Err(err).Send()
+		return diag.FromErr(err)
+	}
+	return resourceProjectAccessTokenRead(ctx, d, m)
 }
 
 func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
