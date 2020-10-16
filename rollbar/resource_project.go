@@ -114,9 +114,13 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return diags
 }
 
+/*
+No need for this function until we have update support in the Rollbar API.
+
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	return resourceProjectRead(ctx, d, m)
 }
+*/
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
