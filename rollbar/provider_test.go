@@ -1,9 +1,23 @@
 /*
- * Copyright (c) 2020 Jason McVetta <jmcvetta@protonmail.com>, all rights
- * reserved.
+ * Copyright (c) 2020 Rollbar, Inc.
  *
- * NO LICENSE WHATSOEVER IS GRANTED for this software without written contract
- * between author and licensee.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 package rollbar_test
@@ -102,4 +116,37 @@ func (s *AccSuite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
 		_, err := s.getResourceIDString(ts, rn)
 		return err
 	}
+}
+
+// getResourceAttrString returns the string value of a named attribute of a
+// Terraform state resource.
+func (s *AccSuite) getResourceAttrString(ts *terraform.State, resourceName string, attribute string) (string, error) {
+	rs, ok := ts.RootModule().Resources[resourceName]
+	if !ok {
+		err := fmt.Errorf("can't find resource: %s", resourceName)
+		log.Err(err).Send()
+		return "", err
+	}
+	value, ok := rs.Primary.Attributes[attribute]
+	if !ok {
+		err := fmt.Errorf("can't find attribute: %s", attribute)
+		log.Err(err).Send()
+		return "", err
+	}
+	return value, nil
+}
+
+// getResourceAttrInt returns the integer value of a named attribute of a
+// Terraform state resource.
+func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, attribute string) (int, error) {
+	value, err := s.getResourceAttrString(ts, resourceName, attribute)
+	if err != nil {
+		return 0, err
+	}
+	i, err := strconv.Atoi(value)
+	if err != nil {
+		log.Err(err).Send()
+		return 0, err
+	}
+	return i, nil
 }
