@@ -27,9 +27,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// TestAccRollbarProjectAccessTokensDataSource tests reading project access
-// tokens with `rollbar_project_access_tokens` data source.
-func (s *AccSuite) TestAccRollbarProjectAccessTokensDataSource() {
+// TestAccProjectAccessTokensDataSource tests reading project access tokens with
+// `rollbar_project_access_tokens` data source.
+func (s *AccSuite) TestAccProjectAccessTokensDataSource() {
 	rn := "data.rollbar_project_access_tokens.test"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -38,7 +38,7 @@ func (s *AccSuite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceRollbarProjectAccessTokens(""),
+				Config: s.configDataSourceProjectAccessTokens(""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					s.checkResourceStateSanity(rn),
@@ -57,7 +57,7 @@ func (s *AccSuite) TestAccRollbarProjectAccessTokensDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceRollbarProjectAccessTokens("post"),
+				Config: s.configDataSourceProjectAccessTokens("post"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					s.checkResourceStateSanity(rn),
@@ -71,10 +71,10 @@ func (s *AccSuite) TestAccRollbarProjectAccessTokensDataSource() {
 	})
 }
 
-// configDataSourceRollbarProjectAccessTokens generates Terraform configuration
-// for resource `rollbar_project_access_tokens`. If `prefix` is not empty, it
-// will be supplied as the `prefix` argument to the data source.
-func (s *AccSuite) configDataSourceRollbarProjectAccessTokens(prefix string) string {
+// configDataSourceProjectAccessTokens generates Terraform configuration for
+// resource `rollbar_project_access_tokens`. If `prefix` is not empty, it will
+// be supplied as the `prefix` argument to the data source.
+func (s *AccSuite) configDataSourceProjectAccessTokens(prefix string) string {
 	var configPrefix string
 	if prefix != "" {
 		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)

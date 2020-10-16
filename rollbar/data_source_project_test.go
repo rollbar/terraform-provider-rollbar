@@ -27,9 +27,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// TestAccRollbarProjectDataSource tests reading a project with
-// `rollbar_project` data source.
-func (s *AccSuite) TestAccRollbarProjectDataSource() {
+// TestAccProjectDataSource tests reading a project with `rollbar_project` data
+// source.
+func (s *AccSuite) TestAccProjectDataSource() {
 	rn := "data.rollbar_project.test"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -38,7 +38,7 @@ func (s *AccSuite) TestAccRollbarProjectDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceRollbarProject(),
+				Config: s.configDataSourceProject(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(rn, "name", s.projectName),
 					resource.TestCheckResourceAttrSet(rn, "id"),
@@ -50,7 +50,7 @@ func (s *AccSuite) TestAccRollbarProjectDataSource() {
 	})
 }
 
-func (s *AccSuite) configDataSourceRollbarProject() string {
+func (s *AccSuite) configDataSourceProject() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {

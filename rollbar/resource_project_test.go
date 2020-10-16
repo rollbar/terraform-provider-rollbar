@@ -29,8 +29,8 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 )
 
-// TestAccRollbarProject tests creation and deletion of a Rollbar project.
-func (s *AccSuite) TestAccRollbarProject() {
+// TestAccProject tests creation and deletion of a Rollbar project.
+func (s *AccSuite) TestAccProject() {
 	rn := "rollbar_project.foo"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -40,19 +40,19 @@ func (s *AccSuite) TestAccRollbarProject() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configResourceRollbarProject(),
+				Config: s.configResourceProject(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttr(rn, "name", s.projectName),
-					s.checkRollbarProjectExists(rn, s.projectName),
-					s.checkRollbarProjectInProjectList(rn),
+					s.checkProjectExists(rn, s.projectName),
+					s.checkProjectInProjectList(rn),
 				),
 			},
 		},
 	})
 }
 
-func (s *AccSuite) configResourceRollbarProject() string {
+func (s *AccSuite) configResourceProject() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "foo" {
@@ -62,8 +62,8 @@ func (s *AccSuite) configResourceRollbarProject() string {
 	return fmt.Sprintf(tmpl, s.projectName)
 }
 
-// checkRollbarProjectExists tests that the newly created project exists
-func (s *AccSuite) checkRollbarProjectExists(rn string, name string) resource.TestCheckFunc {
+// checkProjectExists tests that the newly created project exists
+func (s *AccSuite) checkProjectExists(rn string, name string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)
@@ -75,9 +75,9 @@ func (s *AccSuite) checkRollbarProjectExists(rn string, name string) resource.Te
 	}
 }
 
-// checkRollbarProjectInProjectList tests that the newly created project is
-// present in the list of all projects.
-func (s *AccSuite) checkRollbarProjectInProjectList(rn string) resource.TestCheckFunc {
+// checkProjectInProjectList tests that the newly created project is present in
+// the list of all projects.
+func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)

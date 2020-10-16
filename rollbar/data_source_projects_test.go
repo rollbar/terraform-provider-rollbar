@@ -30,9 +30,9 @@ import (
 	"strconv"
 )
 
-// TestAccRollbarProjectsDataSource tests listing of all projects with
+// TestAccProjectsDataSource tests listing of all projects with
 // `rollbar_projects` data source.
-func (s *AccSuite) TestAccRollbarProjectsDataSource() {
+func (s *AccSuite) TestAccProjectsDataSource() {
 	rn := "data.rollbar_projects.all"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -41,17 +41,17 @@ func (s *AccSuite) TestAccRollbarProjectsDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceRollbarProjects(),
+				Config: s.configDataSourceProjects(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "projects.#"),
-					s.checkRollbarProjectInProjectDataSource(rn),
+					s.checkProjectInProjectDataSource(rn),
 				),
 			},
 		},
 	})
 }
 
-func (s *AccSuite) configDataSourceRollbarProjects() string {
+func (s *AccSuite) configDataSourceProjects() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
@@ -65,9 +65,9 @@ func (s *AccSuite) configDataSourceRollbarProjects() string {
 	return fmt.Sprintf(tmpl, s.projectName)
 }
 
-// checkRollbarProjectInProjectDataSource tests that newly created project is in
-// the list of all projects returned by data source `rollbar_projects`.
-func (s *AccSuite) checkRollbarProjectInProjectDataSource(rn string) resource.TestCheckFunc {
+// checkProjectInProjectDataSource tests that newly created project is in the
+// list of all projects returned by data source `rollbar_projects`.
+func (s *AccSuite) checkProjectInProjectDataSource(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		// How many projects should we expect in the project list?
 		c := s.provider.Meta().(*client.RollbarApiClient)

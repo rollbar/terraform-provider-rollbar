@@ -27,9 +27,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// TestAccRollbarProjectAccessTokenDataSource tests reading a project access
-// token with `rollbar_project_access_token` data source.
-func (s *AccSuite) TestAccRollbarProjectAccessTokenDataSource() {
+// TestAccProjectAccessTokenDataSource tests reading a project access token with
+// `rollbar_project_access_token` data source.
+func (s *AccSuite) TestAccProjectAccessTokenDataSource() {
 	rn := "data.rollbar_project_access_token.test"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -38,7 +38,7 @@ func (s *AccSuite) TestAccRollbarProjectAccessTokenDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceRollbarProjectAccessToken(),
+				Config: s.configDataSourceProjectAccessToken(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttrSet(rn, "access_token"),
@@ -53,10 +53,10 @@ func (s *AccSuite) TestAccRollbarProjectAccessTokenDataSource() {
 
 }
 
-// configDataSourceRollbarProjectAccessTokens generates Terraform configuration
+// configDataSourceProjectAccessToken generates Terraform configuration
 // for resource `rollbar_project_access_tokens`. If `prefix` is not empty, it
 // will be supplied as the `prefix` argument to the data source.
-func (s *AccSuite) configDataSourceRollbarProjectAccessToken() string {
+func (s *AccSuite) configDataSourceProjectAccessToken() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {

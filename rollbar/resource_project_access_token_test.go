@@ -31,8 +31,8 @@ import (
 	"strconv"
 )
 
-// TestAccRollbarProject tests creation and deletion of a Rollbar project.
-func (s *AccSuite) TestAccRollbarProjectAccessToken() {
+// TestAccProjectAccessToken tests creation and deletion of a Rollbar project.
+func (s *AccSuite) TestAccProjectAccessToken() {
 	rn := "rollbar_project_access_token.test"
 
 	resource.Test(s.T(), resource.TestCase{
@@ -41,19 +41,19 @@ func (s *AccSuite) TestAccRollbarProjectAccessToken() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configResourceRollbarProjectAccessToken(),
+				Config: s.configResourceProjectAccessToken(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttrSet(rn, "access_token"),
-					s.checkRollbarProjectAccessToken(rn),
-					s.checkRollbarProjectAccessTokenInTokenList(rn),
+					s.checkProjectAccessToken(rn),
+					s.checkProjectAccessTokenInTokenList(rn),
 				),
 			},
 		},
 	})
 }
 
-func (s *AccSuite) configResourceRollbarProjectAccessToken() string {
+func (s *AccSuite) configResourceProjectAccessToken() string {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
@@ -70,8 +70,8 @@ func (s *AccSuite) configResourceRollbarProjectAccessToken() string {
 	return fmt.Sprintf(tmpl, s.projectName)
 }
 
-// checkRollbarProjectAccessToken tests that the newly created project exists
-func (s *AccSuite) checkRollbarProjectAccessToken(resourceName string) resource.TestCheckFunc {
+// checkProjectAccessToken tests that the newly created project exists.
+func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		accessToken, err := s.getResourceIDString(ts, resourceName)
 		if err != nil {
@@ -117,10 +117,9 @@ func (s *AccSuite) checkRollbarProjectAccessToken(resourceName string) resource.
 	}
 }
 
-// checkRollbarProjectAccessTokenInProjectList tests that the newly created
-// Rollbar project access token is present in the list of all project access
-// tokens.
-func (s *AccSuite) checkRollbarProjectAccessTokenInTokenList(rn string) resource.TestCheckFunc {
+// checkProjectAccessTokenInTokenList tests that the newly created Rollbar
+// project access token is present in the list of all project access tokens.
+func (s *AccSuite) checkProjectAccessTokenInTokenList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		accessToken, err := s.getResourceIDString(ts, rn)
 		s.Nil(err)
