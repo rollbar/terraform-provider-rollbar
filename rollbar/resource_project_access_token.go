@@ -87,14 +87,18 @@ func resourceProjectAccessToken() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"cur_rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-			"cur_rate_limit_window_start": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
+
+			// FIXME: Should we eliminate these fields?
+			//  https://github.com/rollbar/terraform-provider-rollbar/issues/52
+			//"cur_rate_limit_window_count": {
+			//	Type:     schema.TypeInt,
+			//	Computed: true,
+			//},
+			//"cur_rate_limit_window_start": {
+			//	Type:     schema.TypeInt,
+			//	Computed: true,
+			//},
+
 			"date_created": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -108,8 +112,6 @@ func resourceProjectAccessToken() *schema.Resource {
 }
 
 func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	projectId := d.Get("project_id").(int)
 	name := d.Get("name").(string)
 	scopesInterface := d.Get("scopes").([]interface{})
@@ -140,9 +142,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 
 	d.SetId(pat.AccessToken)
 
-	readDiags := resourceProjectAccessTokenRead(ctx, d, m)
-	diags = append(diags, readDiags...)
-	return diags
+	return resourceProjectAccessTokenRead(ctx, d, m)
 }
 
 func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -153,13 +153,15 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l := log.With().
 		Str("accessToken", accessToken).
 		Logger()
-	l.Debug().Msg("Reading project resource")
+	l.Debug().Msg("Reading project access token resource")
 
 	c := m.(*client.RollbarApiClient)
+	c.Resty.Debug = true
 	pat, err := c.ReadProjectAccessToken(projectId, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	c.Resty.Debug = false
 	var mPat map[string]interface{}
 	err = mapstructure.Decode(pat, &mPat)
 	if err != nil {
@@ -189,12 +191,15 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 		RateLimitWindowCount: count,
 	}
 	c := m.(*client.RollbarApiClient)
+	c.Resty.Debug = true
 	err := c.UpdateProjectAccessToken(args)
 	if err != nil {
 		log.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	return resourceProjectAccessTokenRead(ctx, d, m)
+	diags := resourceProjectAccessTokenRead(ctx, d, m)
+	c.Resty.Debug = false
+	return diags
 }
 
 func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
