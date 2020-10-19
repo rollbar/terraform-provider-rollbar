@@ -25,6 +25,7 @@ package rollbar_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/rs/zerolog/log"
 	"regexp"
 )
 
@@ -39,10 +40,16 @@ func (s *AccSuite) TestAccProjectDataSource() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
+				PreConfig: func() {
+					log.Debug().Msg("Testing data source rollbar_project with invalid project name")
+				},
 				Config:      s.configDataSourceProjectNotFound(),
-				ExpectError: regexp.MustCompile("Not found"),
+				ExpectError: regexp.MustCompile("no project with the name"),
 			},
 			{
+				PreConfig: func() {
+					log.Debug().Msg("Testing data source rollbar_project")
+				},
 				Config: s.configDataSourceProject(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(rn, "name", s.projectName),
@@ -77,7 +84,6 @@ func (s *AccSuite) configDataSourceProjectNotFound() string {
 	tmpl := `
 		data "rollbar_project" "test" {
 			name = "%s"
-			depends_on = [rollbar_project.test]
 		}
 	`
 	return fmt.Sprintf(tmpl, s.projectName)
