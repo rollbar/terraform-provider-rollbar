@@ -36,3 +36,5 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of project
 * `account_id` - ID of account that owns the project
 * `date_created` - Date the project was created
+* `date_modified` - Date the project was last modified
+* `status` - Status of the project

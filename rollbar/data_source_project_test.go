@@ -44,6 +44,8 @@ func (s *AccSuite) TestAccProjectDataSource() {
 					resource.TestCheckResourceAttrSet(rn, "id"),
 					resource.TestCheckResourceAttrSet(rn, "account_id"),
 					resource.TestCheckResourceAttrSet(rn, "date_created"),
+					resource.TestCheckResourceAttrSet(rn, "date_modified"),
+					resource.TestCheckResourceAttr(rn, "status", "enabled"),
 				),
 			},
 		},

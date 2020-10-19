@@ -41,12 +41,24 @@ func dataSourceProject() *schema.Resource {
 			},
 
 			// Computed values
-			"account_id": &schema.Schema{
+			"id": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"date_created": &schema.Schema{
+			"account_id": {
 				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"date_created": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"date_modified": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -82,6 +94,14 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	err = d.Set("date_created", project.DateCreated)
+	if err != nil {
+		return err
+	}
+	err = d.Set("date_modified", project.DateModified)
+	if err != nil {
+		return err
+	}
+	err = d.Set("status", project.Status)
 	if err != nil {
 		return err
 	}
