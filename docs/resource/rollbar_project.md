@@ -1,7 +1,7 @@
 `rollbar_project` Resource
 =========================
 
-Rollbar Project resource.
+Rollbar project resource.
 
 
 Example Usage
