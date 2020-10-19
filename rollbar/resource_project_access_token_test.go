@@ -29,6 +29,7 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
+	"regexp"
 	"strconv"
 )
 
@@ -36,11 +37,25 @@ import (
 func (s *AccSuite) TestAccProjectAccessToken() {
 	rn := "rollbar_project_access_token.test" // Resource name
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					log.Info().Msg("Test invalid project access token scopes")
+				},
+				Config:      s.configResourceProjectAccessTokenInvalidScopes(),
+				ExpectError: regexp.MustCompile("invalid scope"),
+			},
+			{
+				PreConfig: func() {
+					log.Info().Msg("Test invalid project access token status")
+				},
+				Config:      s.configResourceProjectAccessTokenInvalidStatus(),
+				ExpectError: regexp.MustCompile("invalid status"),
+			},
 			{
 				PreConfig: func() {
 					log.Info().Msg("Test creating project access token")
@@ -140,6 +155,44 @@ func (s *AccSuite) configResourceProjectAccessTokenUpdatedScopes() string {
 			name = "test-token"
 			scopes = ["post_server_item"]
 			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
+}
+
+func (s *AccSuite) configResourceProjectAccessTokenInvalidScopes() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["avocado"]
+			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
+}
+
+func (s *AccSuite) configResourceProjectAccessTokenInvalidStatus() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["post_server_item"]
+			status = "avocado"
 			rate_limit_window_size = 60
 			rate_limit_window_count = 500
 		}
