@@ -117,7 +117,7 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				PreConfig: func() {
 					log.Info().Msg("Test invalid ID format when importing a project access token")
 				},
-				ExpectError:       regexp.MustCompile("Unexpected format of ID"),
+				ExpectError:       regexp.MustCompile("unexpected format of ID"),
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateId:     "wrong format",
@@ -244,7 +244,7 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 		}
 		rs, ok := ts.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Not found: %s", resourceName)
+			return fmt.Errorf("not found: %s", resourceName)
 		}
 		projectIDString := rs.Primary.Attributes["project_id"]
 		projectID, err := strconv.Atoi(projectIDString)
@@ -320,7 +320,7 @@ func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc 
 	return func(s *terraform.State) (string, error) {
 		rs, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return "", fmt.Errorf("Not found: %s", resourceName)
+			return "", fmt.Errorf("not found: %s", resourceName)
 		}
 		projectId := rs.Primary.Attributes["project_id"]
 		accessToken := rs.Primary.ID
