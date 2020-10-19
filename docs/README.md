@@ -14,7 +14,7 @@ Example Usage
 
 ```hcl
 provider "rollbar" {
-  token = var.rollbar_token
+  api_key = var.rollbar_token
 }
 ```
 
@@ -23,8 +23,8 @@ Argument Reference
 
 The following arguments are supported:
 
-* `token` - (Required) This is the Rollbar authentication token. The value can be
-  sourced from the ROLLBAR_TOKEN environment variable.
+* `api_key` - (Required) This is the Rollbar authentication token. The value can
+  be sourced from the ROLLBAR_TOKEN environment variable.
 
 
 Data Sources

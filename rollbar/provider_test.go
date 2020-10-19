@@ -67,8 +67,8 @@ func (s *AccSuite) SetupSuite() {
 
 // preCheck ensures we are ready to run the test
 func (s *AccSuite) preCheck() {
-	token := os.Getenv("ROLLBAR_TOKEN")
-	s.NotEmpty(token, "ROLLBAR_TOKEN must be set for acceptance tests")
+	token := os.Getenv("ROLLBAR_API_KEY")
+	s.NotEmpty(token, "ROLLBAR_API_KEY must be set for acceptance tests")
 	log.Debug().Msg("Passed preflight check")
 }
 

@@ -43,7 +43,7 @@ func Provider() *schema.Provider {
 				Optional: true,
 				// FIXME: Should the environment variable be ROLLBAR_API_KEY to
 				//  match the name of this field?
-				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_TOKEN", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_KEY", nil),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

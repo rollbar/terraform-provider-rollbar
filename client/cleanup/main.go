@@ -36,7 +36,7 @@ import (
 func main() {
 	log.Info().Msg("Cleaning up orphaned Rollbar projects from failed acceptance test runs.")
 
-	token := os.Getenv("ROLLBAR_TOKEN")
+	token := os.Getenv("ROLLBAR_API_KEY")
 	c := client.NewClient(token)
 
 	projects, err := c.ListProjects()
