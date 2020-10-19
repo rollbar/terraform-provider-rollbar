@@ -25,6 +25,7 @@ package rollbar_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"regexp"
 )
 
 // TestAccProjectDataSource tests reading a project with `rollbar_project` data
@@ -37,6 +38,10 @@ func (s *AccSuite) TestAccProjectDataSource() {
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
+			{
+				Config:      s.configDataSourceProjectNotFound(),
+				ExpectError: regexp.MustCompile("Not found"),
+			},
 			{
 				Config: s.configDataSourceProject(),
 				Check: resource.ComposeTestCheckFunc(
@@ -65,4 +70,15 @@ func (s *AccSuite) configDataSourceProject() string {
 		}
 	`
 	return fmt.Sprintf(tmpl, s.projectName, s.projectName)
+}
+
+func (s *AccSuite) configDataSourceProjectNotFound() string {
+	// language=hcl
+	tmpl := `
+		data "rollbar_project" "test" {
+			name = "%s"
+			depends_on = [rollbar_project.test]
+		}
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
 }
