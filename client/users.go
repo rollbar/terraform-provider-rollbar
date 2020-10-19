@@ -1,63 +1,39 @@
+/*
+ * Copyright (c) 2020 Rollbar, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package client
 
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"strconv"
 )
 
-// ListUsersResponse represents the list users response.
-type ListUsersResponse struct {
-	Error  int `json:"err"`
-	Result struct {
-		Users []struct {
-			Username string `json:"username"`
-			ID       int    `json:"id"`
-			Email    string `json:"email"`
-		}
-	}
-}
-
-// InviteResponse represents the list invites response.
-type InviteResponse struct {
-	Error  int `json:"err"`
-	Result struct {
-		ID           int    `json:"id"`
-		FromUserID   int    `json:"from_user_id"`
-		TeamID       int    `json:"team_id"`
-		ToEmail      string `json:"to_email"`
-		Status       string `json:"status"`
-		DateCreated  int    `json:"date_created"`
-		DateRedeemed int    `json:"date_redeemed"`
-	}
-}
-
-// InviteUser sends an invitation to a user.
-func (c *Client) InviteUser(teamID int, email string) (*InviteResponse, error) {
-	var data InviteResponse
-
-	type requestData struct {
-		AccessToken string `json:"access_token"`
-		Email       string `json:"email"`
-	}
-
-	reqData := requestData{c.AccessToken, email}
-	b, err := json.Marshal(reqData)
-	if err != nil {
-		return nil, err
-	}
-
-	bytes, err := c.post(b, "team", strconv.Itoa(teamID), "invites")
-	if err != nil {
-		return nil, err
-	}
-
-	err = json.Unmarshal(bytes, &data)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, nil
+// User represents a Rollbar user.
+type User struct {
+	Username string `json:"username"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
 }
 
 // ListUsers : A function for listing the users.
@@ -119,4 +95,13 @@ func (c *Client) RemoveUserTeam(email string, teamID int) error {
 	}
 
 	return nil
+}
+
+/*
+ * Containers for unmarshalling Rollbar API responses
+ */
+
+type listUsersResponse struct {
+	Error  int    `json:"err"`
+	Result []User `json:"result"`
 }
