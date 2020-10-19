@@ -44,6 +44,13 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
+					log.Info().Msg("Test create project access token with non-existent project ID")
+				},
+				ExpectError: regexp.MustCompile("Not found"),
+				Config:      s.configResourceProjectAccessTokenNonExistentProject(),
+			},
+			{
+				PreConfig: func() {
 					log.Info().Msg("Test invalid project access token scopes")
 				},
 				Config:      s.configResourceProjectAccessTokenInvalidScopes(),
@@ -173,6 +180,21 @@ func (s *AccSuite) configResourceProjectAccessTokenUpdatedScopes() string {
 		}
 	`
 	return fmt.Sprintf(tmpl, s.projectName)
+}
+
+func (s *AccSuite) configResourceProjectAccessTokenNonExistentProject() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project_access_token" "test" {
+			project_id = 1234567890123457890
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	return fmt.Sprintf(tmpl)
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenInvalidScopes() string {
