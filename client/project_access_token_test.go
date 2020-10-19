@@ -303,6 +303,16 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	badArgs.Status = derpStatus
 	_, err = s.client.CreateProjectAccessToken(badArgs)
 	s.NotNil(err)
+	// Invalid rate limit window size
+	badArgs = args
+	badArgs.RateLimitWindowSize = -33
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid rate limit window count
+	badArgs = args
+	badArgs.RateLimitWindowCount = -54
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
 
 	// Success
 	t, err := s.client.CreateProjectAccessToken(args)
@@ -376,6 +386,16 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 	// Invalid access token
 	badArgs = args
 	badArgs.AccessToken = ""
+	err = s.client.UpdateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid rate limit window size
+	badArgs = args
+	badArgs.RateLimitWindowSize = -33
+	err = s.client.UpdateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid rate limit window count
+	badArgs = args
+	badArgs.RateLimitWindowCount = -54
 	err = s.client.UpdateProjectAccessToken(badArgs)
 	s.NotNil(err)
 
