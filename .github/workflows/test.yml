@@ -50,6 +50,8 @@ jobs:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
       # Acceptance
+      - name: Debug API key
+        run: echo $ROLLBAR_API_KEY
       - name: Acceptance tests
         run: make testacc
       - name: Convert Go coverage file to lcov format
