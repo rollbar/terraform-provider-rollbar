@@ -88,7 +88,7 @@ func (s *Suite) SetupSuite() {
 
 	// Setup RollbarApiClient and enable mocking
 	c := NewClient("fakeTokenString")
-	httpmock.ActivateNonDefault(c.GetHttpClient())
+	httpmock.ActivateNonDefault(c.Resty.GetClient())
 	s.client = c
 }
 

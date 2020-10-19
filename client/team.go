@@ -63,7 +63,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 	}
 
 	u := apiUrl + pathTeamCreate
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetBody(map[string]interface{}{"name": name}).
 		SetResult(teamCreateResponse{}).
 		SetError(ErrorResult{}).
@@ -102,7 +102,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	log.Debug().Msg("Listing all teams")
 	var teams []Team
 	u := apiUrl + pathTeamList
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetResult(teamListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
@@ -148,7 +148,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 
 	u := apiUrl + pathTeamRead
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetResult(teamReadResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
@@ -194,7 +194,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 
 	u := apiUrl + pathTeamDelete
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetError(ErrorResult{}).
 		Delete(u)
 	if err != nil {

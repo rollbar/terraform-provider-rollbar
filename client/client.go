@@ -28,14 +28,13 @@ package client
 import (
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 const apiUrl = "https://api.rollbar.com"
 
 // RollbarApiClient is a client for the Rollbar API.
 type RollbarApiClient struct {
-	resty *resty.Client
+	Resty *resty.Client
 }
 
 // NewClient sets up a new Rollbar API client.
@@ -56,14 +55,8 @@ func NewClient(token string) *RollbarApiClient {
 	r.SetLogger(restyZeroLogger{log.Logger})
 
 	// Rollbar client
-	c := RollbarApiClient{resty: r}
+	c := RollbarApiClient{Resty: r}
 	return &c
-}
-
-// GetHttpClient allows access to the underlying http.Client object.  Useful
-// with mocking tools.
-func (c *RollbarApiClient) GetHttpClient() *http.Client {
-	return c.resty.GetClient()
 }
 
 // Status represents the enabled or disabled status of an entity.

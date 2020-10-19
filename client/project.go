@@ -82,7 +82,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		Str("url", u).
 		Logger()
 
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetResult(projectListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
@@ -133,7 +133,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		Logger()
 	l.Debug().Msg("Creating new project")
 
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetBody(map[string]interface{}{"name": name}).
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
@@ -173,7 +173,7 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		Logger()
 	l.Debug().Msg("Reading project from API")
 
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
@@ -222,7 +222,7 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 		Logger()
 	l.Debug().Msg("Deleting project")
 
-	resp, err := c.resty.R().
+	resp, err := c.Resty.R().
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"projectId": strconv.Itoa(projectId),
