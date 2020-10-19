@@ -156,12 +156,10 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l.Debug().Msg("Reading project access token resource")
 
 	c := m.(*client.RollbarApiClient)
-	c.Resty.Debug = true
 	pat, err := c.ReadProjectAccessToken(projectId, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	c.Resty.Debug = false
 	var mPat map[string]interface{}
 	err = mapstructure.Decode(pat, &mPat)
 	if err != nil {
@@ -191,14 +189,12 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 		RateLimitWindowCount: count,
 	}
 	c := m.(*client.RollbarApiClient)
-	c.Resty.Debug = true
 	err := c.UpdateProjectAccessToken(args)
 	if err != nil {
 		log.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	diags := resourceProjectAccessTokenRead(ctx, d, m)
-	c.Resty.Debug = false
 	return diags
 }
 
