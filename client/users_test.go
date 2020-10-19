@@ -1,4 +1,4 @@
-package rollbar
+package client
 
 import (
 	"fmt"
