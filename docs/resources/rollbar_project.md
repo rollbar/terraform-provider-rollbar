@@ -32,3 +32,13 @@ In addition to all arguments above, the following attributes are exported:
 * `date_created` - Date the project was created
 * `date_modified` - Date the project was last modified
 * `status` - Status of the project
+
+
+Import
+------
+
+Projects can be imported using the project ID, e.g.
+
+```
+$ terraform import rollbar_project.foo 411703
+```
