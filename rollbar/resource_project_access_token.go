@@ -121,9 +121,13 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		scopes = append(scopes, client.Scope(s))
 	}
 	status := client.Status(d.Get("status").(string))
+	size := d.Get("rate_limit_window_size").(int)
+	count := d.Get("rate_limit_window_count").(int)
 	l := log.With().
 		Int("project_id", projectId).
 		Str("name", name).
+		Int("rate_limit_window_size", size).
+		Int("rate_limit_window_count", count).
 		Interface("scopes", scopes).
 		Interface("status", status).
 		Logger()
@@ -131,10 +135,12 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 
 	c := m.(*client.RollbarApiClient)
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
-		Name:      name,
-		ProjectID: projectId,
-		Scopes:    scopes,
-		Status:    status,
+		Name:                 name,
+		ProjectID:            projectId,
+		Scopes:               scopes,
+		Status:               status,
+		RateLimitWindowSize:  size,
+		RateLimitWindowCount: count,
 	})
 	if err != nil {
 		return diag.FromErr(err)
@@ -153,7 +159,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l := log.With().
 		Str("accessToken", accessToken).
 		Logger()
-	l.Debug().Msg("Reading project access token resource")
+	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(*client.RollbarApiClient)
 	pat, err := c.ReadProjectAccessToken(projectId, accessToken)
@@ -188,6 +194,8 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 		RateLimitWindowSize:  size,
 		RateLimitWindowCount: count,
 	}
+	l := log.With().Interface("args", args).Logger()
+	l.Debug().Msg("Updating resource project access token")
 	c := m.(*client.RollbarApiClient)
 	err := c.UpdateProjectAccessToken(args)
 	if err != nil {
@@ -208,7 +216,7 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 		Int("projectId", projectId).
 		Str("accessToken", accessToken).
 		Logger()
-	l.Debug().Msg("Deleting project")
+	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(*client.RollbarApiClient)
 	err := c.DeleteProjectAccessToken(projectId, accessToken)
