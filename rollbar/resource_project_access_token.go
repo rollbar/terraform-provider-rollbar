@@ -232,7 +232,7 @@ func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Importing resource rollbar project access token")
 	idParts := strings.Split(d.Id(), "/")
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
-		return nil, fmt.Errorf("Unexpected format of ID (%q), expected PROJECT-ID/ACCESS-TOKEN", d.Id())
+		return nil, fmt.Errorf("unexpected format of ID (%q), expected PROJECT-ID/ACCESS-TOKEN", d.Id())
 	}
 	projectIdString := idParts[0]
 	accessToken := idParts[1]
