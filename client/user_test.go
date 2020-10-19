@@ -23,119 +23,49 @@
 package client
 
 import (
-	"fmt"
+	"github.com/jarcoal/httpmock"
 	"net/http"
-	"testing"
 )
 
-func TestRemoveUserTeam(t *testing.T) {
-	teardown := setup()
-	defer teardown()
+// TestListUsers tests listing all Rollbar users.
+func (s *Suite) TestListUsers() {
+	u := apiUrl + pathUserList
 
-	vars, err := vars("users.json")
-
-	if err != nil {
-		t.Fatal(err)
+	// Success
+	r := responderFromFixture("user/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []User{
+		{
+			Email:    "jason.mcvetta@gmail.com",
+			ID:       238101,
+			Username: "jmcvetta",
+		},
+		{
+			Email:    "cory@rollbar.com",
+			ID:       2,
+			Username: "coryvirok",
+		},
 	}
+	actual, err := s.client.ListUsers()
+	s.Nil(err)
+	s.Subset(actual, expected)
+	s.Len(actual, len(expected))
 
-	teamID := vars.TeamID
-	userID := vars.UserID
-	userEmail := vars.UserEmail
+	// Internal Server Error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ListUsers()
+	s.NotNil(err)
 
-	handURL := fmt.Sprintf("/team/%d/user/%d", teamID, userID)
-	handURLGet := "/users/"
+	// Server unreachable
+	httpmock.Reset()
+	_, err = s.client.ListUsers()
+	s.NotNil(err)
 
-	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, fixture("users/remove_user.json"))
-	})
-
-	mux.HandleFunc(handURLGet, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, fixture("users/users.json"))
-	})
-
-	err = client.RemoveUserTeam(userEmail, teamID)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestInviteUser(t *testing.T) {
-	teardown := setup()
-	defer teardown()
-
-	vars, err := vars("users.json")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	teamID := vars.TeamID
-	userEmail := vars.UserEmail
-	handURL := fmt.Sprintf("/team/%d/invites", teamID)
-
-	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, fixture("teams/invite_user.json"))
-	})
-	_, err = client.InviteUser(teamID, userEmail)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestListUsers(t *testing.T) {
-	teardown := setup()
-	defer teardown()
-
-	handURL := "/users"
-
-	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, fixture("users/users.json"))
-	})
-
-	_, err := client.ListUsers()
-
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestGetId(t *testing.T) {
-	teardown := setup()
-	defer teardown()
-
-	vars, err := vars("users.json")
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	userEmail := vars.UserEmail
-	handURL := "/users"
-
-	mux.HandleFunc(handURL, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, fixture("users/users.json"))
-	})
-
-	userID, err := client.getID(userEmail)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	varType := fmt.Sprintf("%T", userID)
-
-	if varType != "int" {
-		t.Errorf("Expected 'integer', got: '%T'", userID)
-	}
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ListUsers()
+	s.Equal(ErrUnauthorized, err)
 }

@@ -23,10 +23,8 @@
 package client
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/rs/zerolog/log"
-	"strconv"
+	"net/http"
 )
 
 // User represents a Rollbar user.
@@ -37,22 +35,42 @@ type User struct {
 }
 
 // ListUsers : A function for listing the users.
-func (c *Client) ListUsers() (*ListUsersResponse, error) {
-	var data ListUsersResponse
-
-	bytes, err := c.get("users")
+func (c *RollbarApiClient) ListUsers() ([]User, error) {
+	log.Debug().Msg("Listing users")
+	u := apiUrl + pathUserList
+	var users []User
+	resp, err := c.Resty.R().
+		SetResult(userListResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
 	if err != nil {
-		return nil, err
+		log.Err(err).Msg("Error listing users")
+		return users, err
+	}
+	switch resp.StatusCode() {
+	case http.StatusOK, http.StatusCreated:
+		r := resp.Result().(*userListResponse)
+		users = r.Result.Users
+		log.Debug().
+			Interface("users", users).
+			Msg("Successfully listed users")
+		return users, nil
+	case http.StatusUnauthorized:
+		log.Warn().Msg("Unauthorized")
+		return users, ErrUnauthorized
+	default:
+		er := resp.Error().(*ErrorResult)
+		log.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Msg("Error creating project access token")
+		return users, er
 	}
 
-	err = json.Unmarshal(bytes, &data)
-	if err != nil {
-		return nil, err
-	}
-
-	return &data, nil
 }
 
+/*
 // This response doesn't have pagination so it might break
 // in the future.
 func (c *Client) getID(email string) (int, error) {
@@ -71,6 +89,7 @@ func (c *Client) getID(email string) (int, error) {
 
 	return userID, nil
 }
+
 
 // GetUser fetches one user.
 func (c *Client) GetUser(email string) (int, error) {
@@ -96,12 +115,15 @@ func (c *Client) RemoveUserTeam(email string, teamID int) error {
 
 	return nil
 }
+*/
 
 /*
  * Containers for unmarshalling Rollbar API responses
  */
 
-type listUsersResponse struct {
-	Error  int    `json:"err"`
-	Result []User `json:"result"`
+type userListResponse struct {
+	Error  int `json:"err"`
+	Result struct {
+		Users []User `json:"users"`
+	} `json:"result"`
 }
