@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 )
@@ -35,18 +36,50 @@ import (
 func (s *AccSuite) TestAccProjectAccessToken() {
 	rn := "rollbar_project_access_token.test" // Resource name
 
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
+				PreConfig: func() {
+					log.Info().Msg("Test creating project access token")
+				},
 				Config: s.configResourceProjectAccessToken(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttrSet(rn, "access_token"),
 					s.checkProjectAccessToken(rn),
 					s.checkProjectAccessTokenInTokenList(rn),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "0"),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "0"),
+					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
+					resource.TestCheckResourceAttr(rn, "scopes.0", "read"),
+				),
+			},
+			{
+				PreConfig: func() {
+					log.Info().Msg("Test updating project access token rate limit")
+				},
+				Config: s.configResourceProjectAccessTokenUpdatedRateLimit(),
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					// Confirm the update produced the expected values
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "60"),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "500"),
+					s.checkProjectAccessToken(rn),
+				),
+			},
+			{
+				PreConfig: func() {
+					log.Info().Msg("Test updating project access token scopes")
+				},
+				Config: s.configResourceProjectAccessTokenUpdatedScopes(),
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
+					resource.TestCheckResourceAttr(rn, "scopes.0", "post_server_item"),
+					s.checkProjectAccessToken(rn),
 				),
 			},
 			{
@@ -54,14 +87,6 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				ImportState:       true,
 				ImportStateIdFunc: importIdProjectAccessToken(rn),
 				ImportStateVerify: true,
-			},
-			{
-				Config: s.configResourceProjectAccessTokenUpdatedRateLimit(),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttrSet(rn, "access_token"),
-					s.checkProjectAccessToken(rn),
-				),
 			},
 		},
 	})
@@ -96,7 +121,26 @@ func (s *AccSuite) configResourceProjectAccessTokenUpdatedRateLimit() string {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
-			rate_limit_window_size = 500
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	return fmt.Sprintf(tmpl, s.projectName)
+}
+
+func (s *AccSuite) configResourceProjectAccessTokenUpdatedScopes() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["post_server_item"]
+			status = "enabled"
+			rate_limit_window_size = 60
 			rate_limit_window_count = 500
 		}
 	`
@@ -143,8 +187,20 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 			scopes = append(scopes, s)
 		}
 		if !assert.ObjectsAreEqual(pat.Scopes, scopes) {
-			return fmt.Errorf("token scopesCount from API do not match token scopesCount in Terraform config")
+			return fmt.Errorf("token scopes from API do not match token scopes in Terraform config")
 
+		}
+		sizeStr := rs.Primary.Attributes["rate_limit_window_size"]
+		size, err := strconv.Atoi(sizeStr)
+		s.Nil(err)
+		if pat.RateLimitWindowSize != size {
+			return fmt.Errorf("token rate_limit_window_size from API does not match token rate_limit_window_size in Terraform config")
+		}
+		countStr := rs.Primary.Attributes["rate_limit_window_count"]
+		count, err := strconv.Atoi(countStr)
+		s.Nil(err)
+		if pat.RateLimitWindowCount != count {
+			return fmt.Errorf("token rate_limit_window_count from API does not match token rate_limit_window_count in Terraform config")
 		}
 		return nil
 	}
