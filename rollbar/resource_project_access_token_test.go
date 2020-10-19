@@ -194,7 +194,7 @@ func (s *AccSuite) configResourceProjectAccessTokenNonExistentProject() string {
 			rate_limit_window_count = 500
 		}
 	`
-	return fmt.Sprintf(tmpl)
+	return tmpl
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenInvalidScopes() string {
