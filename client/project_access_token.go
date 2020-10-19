@@ -220,8 +220,10 @@ func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, token string) (
 	}
 
 	for _, t := range tokens {
-		l.Debug().Msg("Found matching project access token")
 		if t.AccessToken == token {
+			l.Debug().
+				Interface("token", t).
+				Msg("Found matching project access token")
 			return t, nil
 		}
 	}
