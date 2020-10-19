@@ -164,12 +164,12 @@ func (args *ProjectAccessTokenUpdateArgs) sanityCheck() error {
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
 // specified Rollbar project.
 func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
-	u := apiUrl + pathPatList
-
 	l := log.With().
-		Str("url", u).
+		Int("projectID", projectID).
 		Logger()
+	l.Debug().Msg("Listing project access tokens")
 
+	u := apiUrl + pathPatList
 	resp, err := c.Resty.R().
 		SetResult(patListResponse{}).
 		SetError(ErrorResult{}).
@@ -268,6 +268,7 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 	l := log.With().
 		Interface("args", args).
 		Logger()
+	l.Debug().Msg("Creating new project access token")
 	var pat ProjectAccessToken
 
 	err := args.sanityCheck()
@@ -319,6 +320,7 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 	l := log.With().
 		Interface("args", args).
 		Logger()
+	l.Debug().Msg("Updating project access token")
 
 	err := args.sanityCheck()
 	if err != nil {
