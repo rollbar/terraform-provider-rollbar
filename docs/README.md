@@ -39,4 +39,4 @@ Data Sources
 Resources
 ---------
 
-* [`rollbar_project`](resources/rollbar_project.md) - A Rollbar project
+* [`rollbar_project`](resource/rollbar_project.md) - A Rollbar project
