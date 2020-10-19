@@ -30,10 +30,11 @@ The following arguments are supported:
 Data Sources
 ------------
 
+* [`rollbar_project`](data_source/rollbar_project.md) - A Rollbar project
 * [`rollbar_projects`](data_source/rollbar_projects.md) - List all Rollbar
   projects
 * [`rollbar_project_access_token`](data_source/rollbar_project_access_token.md)
-  - An access tokens belongin to a Rollbar project
+  - An access tokens belonging to a Rollbar project
 * [`rollbar_project_access_tokens`](data_source/rollbar_project_access_tokens.md)
   - List all access tokens belonging to a Rollbar project
 
