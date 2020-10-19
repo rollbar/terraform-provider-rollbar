@@ -34,7 +34,7 @@ Data Sources
 * [`rollbar_projects`](data_source/rollbar_projects.md) - List all Rollbar
   projects
 * [`rollbar_project_access_token`](data_source/rollbar_project_access_token.md)
-  - An access tokens belonging to a Rollbar project
+  - An access token belonging to a Rollbar project
 * [`rollbar_project_access_tokens`](data_source/rollbar_project_access_tokens.md)
   - List all access tokens belonging to a Rollbar project
 
