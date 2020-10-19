@@ -40,3 +40,5 @@ Resources
 ---------
 
 * [`rollbar_project`](resource/rollbar_project.md) - A Rollbar project
+* [`rollbar_project_access_token`](resource/rollbar_project_access_token.md) - A
+  Rollbar project access token
