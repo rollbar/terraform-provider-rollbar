@@ -66,12 +66,22 @@ resource "rollbar_project" "test" {
   name = "tf-acc-test-syntax-compatibility"
 }
 
-resource "rollbar_project_access_token" "test" {
-  name = "test-token"
+resource "rollbar_project_access_token" "test_1" {
+  name = "test-token-1"
   project_id = rollbar_project.test.id
   scopes = ["post_client_item"]
   depends_on = [rollbar_project.test]
+  rate_limit_window_size = 60
+  rate_limit_window_count = 500
 }
+
+resource "rollbar_project_access_token" "test_2" {
+  name = "test-token-2"
+  project_id = rollbar_project.test.id
+  scopes = ["post_server_item"]
+  depends_on = [rollbar_project.test]
+}
+
 
 data "rollbar_projects" "all" {}
 
