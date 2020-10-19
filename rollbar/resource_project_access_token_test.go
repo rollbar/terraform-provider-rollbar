@@ -98,9 +98,22 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				),
 			},
 			{
+				PreConfig: func() {
+					log.Info().Msg("Test importing a project access token")
+				},
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateIdFunc: importIdProjectAccessToken(rn),
+				ImportStateVerify: true,
+			},
+			{
+				PreConfig: func() {
+					log.Info().Msg("Test invalid ID format when importing a project access token")
+				},
+				ExpectError:       regexp.MustCompile("Unexpected format of ID"),
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateId:     "wrong format",
 				ImportStateVerify: true,
 			},
 		},
