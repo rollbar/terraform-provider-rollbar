@@ -73,7 +73,7 @@ const (
 // on success or an appropriate error code
 func errorFromResponse(resp *resty.Response) error {
 	switch resp.StatusCode() {
-	case http.StatusOK:
+	case http.StatusOK, http.StatusCreated:
 		return nil
 	case http.StatusUnauthorized:
 		return ErrUnauthorized

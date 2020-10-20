@@ -25,7 +25,6 @@ package client
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"strconv"
 	"strings"
 )
@@ -72,29 +71,17 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 		l.Err(err).Msg("Error creating team")
 		return t, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK, http.StatusCreated:
-		// FIXME: currently API returns `200 OK` on successful create; but it
-		//  should instead return `201 Created`.
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-		r := resp.Result().(*teamCreateResponse)
-		t = r.Result
-		l.Debug().
-			Interface("team", t).
-			Msg("Successfully created new team")
-		return t, nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return t, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating team")
-		return t, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error creating team")
+		return t, err
 	}
+	r := resp.Result().(*teamCreateResponse)
+	t = r.Result
+	l.Debug().
+		Interface("team", t).
+		Msg("Successfully created new team")
+	return t, nil
 }
 
 // ListTeams lists all Rollbar teams.
@@ -110,26 +97,17 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 		log.Err(err).Msg("Error listing teams")
 		return teams, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		r := resp.Result().(*teamListResponse)
-		teams = r.Result
-		log.Debug().
-			Interface("teams", teams).
-			Msg("Successfully listed teams")
-		return teams, nil
-	case http.StatusUnauthorized:
-		log.Warn().Msg("Unauthorized")
-		return teams, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		log.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error listing teams")
-		return teams, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error listing teams")
+		return teams, err
 	}
+	r := resp.Result().(*teamListResponse)
+	teams = r.Result
+	log.Debug().
+		Interface("teams", teams).
+		Msg("Successfully listed teams")
+	return teams, nil
 }
 
 // ReadTeam reads a Rollbar team from the API. If no matching team is found,
@@ -153,30 +131,20 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
-		l.Err(err).Msg("Error creating team")
+		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		r := resp.Result().(*teamReadResponse)
-		t = r.Result
-		l.Debug().
-			Interface("team", t).
-			Msg("Successfully read team")
-		return t, nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return t, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error reading team")
-		return t, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error reading team")
+		return t, err
 	}
-
+	r := resp.Result().(*teamReadResponse)
+	t = r.Result
+	l.Debug().
+		Interface("team", t).
+		Msg("Successfully read team")
+	return t, nil
 }
 
 // DeleteTeam deletes a Rollbar team. If no matching team is found, returns
@@ -201,23 +169,13 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 		l.Err(err).Msg("Error deleting team")
 		return err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		l.Debug().Msg("Successfully deleted team")
-		return nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error deleting team")
-		return er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error deleting team")
+		return err
 	}
-
+	l.Debug().Msg("Successfully deleted team")
+	return nil
 }
 
 /*

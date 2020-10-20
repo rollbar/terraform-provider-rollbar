@@ -284,7 +284,6 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	s.Equal(args.Scopes, t.Scopes)
 	s.Equal(args.ProjectID, t.ProjectID)
 
-	// Edge cases
 	s.checkServerErrors("POST", u, func() error {
 		_, err = s.client.CreateProjectAccessToken(args)
 		return err
@@ -351,7 +350,6 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 	err = s.client.UpdateProjectAccessToken(args)
 	s.Nil(err)
 
-	// Edge cases
 	s.checkServerErrors("PATCH", u, func() error {
 		return s.client.UpdateProjectAccessToken(args)
 	})
