@@ -33,7 +33,7 @@ type Invitation struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
 	TeamID       int    `json:"team_id"`
-	Email        string `json:"to_email"`
+	ToEmail      string `json:"to_email"`
 	Status       string `json:"status"`
 	DateCreated  int    `json:"date_created"`
 	DateRedeemed int    `json:"date_redeemed"`
@@ -87,7 +87,7 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 	if err != nil {
 		return
 	}
-	inv = resp.Result().(invitationResponse).Result
+	inv = resp.Result().(*invitationResponse).Result
 	return
 }
 

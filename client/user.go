@@ -82,7 +82,7 @@ func (c *Client) getID(email string) (int, error) {
 	}
 
 	for _, user := range l.Result.Users {
-		if user.Email == email {
+		if user.ToEmail == email {
 			userID = user.ID
 		}
 	}
