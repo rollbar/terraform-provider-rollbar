@@ -36,6 +36,6 @@ const (
 	pathTeamRead      = "/api/1/team/{teamId}"
 	pathTeamDelete    = "/api/1/team/{teamId}"
 	pathUserList      = "/api/1/users"
-	pathUserRead      = "/api/1/user/{userId}"
-	pathInviteCreate  = "/api/1/team/{teamId}/invites"
+	//pathUserRead      = "/api/1/user/{userId}"
+	pathInviteCreate = "/api/1/team/{teamId}/invites"
 )
