@@ -217,8 +217,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
 	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
-	var r httpmock.Responder
-	r = func(req *http.Request) (*http.Response, error) {
+	r := func(req *http.Request) (*http.Response, error) {
 		a := ProjectAccessTokenCreateArgs{}
 		err := json.NewDecoder(req.Body).Decode(&a)
 		log.Debug().
@@ -304,8 +303,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
 	u = strings.ReplaceAll(u, "{accessToken}", accessToken)
 	rs := responseFromFixture("project_access_token/update.json", http.StatusOK)
-	var r httpmock.Responder
-	r = func(req *http.Request) (*http.Response, error) {
+	r := func(req *http.Request) (*http.Response, error) {
 		a := ProjectAccessTokenUpdateArgs{}
 		err := json.NewDecoder(req.Body).Decode(&a)
 		log.Debug().
