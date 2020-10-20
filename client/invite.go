@@ -33,7 +33,7 @@ type Invite struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
 	TeamID       int    `json:"team_id"`
-	ToEmail      string `json:"to_email"`
+	Email        string `json:"to_email"`
 	Status       string `json:"status"`
 	DateCreated  int    `json:"date_created"`
 	DateRedeemed int    `json:"date_redeemed"`
