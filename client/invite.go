@@ -71,6 +71,14 @@ func (c *RollbarApiClient) CreateInvite(teamID int, email string) (Invite, error
 	return inv, nil
 }
 
+func (c *RollbarApiClient) ReadInvite(inviteID int) (inv Invite, err error) {
+	l := log.With().
+		Int("inviteID", inviteID).
+		Logger()
+	l.Debug().Msg("Reading invitation from Rollbar API")
+	return
+}
+
 /*
  * Containers for unmarshalling Rollbar API responses
  */
