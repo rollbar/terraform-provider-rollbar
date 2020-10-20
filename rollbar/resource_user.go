@@ -2,11 +2,12 @@ package rollbar
 
 import (
 	"fmt"
+	"github.com/babbel/rollbar-go/rollbar"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
-
-	"github.com/babbel/rollbar-go/rollbar"
-	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func resourceUser() *schema.Resource {
@@ -36,69 +37,82 @@ func resourceUser() *schema.Resource {
 func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	email := d.Get("email").(string)
 	teamID := d.Get("team_id").(int)
+	l := log.With().
+		Str("email", email).
+		Int("teamID", teamID).
+		Logger()
+	l.Debug().Msg("Creating resource rollbar_user")
 
-	client := meta.(*rollbar.Client)
-	resp, err := client.InviteUser(teamID, email)
+	client := meta.(*client.RollbarApiClient)
+	inv, err := client.CreateInvite(teamID, email)
 	if err != nil {
+		l.Err(err).Msg("Error creating invite")
 		return err
 	}
 	// Use the email as an id.
-	id := resp.Result.ToEmail
-
+	id := strconv.Itoa(inv.ID)
 	d.SetId(id)
+
+	l.Debug().
+		Interface("invitation", inv).
+		Msg("Successfully created invitation")
 	return nil
 }
 
 func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
-	var invites []string
-	invited := false
-	userPresent := false
-	email := d.Id()
-	teamID := d.Get("team_id").(int)
-	client := meta.(*rollbar.Client)
+	/*
+		var invites []string
+		invited := false
+		userPresent := false
+		email := d.Id()
+		teamID := d.Get("team_id").(int)
+		client := meta.(*client.RollbarApiClient)
 
-	listInvites, err := client.ListInvites(teamID)
+		listInvites, err := client.ListInvites(teamID)
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	listUsers, err := client.ListUsers()
+		listUsers, err := client.ListUsers()
 
-	if err != nil {
-		return err
-	}
+		if err != nil {
+			return err
+		}
 
-	// This logic is needed so that we can check if the the user already was invited.
-	// Check if there's an active invite for the user or the user has already accepted the invite.
-	for _, invite := range listInvites {
-		// Find the corresponding invite with the provided email.
-		if invite.ToEmail == email {
-			// Append all the invites into a slice.
-			invites := append(invites, invite.Status)
+		// This logic is needed so that we can check if the the user already was invited.
+		// Check if there's an active invite for the user or the user has already accepted the invite.
+		for _, invite := range listInvites {
+			// Find the corresponding invite with the provided email.
+			if invite.ToEmail == email {
+				// Append all the invites into a slice.
+				invites := append(invites, invite.Status)
 
-			// Get the last invite (they are sequential).
-			lastInv := invites[len(invites)-1]
+				// Get the last invite (they are sequential).
+				lastInv := invites[len(invites)-1]
 
-			// If the invitation is pending that means that the user is invited.
-			if lastInv == "pending" {
-				invited = true
+				// If the invitation is pending that means that the user is invited.
+				if lastInv == "pending" {
+					invited = true
+				}
 			}
 		}
-	}
-	// Check if the user is present in the team.
-	for _, user := range listUsers.Result.Users {
-		if user.Email == email {
-			userPresent = true
+		// Check if the user is present in the team.
+		for _, user := range listUsers.Result.Users {
+			if user.Email == email {
+				userPresent = true
+			}
 		}
-	}
 
-	if !userPresent && !invited {
-		d.SetId("")
-		return fmt.Errorf("No user or invitee found with the email %s", email)
-	}
+		if !userPresent && !invited {
+			d.SetId("")
+			return fmt.Errorf("No user or invitee found with the email %s", email)
+		}
 
-	d.Set("email", email)
+		d.Set("email", email)
+		return nil
+
+	*/
 	return nil
 }
 
