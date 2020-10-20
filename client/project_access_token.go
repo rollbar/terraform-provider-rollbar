@@ -350,26 +350,7 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 		l.Err(err).Msg("Error updating project access token")
 		return err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		l.Debug().
-			Msg("Successfully updated project access token")
-		return nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return ErrUnauthorized
-	case http.StatusNotFound:
-		l.Warn().Msg("Not found")
-		return ErrNotFound
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error updating project access token")
-		return er
-	}
+	return errorFromResponse(resp)
 }
 
 /*

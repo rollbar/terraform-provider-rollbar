@@ -28,6 +28,7 @@ package client
 import (
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
+	"net/http"
 )
 
 const apiUrl = "https://api.rollbar.com"
@@ -67,3 +68,24 @@ const (
 	StatusEnabled  = Status("enabled")
 	StatusDisabled = Status("disabled")
 )
+
+// errorFromResponse interprets the status code of Resty response, returning nil
+// on success or an appropriate error code
+func errorFromResponse(resp *resty.Response) error {
+	switch resp.StatusCode() {
+	case http.StatusOK:
+		return nil
+	case http.StatusUnauthorized:
+		return ErrUnauthorized
+	case http.StatusNotFound:
+		return ErrNotFound
+	default:
+		er := resp.Error().(*ErrorResult)
+		log.Error().
+			Int("StatusCode", resp.StatusCode()).
+			Str("Status", resp.Status()).
+			Interface("ErrorResult", er).
+			Send()
+		return er
+	}
+}
