@@ -306,6 +306,9 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 			Interface("token", pat).
 			Msg("Successfully created new project access token")
 		return pat, nil
+	case http.StatusNotFound:
+		l.Warn().Msg("Not found")
+		return pat, ErrNotFound
 	case http.StatusUnauthorized:
 		l.Warn().Msg("Unauthorized")
 		return pat, ErrUnauthorized
@@ -355,6 +358,9 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 	case http.StatusUnauthorized:
 		l.Warn().Msg("Unauthorized")
 		return ErrUnauthorized
+	case http.StatusNotFound:
+		l.Warn().Msg("Not found")
+		return ErrNotFound
 	default:
 		er := resp.Error().(*ErrorResult)
 		l.Error().

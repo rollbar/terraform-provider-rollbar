@@ -105,3 +105,33 @@ func (s *Suite) BeforeTest() {
 func TestRollbarClientTestSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
+
+// EdgeCases tests for correct handling of various edge cases
+func (s *Suite) EdgeCases(mockMethod, mockUrl string, testFunc func() error) {
+	// Not Found
+	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
+		ErrorResult{Err: 404, Message: "Not Found"})
+	httpmock.RegisterResponder(mockMethod, mockUrl, r)
+	err := testFunc()
+	s.Equal(ErrNotFound, err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponder(mockMethod, mockUrl, r)
+	err = testFunc()
+	s.Equal(ErrUnauthorized, err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
+		ErrorResult{Err: 500, Message: "Internal Server Error"})
+	httpmock.RegisterResponder(mockMethod, mockUrl, r)
+	err = testFunc()
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
+
+	// Unreachable server
+	httpmock.Reset()
+	err = testFunc()
+	s.NotNil(err)
+}
