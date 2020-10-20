@@ -25,10 +25,11 @@ package client
 import (
 	"github.com/rs/zerolog/log"
 	"strconv"
+	"strings"
 )
 
-// Invite represents an invitation for a user to join a Rollbar team.
-type Invite struct {
+// Invitation represents an invitation for a user to join a Rollbar team.
+type Invitation struct {
 	ID           int    `json:"id"`
 	FromUserID   int    `json:"from_user_id"`
 	TeamID       int    `json:"team_id"`
@@ -38,16 +39,16 @@ type Invite struct {
 	DateRedeemed int    `json:"date_redeemed"`
 }
 
-// CreateInvite sends an invitation to a user.
-func (c *RollbarApiClient) CreateInvite(teamID int, email string) (Invite, error) {
+// CreateInvitation sends an invitation to a user.
+func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitation, error) {
 	l := log.With().
 		Int("teamID", teamID).
 		Str("email", email).
 		Logger()
-	l.Debug().Msg("Creating new invite")
+	l.Debug().Msg("Creating new invitation")
 
-	u := apiUrl + pathInviteCreate
-	var inv Invite
+	u := apiUrl + pathInvitationCreate
+	var inv Invitation
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"teamId": strconv.Itoa(teamID),
@@ -55,7 +56,7 @@ func (c *RollbarApiClient) CreateInvite(teamID int, email string) (Invite, error
 		SetBody(map[string]string{
 			"email": email,
 		}).
-		SetResult(inviteCreateResponse{}).
+		SetResult(invitationResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
 	if err != nil {
@@ -66,16 +67,27 @@ func (c *RollbarApiClient) CreateInvite(teamID int, email string) (Invite, error
 	if err != nil {
 		return inv, err
 	}
-	r := resp.Result().(*inviteCreateResponse)
+	r := resp.Result().(*invitationResponse)
 	inv = r.Result
 	return inv, nil
 }
 
-func (c *RollbarApiClient) ReadInvite(inviteID int) (inv Invite, err error) {
+func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err error) {
 	l := log.With().
 		Int("inviteID", inviteID).
 		Logger()
 	l.Debug().Msg("Reading invitation from Rollbar API")
+	u := apiUrl + pathInvitationRead
+	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(inviteID))
+	resp, err := c.Resty.R().
+		SetResult(invitationResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	err = errorFromResponse(resp)
+	if err != nil {
+		return
+	}
+	inv = resp.Result().(invitationResponse).Result
 	return
 }
 
@@ -83,7 +95,12 @@ func (c *RollbarApiClient) ReadInvite(inviteID int) (inv Invite, err error) {
  * Containers for unmarshalling Rollbar API responses
  */
 
-type inviteCreateResponse struct {
-	Error  int    `json:"err"`
-	Result Invite `json:"result"`
+type invitationResponse struct {
+	Error  int        `json:"err"`
+	Result Invitation `json:"result"`
+}
+
+type invitationListResponse struct {
+	Error  int          `json:"err"`
+	Result []Invitation `json:"result"`
 }

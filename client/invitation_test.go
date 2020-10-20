@@ -11,7 +11,7 @@ import (
 func (s *Suite) TestCreateInvite() {
 	teamID := 572097
 	email := "test@rollbar.com"
-	u := apiUrl + pathInviteCreate
+	u := apiUrl + pathInvitationCreate
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 
 	// Success
@@ -23,16 +23,16 @@ func (s *Suite) TestCreateInvite() {
 		s.Nil(err)
 		s.Contains(m, "email")
 		s.Equal(email, m["email"])
-		rs := responseFromFixture("invite/create.json", http.StatusOK)
+		rs := responseFromFixture("invitation/create.json", http.StatusOK)
 		return rs, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
-	inv, err := s.client.CreateInvite(teamID, email)
+	inv, err := s.client.CreateInvitation(teamID, email)
 	s.Nil(err)
 	s.Equal(email, inv.Email)
 
 	s.checkServerErrors("POST", u, func() error {
-		_, err = s.client.CreateInvite(teamID, email)
+		_, err = s.client.CreateInvitation(teamID, email)
 		return err
 	})
 }
