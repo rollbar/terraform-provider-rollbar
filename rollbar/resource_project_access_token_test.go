@@ -46,7 +46,7 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				PreConfig: func() {
 					log.Info().Msg("Test create project access token with non-existent project ID")
 				},
-				ExpectError: regexp.MustCompile("Not found"),
+				ExpectError: regexp.MustCompile("not found"),
 				Config:      s.configResourceProjectAccessTokenNonExistentProject(),
 			},
 			{
