@@ -53,7 +53,7 @@ func resourceUserCreate(d *schema.ResourceData, meta interface{}) error {
 	l.Debug().Msg("Creating resource rollbar_user")
 
 	client := meta.(*client.RollbarApiClient)
-	inv, err := client.CreateInvite(teamID, email)
+	inv, err := client.CreateInvitation(teamID, email)
 	if err != nil {
 		l.Err(err).Msg("Error creating invite")
 		return err
@@ -92,7 +92,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		// Check if there's an active invite for the user or the user has already accepted the invite.
 		for _, invite := range listInvites {
 			// Find the corresponding invite with the provided email.
-			if invite.Email == email {
+			if invite.ToEmail == email {
 				// Append all the invites into a slice.
 				invites := append(invites, invite.Status)
 
@@ -107,7 +107,7 @@ func resourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		// Check if the user is present in the team.
 		for _, user := range listUsers.Result.Users {
-			if user.Email == email {
+			if user.ToEmail == email {
 				userPresent = true
 			}
 		}
