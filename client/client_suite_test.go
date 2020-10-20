@@ -106,8 +106,8 @@ func TestRollbarClientTestSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
 
-// EdgeCases tests for correct handling of various edge cases
-func (s *Suite) EdgeCases(mockMethod, mockUrl string, testFunc func() error) {
+// checkServerErrors check correct handling of various API error responses
+func (s *Suite) checkServerErrors(mockMethod, mockUrl string, testFunc func() error) {
 	// Not Found
 	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
 		ErrorResult{Err: 404, Message: "Not Found"})

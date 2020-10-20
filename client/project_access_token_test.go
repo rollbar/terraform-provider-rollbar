@@ -111,7 +111,7 @@ func (s *Suite) TestListProjectAccessTokens() {
 		_, err = s.client.ListProjectAccessTokens(projectID)
 		return err
 	}
-	s.EdgeCases("GET", u, testFunc)
+	s.checkServerErrors("GET", u, testFunc)
 }
 
 // TestReadProjectAccessToken tests reading a Rollbar project access token from
@@ -149,7 +149,7 @@ func (s *Suite) TestReadProjectAccessToken() {
 	_, err = s.client.ReadProjectAccessToken(projectID, "does-not-exist")
 	s.Equal(ErrNotFound, err)
 
-	s.EdgeCases("GET", u, func() error {
+	s.checkServerErrors("GET", u, func() error {
 		_, err = s.client.ReadProjectAccessToken(projectID, "does-not-exist")
 		return err
 	})
@@ -189,7 +189,7 @@ func (s *Suite) TestReadProjectAccessTokenByName() {
 	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
-	s.EdgeCases("GET", u, func() error {
+	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ReadProjectAccessTokenByName(projectID, expected.Name)
 		return err
 	})
@@ -285,7 +285,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	s.Equal(args.ProjectID, t.ProjectID)
 
 	// Edge cases
-	s.EdgeCases("POST", u, func() error {
+	s.checkServerErrors("POST", u, func() error {
 		_, err = s.client.CreateProjectAccessToken(args)
 		return err
 	})
@@ -352,7 +352,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 	s.Nil(err)
 
 	// Edge cases
-	s.EdgeCases("PATCH", u, func() error {
+	s.checkServerErrors("PATCH", u, func() error {
 		return s.client.UpdateProjectAccessToken(args)
 	})
 }

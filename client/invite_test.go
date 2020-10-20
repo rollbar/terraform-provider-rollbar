@@ -31,7 +31,7 @@ func (s *Suite) TestCreateInvite() {
 	s.Nil(err)
 	s.Equal(email, inv.Email)
 
-	s.EdgeCases("POST", u, func() error {
+	s.checkServerErrors("POST", u, func() error {
 		_, err = s.client.CreateInvite(teamID, email)
 		return err
 	})

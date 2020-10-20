@@ -62,7 +62,7 @@ func (s *Suite) TestListProjects() {
 	s.Subset(actual, expected)
 	s.Len(actual, len(expected))
 
-	s.EdgeCases("GET", u, func() error {
+	s.checkServerErrors("GET", u, func() error {
 		_, err = s.client.ListProjects()
 		return err
 	})
@@ -88,7 +88,7 @@ func (s *Suite) TestCreateProject() {
 	s.Nil(err)
 	s.Equal(name, proj.Name)
 
-	s.EdgeCases("POST", u, func() error {
+	s.checkServerErrors("POST", u, func() error {
 		_, err = s.client.CreateProject(name)
 		return err
 	})
@@ -113,7 +113,7 @@ func (s *Suite) TestReadProject() {
 	s.Nil(err)
 	s.Equal(&expected, actual)
 
-	s.EdgeCases("GET", u, func() error {
+	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ReadProject(expected.Id)
 		return err
 	})
@@ -137,7 +137,7 @@ func (s *Suite) TestDeleteProject() {
 	err := s.client.DeleteProject(delId)
 	s.Nil(err)
 
-	s.EdgeCases("DELETE", urlDel, func() error {
+	s.checkServerErrors("DELETE", urlDel, func() error {
 		return s.client.DeleteProject(delId)
 	})
 }
