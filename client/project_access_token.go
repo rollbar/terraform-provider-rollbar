@@ -25,7 +25,6 @@ package client
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"strconv"
 )
 
@@ -184,21 +183,13 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 		l.Err(err).Send()
 		return nil, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		pats := resp.Result().(*patListResponse).Result
-		return pats, nil
-	case http.StatusNotFound:
-		l.Warn().Msg("Project not found")
-		return nil, ErrNotFound
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return nil, ErrUnauthorized
-	default:
-		errResp := resp.Error().(*ErrorResult)
-		l.Err(errResp).Msg("Unexpected error")
-		return nil, errResp
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
 	}
+	pats := resp.Result().(*patListResponse).Result
+	return pats, nil
 }
 
 // ReadProjectAccessToken reads a Rollbar project access token from the API.  It
@@ -295,29 +286,17 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 		l.Err(err).Msg("Error creating project access token")
 		return pat, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK, http.StatusCreated:
-		// FIXME: currently API returns `200 OK` on successful create; but it
-		//  should instead return `201 Created`.
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-		r := resp.Result().(*patCreateResponse)
-		pat = r.Result
-		l.Debug().
-			Interface("token", pat).
-			Msg("Successfully created new project access token")
-		return pat, nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return pat, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating project access token")
-		return pat, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return pat, err
 	}
+	r := resp.Result().(*patCreateResponse)
+	pat = r.Result
+	l.Debug().
+		Interface("token", pat).
+		Msg("Successfully created new project access token")
+	return pat, nil
 }
 
 // UpdateProjectAccessToken updates a Rollbar project access token.
@@ -347,23 +326,7 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 		l.Err(err).Msg("Error updating project access token")
 		return err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		l.Debug().
-			Msg("Successfully updated project access token")
-		return nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error updating project access token")
-		return er
-	}
+	return errorFromResponse(resp)
 }
 
 /*

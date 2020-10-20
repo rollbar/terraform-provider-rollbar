@@ -24,7 +24,6 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"strconv"
 )
 
@@ -63,29 +62,13 @@ func (c *RollbarApiClient) CreateInvite(teamID int, email string) (Invite, error
 		l.Err(err).Msg("Error creating invitation")
 		return inv, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK, http.StatusCreated:
-		// FIXME: currently API returns `200 OK` on successful create; but it
-		//  should instead return `201 Created`.
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-		r := resp.Result().(*inviteCreateResponse)
-		inv = r.Result
-		l.Debug().
-			Interface("invite", inv).
-			Msg("Successfully created new invitation")
-		return inv, nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return inv, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating project access token")
-		return inv, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		return inv, err
 	}
+	r := resp.Result().(*inviteCreateResponse)
+	inv = r.Result
+	return inv, nil
 }
 
 /*

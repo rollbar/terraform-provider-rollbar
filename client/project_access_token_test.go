@@ -107,18 +107,11 @@ func (s *Suite) TestListProjectAccessTokens() {
 	s.Nil(err)
 	s.Equal(expected, actual)
 
-	// Unreachable server
-	httpmock.Reset()
-	_, err = s.client.ListProjectAccessTokens(projectID)
-	s.NotNil(err)
-	s.NotEqual(ErrNotFound, err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListProjectAccessTokens(projectID)
-	s.Equal(ErrUnauthorized, err)
+	testFunc := func() error {
+		_, err = s.client.ListProjectAccessTokens(projectID)
+		return err
+	}
+	s.checkServerErrors("GET", u, testFunc)
 }
 
 // TestReadProjectAccessToken tests reading a Rollbar project access token from
@@ -156,26 +149,10 @@ func (s *Suite) TestReadProjectAccessToken() {
 	_, err = s.client.ReadProjectAccessToken(projectID, "does-not-exist")
 	s.Equal(ErrNotFound, err)
 
-	// Not found
-	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, ErrorResult{Err: 404, Message: "Not Found"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
-	s.Equal(ErrNotFound, err)
-
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
-		ErrorResult{Err: 500, Message: "Internal Server Error"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
-	s.NotNil(err)
-	s.NotEqual(ErrNotFound, err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessToken(projectID, expected.AccessToken)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err = s.client.ReadProjectAccessToken(projectID, "does-not-exist")
+		return err
+	})
 }
 
 // TestReadProjectAccessTokenByName tests reading a Rollbar project access token
@@ -212,26 +189,11 @@ func (s *Suite) TestReadProjectAccessTokenByName() {
 	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
 	s.Equal(ErrNotFound, err)
 
-	// Project ID not found
-	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, ErrorResult{Err: 404, Message: "Not Found"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
-	s.Equal(ErrNotFound, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ReadProjectAccessTokenByName(projectID, expected.Name)
+		return err
+	})
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
-		ErrorResult{Err: 500, Message: "Internal Server Error"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
-	s.NotNil(err)
-	s.NotEqual(ErrNotFound, err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProjectAccessTokenByName(projectID, "this-name-does-not-exist")
-	s.Equal(ErrUnauthorized, err)
 }
 
 // TestDeleteProjectAccessToken tests deleting a Rollbar project access token.
@@ -255,8 +217,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	u := apiUrl + pathPatCreate
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
 	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
-	var r httpmock.Responder
-	r = func(req *http.Request) (*http.Response, error) {
+	r := func(req *http.Request) (*http.Response, error) {
 		a := ProjectAccessTokenCreateArgs{}
 		err := json.NewDecoder(req.Body).Decode(&a)
 		log.Debug().
@@ -322,25 +283,10 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	s.Equal(args.Scopes, t.Scopes)
 	s.Equal(args.ProjectID, t.ProjectID)
 
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateProjectAccessToken(args)
-	s.Equal(ErrUnauthorized, err)
-
-	// Unreachable server
-	httpmock.Reset()
-	_, err = s.client.CreateProjectAccessToken(args)
-	s.NotNil(err)
-
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
-		ErrorResult{Err: 500, Message: "Internal Server Error"})
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateProjectAccessToken(args)
-	s.NotNil(err)
-	s.NotEqual(ErrNotFound, err)
+	s.checkServerErrors("POST", u, func() error {
+		_, err = s.client.CreateProjectAccessToken(args)
+		return err
+	})
 }
 
 func (s *Suite) TestUpdateProjectAccessToken() {
@@ -357,8 +303,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
 	u = strings.ReplaceAll(u, "{accessToken}", accessToken)
 	rs := responseFromFixture("project_access_token/update.json", http.StatusOK)
-	var r httpmock.Responder
-	r = func(req *http.Request) (*http.Response, error) {
+	r := func(req *http.Request) (*http.Response, error) {
 		a := ProjectAccessTokenUpdateArgs{}
 		err := json.NewDecoder(req.Body).Decode(&a)
 		log.Debug().
@@ -403,23 +348,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 	err = s.client.UpdateProjectAccessToken(args)
 	s.Nil(err)
 
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("PATCH", u, r)
-	err = s.client.UpdateProjectAccessToken(args)
-	s.Equal(ErrUnauthorized, err)
-
-	// Unreachable server
-	httpmock.Reset()
-	err = s.client.UpdateProjectAccessToken(args)
-	s.NotNil(err)
-
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
-		ErrorResult{Err: 500, Message: "Internal Server Error"})
-	httpmock.RegisterResponder("PATCH", u, r)
-	err = s.client.UpdateProjectAccessToken(args)
-	s.NotNil(err)
-	s.NotEqual(ErrNotFound, err)
+	s.checkServerErrors("PATCH", u, func() error {
+		return s.client.UpdateProjectAccessToken(args)
+	})
 }

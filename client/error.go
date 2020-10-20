@@ -35,7 +35,7 @@ func (er ErrorResult) Error() string {
 }
 
 // ErrNotFound is returned when the API returns a '404 Not Found' error.
-var ErrNotFound = fmt.Errorf("entity not found")
+var ErrNotFound = fmt.Errorf("not found")
 
 // ErrUnauthorized is returned when the API returns a '401 Unauthorized' error.
 var ErrUnauthorized = fmt.Errorf("unauthorized")

@@ -24,7 +24,6 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
-	"net/http"
 	"strconv"
 )
 
@@ -90,20 +89,10 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 		l.Err(err).Send()
 		return nil, err
 	}
-
-	switch resp.StatusCode() {
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return nil, ErrUnauthorized
-	case http.StatusOK:
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating a project")
-		return nil, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
 	}
 
 	lpr := resp.Result().(*projectListResponse)
@@ -142,24 +131,15 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 		l.Err(err).Msg("Error creating project")
 		return nil, err
 	}
-
-	switch resp.StatusCode() {
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return nil, ErrUnauthorized
-	case http.StatusOK:
-		l.Debug().Msg("Project successfully created")
-		pr := resp.Result().(*projectResponse)
-		return &pr.Result, nil
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating a project")
-		return nil, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
 	}
+	l.Debug().Msg("Project successfully created")
+	pr := resp.Result().(*projectResponse)
+	return &pr.Result, nil
+
 }
 
 // ReadProject a Rollbar project from the API. If no matching project is found,
@@ -184,32 +164,21 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		l.Err(err).Msg("Error reading project")
 		return nil, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		pr := resp.Result().(*projectResponse)
-		// FIXME: This is a workaround for a known bug in the API
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/23
-		if pr.Result.Name == "" {
-			l.Warn().Msg("Project not found")
-			return nil, ErrNotFound
-		}
-		l.Debug().Msg("Project successfully read")
-		return &pr.Result, nil
-	case http.StatusNotFound:
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	pr := resp.Result().(*projectResponse)
+	// FIXME: This is a workaround for a known bug in the API
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/23
+	if pr.Result.Name == "" {
 		l.Warn().Msg("Project not found")
 		return nil, ErrNotFound
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return nil, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating a project")
-		return nil, er
 	}
+	l.Debug().Msg("Project successfully read")
+	return &pr.Result, nil
+
 }
 
 // DeleteProject deletes a Rollbar project. If no matching project is found,
@@ -232,26 +201,13 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 		l.Err(err).Msg("Error deleting project")
 		return err
 	}
-	l.Debug().Bytes("body", resp.Body()).Msg("Response body")
-	switch resp.StatusCode() {
-	case http.StatusNotFound:
-		l.Warn().Msg("Project not found")
-		return ErrNotFound
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return ErrUnauthorized
-	case http.StatusOK:
-		l.Debug().Msg("Project successfully deleted")
-		return nil
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating a project")
-		return er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return err
 	}
+	l.Debug().Msg("Project successfully deleted")
+	return nil
 }
 
 /*

@@ -31,21 +31,8 @@ func (s *Suite) TestCreateInvite() {
 	s.Nil(err)
 	s.Equal(email, inv.Email)
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateInvite(teamID, email)
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.CreateInvite(teamID, email)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateInvite(teamID, email)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("POST", u, func() error {
+		_, err = s.client.CreateInvite(teamID, email)
+		return err
+	})
 }
