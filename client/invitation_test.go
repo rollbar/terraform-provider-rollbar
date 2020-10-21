@@ -8,10 +8,11 @@ import (
 	"strings"
 )
 
+// TestCreateInvitation tests creating a Rollbar team invitation.
 func (s *Suite) TestCreateInvitation() {
 	teamID := 572097
 	email := "test@rollbar.com"
-	u := apiUrl + pathInvitationCreate
+	u := apiUrl + pathInvitations
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 
 	// Success
@@ -36,9 +37,11 @@ func (s *Suite) TestCreateInvitation() {
 		return err
 	})
 }
+
+// TestReadInvitation tests reading a Rollbar team invitation from the API.
 func (s *Suite) TestReadInvitation() {
 	id := 153650
-	u := apiUrl + pathInvitationRead
+	u := apiUrl + pathInvitation
 	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(id))
 
 	// Success
@@ -61,4 +64,25 @@ func (s *Suite) TestReadInvitation() {
 		_, err := s.client.ReadInvitation(id)
 		return err
 	})
+}
+
+func (s *Suite) TestCancelInvitation() {
+	invitationId := 153650
+	u := apiUrl + pathInvitation
+	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(invitationId))
+
+	r := responderFromFixture("invitation/cancel.json", http.StatusOK)
+	httpmock.RegisterResponder("DELETE", u, r)
+	err := s.client.CancelInvitation(invitationId)
+	s.Nil(err)
+
+	// DeleteInvitation is an alias for CancelInvitation.
+	err = s.client.DeleteInvitation(invitationId)
+	s.Nil(err)
+
+	s.checkServerErrors("DELETE", u, func() error {
+		err := s.client.CancelInvitation(invitationId)
+		return err
+	})
+
 }
