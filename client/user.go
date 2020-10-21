@@ -33,7 +33,7 @@ type User struct {
 	Email    string `json:"email"`
 }
 
-// ListUsers : A function for listing the users.
+// ListUsers lists all Rollbar users.
 func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 	log.Debug().Msg("Listing users")
 	u := apiUrl + pathUserList
