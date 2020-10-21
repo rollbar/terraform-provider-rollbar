@@ -24,7 +24,6 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 // User represents a Rollbar user.
@@ -35,39 +34,27 @@ type User struct {
 }
 
 // ListUsers : A function for listing the users.
-func (c *RollbarApiClient) ListUsers() ([]User, error) {
+func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 	log.Debug().Msg("Listing users")
 	u := apiUrl + pathUserList
-	var users []User
 	resp, err := c.Resty.R().
 		SetResult(userListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
 		log.Err(err).Msg("Error listing users")
-		return users, err
+		return
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK, http.StatusCreated:
-		r := resp.Result().(*userListResponse)
-		users = r.Result.Users
-		log.Debug().
-			Interface("users", users).
-			Msg("Successfully listed users")
-		return users, nil
-	case http.StatusUnauthorized:
-		log.Warn().Msg("Unauthorized")
-		return users, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		log.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating project access token")
-		return users, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error listing users")
+		return
 	}
-
+	users = resp.Result().(*userListResponse).Result.Users
+	log.Debug().
+		Interface("users", users).
+		Msg("Successfully listed users")
+	return
 }
 
 /*
