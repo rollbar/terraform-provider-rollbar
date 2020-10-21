@@ -55,4 +55,8 @@ func (s *Suite) TestRestyZeroLogger() {
 
 	// Error log
 	s.client.Resty.SetProxy("not_a_valid_url") // Invalid URL triggers message to error log
+
+	// Clean up
+	s.client.Resty.DisableTrace()
+	s.client.Resty.SetDebug(false)
 }
