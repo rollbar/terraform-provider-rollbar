@@ -39,7 +39,35 @@ type Invitation struct {
 	DateRedeemed int    `json:"date_redeemed"`
 }
 
-// CreateInvitation sends an invitation to a user.
+// ListInvitations lists all invitations for a Rollbar team.
+func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err error) {
+	l := log.With().
+		Int("teamID", teamID).
+		Logger()
+	l.Debug().Msg("Listing invitations")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId": strconv.Itoa(teamID),
+		}).
+		SetResult(invitationListResponse{}).
+		SetError(ErrorResult{}).
+		Get(apiUrl + pathInvitations)
+	if err != nil {
+		l.Err(err).Msg("Error listing invitations")
+		return
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error listing invitations")
+		return
+	}
+	r := resp.Result().(*invitationListResponse)
+	invs = r.Result
+	l.Debug().Msg("Successfully listed invitations")
+	return
+}
+
+// CreateInvitation sends a Rollbar team invitation to a user.
 func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitation, error) {
 	l := log.With().
 		Int("teamID", teamID).

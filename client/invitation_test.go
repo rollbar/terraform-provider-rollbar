@@ -30,6 +30,45 @@ import (
 	"strings"
 )
 
+// TestListInvitations tests creating a Rollbar team invitation.
+func (s *Suite) TestListInvitations() {
+	teamID := 572097
+	u := apiUrl + pathInvitations
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+
+	// Success
+	r := responderFromFixture("invitation/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []Invitation{
+		{
+			DateCreated:  1603192170,
+			DateRedeemed: 0,
+			FromUserID:   238101,
+			ID:           153649,
+			Status:       "pending",
+			TeamID:       676971,
+			ToEmail:      "jason.mcvetta+test3@gmail.com",
+		},
+		{
+			DateCreated:  1603192477,
+			DateRedeemed: 0,
+			FromUserID:   5325,
+			ID:           153650,
+			Status:       "pending",
+			TeamID:       676971,
+			ToEmail:      "jason.mcvetta+test4@gmail.com",
+		},
+	}
+	actual, err := s.client.ListInvitations(teamID)
+	s.Nil(err)
+	s.ElementsMatch(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListInvitations(teamID)
+		return err
+	})
+}
+
 // TestCreateInvitation tests creating a Rollbar team invitation.
 func (s *Suite) TestCreateInvitation() {
 	teamID := 572097

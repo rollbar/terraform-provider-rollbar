@@ -59,8 +59,8 @@ func (s *Suite) TestListProjects() {
 	}
 	actual, err := s.client.ListProjects()
 	s.Nil(err)
-	s.Subset(actual, expected)
 	s.Len(actual, len(expected))
+	s.ElementsMatch(expected, actual)
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err = s.client.ListProjects()
