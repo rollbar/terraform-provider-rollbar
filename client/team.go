@@ -25,6 +25,7 @@ package client
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -197,7 +198,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 	if err != nil {
 		// API returns status `403 Forbidden` on invalid user to team assignment
 		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
-		if resp.StatusCode() == 403 {
+		if resp.StatusCode() == http.StatusForbidden {
 			l.Err(err).Msg("Team or user not found")
 			return ErrNotFound
 		}
@@ -225,6 +226,13 @@ func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
+		// API returns status `422 Unprocessable Entity` on invalid user to team
+		// assignment.
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
+		if resp.StatusCode() == http.StatusUnprocessableEntity {
+			l.Err(err).Msg("Team or user not found")
+			return ErrNotFound
+		}
 		l.Err(err).Msg("Error removing user from team")
 		return err
 	}
