@@ -178,22 +178,60 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 	return nil
 }
 
-/*
-// RemoveUserTeam removes a user from a team.
-func (c *Client) RemoveUserTeam(email string, teamID int) error {
-	userID, err := c.GetUser(email)
+// AssignUserToTeam assigns a user to a Rollbar team.
+func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
+	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
+	l.Debug().Msg("Assigning user to team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId": strconv.Itoa(teamID),
+			"userId": strconv.Itoa(userID),
+		}).
+		SetError(ErrorResult{}).
+		Put(apiUrl + pathTeamUser)
 	if err != nil {
+		l.Err(err).Msg("Error assigning user to team")
 		return err
 	}
-
-	err = c.delete("team", strconv.Itoa(teamID), "user", strconv.Itoa(userID))
+	err = errorFromResponse(resp)
 	if err != nil {
+		// API returns status `403 Forbidden` on invalid user to team assignment
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
+		if resp.StatusCode() == 403 {
+			l.Err(err).Msg("Team or user not found")
+			return ErrNotFound
+		}
+		l.Err(err).Msg("Error assigning user to team")
 		return err
 	}
-
+	l.Debug().Msg("Successfully assigned user to team")
 	return nil
 }
-*/
+
+// RemoveUserFromTeam removes a user from a Rollbar team.
+func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
+	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
+	l.Debug().Msg("Removing user from team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId": strconv.Itoa(teamID),
+			"userId": strconv.Itoa(userID),
+		}).
+		SetError(ErrorResult{}).
+		Delete(apiUrl + pathTeamUser)
+	if err != nil {
+		l.Err(err).Msg("Error removing user from team")
+		return err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error removing user from team")
+		return err
+	}
+	l.Debug().Msg("Successfully removed user from team")
+	return nil
+
+}
 
 /*
  * Containers for unmarshalling API responses

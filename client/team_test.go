@@ -210,3 +210,32 @@ func (s *Suite) TestDeleteTeam() {
 	err = s.client.DeleteTeam(teamId)
 	s.Equal(ErrUnauthorized, err)
 }
+
+// TestAssignUserToTeam tests assigning a user to a Rollbar team.
+func (s *Suite) TestAssignUserToTeam() {
+	teamID := 676971
+	userID := 238101
+
+	// Successful assignment
+	u := apiUrl + pathTeamUser
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+	r := responderFromFixture("team_user/assign.json", http.StatusOK)
+	httpmock.RegisterResponder("PUT", u, r)
+	err := s.client.AssignUserToTeam(teamID, userID)
+	s.Nil(err)
+
+	s.checkServerErrors("PUT", u, func() error {
+		err = s.client.AssignUserToTeam(teamID, userID) // non-existent user
+		return err
+	})
+
+	// API returns status 403 when the team or user is not found.
+	u = apiUrl + pathTeamUser
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{userId}", "0")
+	r = responderFromFixture("team_user/assign_not_found.json", http.StatusForbidden)
+	httpmock.RegisterResponder("PUT", u, r)
+	err = s.client.AssignUserToTeam(teamID, 0) // non-existent user
+	s.Equal(ErrNotFound, err)
+}
