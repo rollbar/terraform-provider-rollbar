@@ -61,6 +61,7 @@ func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 	return
 }
 
+// ReadUser reads a Rollbar user from the API.
 func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Reading user from API")
@@ -84,6 +85,24 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 		Interface("user", user).
 		Msg("Successfully read user from API")
 	return
+}
+
+// UserIdFromEmail finds the user ID for a given email.  WARNING: this is a
+// potentially slow call.  Don't repeat it unnecessarily.
+func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
+	l := log.With().Str("email", email).Logger()
+	l.Debug().Msg("Getting user ID from email")
+	users, err := c.ListUsers()
+	if err != nil {
+		l.Err(err).Msg("Error getting user ID from email")
+		return 0, err
+	}
+	for _, u := range users {
+		if u.Email == email {
+			return u.ID, nil
+		}
+	}
+	return 0, ErrNotFound
 }
 
 /*

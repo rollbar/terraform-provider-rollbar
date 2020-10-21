@@ -97,3 +97,25 @@ func (s *Suite) TestReadUser() {
 		return err
 	})
 }
+
+// TestUserIdFromEmail tests getting a Rollbar user ID from an email address.
+func (s *Suite) TestUserIdFromEmail() {
+	email := "jason.mcvetta@gmail.com"
+	expected := 238101
+
+	u := apiUrl + pathUsers
+	r := responderFromFixture("user/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.UserIdFromEmail(email)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	_, err = s.client.UserIdFromEmail("fake email")
+	s.Equal(ErrNotFound, err)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.UserIdFromEmail(email)
+		return err
+	})
+}
