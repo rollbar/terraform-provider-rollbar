@@ -177,7 +177,7 @@ func resourceUserImporter(d *schema.ResourceData, meta interface{}) ([]*schema.R
 	sParts := strings.Split(d.Id(), ":")
 
 	if len(sParts) != 2 {
-		return nil, fmt.Errorf("Invalid ID specified. Supplied ID must be written as <email>:<team_id>")
+		return nil, fmt.Errorf("invalid ID specified. Supplied ID must be written as <email>:<team_id>")
 	}
 
 	teamIDInt, err := strconv.Atoi(sParts[1])
