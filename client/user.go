@@ -24,6 +24,7 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
+	"strconv"
 )
 
 // User represents a Rollbar user.
@@ -31,12 +32,15 @@ type User struct {
 	Username string `json:"username"`
 	ID       int    `json:"id"`
 	Email    string `json:"email"`
+
+	// https://github.com/rollbar/terraform-provider-rollbar/issues/65
+	//EmailEnabled bool   `json:"email_enabled"`
 }
 
 // ListUsers lists all Rollbar users.
 func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 	log.Debug().Msg("Listing users")
-	u := apiUrl + pathUserList
+	u := apiUrl + pathUsers
 	resp, err := c.Resty.R().
 		SetResult(userListResponse{}).
 		SetError(ErrorResult{}).
@@ -54,6 +58,31 @@ func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 	log.Debug().
 		Interface("users", users).
 		Msg("Successfully listed users")
+	return
+}
+
+func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
+	l := log.With().Int("id", id).Logger()
+	l.Debug().Msg("Reading user from API")
+	u := apiUrl + pathUser
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{"userId": strconv.Itoa(id)}).
+		SetResult(userReadResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	if err != nil {
+		log.Err(err).Msg("Error reading user from API")
+		return
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error reading user from API")
+		return
+	}
+	user = resp.Result().(*userReadResponse).Result
+	log.Debug().
+		Interface("user", user).
+		Msg("Successfully read user from API")
 	return
 }
 
@@ -113,4 +142,9 @@ type userListResponse struct {
 	Result struct {
 		Users []User `json:"users"`
 	} `json:"result"`
+}
+
+type userReadResponse struct {
+	Error  int  `json:"err"`
+	Result User `json:"result"`
 }

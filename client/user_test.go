@@ -25,11 +25,13 @@ package client
 import (
 	"github.com/jarcoal/httpmock"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 // TestListUsers tests listing all Rollbar users.
 func (s *Suite) TestListUsers() {
-	u := apiUrl + pathUserList
+	u := apiUrl + pathUsers
 
 	// Success
 	r := responderFromFixture("user/list.json", http.StatusOK)
@@ -68,4 +70,30 @@ func (s *Suite) TestListUsers() {
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ListUsers()
 	s.Equal(ErrUnauthorized, err)
+}
+
+// TestReadUser tests reading a Rollbar user from the API.
+func (s *Suite) TestReadUser() {
+	userId := 238101
+	u := apiUrl + pathUser
+	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userId))
+
+	// Success
+	r := responderFromFixture("user/read.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := User{
+		Email:    "jason.mcvetta@gmail.com",
+		ID:       238101,
+		Username: "jmcvetta",
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/65
+		//EmailEnabled: true,
+	}
+	actual, err := s.client.ReadUser(userId)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ReadUser(userId)
+		return err
+	})
 }
