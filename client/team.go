@@ -179,6 +179,23 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 }
 
 /*
+// RemoveUserTeam removes a user from a team.
+func (c *Client) RemoveUserTeam(email string, teamID int) error {
+	userID, err := c.GetUser(email)
+	if err != nil {
+		return err
+	}
+
+	err = c.delete("team", strconv.Itoa(teamID), "user", strconv.Itoa(userID))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+*/
+
+/*
  * Containers for unmarshalling API responses
  */
 

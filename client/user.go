@@ -106,53 +106,6 @@ func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
 }
 
 /*
-// This response doesn't have pagination so it might break
-// in the future.
-func (c *Client) getID(email string) (int, error) {
-	var userID int
-
-	l, err := c.ListUsers()
-	if err != nil {
-		return 0, err
-	}
-
-	for _, user := range l.Result.Users {
-		if user.ToEmail == email {
-			userID = user.ID
-		}
-	}
-
-	return userID, nil
-}
-
-
-// GetUser fetches one user.
-func (c *Client) GetUser(email string) (int, error) {
-	userID, err := c.getID(email)
-	if err != nil {
-		return 0, fmt.Errorf("There was a problem with getting the user id %s", err)
-	}
-	return userID, nil
-
-}
-
-// RemoveUserTeam removes a user from a team.
-func (c *Client) RemoveUserTeam(email string, teamID int) error {
-	userID, err := c.GetUser(email)
-	if err != nil {
-		return err
-	}
-
-	err = c.delete("team", strconv.Itoa(teamID), "user", strconv.Itoa(userID))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-*/
-
-/*
  * Containers for unmarshalling Rollbar API responses
  */
 
