@@ -26,12 +26,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"strconv"
-	"strings"
-)
-
-import (
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
@@ -46,7 +40,7 @@ func resourceUser() *schema.Resource {
 		UpdateContext: resourceUserUpdate,
 		DeleteContext: resourceUserDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceUserImporter,
+			StateContext: resourceUserImporter,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -94,18 +88,25 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	userPresent := false
 	email := d.Id()
 	teamID := d.Get("team_id").(int)
-	client := meta.(*client.RollbarApiClient)
+	l := log.With().
+		Str("email", email).
+		Int("teamID", teamID).
+		Logger()
+	l.Debug().Msg("Reading resource user")
 
-	listInvites, err := client.ListInvitations(teamID)
-
+	c := meta.(*client.RollbarApiClient)
+	listInvites, err := c.ListInvitations(teamID)
 	if err != nil {
-		return err
+		l.Err(err).Msg("Error reading resource user")
+		return diag.FromErr(err)
 	}
 
-	listUsers, err := client.ListUsers()
-
+	listUsers, err := c.ListUsers()
 	if err != nil {
-		return err
+		if err != nil {
+			l.Err(err).Msg("Error reading resource user")
+			return diag.FromErr(err)
+		}
 	}
 
 	// This logic is needed so that we can check if the the user already was invited.
@@ -126,20 +127,24 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		}
 	}
 	// Check if the user is present in the team.
-	for _, user := range listUsers.Result.Users {
-		if user.ToEmail == email {
+	for _, user := range listUsers {
+		if user.Email == email {
 			userPresent = true
 		}
 	}
 
 	if !userPresent && !invited {
 		d.SetId("")
-		return fmt.Errorf("No user or invitee found with the email %s", email)
+		err := fmt.Errorf("no user or invitee found with the email %s", email)
+		l.Err(err).Msg("Error reading resource user")
+		return diag.FromErr(err)
 	}
 
-	d.Set("email", email)
-	return nil
-
+	err = d.Set("email", email)
+	if err != nil {
+		l.Err(err).Msg("Error reading resource user")
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -172,7 +177,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-func resourceUserImporter(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func resourceUserImporter(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	// Import needs to be done with 2 values email and team id which will be split.
 	sParts := strings.Split(d.Id(), ":")
 
