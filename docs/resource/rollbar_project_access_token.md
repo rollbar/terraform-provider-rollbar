@@ -7,7 +7,7 @@ Rollbar project access token resource.
 Example Usage
 -------------
 
-```hcl-terraform
+```hcl
 # Create a project
 resource "rollbar_project" "foo" {
   name         = "Foo"
