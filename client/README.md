@@ -1,5 +1,5 @@
-Rollbar API Client
-==================
+Rollbar Management API Client
+=============================
 
 A client for the Rollbar API, providing access to project & team management
 functionality. Used internally by the Rollbar Terraform provider.  Does **not**
