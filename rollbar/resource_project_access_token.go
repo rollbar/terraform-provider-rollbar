@@ -224,6 +224,13 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
+	// FIXME: Implement this functionality when the API is ready!
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
+	diags = diag.Diagnostics{{
+		Severity: diag.Warning,
+		Summary:  "Delete not implemented for resource `rollbar_project_access_token`",
+		Detail:   "https://github.com/rollbar/terraform-provider-rollbar/issues/12",
+	}}
 	return diags
 }
 
