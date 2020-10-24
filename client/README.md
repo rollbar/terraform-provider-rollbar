@@ -9,4 +9,8 @@ errors from your application, this is the wrong client.
 See [`rollbar-go`](https://github.com/rollbar/rollbar-go) for the official Go
 client for Rollbar, which *does* provide support for error reporting.
 
+
+Documentation
+-------------
+
 [![Documentation](https://godoc.org/github.com/rollbar/terraform-provider-rollbar?status.svg)](http://godoc.org/github.com/rollbar/terraform-provider-rollbar)
