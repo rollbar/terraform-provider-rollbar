@@ -66,8 +66,8 @@ func resourceUserCreate(_ context.Context, d *schema.ResourceData, meta interfac
 		Logger()
 	l.Debug().Msg("Creating resource rollbar_user")
 
-	client := meta.(*client.RollbarApiClient)
-	inv, err := client.CreateInvitation(teamID, email)
+	c := meta.(*client.RollbarApiClient)
+	inv, err := c.CreateInvitation(teamID, email)
 	if err != nil {
 		l.Err(err).Msg("Error creating invite")
 		return diag.FromErr(err)
