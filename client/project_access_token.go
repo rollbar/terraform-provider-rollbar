@@ -30,20 +30,17 @@ import (
 
 // ProjectAccessToken represents a Rollbar project access token.
 type ProjectAccessToken struct {
-	Name                 string  `mapstructure:"name"`
-	ProjectID            int     `json:"project_id" mapstructure:"project_id"`
-	AccessToken          string  `json:"access_token" mapstructure:"access_token"`
-	Scopes               []Scope `mapstructure:"scopes"`
-	Status               Status  `mapstructure:"status"`
-	RateLimitWindowSize  int     `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
-	RateLimitWindowCount int     `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
-	DateCreated          int     `json:"date_created" mapstructure:"date_created"`
-	DateModified         int     `json:"date_modified" mapstructure:"date_modified"`
-
-	// FIXME: Should we eliminate these fields?
-	//  https://github.com/rollbar/terraform-provider-rollbar/issues/52
-	//CurRateLimitWindowCount int     `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
-	//CurRateLimitWindowStart int     `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
+	Name                    string  `mapstructure:"name"`
+	ProjectID               int     `json:"project_id" mapstructure:"project_id"`
+	AccessToken             string  `json:"access_token" mapstructure:"access_token"`
+	Scopes                  []Scope `mapstructure:"scopes"`
+	Status                  Status  `mapstructure:"status"`
+	RateLimitWindowSize     int     `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
+	RateLimitWindowCount    int     `json:"rate_limit_window_count" mapstructure:"rate_limit_window_count"`
+	DateCreated             int     `json:"date_created" mapstructure:"date_created"`
+	DateModified            int     `json:"date_modified" mapstructure:"date_modified"`
+	CurRateLimitWindowCount int     `json:"cur_rate_limit_window_count" mapstructure:"cur_rate_limit_window_count"`
+	CurRateLimitWindowStart int     `json:"cur_rate_limit_window_start" mapstructure:"cur_rate_limit_window_start"`
 }
 
 // Scope represents the scope of a Rollbar project access token.
