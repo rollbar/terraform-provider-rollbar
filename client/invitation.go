@@ -112,6 +112,10 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 		SetResult(invitationResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
+	if err != nil {
+		l.Err(err).Msg("Error reading invitation from API")
+		return
+	}
 	err = errorFromResponse(resp)
 	if err != nil {
 		l.Err(err).Msg("Error reading invitation from API")
@@ -141,6 +145,10 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 		}).
 		SetError(ErrorResult{}).
 		Delete(u)
+	if err != nil {
+		l.Err(err).Msg("Error canceling invitation")
+		return
+	}
 	err = errorFromResponse(resp)
 	if err != nil {
 		l.Err(err).Msg("Error canceling invitation")
