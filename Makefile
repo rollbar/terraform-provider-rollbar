@@ -71,3 +71,12 @@ testacc:
 
 slscan:
 	./.slscan.sh
+
+SHELL=bash
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	@read -p "Are you sure? " -n 1 -r; \
+	if [[ $$REPLY =~ ^[Yy] ]]; \
+	then \
+		go test $(SWEEP_DIR) -v -sweep=$(SWEEP) $(SWEEPARGS) -timeout 60m; \
+	fi
