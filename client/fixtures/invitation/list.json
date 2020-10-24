@@ -1,0 +1,23 @@
+{
+  "err": 0,
+  "result": [
+    {
+      "date_created": 1603192170,
+      "date_redeemed": null,
+      "from_user_id": 238101,
+      "id": 153649,
+      "status": "pending",
+      "team_id": 676971,
+      "to_email": "jason.mcvetta+test3@gmail.com"
+    },
+    {
+      "date_created": 1603192477,
+      "date_redeemed": null,
+      "from_user_id": 5325,
+      "id": 153650,
+      "status": "pending",
+      "team_id": 676971,
+      "to_email": "jason.mcvetta+test4@gmail.com"
+    }
+  ]
+}

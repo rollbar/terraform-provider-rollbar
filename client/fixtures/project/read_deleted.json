@@ -1,0 +1,42 @@
+{
+    "err": 0,
+    "result": {
+        "account_id": 317418,
+        "date_created": 1602495301,
+        "date_modified": 1602495338,
+        "id": 412646,
+        "name": null,
+        "settings_data": {
+            "grouping": {
+                "auto_upgrade": true,
+                "recent_versions": [
+                    "5.0.0"
+                ]
+            },
+            "integrations": {
+                "asana": {},
+                "azuredevops": {},
+                "bitbucket": {},
+                "campfire": {},
+                "ciscospark": {},
+                "clubhouse": {},
+                "datadog": {},
+                "email": {},
+                "flowdock": {},
+                "github": {},
+                "gitlab": {},
+                "hipchat": {},
+                "jira": {},
+                "lightstep": {},
+                "pagerduty": {},
+                "pivotal": {},
+                "slack": {},
+                "sprintly": {},
+                "trello": {},
+                "victorops": {},
+                "webhook": {}
+            }
+        }
+    }
+}
+

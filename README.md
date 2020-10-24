@@ -1,77 +1,73 @@
-Terraform Provider 
-==================
+Terraform provider for Rollbar
+==============================
 
-Originally [babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
+The Rollbar provider is used to interact with Rollbar resources.
 
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
+The provider allows you to manage your Rollbar account's projects, members, and
+teams easily. It needs to be configured with the proper credentials before it
+can be used.
+
+
+
+Status
+------
+
+[![Build & Test](https://github.com/rollbar/terraform-provider-rollbar/workflows/Build%20&%20Test/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions)
+[![Coverage Status](https://coveralls.io/repos/github/rollbar/terraform-provider-rollbar/badge.svg?branch=merge-jmcvetta)](https://coveralls.io/github/rollbar/terraform-provider-rollbar?branch=merge-jmcvetta)
+[![CodeQL](https://github.com/rollbar/terraform-provider-rollbar/workflows/CodeQL/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3ACodeQL)
+[![ShiftLeft Scan](https://github.com/rollbar/terraform-provider-rollbar/workflows/ShiftLeft%20Scan/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3A%22ShiftLeft+Scan%22)
+
+
 
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x
-- [Go](https://golang.org/doc/install) 1.13.x+ (to build the provider plugin)
+- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
+- [Go](https://golang.org/doc/install) 1.14.x
 
-Building The Provider
----------------------
-Clone repository outside your Go path (not to `$GOPATH/src/github.com/babbel/terraform-provider-rollbar`)
-or set `GO111MODULE=on` (cf. [Go module documenation](https://github.com/golang/go/wiki/Modules#daily-workflow)).
 
-```sh
-$ git clone git@github.com:babbel/terraform-provider-rollbar
+Usage
+-----
+
+[See the docs for usage information.](docs/README.md)
+
+
+Debugging
+---------
+
+Enable writing debug log to `/tmp/terraform-provider-rollbar.log` by setting an
+environment variable:
+
+```
+export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1
+terraform apply   # or any command that calls the Rollbar provider
 ```
 
-Enter the directory and build the provider
+This is necessary because Terraform providers aren’t _actually_ plugins - they
+don’t get loaded into the running Terraform process.  Rather a provider is a
+stand alone program that is started as a child processes and communicates with
+Terraform via gRPC.  Anything that child process writes to stdout/stderr is
+lost.  So if we want debug logging we must write to a file.
 
-```sh
-$ make build-darwin
-```
 
-or
+### Dev Script
 
-```sh
-$ make build-linux
-```
+Running `make dev` will:
+* Build and install the provider 
+* Run `terraform apply` in the `examples` folder with debug logging enabled
+* Display the logs on completion.
 
-Using the provider
-----------------------
 
-```hcl
-provider "rollbar" {
-  api_key = "${var.api_key}"
-}
+License
+-------
 
-resource "rollbar_user" "test" {
-  team_id = 333290
-  email   = "test@somewhere.com"
-}
-```
+This is Free Software, released under the terms of the [MIT license](LICENSE).
 
-Developing the Provider
----------------------------
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13.x+ is *required*).
+History
+-------
 
-To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
-
-In order to test the provider, you can simply run `make test`.
-
-```sh
-$ make test
-```
-
-We cannot have the acceptance tests until rollbar changes/improves their api.
-The reason is because creating an invitation doesn't yield an userid.
-A user id is created when a user accepts their invitation.
-
-Github Releases
----------------------------
-In order to push a release to Github the feature branch has to merged into master and then a tag needs to be created with the version name of the provider e.g. **v0.0.1** and pushed.
-
-```sh
-git checkout master
-git pull origin master
-git tag v<semver> -m "release comment"
-git push origin master --tags
-```
+Derived from
+[jmcvetta/terraform-provider-rollbar-jmcvetta](https://github.com/jmcvetta/terraform-provider-rollbar-jmcvetta)
+and
+[babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)

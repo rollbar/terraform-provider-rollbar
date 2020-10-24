@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) 2020 Rollbar, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package rollbar
+
+import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
+	//"gopkg.in/jeevatkm/go-model.v1"
+	"strconv"
+	"time"
+)
+
+func dataSourceProjects() *schema.Resource {
+	return &schema.Resource{
+		ReadContext: dataSourceProjectsRead,
+		Schema: map[string]*schema.Schema{
+			"projects": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"account_id": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"date_created": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"date_modified": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"status": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	log.Debug().Msg("Reading project list from API")
+	var diags diag.Diagnostics
+	c := m.(*client.RollbarApiClient)
+
+	projects, err := c.ListProjects()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := d.Set("projects", projects); err != nil {
+		log.Err(err).
+			Interface("projects", projects).
+			Msg("Error setting resource data")
+		return diag.FromErr(err)
+	}
+
+	// Set resource ID to current timestamp (every resource must have an ID or
+	// it will be destroyed).
+	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+
+	log.Debug().Msg("Successfully read project list from API.")
+	return diags
+}

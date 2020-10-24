@@ -1,0 +1,62 @@
+name: Build & Test
+on: [push]
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    env:
+      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+      - uses: actions/setup-go@v2
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Build
+      - name: Download dependencies
+        run: go get
+      - name: Build the application
+        run: go build -o app
+
+      - name: Unit tests
+        run: make test
+
+      # Test provider with real Terraform
+      - name: Install
+        run: make install
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./example
+      - name: Terraform plan
+        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        working-directory: ./example
+        env:
+          ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
+
+      # Acceptance
+      - name: Acceptance tests
+        run: make testacc
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
+      - uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
