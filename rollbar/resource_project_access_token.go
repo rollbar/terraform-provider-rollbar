@@ -159,9 +159,20 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 
 	c := m.(*client.RollbarApiClient)
 	pat, err := c.ReadProjectAccessToken(projectId, accessToken)
+	if err == client.ErrNotFound {
+		d.SetId("")
+		msg := fmt.Sprintf("Removing project access token `%s` on project %d from state because it was not found on Rollbar", accessToken, projectId)
+		l.Err(err).Msg(msg)
+		return diag.Diagnostics{{
+			Severity: diag.Warning,
+			Summary:  "Project access token not found, removed from state",
+			Detail:   msg,
+		}}
+	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	var mPat map[string]interface{}
 	err = mapstructure.Decode(pat, &mPat)
 	if err != nil {
