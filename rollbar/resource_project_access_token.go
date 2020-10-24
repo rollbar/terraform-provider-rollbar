@@ -87,23 +87,19 @@ func resourceProjectAccessToken() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
-			// FIXME: Should we eliminate these fields?
-			//  https://github.com/rollbar/terraform-provider-rollbar/issues/52
-			//"cur_rate_limit_window_count": {
-			//	Type:     schema.TypeInt,
-			//	Computed: true,
-			//},
-			//"cur_rate_limit_window_start": {
-			//	Type:     schema.TypeInt,
-			//	Computed: true,
-			//},
-
 			"date_created": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"date_modified": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"cur_rate_limit_window_count": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			"cur_rate_limit_window_start": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
