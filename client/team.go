@@ -72,29 +72,17 @@ func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team,
 		l.Err(err).Msg("Error creating team")
 		return t, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK, http.StatusCreated:
-		// FIXME: currently API returns `200 OK` on successful create; but it
-		//  should instead return `201 Created`.
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
-		r := resp.Result().(*teamCreateResponse)
-		t = r.Result
-		l.Debug().
-			Interface("team", t).
-			Msg("Successfully created new team")
-		return t, nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return t, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error creating team")
-		return t, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error creating team")
+		return t, err
 	}
+	r := resp.Result().(*teamCreateResponse)
+	t = r.Result
+	l.Debug().
+		Interface("team", t).
+		Msg("Successfully created new team")
+	return t, nil
 }
 
 // ListTeams lists all Rollbar teams.
@@ -110,26 +98,17 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 		log.Err(err).Msg("Error listing teams")
 		return teams, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		r := resp.Result().(*teamListResponse)
-		teams = r.Result
-		log.Debug().
-			Interface("teams", teams).
-			Msg("Successfully listed teams")
-		return teams, nil
-	case http.StatusUnauthorized:
-		log.Warn().Msg("Unauthorized")
-		return teams, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		log.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error listing teams")
-		return teams, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error listing teams")
+		return teams, err
 	}
+	r := resp.Result().(*teamListResponse)
+	teams = r.Result
+	log.Debug().
+		Interface("teams", teams).
+		Msg("Successfully listed teams")
+	return teams, nil
 }
 
 // ReadTeam reads a Rollbar team from the API. If no matching team is found,
@@ -153,30 +132,20 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
-		l.Err(err).Msg("Error creating team")
+		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		r := resp.Result().(*teamReadResponse)
-		t = r.Result
-		l.Debug().
-			Interface("team", t).
-			Msg("Successfully read team")
-		return t, nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return t, ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error reading team")
-		return t, er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error reading team")
+		return t, err
 	}
-
+	r := resp.Result().(*teamReadResponse)
+	t = r.Result
+	l.Debug().
+		Interface("team", t).
+		Msg("Successfully read team")
+	return t, nil
 }
 
 // DeleteTeam deletes a Rollbar team. If no matching team is found, returns
@@ -201,22 +170,74 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 		l.Err(err).Msg("Error deleting team")
 		return err
 	}
-	switch resp.StatusCode() {
-	case http.StatusOK:
-		l.Debug().Msg("Successfully deleted team")
-		return nil
-	case http.StatusUnauthorized:
-		l.Warn().Msg("Unauthorized")
-		return ErrUnauthorized
-	default:
-		er := resp.Error().(*ErrorResult)
-		l.Error().
-			Int("StatusCode", resp.StatusCode()).
-			Str("Status", resp.Status()).
-			Interface("ErrorResult", er).
-			Msg("Error deleting team")
-		return er
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error deleting team")
+		return err
 	}
+	l.Debug().Msg("Successfully deleted team")
+	return nil
+}
+
+// AssignUserToTeam assigns a user to a Rollbar team.
+func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
+	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
+	l.Debug().Msg("Assigning user to team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId": strconv.Itoa(teamID),
+			"userId": strconv.Itoa(userID),
+		}).
+		SetError(ErrorResult{}).
+		Put(apiUrl + pathTeamUser)
+	if err != nil {
+		l.Err(err).Msg("Error assigning user to team")
+		return err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		// API returns status `403 Forbidden` on invalid user to team assignment
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
+		if resp.StatusCode() == http.StatusForbidden {
+			l.Err(err).Msg("Team or user not found")
+			return ErrNotFound
+		}
+		l.Err(err).Msg("Error assigning user to team")
+		return err
+	}
+	l.Debug().Msg("Successfully assigned user to team")
+	return nil
+}
+
+// RemoveUserFromTeam removes a user from a Rollbar team.
+func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
+	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
+	l.Debug().Msg("Removing user from team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId": strconv.Itoa(teamID),
+			"userId": strconv.Itoa(userID),
+		}).
+		SetError(ErrorResult{}).
+		Delete(apiUrl + pathTeamUser)
+	if err != nil {
+		l.Err(err).Msg("Error removing user from team")
+		return err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		// API returns status `422 Unprocessable Entity` on invalid user to team
+		// assignment.
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
+		if resp.StatusCode() == http.StatusUnprocessableEntity {
+			l.Err(err).Msg("Team or user not found")
+			return ErrNotFound
+		}
+		l.Err(err).Msg("Error removing user from team")
+		return err
+	}
+	l.Debug().Msg("Successfully removed user from team")
+	return nil
 
 }
 

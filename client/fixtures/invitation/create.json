@@ -1,0 +1,12 @@
+{
+  "err": 0,
+  "result": {
+    "date_created": 1603191497,
+    "date_redeemed": null,
+    "from_user_id": 5325,
+    "id": 153648,
+    "status": "pending",
+    "team_id": 572097,
+    "to_email": "test@rollbar.com"
+  }
+}

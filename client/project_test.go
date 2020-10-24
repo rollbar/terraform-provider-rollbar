@@ -59,26 +59,13 @@ func (s *Suite) TestListProjects() {
 	}
 	actual, err := s.client.ListProjects()
 	s.Nil(err)
-	s.Subset(actual, expected)
 	s.Len(actual, len(expected))
+	s.ElementsMatch(expected, actual)
 
-	// Internal Server Error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListProjects()
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.ListProjects()
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListProjects()
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err = s.client.ListProjects()
+		return err
+	})
 }
 
 func (s *Suite) TestCreateProject() {
@@ -101,23 +88,10 @@ func (s *Suite) TestCreateProject() {
 	s.Nil(err)
 	s.Equal(name, proj.Name)
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateProject(name)
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.CreateProject(name)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateProject(name)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("POST", u, func() error {
+		_, err = s.client.CreateProject(name)
+		return err
+	})
 }
 
 func (s *Suite) TestReadProject() {
@@ -139,30 +113,10 @@ func (s *Suite) TestReadProject() {
 	s.Nil(err)
 	s.Equal(&expected, actual)
 
-	// Not Found
-	er := ErrorResult{Err: 404, Message: "Not Found"}
-	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound, er)
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProject(expected.Id)
-	s.Equal(ErrNotFound, err)
-
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProject(expected.Id)
-	s.Equal(err, &errResult500)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.ReadProject(expected.Id)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProject(expected.Id)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ReadProject(expected.Id)
+		return err
+	})
 
 	// Deleted project API bug
 	// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/23
@@ -183,28 +137,7 @@ func (s *Suite) TestDeleteProject() {
 	err := s.client.DeleteProject(delId)
 	s.Nil(err)
 
-	// Project not found
-	r = httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
-		ErrorResult{Err: 404, Message: "Not Found"})
-	httpmock.RegisterResponder("DELETE", urlDel, r)
-	err = s.client.DeleteProject(delId)
-	s.Equal(ErrNotFound, err)
-
-	// Internal Server Error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("DELETE", urlDel, r)
-	err = s.client.DeleteProject(delId)
-	s.Equal(&errResult500, err)
-
-	// Server unreachable
-	httpmock.Reset()
-	err = s.client.DeleteProject(delId)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("DELETE", urlDel, r)
-	err = s.client.DeleteProject(delId)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("DELETE", urlDel, func() error {
+		return s.client.DeleteProject(delId)
+	})
 }

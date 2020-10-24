@@ -1,0 +1,18 @@
+{
+  "err": 0,
+  "result": {
+    "users": [
+      {
+        "email": "jason.mcvetta@gmail.com",
+        "id": 238101,
+        "username": "jmcvetta"
+      },
+      {
+        "email": "cory@rollbar.com",
+        "id": 2,
+        "username": "coryvirok"
+      }
+    ]
+  }
+}
+

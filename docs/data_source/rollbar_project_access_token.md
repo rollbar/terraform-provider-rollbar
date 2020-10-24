@@ -10,7 +10,7 @@ Example Usage
 
 To retrieve info about a token:
 
-```hcl-terraform
+```hcl
 resource "rollbar_project" "test" {
   name = "foobar"
 }
