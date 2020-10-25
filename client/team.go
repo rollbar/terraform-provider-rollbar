@@ -35,25 +35,15 @@ type Team struct {
 	ID          int
 	AccountID   int `json:"account_id"`
 	Name        string
-	AccessLevel TeamAccessLevel `json:"access_level"`
+	AccessLevel string `json:"access_level"`
 }
 
-// TeamAccessLevel represents the Rollbar team access level.
-type TeamAccessLevel string
-
-// Possible values for team access level
-const (
-	TeamAccessStandard = TeamAccessLevel("standard")
-	TeamAccessLight    = TeamAccessLevel("light")
-	TeamAccessView     = TeamAccessLevel("view")
-)
-
 // CreateTeam creates a new Rollbar team.
-func (c *RollbarApiClient) CreateTeam(name string, level TeamAccessLevel) (Team, error) {
+func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 	var t Team
 	l := log.With().
 		Str("name", name).
-		Str("access_level", string(level)).
+		Str("access_level", level).
 		Logger()
 	l.Debug().Msg("Creating new team")
 

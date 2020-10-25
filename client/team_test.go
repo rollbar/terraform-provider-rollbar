@@ -38,7 +38,7 @@ func (s *Suite) TestCreateTeam() {
 		ID:          676974,
 		AccountID:   317418,
 		Name:        teamName,
-		AccessLevel: TeamAccessStandard,
+		AccessLevel: "standard",
 	}
 	// FIXME: currently API returns `200 OK` on successful create; but it should
 	//  instead return `201 Created`.
@@ -57,30 +57,30 @@ func (s *Suite) TestCreateTeam() {
 	httpmock.RegisterResponder("POST", u, r)
 
 	// Successful create
-	actual, err := s.client.CreateTeam(teamName, TeamAccessStandard)
+	actual, err := s.client.CreateTeam(teamName, "standard")
 	s.Nil(err)
 	s.Equal(expected, actual)
 
 	// Invalid name
-	_, err = s.client.CreateTeam("", TeamAccessStandard)
+	_, err = s.client.CreateTeam("", "standard")
 	s.NotNil(err)
 
 	// Internal server error
 	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
 	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
+	_, err = s.client.CreateTeam(teamName, "standard")
 	s.NotNil(err)
 
 	// Server unreachable
 	httpmock.Reset()
-	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
+	_, err = s.client.CreateTeam(teamName, "standard")
 	s.NotNil(err)
 
 	// Unauthorized
 	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
 		ErrorResult{Err: 401, Message: "Unauthorized"})
 	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
+	_, err = s.client.CreateTeam(teamName, "standard")
 	s.Equal(ErrUnauthorized, err)
 }
 
@@ -98,7 +98,7 @@ func (s *Suite) TestListTeams() {
 			ID:          676974,
 			AccountID:   317418,
 			Name:        "foobar",
-			AccessLevel: TeamAccessStandard,
+			AccessLevel: "standard",
 		},
 		{
 			AccessLevel: "owner",
@@ -143,7 +143,7 @@ func (s *Suite) TestReadTeam() {
 		ID:          676974,
 		AccountID:   317418,
 		Name:        "foobar",
-		AccessLevel: TeamAccessStandard,
+		AccessLevel: "standard",
 	}
 	r := responderFromFixture("team/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
