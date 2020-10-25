@@ -1,4 +1,6 @@
 TEST?=$$(go list ./... | grep -v vendor | grep -v babbel-rollbar-client | grep -v babbel-terraform-provider)
+SWEEP?=all
+SWEEP_DIR?=./rollbar
 HOSTNAME=github.com
 NAMESPACE=rollbar
 NAME=rollbar
@@ -71,3 +73,12 @@ testacc:
 
 slscan:
 	./.slscan.sh
+
+SHELL=bash
+sweep:
+	@echo "WARNING: This will destroy infrastructure. Use only in development accounts."
+	@read -p "Are you sure? " -n 1 -r; \
+	if [[ $$REPLY =~ ^[Yy] ]]; \
+	then \
+		go test $(SWEEP_DIR) -v -sweep=$(SWEEP) $(SWEEPARGS) -timeout 60m; \
+	fi
