@@ -27,9 +27,12 @@ package rollbar
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
+	"strings"
 )
 
 const schemaKeyToken = "api_key"
@@ -66,4 +69,21 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	token := d.Get(schemaKeyToken).(string)
 	c := client.NewClient(token)
 	return c, diags
+}
+
+// handleErrNotFound handles an ErrNotFound when reading a resource, by removing
+// the resource from state and returning a Diagnostics object.
+func handleErrNotFound(d *schema.ResourceData, resourceName string) diag.Diagnostics {
+	id := d.Id()
+	d.SetId("")
+	tmpl := `Removing %s %s from state because it was not found on Rollbar`
+	detail := fmt.Sprintf(tmpl, resourceName, id)
+	log.Warn().Msg(detail)
+	tmpl = "%s not found, removed from state"
+	summary := fmt.Sprintf(tmpl, strings.ToTitle(resourceName))
+	return diag.Diagnostics{{
+		Severity: diag.Warning,
+		Summary:  summary,
+		Detail:   detail,
+	}}
 }
