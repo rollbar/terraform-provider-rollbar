@@ -20,7 +20,8 @@ func init() {
 // TestAccTeam tests CRUD operations for a Rollbar team.
 func (s *AccSuite) TestAccTeam() {
 	rn := "rollbar_team.test"
-	teamName := fmt.Sprintf("%s-team-0", s.projectName)
+	teamName0 := fmt.Sprintf("%s-team-0", s.projectName)
+	teamName1 := fmt.Sprintf("%s-team-0", s.projectName)
 
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
@@ -29,13 +30,27 @@ func (s *AccSuite) TestAccTeam() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				// language=hcl-terraform
-				Config: s.configResourceTeam(teamName),
+				Config: s.configResourceTeam(teamName0),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName),
-					s.checkTeam(rn, teamName),
-					//s.checkProjectInProjectList(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName0),
+					s.checkTeam(rn, teamName0, "standard"),
+				),
+			},
+			{
+				Config: s.configResourceTeamUpdateAccessLevel(teamName0),
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName0),
+					s.checkTeam(rn, teamName0, "light"),
+				),
+			},
+			{
+				Config: s.configResourceTeamUpdateTeamName(teamName1),
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName1),
+					s.checkTeam(rn, teamName1, "light"),
 				),
 			},
 			{
@@ -48,19 +63,40 @@ func (s *AccSuite) TestAccTeam() {
 }
 
 func (s *AccSuite) configResourceTeam(teamName string) string {
-	// langauge=hcl
+	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test" {
 			name = "%s"
 		}
 	`
 	return fmt.Sprintf(tmpl, teamName)
+}
 
+func (s *AccSuite) configResourceTeamUpdateAccessLevel(teamName string) string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+			access_level = "light"
+		}
+	`
+	return fmt.Sprintf(tmpl, teamName)
+}
+
+func (s *AccSuite) configResourceTeamUpdateTeamName(teamName string) string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+			access_level = "light"
+		}
+	`
+	return fmt.Sprintf(tmpl, teamName)
 }
 
 // checkTeam checks that the newly created team exists and has correct
 // attributes.
-func (s *AccSuite) checkTeam(rn, teamName string) resource.TestCheckFunc {
+func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)
@@ -68,7 +104,7 @@ func (s *AccSuite) checkTeam(rn, teamName string) resource.TestCheckFunc {
 		t, err := c.ReadTeam(id)
 		s.Nil(err)
 		s.Equal(teamName, t.Name, "team name from API does not match team name in Terraform config")
-		s.Equal("standard", t.AccessLevel)
+		s.Equal(accessLevel, t.AccessLevel)
 		return nil
 	}
 }
