@@ -1,4 +1,6 @@
 TEST?=$$(go list ./... | grep -v vendor | grep -v babbel-rollbar-client | grep -v babbel-terraform-provider)
+SWEEP?=all
+SWEEP_DIR?=./rollbar
 HOSTNAME=github.com
 NAMESPACE=rollbar
 NAME=rollbar
