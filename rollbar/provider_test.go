@@ -37,6 +37,11 @@ import (
 	"testing"
 )
 
+// TestMain connects Terraform sweeper system with Go's testing framework.
+func TestMain(m *testing.M) {
+	resource.TestMain(m)
+}
+
 // AccSuite is the acceptance testing suite.
 type AccSuite struct {
 	suite.Suite
