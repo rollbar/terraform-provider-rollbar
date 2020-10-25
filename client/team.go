@@ -54,7 +54,10 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 
 	u := apiUrl + pathTeamCreate
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"name": name}).
+		SetBody(map[string]interface{}{
+			"name":         name,
+			"access_level": level,
+		}).
 		SetResult(teamCreateResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)

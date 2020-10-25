@@ -33,25 +33,24 @@ import (
 func (s *Suite) TestCreateTeam() {
 	// Setup API mock
 	teamName := "foobar"
+	accessLevel := "standard"
 	u := apiUrl + pathTeamCreate
 	expected := Team{
 		ID:          676974,
 		AccountID:   317418,
 		Name:        teamName,
-		AccessLevel: "standard",
+		AccessLevel: accessLevel,
 	}
 	// FIXME: currently API returns `200 OK` on successful create; but it should
 	//  instead return `201 Created`.
 	//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
 	sr := responseFromFixture("team/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
-		type body struct {
-			Name string
-		}
-		b := body{}
+		b := make(map[string]interface{})
 		err := json.NewDecoder(req.Body).Decode(&b)
 		s.Nil(err)
-		s.Equal(teamName, b.Name)
+		s.Equal(teamName, b["name"])
+		s.Equal(accessLevel, b["access_level"])
 		return sr, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
