@@ -29,6 +29,7 @@ func resourceTeam() *schema.Resource {
 			"access_level": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "standard",
 				ForceNew: true,
 			},
 			"account_id": {
@@ -41,7 +42,7 @@ func resourceTeam() *schema.Resource {
 
 func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
-	level := d.Get("name").(string)
+	level := d.Get("access_level").(string)
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
 	l.Info().Msg("Creating new Rollbar team")
 	c := m.(*client.RollbarApiClient)
@@ -75,9 +76,11 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	errs = append(errs, d.Set("name", t.Name))
 	errs = append(errs, d.Set("account_id", t.AccountID))
 	errs = append(errs, d.Set("access_level", t.AccessLevel))
-	if errs != nil {
-		l.Err(errs[0]).Send()
-		return diag.FromErr(errs[0])
+	for _, err = range errs {
+		if err != nil {
+			l.Err(errs[0]).Send()
+			return diag.FromErr(errs[0])
+		}
 	}
 	l.Info().Msg("Successfully read Rollbar team from API")
 	return nil
