@@ -78,8 +78,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	l.Info().Msg("Creating resource rollbar_user")
 
 	// If a user already exists, we assign the user to each team.
-	var exists bool // User already exists?
-	userId, err := c.UserIdFromEmail(email)
+	var userExists bool // User already exists?
+	userID, err := c.UserIdFromEmail(email)
 	switch err {
 	default:
 		// Error
@@ -90,9 +90,9 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		l.Debug().Msg("User does not already exist")
 	case nil:
 		// User already exists
-		l := l.With().Int("userId", userId).Logger()
+		l := l.With().Int("userID", userID).Logger()
 		l.Debug().Msg("User already exists")
-		exists = true
+		userExists = true
 	}
 
 	// Teams to which this user SHOULD belong
@@ -103,8 +103,8 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 
 	// Teams to which this user currently does belong
 	teamsCurrent := make(map[int]bool)
-	if exists { // If user doesn't exist, they don't belong to any teams
-		ut, err := c.ListUserTeams(userId)
+	if userExists { // If user doesn't exist, they don't belong to any teams
+		ut, err := c.ListUserTeams(userID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
@@ -115,53 +115,59 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 	}
 
 	// Teams to which this user should be added
-	teamsToAdd := make(map[int]bool)
+	teamsToJoin := make(map[int]bool)
 	for id, _ := range teamsDesired {
 		if !teamsCurrent[id] {
-			teamsToAdd[id] = true
+			teamsToJoin[id] = true
 		}
+	}
+	for teamID, join := range teamsToJoin {
+		l = l.With().Int("teamID", teamID).Logger()
+		if !join {
+			continue
+		}
+		// If user already exists we can assign to teams without invitation.  If
+		// user does not already exist we must send an invitation.
+		if userExists {
+			err = c.AssignUserToTeam(teamID, userID)
+			if err != nil {
+				l.Err(err).Send()
+				return diag.FromErr(err)
+			}
+			l.Debug().Msg("Assigned user to team")
+		} else {
+			inv, err := c.CreateInvitation(teamID, email)
+			if err != nil {
+				l.Err(err).Send()
+				return diag.FromErr(err)
+			}
+			l.Debug().
+				Int("inviteID", inv.ID).
+				Msg("Assigned user to team")
+		}
+		teamsToJoin[teamID] = false // Task complete
 	}
 
 	// Teams from which this user should be removed
-	teamsToRemove := make(map[int]bool)
+	teamsToLeave := make(map[int]bool)
 	for id, _ := range teamsCurrent {
 		if !teamsDesired[id] {
-			teamsToRemove[id] = true
+			teamsToLeave[id] = true
 		}
 	}
 
-	for _, teamID := range teamIDs {
-		var invited bool
-		invitations, err := c.ListInvitations(teamID)
+	for teamID, leave := range teamsToLeave {
+		if !leave {
+			continue
+		}
+		err := c.RemoveUserFromTeam(teamID, userID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
-		for _, inv := range invitations {
-			if inv.ToEmail == email {
-				invited = true
-			}
-		}
-		if !invited {
-
-		}
-
+		teamsToLeave[teamID] = false // Task complete
 	}
 
-	var invited bool // Email has already been invited to this team, but has not yet become a user
-
-	inv, err := c.CreateInvitation(teamID, email)
-	if err != nil {
-		l.Err(err).Msg("Error creating invite")
-		return diag.FromErr(err)
-	}
-	// Use the email as an id.
-	id := strconv.Itoa(inv.ID)
-	d.SetId(id)
-
-	l.Debug().
-		Interface("invitation", inv).
-		Msg("Successfully created invitation")
 	return nil
 }
 
