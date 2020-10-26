@@ -7,6 +7,7 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -29,6 +30,12 @@ func (s *AccSuite) TestAccTeam() {
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
+			// Invalid name - failure expected
+			{
+				Config:      s.configResourceTeamInvalidname(),
+				ExpectError: regexp.MustCompile("name cannot be blank"),
+			},
+
 			// Initial create
 			{
 				Config: s.configResourceTeam(teamName0),
@@ -89,6 +96,16 @@ func (s *AccSuite) TestAccTeam() {
 			},
 		},
 	})
+}
+
+func (s *AccSuite) configResourceTeamInvalidname() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = ""
+		}
+	`
+	return tmpl
 }
 
 func (s *AccSuite) configResourceTeam(teamName string) string {
