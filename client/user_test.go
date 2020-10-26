@@ -53,23 +53,10 @@ func (s *Suite) TestListUsers() {
 	s.Subset(actual, expected)
 	s.Len(actual, len(expected))
 
-	// Internal Server Error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListUsers()
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.ListUsers()
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListUsers()
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListUsers()
+		return err
+	})
 }
 
 // TestReadUser tests reading a Rollbar user from the API.
