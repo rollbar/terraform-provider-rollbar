@@ -23,7 +23,7 @@ func (s *AccSuite) TestAccTeam() {
 	teamName0 := fmt.Sprintf("%s-team-0", s.projectName)
 	teamName1 := fmt.Sprintf("%s-team-0", s.projectName)
 
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,

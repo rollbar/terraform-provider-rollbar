@@ -27,12 +27,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// TestAccProjectAccessTokensDataSource tests reading project access tokens with
-// `rollbar_project_access_tokens` data source.
-func (s *AccSuite) TestAccProjectAccessTokensDataSource() {
+// TestAccProjectAccessTokensDataSourceNoPrefix tests reading project access
+// tokens with `rollbar_project_access_tokens` data source, with no prefix
+// specified.
+func (s *AccSuite) TestAccProjectAccessTokensDataSourceNoPrefix() {
 	rn := "data.rollbar_project_access_tokens.test"
-
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -50,8 +50,14 @@ func (s *AccSuite) TestAccProjectAccessTokensDataSource() {
 			},
 		},
 	})
+}
 
-	resource.Test(s.T(), resource.TestCase{
+// TestAccProjectAccessTokensDataSourceWithPrefix tests reading project access
+// tokens with `rollbar_project_access_tokens` data source, with a specific
+// prefix.
+func (s *AccSuite) TestAccProjectAccessTokensDataSourceWithPrefix() {
+	rn := "data.rollbar_project_access_tokens.test"
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

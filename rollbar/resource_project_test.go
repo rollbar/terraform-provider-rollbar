@@ -43,7 +43,7 @@ func init() {
 func (s *AccSuite) TestAccProject() {
 	rn := "rollbar_project.foo"
 
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
