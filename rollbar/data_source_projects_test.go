@@ -62,7 +62,7 @@ func (s *AccSuite) configDataSourceProjects() string {
 			depends_on = [rollbar_project.test]
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 // checkProjectInProjectDataSource tests that newly created project is in the
@@ -95,7 +95,7 @@ func (s *AccSuite) checkProjectInProjectDataSource(rn string) resource.TestCheck
 			// project in the list.
 			index := strconv.Itoa(len(pl) - 1)
 			projectNameResource := fmt.Sprintf("projects.%s.name", index)
-			err = resource.TestCheckResourceAttr(rn, projectNameResource, s.projectName)(ts)
+			err = resource.TestCheckResourceAttr(rn, projectNameResource, s.randName)(ts)
 			if err != nil {
 				return err
 			}

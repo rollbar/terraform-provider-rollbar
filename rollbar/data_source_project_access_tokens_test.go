@@ -97,5 +97,5 @@ func (s *AccSuite) configDataSourceProjectAccessTokens(prefix string) string {
 			%s
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName, configPrefix)
+	return fmt.Sprintf(tmpl, s.randName, configPrefix)
 }

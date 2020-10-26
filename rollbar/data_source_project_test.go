@@ -52,7 +52,7 @@ func (s *AccSuite) TestAccProjectDataSource() {
 				},
 				Config: s.configDataSourceProject(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(rn, "name", s.projectName),
+					resource.TestCheckResourceAttr(rn, "name", s.randName),
 					resource.TestCheckResourceAttrSet(rn, "id"),
 					resource.TestCheckResourceAttrSet(rn, "account_id"),
 					resource.TestCheckResourceAttrSet(rn, "date_created"),
@@ -76,7 +76,7 @@ func (s *AccSuite) configDataSourceProject() string {
 			depends_on = [rollbar_project.test]
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName, s.randName)
 }
 
 func (s *AccSuite) configDataSourceProjectNotFound() string {
@@ -86,5 +86,5 @@ func (s *AccSuite) configDataSourceProjectNotFound() string {
 			name = "%s"
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }

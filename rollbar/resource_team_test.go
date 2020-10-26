@@ -21,8 +21,8 @@ func init() {
 // TestAccTeam tests CRUD operations for a Rollbar team.
 func (s *AccSuite) TestAccTeam() {
 	rn := "rollbar_team.test"
-	teamName0 := fmt.Sprintf("%s-team-0", s.projectName)
-	teamName1 := fmt.Sprintf("%s-team-0", s.projectName)
+	teamName0 := fmt.Sprintf("%s-team-0", s.randName)
+	teamName1 := fmt.Sprintf("%s-team-0", s.randName)
 
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },

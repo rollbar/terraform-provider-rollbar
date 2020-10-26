@@ -61,7 +61,7 @@ type AccSuite struct {
 	providers map[string]*schema.Provider
 
 	// The following variables are populated before each test by SetupTest():
-	projectName string // Name of a Rollbar project
+	randName string // Name of a Rollbar project
 }
 
 func (s *AccSuite) SetupSuite() {
@@ -81,7 +81,7 @@ func (s *AccSuite) preCheck() {
 
 func (s *AccSuite) SetupTest() {
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	s.projectName = fmt.Sprintf("tf-acc-test-%s", randString)
+	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
 
 func TestAccSuite(t *testing.T) {
