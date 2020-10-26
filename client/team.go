@@ -130,6 +130,13 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
+		// FIXME: Workaround API bug
+		//  https://github.com/rollbar/terraform-provider-rollbar/issues/79
+		statusForbidden := resp.StatusCode() == http.StatusForbidden
+		msgNotFound := strings.Contains(err.Error(), "Team not found in this account")
+		if statusForbidden && msgNotFound {
+			return t, ErrNotFound
+		}
 		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
