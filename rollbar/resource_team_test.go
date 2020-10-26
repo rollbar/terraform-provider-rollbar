@@ -54,6 +54,27 @@ func (s *AccSuite) TestAccTeam() {
 				),
 			},
 			{
+				// Before running Terraform we delete the team on Rollbar but not in local state
+				PreConfig: func() {
+					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+					teams, err := c.ListTeams()
+					s.Nil(err)
+					for _, t := range teams {
+						if t.Name == teamName1 {
+							err = c.DeleteTeam(t.ID)
+							s.Nil(err)
+						}
+					}
+
+				},
+				Config: s.configResourceTeamUpdateTeamName(teamName1),
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName1),
+					s.checkTeam(rn, teamName1, "light"),
+				),
+			},
+			{
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -109,11 +130,11 @@ func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestChec
 	}
 }
 
+// sweepResourceTeam cleans up orphaned Rollbar teams.
 func sweepResourceTeam(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar teams from acceptance test runs.")
-	token := os.Getenv("ROLLBAR_API_KEY")
-	c := client.NewClient(token)
 
+	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
 	teams, err := c.ListTeams()
 	if err != nil {
 		log.Err(err).Send()
