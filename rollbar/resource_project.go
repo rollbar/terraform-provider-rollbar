@@ -24,7 +24,6 @@ package rollbar
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
@@ -139,14 +138,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	c := m.(*client.RollbarApiClient)
 	proj, err := c.ReadProject(id)
 	if err == client.ErrNotFound {
-		d.SetId("")
-		msg := fmt.Sprintf("Removing project %d from state because it was not found on Rollbar", id)
-		l.Err(err).Msg(msg)
-		return diag.Diagnostics{{
-			Severity: diag.Warning,
-			Summary:  "Project not found, removed from state",
-			Detail:   msg,
-		}}
+		return handleErrNotFound(d, "project")
 	}
 	if err != nil {
 		l.Err(err).Send()

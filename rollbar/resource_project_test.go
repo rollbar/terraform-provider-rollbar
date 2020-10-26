@@ -27,13 +27,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
+	"os"
+	"strings"
 )
+
+func init() {
+	resource.AddTestSweepers("rollbar_project", &resource.Sweeper{
+		Name: "rollbar_project",
+		F:    sweepResourceProject,
+	})
+}
 
 // TestAccProject tests creation and deletion of a Rollbar project.
 func (s *AccSuite) TestAccProject() {
 	rn := "rollbar_project.foo"
 
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
@@ -98,4 +108,33 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 		s.True(found, "Project not found in project list")
 		return nil
 	}
+}
+
+func sweepResourceProject(_ string) error {
+	log.Info().Msg("Cleaning up Rollbar projects from acceptance test runs.")
+
+	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	projects, err := c.ListProjects()
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	for _, p := range projects {
+		l := log.With().
+			Str("name", p.Name).
+			Int("id", p.Id).
+			Logger()
+		if strings.HasPrefix(p.Name, "tf-acc-test-") {
+			err = c.DeleteProject(p.Id)
+			if err != nil {
+				l.Err(err).Send()
+				return err
+			}
+			l.Info().Msg("Deleted project")
+		}
+	}
+
+	log.Info().Msg("Projects cleanup complete")
+	return nil
 }

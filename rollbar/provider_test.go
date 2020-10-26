@@ -37,6 +37,23 @@ import (
 	"testing"
 )
 
+func init() {
+	// Setup nice logging
+	log.Logger = log.
+		With().Caller().
+		Logger()
+	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
+		log.Logger = log.Logger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	}
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+}
+
+// TestMain connects Terraform sweeper system with Go's testing framework.
+func TestMain(m *testing.M) {
+	resource.TestMain(m)
+}
+
 // AccSuite is the acceptance testing suite.
 type AccSuite struct {
 	suite.Suite
@@ -48,16 +65,6 @@ type AccSuite struct {
 }
 
 func (s *AccSuite) SetupSuite() {
-	// Log to console
-	log.Logger = log.
-		With().Caller().
-		Logger()
-	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
-		log.Logger = log.Logger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-
-	}
-	zerolog.SetGlobalLevel(zerolog.DebugLevel)
-
 	// Setup testing
 	s.provider = rollbar.Provider()
 	s.providers = map[string]*schema.Provider{
