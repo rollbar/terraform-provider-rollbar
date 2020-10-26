@@ -119,3 +119,28 @@ func (s *Suite) TestUserIdFromEmail() {
 		return err
 	})
 }
+
+// TestListUserTeams tests listing all Rollbar users.
+func (s *Suite) TestListUserTeams() {
+	userID := 238101
+	u := apiUrl + pathUserTeams
+	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+
+	// Success
+	r := responderFromFixture("user/list_teams.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []int{
+		662036,
+		662037,
+		676971,
+	}
+	actual, err := s.client.ListUserTeams(userID)
+	s.Nil(err)
+	s.Subset(actual, expected)
+	s.Len(actual, len(expected))
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListUserTeams(userID)
+		return err
+	})
+}
