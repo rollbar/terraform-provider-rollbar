@@ -130,6 +130,14 @@ func (s *Suite) TestReadTeam() {
 	_, err = s.client.ReadTeam(0)
 	s.NotNil(err)
 
+	// FIXME: Workaround API bug
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/79
+	r = httpmock.NewJsonResponderOrPanic(http.StatusForbidden,
+		ErrorResult{Err: 1, Message: "Team not found in this account."})
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadTeam(teamId)
+	s.Equal(ErrNotFound, err)
+
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ReadTeam(teamId)
 		return err
