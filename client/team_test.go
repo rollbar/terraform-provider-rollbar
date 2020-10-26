@@ -174,7 +174,7 @@ func (s *Suite) TestAssignUserToTeam() {
 	u := apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
-	r := responderFromFixture("team_user/assign.json", http.StatusOK)
+	r := responderFromFixture("team/assign_user.json", http.StatusOK)
 	httpmock.RegisterResponder("PUT", u, r)
 	err := s.client.AssignUserToTeam(teamID, userID)
 	s.Nil(err)
@@ -188,7 +188,7 @@ func (s *Suite) TestAssignUserToTeam() {
 	u = apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", "0")
-	r = responderFromFixture("team_user/assign_not_found.json", http.StatusForbidden)
+	r = responderFromFixture("team/assign_user_not_found.json", http.StatusForbidden)
 	httpmock.RegisterResponder("PUT", u, r)
 	err = s.client.AssignUserToTeam(teamID, 0) // non-existent user
 	s.Equal(ErrNotFound, err)
@@ -203,7 +203,7 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	u := apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
-	r := responderFromFixture("team_user/remove.json", http.StatusOK)
+	r := responderFromFixture("team/remove_user.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
 	err := s.client.RemoveUserFromTeam(teamID, userID)
 	s.Nil(err)
@@ -217,7 +217,7 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	u = apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", "0")
-	r = responderFromFixture("team_user/remove_not_found.json", http.StatusUnprocessableEntity)
+	r = responderFromFixture("team/remove_user_not_found.json", http.StatusUnprocessableEntity)
 	httpmock.RegisterResponder("DELETE", u, r)
 	err = s.client.RemoveUserFromTeam(teamID, 0) // non-existent user
 	s.Equal(ErrNotFound, err)
