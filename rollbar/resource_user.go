@@ -67,7 +67,7 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-func resourceUserCreate(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.RollbarApiClient)
 	email := d.Get("email").(string)
 	teamIDs := d.Get("teams").([]int)
@@ -78,25 +78,55 @@ func resourceUserCreate(_ context.Context, d *schema.ResourceData, meta interfac
 	l.Info().Msg("Creating resource rollbar_user")
 
 	// If a user already exists, we assign the user to each team.
+	var exists bool // User already exists?
 	userId, err := c.UserIdFromEmail(email)
 	switch err {
 	default:
+		// Error
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	case client.ErrNotFound:
+		// User does not yet exist
 		l.Debug().Msg("User does not already exist")
 	case nil:
+		// User already exists
 		l := l.With().Int("userId", userId).Logger()
 		l.Debug().Msg("User already exists")
-		for _, teamID := range teamIDs {
-			err := c.AssignUserToTeam(teamID, userId)
-			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
-			}
-			l.Info().
-				Int("teamID", teamID).
-				Msg("User assigned to team")
+		exists = true
+	}
+
+	// Teams to which this user SHOULD belong
+	teamsDesired := make(map[int]bool)
+	for _, id := range teamIDs {
+		teamsDesired[id] = false
+	}
+
+	// Teams to which this user currently does belong
+	teamsCurrent := make(map[int]bool)
+	if exists { // If user doesn't exist, they don't belong to any teams
+		ut, err := c.ListUserTeams(userId)
+		if err != nil {
+			l.Err(err).Send()
+			return diag.FromErr(err)
+		}
+		for _, t := range ut {
+			teamsCurrent[t] = true
+		}
+	}
+
+	// Teams to which this user should be added
+	teamsToAdd := make(map[int]bool)
+	for id, _ := range teamsDesired {
+		if !teamsCurrent[id] {
+			teamsToAdd[id] = true
+		}
+	}
+
+	// Teams from which this user should be removed
+	teamsToRemove := make(map[int]bool)
+	for id, _ := range teamsCurrent {
+		if !teamsDesired[id] {
+			teamsToRemove[id] = true
 		}
 	}
 
