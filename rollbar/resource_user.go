@@ -44,14 +44,24 @@ func resourceUser() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"email": &schema.Schema{
+			// Required
+			"email": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"team_id": &schema.Schema{
-				Type:     schema.TypeInt,
-				Required: true,
+			"teams": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+
+			// Computed
+			"username": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
@@ -67,6 +77,13 @@ func resourceUserCreate(_ context.Context, d *schema.ResourceData, meta interfac
 	l.Debug().Msg("Creating resource rollbar_user")
 
 	c := meta.(*client.RollbarApiClient)
+	userId, err := c.UserIdFromEmail(email)
+	log.Debug().Int("userId", userId)
+	if err == nil {
+		// user already exists
+	} else {
+		// User must be invited
+	}
 	inv, err := c.CreateInvitation(teamID, email)
 	if err != nil {
 		l.Err(err).Msg("Error creating invite")
