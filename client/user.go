@@ -91,7 +91,7 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 // potentially slow call.  Don't repeat it unnecessarily.
 func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
 	l := log.With().Str("email", email).Logger()
-	l.Debug().Msg("Getting user ID from email")
+	l.Info().Msg("Getting user ID from email")
 	users, err := c.ListUsers()
 	if err != nil {
 		l.Err(err).Msg("Error getting user ID from email")
@@ -103,6 +103,35 @@ func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
 		}
 	}
 	return 0, ErrNotFound
+}
+
+// ListUserTeams lists a Rollbar user's teams.
+func (c *RollbarApiClient) ListUserTeams(userID int) (teamIDs []int, err error) {
+	l := log.With().Int("userID", userID).Logger()
+	l.Info().Msg("Reading teams for Rollbar user")
+	u := apiUrl + pathUserTeams
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{"userId": strconv.Itoa(userID)}).
+		SetResult(userTeamListResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	if err != nil {
+		log.Err(err).Msg("Error reading Rollbar user's teams from API")
+		return
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error reading Rollbar user's teams from API")
+		return
+	}
+	teams := resp.Result().(*userTeamListResponse).Result.Teams
+	for _, t := range teams {
+		teamIDs = append(teamIDs, t.ID)
+	}
+	log.Debug().
+		Ints("teamIDs", teamIDs).
+		Msg("Successfully read Rollbar user's teams from API")
+	return
 }
 
 /*
@@ -119,4 +148,11 @@ type userListResponse struct {
 type userReadResponse struct {
 	Error  int  `json:"err"`
 	Result User `json:"result"`
+}
+
+type userTeamListResponse struct {
+	Error  int `json:"err"`
+	Result struct {
+		Teams []Team `json:"teams"`
+	} `json:"result"`
 }
