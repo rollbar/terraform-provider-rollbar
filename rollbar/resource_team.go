@@ -69,7 +69,6 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return handleErrNotFound(d, "team")
 	}
 	if err != nil {
-		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	var errs []error
