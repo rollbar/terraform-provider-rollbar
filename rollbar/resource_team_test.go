@@ -29,6 +29,7 @@ func (s *AccSuite) TestAccTeam() {
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
+			// Initial create
 			{
 				Config: s.configResourceTeam(teamName0),
 				Check: resource.ComposeTestCheckFunc(
@@ -37,6 +38,8 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName0, "standard"),
 				),
 			},
+
+			// Update team access level
 			{
 				Config: s.configResourceTeamUpdateAccessLevel(teamName0),
 				Check: resource.ComposeTestCheckFunc(
@@ -45,6 +48,8 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName0, "light"),
 				),
 			},
+
+			// Update team name
 			{
 				Config: s.configResourceTeamUpdateTeamName(teamName1),
 				Check: resource.ComposeTestCheckFunc(
@@ -53,8 +58,9 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName1, "light"),
 				),
 			},
+
+			// Before running Terraform, delete the team on Rollbar but not in local state
 			{
-				// Before running Terraform we delete the team on Rollbar but not in local state
 				PreConfig: func() {
 					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
 					teams, err := c.ListTeams()
@@ -74,6 +80,8 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName1, "light"),
 				),
 			},
+
+			// Import a team
 			{
 				ResourceName:      rn,
 				ImportState:       true,
