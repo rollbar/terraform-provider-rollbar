@@ -68,22 +68,58 @@ func resourceUser() *schema.Resource {
 }
 
 func resourceUserCreate(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c := meta.(*client.RollbarApiClient)
 	email := d.Get("email").(string)
-	teamID := d.Get("team_id").(int)
+	teamIDs := d.Get("teams").([]int)
 	l := log.With().
 		Str("email", email).
-		Int("teamID", teamID).
+		Ints("teamIDs", teamIDs).
 		Logger()
-	l.Debug().Msg("Creating resource rollbar_user")
+	l.Info().Msg("Creating resource rollbar_user")
 
-	c := meta.(*client.RollbarApiClient)
+	// If a user already exists, we assign the user to each team.
 	userId, err := c.UserIdFromEmail(email)
-	log.Debug().Int("userId", userId)
-	if err == nil {
-		// user already exists
-	} else {
-		// User must be invited
+	switch err {
+	default:
+		l.Err(err).Send()
+		return diag.FromErr(err)
+	case client.ErrNotFound:
+		l.Debug().Msg("User does not already exist")
+	case nil:
+		l := l.With().Int("userId", userId).Logger()
+		l.Debug().Msg("User already exists")
+		for _, teamID := range teamIDs {
+			err := c.AssignUserToTeam(teamID, userId)
+			if err != nil {
+				l.Err(err).Send()
+				return diag.FromErr(err)
+			}
+			l.Info().
+				Int("teamID", teamID).
+				Msg("User assigned to team")
+		}
 	}
+
+	for _, teamID := range teamIDs {
+		var invited bool
+		invitations, err := c.ListInvitations(teamID)
+		if err != nil {
+			l.Err(err).Send()
+			return diag.FromErr(err)
+		}
+		for _, inv := range invitations {
+			if inv.ToEmail == email {
+				invited = true
+			}
+		}
+		if !invited {
+
+		}
+
+	}
+
+	var invited bool // Email has already been invited to this team, but has not yet become a user
+
 	inv, err := c.CreateInvitation(teamID, email)
 	if err != nil {
 		l.Err(err).Msg("Error creating invite")
@@ -212,4 +248,8 @@ func resourceUserImporter(_ context.Context, d *schema.ResourceData, meta interf
 	d.SetId(sParts[0])
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func resourceUserStateId(userID int, email string) string {
+	return fmt.Sprintf("%d:%s", userID, email)
 }
