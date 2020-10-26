@@ -98,9 +98,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 	r := resp.Result().(*teamListResponse)
 	teams = r.Result
-	log.Debug().
-		Interface("teams", teams).
-		Msg("Successfully listed teams")
+	log.Info().Msg("Successfully listed teams")
 	return teams, nil
 }
 
