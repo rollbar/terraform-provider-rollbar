@@ -34,7 +34,7 @@ import (
 func (s *AccSuite) TestAccProjectDataSource() {
 	rn := "data.rollbar_project.test"
 
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

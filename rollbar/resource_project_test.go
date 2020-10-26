@@ -43,7 +43,7 @@ func init() {
 func (s *AccSuite) TestAccProject() {
 	rn := "rollbar_project.foo"
 
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
@@ -111,14 +111,13 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 }
 
 func sweepResourceProject(_ string) error {
-	log.Info().Msg("Cleaning up orphaned Rollbar projects from failed acceptance test runs.")
+	log.Info().Msg("Cleaning up Rollbar projects from acceptance test runs.")
 
-	token := os.Getenv("ROLLBAR_API_KEY")
-	c := client.NewClient(token)
-
+	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
 	projects, err := c.ListProjects()
 	if err != nil {
-		log.Fatal().Err(err).Send()
+		log.Err(err).Send()
+		return err
 	}
 
 	for _, p := range projects {
@@ -129,12 +128,13 @@ func sweepResourceProject(_ string) error {
 		if strings.HasPrefix(p.Name, "tf-acc-test-") {
 			err = c.DeleteProject(p.Id)
 			if err != nil {
-				l.Fatal().Err(err).Send()
+				l.Err(err).Send()
+				return err
 			}
 			l.Info().Msg("Deleted project")
 		}
 	}
 
-	log.Info().Msg("Cleanup complete")
+	log.Info().Msg("Projects cleanup complete")
 	return nil
 }

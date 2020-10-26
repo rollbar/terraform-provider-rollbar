@@ -33,55 +33,41 @@ import (
 func (s *Suite) TestCreateTeam() {
 	// Setup API mock
 	teamName := "foobar"
+	accessLevel := "standard"
 	u := apiUrl + pathTeamCreate
 	expected := Team{
 		ID:          676974,
 		AccountID:   317418,
 		Name:        teamName,
-		AccessLevel: TeamAccessStandard,
+		AccessLevel: accessLevel,
 	}
 	// FIXME: currently API returns `200 OK` on successful create; but it should
 	//  instead return `201 Created`.
 	//  https://github.com/rollbar/terraform-provider-rollbar/issues/8
 	sr := responseFromFixture("team/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
-		type body struct {
-			Name string
-		}
-		b := body{}
+		b := make(map[string]interface{})
 		err := json.NewDecoder(req.Body).Decode(&b)
 		s.Nil(err)
-		s.Equal(teamName, b.Name)
+		s.Equal(teamName, b["name"])
+		s.Equal(accessLevel, b["access_level"])
 		return sr, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
 
 	// Successful create
-	actual, err := s.client.CreateTeam(teamName, TeamAccessStandard)
+	actual, err := s.client.CreateTeam(teamName, "standard")
 	s.Nil(err)
 	s.Equal(expected, actual)
 
 	// Invalid name
-	_, err = s.client.CreateTeam("", TeamAccessStandard)
+	_, err = s.client.CreateTeam("", "standard")
 	s.NotNil(err)
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("POST", u, r)
-	_, err = s.client.CreateTeam(teamName, TeamAccessStandard)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("POST", u, func() error {
+		_, err = s.client.CreateTeam(teamName, "standard")
+		return err
+	})
 }
 
 func (s *Suite) TestListTeams() {
@@ -98,7 +84,7 @@ func (s *Suite) TestListTeams() {
 			ID:          676974,
 			AccountID:   317418,
 			Name:        "foobar",
-			AccessLevel: TeamAccessStandard,
+			AccessLevel: "standard",
 		},
 		{
 			AccessLevel: "owner",
@@ -115,23 +101,10 @@ func (s *Suite) TestListTeams() {
 	s.Nil(err)
 	s.Equal(expected, actual)
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListTeams()
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.ListTeams()
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ListTeams()
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListTeams()
+		return err
+	})
 }
 
 func (s *Suite) TestReadTeam() {
@@ -143,7 +116,7 @@ func (s *Suite) TestReadTeam() {
 		ID:          676974,
 		AccountID:   317418,
 		Name:        "foobar",
-		AccessLevel: TeamAccessStandard,
+		AccessLevel: "standard",
 	}
 	r := responderFromFixture("team/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
@@ -157,23 +130,18 @@ func (s *Suite) TestReadTeam() {
 	_, err = s.client.ReadTeam(0)
 	s.NotNil(err)
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
+	// FIXME: Workaround API bug
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/79
+	r = httpmock.NewJsonResponderOrPanic(http.StatusForbidden,
+		ErrorResult{Err: 1, Message: "Team not found in this account."})
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadTeam(teamId)
-	s.NotNil(err)
+	s.Equal(ErrNotFound, err)
 
-	// Server unreachable
-	httpmock.Reset()
-	_, err = s.client.ReadTeam(teamId)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadTeam(teamId)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ReadTeam(teamId)
+		return err
+	})
 }
 
 func (s *Suite) TestDeleteTeam() {
@@ -192,23 +160,9 @@ func (s *Suite) TestDeleteTeam() {
 	err = s.client.DeleteTeam(0)
 	s.NotNil(err)
 
-	// Internal server error
-	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError, errResult500)
-	httpmock.RegisterResponder("DELETE", u, r)
-	err = s.client.DeleteTeam(teamId)
-	s.NotNil(err)
-
-	// Server unreachable
-	httpmock.Reset()
-	err = s.client.DeleteTeam(teamId)
-	s.NotNil(err)
-
-	// Unauthorized
-	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
-		ErrorResult{Err: 401, Message: "Unauthorized"})
-	httpmock.RegisterResponder("DELETE", u, r)
-	err = s.client.DeleteTeam(teamId)
-	s.Equal(ErrUnauthorized, err)
+	s.checkServerErrors("DELETE", u, func() error {
+		return s.client.DeleteTeam(teamId)
+	})
 }
 
 // TestAssignUserToTeam tests assigning a user to a Rollbar team.
