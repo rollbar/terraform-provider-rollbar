@@ -67,8 +67,8 @@ func resourceUser() *schema.Resource {
 	}
 }
 
+// resourceUserCreate creates a new Rollar user resource
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*client.RollbarApiClient)
 	email := d.Get("email").(string)
 	teamIDs := d.Get("teams").([]int)
 	l := log.With().
@@ -76,6 +76,22 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Ints("teamIDs", teamIDs).
 		Logger()
 	l.Info().Msg("Creating resource rollbar_user")
+	d.SetId(email)
+	return resourceUserCreateOrUpdate(ctx, d, meta)
+}
+
+// resourceUserCreateOrUpdate does the heavy lifting of assigning and/or
+// inviting user to specified groups, and removing user from groups no longer
+// specified.
+func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	c := meta.(*client.RollbarApiClient)
+	//email := d.Get("email").(string)
+	email := d.Id()
+	teamIDs := d.Get("teams").([]int)
+	l := log.With().
+		Str("email", email).
+		Ints("teamIDs", teamIDs).
+		Logger()
 
 	// If a user already exists, we assign the user to each team.
 	var userExists bool // User already exists?
@@ -168,7 +184,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		teamsToLeave[teamID] = false // Task complete
 	}
 
-	return nil
+	return resourceUserRead(ctx, d, meta)
 }
 
 func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -237,12 +253,22 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	return nil
 }
 
-func resourceUserUpdate(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Fatal().Msg("Not yet implemented")
-	return nil
+func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	email := d.Get("email").(string)
+	teamIDs := d.Get("teams").([]int)
+	l := log.With().
+		Str("email", email).
+		Ints("teamIDs", teamIDs).
+		Logger()
+	l.Info().Msg("Creating resource rollbar_user")
+	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
 func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	err := fmt.Errorf("not yet implemented")
+	log.Err(err).Send()
+	return diag.FromErr(err)
+
 	email := d.Id()
 	teamID := d.Get("team_id").(int)
 	l := log.With().
