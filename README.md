@@ -16,6 +16,7 @@ Status
 [![Coverage Status](https://coveralls.io/repos/github/rollbar/terraform-provider-rollbar/badge.svg?branch=merge-jmcvetta)](https://coveralls.io/github/rollbar/terraform-provider-rollbar?branch=merge-jmcvetta)
 [![CodeQL](https://github.com/rollbar/terraform-provider-rollbar/workflows/CodeQL/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3ACodeQL)
 [![ShiftLeft Scan](https://github.com/rollbar/terraform-provider-rollbar/workflows/ShiftLeft%20Scan/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3A%22ShiftLeft+Scan%22)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c5097d1a11f6f2310089/maintainability)](https://codeclimate.com/github/rollbar/terraform-provider-rollbar/maintainability)
 
 
 
