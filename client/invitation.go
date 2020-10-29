@@ -159,6 +159,40 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 	return
 }
 
+// FindInvitations finds all Rollbar team invitations for a given email. Note
+// this method is quite inefficient, as it must read all invitations for all
+// teams.
+func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err error) {
+	l := log.With().
+		Str("email", email).
+		Logger()
+
+	l.Info().Msg("Finding invitations for email")
+	teams, err := c.ListTeams()
+	if err != nil {
+		return
+	}
+	var allInvs []Invitation
+	for _, t := range teams {
+		teamInvs, err := c.ListInvitations(t.ID)
+		if err != nil {
+			return invs, err
+		}
+		allInvs = append(allInvs, teamInvs...)
+	}
+	for _, inv := range allInvs {
+		if inv.ToEmail == email {
+			invs = append(invs, inv)
+		}
+	}
+	if len(invs) == 0 {
+		l.Info().Msg("No invitations found for email")
+		return invs, ErrNotFound
+	}
+	l.Info().Msg("Successfully found invitations for email")
+	return
+}
+
 /*
  * Containers for unmarshalling Rollbar API responses
  */
