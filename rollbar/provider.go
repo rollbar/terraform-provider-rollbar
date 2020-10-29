@@ -88,3 +88,18 @@ func handleErrNotFound(d *schema.ResourceData, resourceName string) diag.Diagnos
 		Detail:   detail,
 	}}
 }
+
+// errSetter sets Terraform state values until an error occurs, whereupon it
+// becomes a no-op but preserves the error value.
+// Based on Rob Pike's errWriter - https://blog.golang.org/errors-are-values
+type errSetter struct {
+	d   *schema.ResourceData
+	err error
+}
+
+func (es *errSetter) set(key string, value interface{}) {
+	if es.err != nil {
+		return
+	}
+	es.err = es.d.Set(key, value)
+}
