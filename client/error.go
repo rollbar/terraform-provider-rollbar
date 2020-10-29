@@ -22,7 +22,9 @@
 
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // ErrorResult represents an error result returned by Rollbar API.
 type ErrorResult struct {
@@ -36,6 +38,19 @@ func (er ErrorResult) Error() string {
 
 // ErrNotFound is returned when the API returns a '404 Not Found' error.
 var ErrNotFound = fmt.Errorf("not found")
+
+// NewErrNotFound is returned when the API returns a '404 Not Found' error.
+type NewErrNotFound struct {
+	Message string
+}
+
+func (e NewErrNotFound) Error() string {
+	if e.Message != "" {
+		return e.Message
+	} else {
+		return "not found"
+	}
+}
 
 // ErrUnauthorized is returned when the API returns a '401 Unauthorized' error.
 var ErrUnauthorized = fmt.Errorf("unauthorized")
