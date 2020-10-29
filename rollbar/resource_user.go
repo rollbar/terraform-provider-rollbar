@@ -24,13 +24,10 @@ package rollbar
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"strings"
 )
 
 func resourceUser() *schema.Resource {
@@ -39,9 +36,11 @@ func resourceUser() *schema.Resource {
 		ReadContext:   resourceUserRead,
 		UpdateContext: resourceUserUpdate,
 		DeleteContext: resourceUserDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: resourceUserImporter,
-		},
+
+		// TODO: Import functionality
+		//Importer: &schema.ResourceImporter{
+		//	StateContext: schema.ImportStatePassthroughContext,
+		//},
 
 		Schema: map[string]*schema.Schema{
 			// Required
@@ -318,26 +317,6 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 
 	l.Info().Msg("Successfully deleted user resource")
 	return nil
-}
-
-func resourceUserImporter(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	// Import needs to be done with 2 values email and team id which will be split.
-	sParts := strings.Split(d.Id(), ":")
-
-	if len(sParts) != 2 {
-		return nil, fmt.Errorf("invalid ID specified. Supplied ID must be written as <email>:<team_id>")
-	}
-
-	teamIDInt, err := strconv.Atoi(sParts[1])
-
-	if err != nil {
-		return nil, err
-	}
-
-	d.Set("team_id", teamIDInt)
-	d.SetId(sParts[0])
-
-	return []*schema.ResourceData{d}, nil
 }
 
 /*

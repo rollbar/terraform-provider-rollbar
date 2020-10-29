@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"regexp"
 )
 
 // TestAccUser tests CRUD operations for a Rollbar user.
@@ -14,12 +15,12 @@ func (s *AccSuite) TestAccUser() {
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
-			//// Invalid name - failure expected
-			//{
-			//	Config:      s.configResourceUserInvalidname(),
-			//	ExpectError: regexp.MustCompile("name cannot be blank"),
-			//},
-			//
+			// Invalid email - failure expected
+			{
+				Config:      s.configResourceUserInvalid(),
+				ExpectError: regexp.MustCompile("Email must be supplied"),
+			},
+
 			// Initial create
 			{
 				Config: s.configResourceUser(),
@@ -28,11 +29,37 @@ func (s *AccSuite) TestAccUser() {
 					s.checkUser(rn),
 				),
 			},
+
+			// TODO: Import functionality
+			// Import a user
+			//{
+			//	ResourceName:      rn,
+			//	ImportState:       true,
+			//	ImportStateVerify: true,
+			//},
 		},
 	})
 }
 
+// configResourceUserInvalid returns rollbar_user configuration with an invalid
+// email address.
+func (s *AccSuite) configResourceUserInvalid() string {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = ""
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	return fmt.Sprintf(tmpl, s.randName)
+}
+
 func (s *AccSuite) configResourceUser() string {
+	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team" {
 			name = "%s-team-0"
