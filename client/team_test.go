@@ -81,9 +81,9 @@ func (s *Suite) TestListTeams() {
 			Name:        "Everyone",
 		},
 		{
-			ID:          676974,
+			ID:          676971,
 			AccountID:   317418,
-			Name:        "foobar",
+			Name:        "my-test-team",
 			AccessLevel: "standard",
 		},
 		{
