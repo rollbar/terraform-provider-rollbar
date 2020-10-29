@@ -85,6 +85,11 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Logger()
 	l.Info().Msg("Creating resource rollbar_user")
 	d.SetId(email)
+	err := d.Set("status", "invited")
+	if err != nil {
+		l.Err(err).Send()
+		return diag.FromErr(err)
+	}
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
@@ -217,6 +222,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 
 	// If Rollbar user already exists, list user's teamIDs
 	if userID != 0 {
+		es.Set("status", "registered")
 		u, err := c.ReadUser(userID)
 		if err != nil {
 			return diag.FromErr(err)
@@ -253,6 +259,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		l.Err(es.err).Msg("Error setting state")
 		return diag.FromErr(err)
 	}
+	l.Info().Msg("Successfully read user resource")
 	return nil
 }
 
@@ -263,7 +270,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
 		Logger()
-	l.Info().Msg("Creating resource rollbar_user")
+	l.Info().Msg("Updating resource rollbar_user")
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
