@@ -98,6 +98,8 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		Ints("teamIDs", teamIDs).
 		Logger()
 
+	// Check if a Rollbar user ID is known in TF state; or if not, whether a
+	// Rollbar user already exists.
 	var userID int
 	if u.UserID != 0 {
 		userID = u.UserID
@@ -118,6 +120,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			l.Debug().Msg("User already exists")
 		}
 	}
+	d.SetId(u.String()) // In case this email now has a user ID that wasn't known before.
 
 	// Teams to which this user SHOULD belong
 	teamsDesired := make(map[int]bool)
@@ -125,7 +128,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsDesired[id] = false
 	}
 
-	// Teams to which this user currently does belong
+	// Teams to which this user currently belongs
 	teamsCurrent := make(map[int]bool)
 	if userID != 0 { // If user doesn't exist, they don't belong to any teams
 		ut, err := c.ListUserTeams(userID)
