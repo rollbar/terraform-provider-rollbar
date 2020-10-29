@@ -52,7 +52,7 @@ func resourceUser() *schema.Resource {
 			},
 			"team_ids": {
 				Type:     schema.TypeList,
-				Computed: true,
+				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
