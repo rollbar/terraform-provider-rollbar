@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"strconv"
-	"strings"
 )
 
 // TestAccUser tests CRUD operations for a Rollbar user.
@@ -41,11 +39,11 @@ func (s *AccSuite) configResourceUser() string {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test@gmail.com"
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
-	return fmt.Sprintf(tmpl, s.randName)
+	return fmt.Sprintf(tmpl, s.randName, s.randName)
 }
 
 func (s *AccSuite) checkUser(resourceName string) resource.TestCheckFunc {
@@ -53,13 +51,13 @@ func (s *AccSuite) checkUser(resourceName string) resource.TestCheckFunc {
 		c := s.client()
 		email, err := s.getResourceIDString(ts, resourceName)
 		s.Nil(err)
-		teamIDsString, err := s.getResourceAttrString(ts, resourceName, "team_ids")
-		s.Nil(err)
 
 		teamFound := make(map[int]bool)
-		components := strings.Split(teamIDsString, ",")
-		for _, teamIDstring := range components {
-			teamID, err := strconv.Atoi(teamIDstring)
+		teamCount, err := s.getResourceAttrInt(ts, resourceName, "team_ids.#")
+		s.Nil(err)
+		for i := 0; i < teamCount; i++ {
+			attr := fmt.Sprintf("team_ids.%d", i)
+			teamID, err := s.getResourceAttrInt(ts, resourceName, attr)
 			s.Nil(err)
 			teamFound[teamID] = false
 		}
