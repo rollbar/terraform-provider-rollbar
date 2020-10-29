@@ -275,30 +275,48 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	err := fmt.Errorf("not yet implemented")
-	log.Err(err).Send()
-	return diag.FromErr(err)
+	//err := fmt.Errorf("not yet implemented")
+	//log.Err(err).Send()
+	//return diag.FromErr(err)
 
 	email := d.Id()
-	teamID := d.Get("team_id").(int)
 	l := log.With().
 		Str("email", email).
-		Int("teamID", teamID).
 		Logger()
-	l.Debug().Msg("Deleting resource user")
-
+	l.Info().Msg("Deleting user resource")
 	c := meta.(*client.RollbarApiClient)
-	id, err := c.FindUserID(email)
+
+	// If user ID is known, remove user from teams
+	userID, _ := c.FindUserID(email)
+	if userID != 0 {
+		teamIDs, err := c.ListUserTeams(userID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		for _, teamID := range teamIDs {
+			err := c.RemoveUserFromTeam(userID, teamID)
+			if err != nil {
+				return diag.FromErr(err)
+			}
+		}
+	}
+
+	// Cancel user's invitations
+	invitations, err := c.FindInvitations(email)
 	if err != nil {
-		l.Err(err).Msg("Error deleting resource user")
+		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	err = c.RemoveUserFromTeam(id, teamID)
-	if err != nil {
-		l.Err(err).Msg("Error deleting resource user")
-		return diag.FromErr(err)
+	for _, inv := range invitations {
+		err := c.CancelInvitation(inv.ID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
+
 	d.SetId("")
+
+	l.Info().Msg("Successfully deleted user resource")
 	return nil
 }
 
