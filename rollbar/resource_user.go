@@ -50,7 +50,7 @@ func resourceUser() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"teams": {
+			"team_ids": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Schema{
@@ -61,6 +61,10 @@ func resourceUser() *schema.Resource {
 			// Computed
 			"username": {
 				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"user_id": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"status": {
@@ -80,10 +84,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Ints("teamIDs", teamIDs).
 		Logger()
 	l.Info().Msg("Creating resource rollbar_user")
-	u := userStateID{
-		Email: email,
-	}
-	d.SetId(u.String())
+	d.SetId(email)
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
@@ -92,39 +93,24 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.RollbarApiClient)
-	u, err := userStateIDFromString(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	es := errSetter{d: d}
+	email := d.Get("email").(string)
 	teamIDs := d.Get("teams").([]int)
 	l := log.With().
-		Interface("userStateID", u).
+		Str("email", email).
 		Ints("teamIDs", teamIDs).
 		Logger()
 
-	// Check if a Rollbar user ID is known in TF state; or if not, whether a
-	// Rollbar user already exists.
-	var userID int
-	if u.UserID != 0 {
-		userID = u.UserID
-	} else {
-		userID, err = c.UserIdFromEmail(u.Email)
-		switch err {
-		default:
-			// Error
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		case client.ErrNotFound:
-			// User does not yet exist
-			l.Debug().Msg("User does not already exist")
-		case nil:
-			// User already exists
-			u.UserID = userID
-			l := l.With().Int("userID", userID).Logger()
-			l.Debug().Msg("User already exists")
-		}
+	// Check if a Rollbar user exists for this email
+	userID, err := c.FindUserID(email)
+	switch err {
+	case nil:
+		es.Set("user_id", userID)
+	case client.ErrNotFound: // Do nothing
+	default: // Actual error
+		l.Err(err).Send()
+		return diag.FromErr(err)
 	}
-	d.SetId(u.String()) // In case this email now has a user ID that wasn't known before.
 
 	// Teams to which this user SHOULD belong
 	teamsDesired := make(map[int]bool)
@@ -168,7 +154,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 			l.Debug().Msg("Assigned user to team")
 		} else {
-			inv, err := c.CreateInvitation(teamID, u.Email)
+			inv, err := c.CreateInvitation(teamID, email)
 			if err != nil {
 				l.Err(err).Send()
 				return diag.FromErr(err)
@@ -200,44 +186,73 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsToLeave[teamID] = false // Task complete
 	}
 
+	if es.err != nil {
+		l.Err(es.err).Msg("Error setting state value")
+		return diag.FromErr(err)
+	}
+	d.SetId(email)
 	return resourceUserRead(ctx, d, meta)
 }
 
 func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	usi, err := userStateIDFromString(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	email := d.Id()
+	userID := d.Get("user_id").(int)
 	l := log.With().
-		Interface("userStateID", usi).
+		Str("email", email).
+		Int("userID", userID).
 		Logger()
-	l.Debug().Msg("Reading resource user")
+	l.Debug().Msg("Reading user resource")
 	c := meta.(*client.RollbarApiClient)
-	//es := errSetter{d: d}
+	es := errSetter{d: d}
+	teamIDs := make(map[int]bool)
+	var err error
 
-	// If user ID did not exist last time, check to see if it exists now.  I.e.,
-	// has the invited email registered to become a Rollbar user.
-	if usi.UserID == 0 {
-		userID, err := c.UserIdFromEmail(usi.Email)
-		switch err {
-		case client.ErrNotFound: // Do nothing
-		case nil:
-			// Newly registered Rollbar user
-			usi.UserID = userID
-			d.SetId(usi.String())
-		default: // Other errors
+	// If user ID is not in state, try to query it from Rollbar
+	if userID == 0 {
+		userID, err = c.FindUserID(email)
+		if err != client.ErrNotFound && err != nil {
 			return diag.FromErr(err)
 		}
 	}
 
-	// If we still don't have a UserID, we will look at invitations to get team memberships.
-	if usi.UserID == 0 {
-		invitations, err := c.FindInvitations(usi.Email)
-		switch err {
-		case client.ErrNotFound:
+	// If Rollbar user already exists, list user's teamIDs
+	if userID != 0 {
+		u, err := c.ReadUser(userID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		es.Set("username", u.Username)
+		ids, err := c.ListUserTeams(userID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		for _, id := range ids {
+			teamIDs[id] = true
 		}
 	}
 
+	// Add pending invitations to team IDs
+	invitations, err := c.FindInvitations(email)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	for _, inv := range invitations {
+		if inv.Status == "pending" {
+			teamIDs[inv.TeamID] = true
+		}
+	}
+
+	// Flatten the teamIDs map and set state
+	var tids []int
+	for id, _ := range teamIDs {
+		tids = append(tids, id)
+	}
+	es.Set("team_ids", tids)
+
+	if es.err != nil {
+		l.Err(es.err).Msg("Error setting state")
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -266,7 +281,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	l.Debug().Msg("Deleting resource user")
 
 	c := meta.(*client.RollbarApiClient)
-	id, err := c.UserIdFromEmail(email)
+	id, err := c.FindUserID(email)
 	if err != nil {
 		l.Err(err).Msg("Error deleting resource user")
 		return diag.FromErr(err)
@@ -300,6 +315,7 @@ func resourceUserImporter(_ context.Context, d *schema.ResourceData, meta interf
 	return []*schema.ResourceData{d}, nil
 }
 
+/*
 // userStateID represents the data used to identify a Rollbar user in Terraform
 // state. As the prospective user progresses through the stages from invitation
 // through becoming a registered user - so do the prospective user's API-side
@@ -332,3 +348,5 @@ func userStateIDFromString(s string) (u userStateID, err error) {
 	}
 	return
 }
+
+*/
