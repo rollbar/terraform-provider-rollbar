@@ -13,7 +13,7 @@ Status
 ------
 
 [![Build & Test](https://github.com/rollbar/terraform-provider-rollbar/workflows/Build%20&%20Test/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions)
-[![Coverage Status](https://coveralls.io/repos/github/rollbar/terraform-provider-rollbar/badge.svg?branch=merge-jmcvetta)](https://coveralls.io/github/rollbar/terraform-provider-rollbar?branch=merge-jmcvetta)
+[![Coverage Status](https://coveralls.io/repos/github/rollbar/terraform-provider-rollbar/badge.svg)](https://coveralls.io/github/rollbar/terraform-provider-rollbar)
 [![CodeQL](https://github.com/rollbar/terraform-provider-rollbar/workflows/CodeQL/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3ACodeQL)
 [![ShiftLeft Scan](https://github.com/rollbar/terraform-provider-rollbar/workflows/ShiftLeft%20Scan/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3A%22ShiftLeft+Scan%22)
 
