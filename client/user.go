@@ -87,9 +87,9 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 	return
 }
 
-// UserIdFromEmail finds the user ID for a given email.  WARNING: this is a
+// FindUserID finds the user ID for a given email.  WARNING: this is a
 // potentially slow call.  Don't repeat it unnecessarily.
-func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
+func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 	l := log.With().Str("email", email).Logger()
 	l.Info().Msg("Getting user ID from email")
 	users, err := c.ListUsers()

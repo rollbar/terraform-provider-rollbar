@@ -94,15 +94,15 @@ func (s *Suite) TestUserIdFromEmail() {
 	r := responderFromFixture("user/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
-	actual, err := s.client.UserIdFromEmail(email)
+	actual, err := s.client.FindUserID(email)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
-	_, err = s.client.UserIdFromEmail("fake email")
+	_, err = s.client.FindUserID("fake email")
 	s.Equal(ErrNotFound, err)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.UserIdFromEmail(email)
+		_, err := s.client.FindUserID(email)
 		return err
 	})
 }
