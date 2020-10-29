@@ -67,7 +67,7 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-// resourceUserCreate creates a new Rollar user resource
+// resourceUserCreate creates a new Rollbar user resource.
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
 	teamIDs := d.Get("teams").([]int)
@@ -76,7 +76,10 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Ints("teamIDs", teamIDs).
 		Logger()
 	l.Info().Msg("Creating resource rollbar_user")
-	d.SetId(email)
+	u := userStateID{
+		Email: email,
+	}
+	d.SetId(u.String())
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
@@ -85,30 +88,35 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.RollbarApiClient)
-	//email := d.Get("email").(string)
-	email := d.Id()
+	u, err := userStateIDFromString(d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	teamIDs := d.Get("teams").([]int)
 	l := log.With().
-		Str("email", email).
+		Interface("userStateID", u).
 		Ints("teamIDs", teamIDs).
 		Logger()
 
-	// If a user already exists, we assign the user to each team.
-	var userExists bool // User already exists?
-	userID, err := c.UserIdFromEmail(email)
-	switch err {
-	default:
-		// Error
-		l.Err(err).Send()
-		return diag.FromErr(err)
-	case client.ErrNotFound:
-		// User does not yet exist
-		l.Debug().Msg("User does not already exist")
-	case nil:
-		// User already exists
-		l := l.With().Int("userID", userID).Logger()
-		l.Debug().Msg("User already exists")
-		userExists = true
+	var userID int
+	if u.UserID != 0 {
+		userID = u.UserID
+	} else {
+		userID, err = c.UserIdFromEmail(u.Email)
+		switch err {
+		default:
+			// Error
+			l.Err(err).Send()
+			return diag.FromErr(err)
+		case client.ErrNotFound:
+			// User does not yet exist
+			l.Debug().Msg("User does not already exist")
+		case nil:
+			// User already exists
+			u.UserID = userID
+			l := l.With().Int("userID", userID).Logger()
+			l.Debug().Msg("User already exists")
+		}
 	}
 
 	// Teams to which this user SHOULD belong
@@ -119,7 +127,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	// Teams to which this user currently does belong
 	teamsCurrent := make(map[int]bool)
-	if userExists { // If user doesn't exist, they don't belong to any teams
+	if userID != 0 { // If user doesn't exist, they don't belong to any teams
 		ut, err := c.ListUserTeams(userID)
 		if err != nil {
 			l.Err(err).Send()
@@ -137,6 +145,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			teamsToJoin[id] = true
 		}
 	}
+	// Join those teams
 	for teamID, join := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
 		if !join {
@@ -144,7 +153,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 		// If user already exists we can assign to teams without invitation.  If
 		// user does not already exist we must send an invitation.
-		if userExists {
+		if userID != 0 {
 			err = c.AssignUserToTeam(teamID, userID)
 			if err != nil {
 				l.Err(err).Send()
@@ -152,7 +161,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			}
 			l.Debug().Msg("Assigned user to team")
 		} else {
-			inv, err := c.CreateInvitation(teamID, email)
+			inv, err := c.CreateInvitation(teamID, u.Email)
 			if err != nil {
 				l.Err(err).Send()
 				return diag.FromErr(err)
@@ -171,7 +180,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			teamsToLeave[id] = true
 		}
 	}
-
+	// Leave those teams
 	for teamID, leave := range teamsToLeave {
 		if !leave {
 			continue
@@ -312,6 +321,35 @@ func resourceUserImporter(_ context.Context, d *schema.ResourceData, meta interf
 	return []*schema.ResourceData{d}, nil
 }
 
-func resourceUserStateId(userID int, email string) string {
-	return fmt.Sprintf("%d:%s", userID, email)
+// userStateID represents the data used to identify a Rollbar user in Terraform
+// state. As the prospective user progresses through the stages from invitation
+// through becoming a registered user - so do the prospective user's API-side
+// identifier change from Email to UserID.
+type userStateID struct {
+	UserID int
+	Email  string
+}
+
+func (u userStateID) String() string {
+	return fmt.Sprintf("%d:%s", u.UserID, u.Email)
+}
+
+func userStateIDFromString(s string) (u userStateID, err error) {
+	components := strings.Split(s, ":")
+	if len(components) != 2 {
+		err = fmt.Errorf("invalid user state ID string: %s", s)
+		log.Err(err).Send()
+		return
+	}
+	userID, err := strconv.Atoi(components[0])
+	if err != nil {
+		log.Err(err).Send()
+		return
+	}
+	email := components[1]
+	u = userStateID{
+		UserID: userID,
+		Email:  email,
+	}
+	return
 }
