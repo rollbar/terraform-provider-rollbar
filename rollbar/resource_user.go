@@ -63,6 +63,10 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -200,68 +204,40 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	var invites []string
-	invited := false
-	userPresent := false
-	email := d.Id()
-	teamID := d.Get("team_id").(int)
-	l := log.With().
-		Str("email", email).
-		Int("teamID", teamID).
-		Logger()
-	l.Debug().Msg("Reading resource user")
-
-	c := meta.(*client.RollbarApiClient)
-	listInvites, err := c.ListInvitations(teamID)
+	usi, err := userStateIDFromString(d.Id())
 	if err != nil {
-		l.Err(err).Msg("Error reading resource user")
 		return diag.FromErr(err)
 	}
+	l := log.With().
+		Interface("userStateID", usi).
+		Logger()
+	l.Debug().Msg("Reading resource user")
+	c := meta.(*client.RollbarApiClient)
+	//es := errSetter{d: d}
 
-	listUsers, err := c.ListUsers()
-	if err != nil {
-		if err != nil {
-			l.Err(err).Msg("Error reading resource user")
+	// If user ID did not exist last time, check to see if it exists now.  I.e.,
+	// has the invited email registered to become a Rollbar user.
+	if usi.UserID == 0 {
+		userID, err := c.UserIdFromEmail(usi.Email)
+		switch err {
+		case client.ErrNotFound: // Do nothing
+		case nil:
+			// Newly registered Rollbar user
+			usi.UserID = userID
+			d.SetId(usi.String())
+		default: // Other errors
 			return diag.FromErr(err)
 		}
 	}
 
-	// This logic is needed so that we can check if the the user already was invited.
-	// Check if there's an active invite for the user or the user has already accepted the invite.
-	for _, invite := range listInvites {
-		// Find the corresponding invite with the provided email.
-		if invite.ToEmail == email {
-			// Append all the invites into a slice.
-			invites := append(invites, invite.Status)
-
-			// Get the last invite (they are sequential).
-			lastInv := invites[len(invites)-1]
-
-			// If the invitation is pending that means that the user is invited.
-			if lastInv == "pending" {
-				invited = true
-			}
-		}
-	}
-	// Check if the user is present in the team.
-	for _, user := range listUsers {
-		if user.Email == email {
-			userPresent = true
+	// If we still don't have a UserID, we will look at invitations to get team memberships.
+	if usi.UserID == 0 {
+		invitations, err := c.FindInvitations(usi.Email)
+		switch err {
+		case client.ErrNotFound:
 		}
 	}
 
-	if !userPresent && !invited {
-		d.SetId("")
-		err := fmt.Errorf("no user or invitee found with the email %s", email)
-		l.Err(err).Msg("Error reading resource user")
-		return diag.FromErr(err)
-	}
-
-	err = d.Set("email", email)
-	if err != nil {
-		l.Err(err).Msg("Error reading resource user")
-		return diag.FromErr(err)
-	}
 	return nil
 }
 
