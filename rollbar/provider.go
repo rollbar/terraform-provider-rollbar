@@ -104,3 +104,14 @@ func (es *errSetter) Set(key string, value interface{}) {
 	}
 	es.err = es.d.Set(key, value)
 }
+
+// getValueAsIntSlice gets the value of a key as a slice of integers.
+func getValueAsIntSlice(d *schema.ResourceData, key string) []int {
+	var ints []int
+	interfaces := d.Get(key).([]interface{})
+	for _, iface := range interfaces {
+		id := iface.(int)
+		ints = append(ints, id)
+	}
+	return ints
+}

@@ -78,7 +78,7 @@ func resourceUser() *schema.Resource {
 // resourceUserCreate creates a new Rollbar user resource.
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
-	teamIDs := d.Get("teams").([]int)
+	teamIDs := getValueAsIntSlice(d, "team_ids")
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
@@ -100,7 +100,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	c := meta.(*client.RollbarApiClient)
 	es := errSetter{d: d}
 	email := d.Get("email").(string)
-	teamIDs := d.Get("teams").([]int)
+	teamIDs := getValueAsIntSlice(d, "team_ids")
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).

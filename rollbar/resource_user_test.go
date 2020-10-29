@@ -53,7 +53,7 @@ func (s *AccSuite) checkUser(resourceName string) resource.TestCheckFunc {
 		c := s.client()
 		email, err := s.getResourceIDString(ts, resourceName)
 		s.Nil(err)
-		teamIDsString, err := s.getResourceAttrString(ts, resourceName, "teams")
+		teamIDsString, err := s.getResourceAttrString(ts, resourceName, "team_ids")
 		s.Nil(err)
 
 		teamFound := make(map[int]bool)
