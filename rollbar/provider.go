@@ -97,7 +97,7 @@ type errSetter struct {
 	err error
 }
 
-func (es *errSetter) set(key string, value interface{}) {
+func (es *errSetter) Set(key string, value interface{}) {
 	if es.err != nil {
 		return
 	}
