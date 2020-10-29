@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -59,6 +60,7 @@ type AccSuite struct {
 	suite.Suite
 	provider  *schema.Provider
 	providers map[string]*schema.Provider
+	client    *client.RollbarApiClient
 
 	// The following variables are populated before each test by SetupTest():
 	randName string // Name of a Rollbar project
@@ -70,6 +72,7 @@ func (s *AccSuite) SetupSuite() {
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
 	}
+	s.client = s.provider.Meta().(*client.RollbarApiClient)
 }
 
 // preCheck ensures we are ready to run the test
