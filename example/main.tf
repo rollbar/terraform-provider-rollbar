@@ -82,6 +82,14 @@ resource "rollbar_project_access_token" "test_2" {
   depends_on = [rollbar_project.test]
 }
 
+resource "rollbar_team" "test_team_0" {
+  name = "test-team-example"
+}
+
+resource "rollbar_user" "test_user_0" {
+  email = "jason.mcvetta+terraform-rollbar-provider-example@gmail.com"
+  team_ids = [rollbar_team.test_team_0.id]
+}
 
 data "rollbar_projects" "all" {}
 
