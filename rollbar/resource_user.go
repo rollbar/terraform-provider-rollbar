@@ -217,6 +217,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	if userID == 0 {
 		userID, err = c.FindUserID(email)
 		if err != client.ErrNotFound && err != nil {
+			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 	}
@@ -226,11 +227,13 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		es.Set("status", "registered")
 		u, err := c.ReadUser(userID)
 		if err != nil {
+			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 		es.Set("username", u.Username)
 		ids, err := c.ListUserTeams(userID)
 		if err != nil {
+			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 		for _, id := range ids {
