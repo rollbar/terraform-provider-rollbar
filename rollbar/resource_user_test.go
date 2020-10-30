@@ -7,26 +7,32 @@ import (
 	"regexp"
 )
 
-// TestAccUser tests CRUD operations for a Rollbar user.
-func (s *AccSuite) TestAccUser() {
+// TestAccUserCreate tests creating a new rollbar_user resource.
+func (s *AccSuite) TestAccUserCreate() {
 	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName, s.randName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
-			// Invalid email - failure expected
-			{
-				Config:      s.configResourceUserInvalid(),
-				ExpectError: regexp.MustCompile("Email must be supplied"),
-			},
-
 			// Initial create
 			{
-				Config: s.configResourceUser(),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					s.checkUser(rn),
+					s.checkUserTeams(rn),
 				),
 			},
 
@@ -41,9 +47,68 @@ func (s *AccSuite) TestAccUser() {
 	})
 }
 
-// configResourceUserInvalid returns rollbar_user configuration with an invalid
-// email address.
-func (s *AccSuite) configResourceUserInvalid() string {
+// TestAccUserAddTeam tests adding a team to an existing rollbar_user resource.
+func (s *AccSuite) TestAccUserAddTeam() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s-team-1"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s-team-2"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			team_ids = [rollbar_team.test_team_1.id]
+		}
+	`
+	configOrigin := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	tmpl = `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s-team-1"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s-team-2"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			team_ids = [
+				rollbar_team.test_team_1.id,
+				rollbar_team.test_team_2.id,
+			]
+		}
+	`
+	configAddTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: configOrigin,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+				),
+			},
+			{
+				Config: configAddTeam,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkUserTeams(rn),
+				),
+			},
+		},
+	})
+}
+
+// TestAccUserInvalidConfig tests invalid config when trying to create a
+// rollbar_user resource.
+func (s *AccSuite) TestAccUserInvalidConfig() {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team" {
@@ -55,25 +120,22 @@ func (s *AccSuite) configResourceUserInvalid() string {
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
-	return fmt.Sprintf(tmpl, s.randName)
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config:      config,
+				ExpectError: regexp.MustCompile("Email must be supplied"),
+			},
+		},
+	})
 }
 
-func (s *AccSuite) configResourceUser() string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test_team" {
-			name = "%s-team-0"
-		}
-
-		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
-			team_ids = [rollbar_team.test_team.id]
-		}
-	`
-	return fmt.Sprintf(tmpl, s.randName, s.randName)
-}
-
-func (s *AccSuite) checkUser(resourceName string) resource.TestCheckFunc {
+// checkUserTeams checks team memberships on a rollbar_user resource.
+func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		c := s.client()
 		email, err := s.getResourceIDString(ts, resourceName)
