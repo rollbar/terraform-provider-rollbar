@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rs/zerolog/log"
 	"regexp"
 )
 
@@ -17,7 +18,7 @@ func (s *AccSuite) TestAccUserCreate() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "jason.mcvetta+%s@gmail.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -27,7 +28,6 @@ func (s *AccSuite) TestAccUserCreate() {
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
-			// Initial create
 			{
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
@@ -35,14 +35,42 @@ func (s *AccSuite) TestAccUserCreate() {
 					s.checkUserTeams(rn),
 				),
 			},
+		},
+	})
+}
 
-			// TODO: Import functionality
-			// Import a user
-			//{
-			//	ResourceName:      rn,
-			//	ImportState:       true,
-			//	ImportStateVerify: true,
-			//},
+// TestAccUserImport tests importing a rollbar_user resource.
+func (s *AccSuite) DontTestAccUserImport() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+%s@gmail.com"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+			{
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateCheck: func(iss []*terraform.InstanceState) error {
+					log.Warn().Interface("iss", iss).Send()
+					return nil
+				},
+			},
 		},
 	})
 }
@@ -80,6 +108,10 @@ func (s *AccSuite) TestAccUserAddTeam() {
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
+			]
+			depends_on = [
+				rollbar_team.test_team_1, 
+				rollbar_team.test_team_2
 			]
 		}
 	`
