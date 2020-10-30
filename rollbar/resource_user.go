@@ -82,7 +82,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
 		Logger()
-	l.Info().Msg("Creating resource rollbar_user")
+	l.Info().Msg("Creating rollbar_user resource")
 	d.SetId(email)
 	err := d.Set("status", "invited")
 	if err != nil {
@@ -104,6 +104,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
 		Logger()
+	l.Debug().Msg("Creating or updating rollbar_user resource")
 
 	// Check if a Rollbar user exists for this email
 	userID, err := c.FindUserID(email)
@@ -195,6 +196,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	d.SetId(email)
+	l.Info().Msg("Successfully created or updated rollbar_user resource")
 	return resourceUserRead(ctx, d, meta)
 }
 
@@ -205,7 +207,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Str("email", email).
 		Int("userID", userID).
 		Logger()
-	l.Debug().Msg("Reading user resource")
+	l.Info().Msg("Reading user resource")
 	c := meta.(*client.RollbarApiClient)
 	es := errSetter{d: d}
 	teamIDs := make(map[int]bool)
@@ -274,10 +276,6 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 }
 
 func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	//err := fmt.Errorf("not yet implemented")
-	//log.Err(err).Send()
-	//return diag.FromErr(err)
-
 	email := d.Id()
 	l := log.With().
 		Str("email", email).
@@ -290,11 +288,13 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	if userID != 0 {
 		teamIDs, err := c.ListUserTeams(userID)
 		if err != nil {
+			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 		for _, teamID := range teamIDs {
 			err := c.RemoveUserFromTeam(userID, teamID)
 			if err != nil {
+				l.Err(err).Send()
 				return diag.FromErr(err)
 			}
 		}
@@ -309,6 +309,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	for _, inv := range invitations {
 		err := c.CancelInvitation(inv.ID)
 		if err != nil {
+			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 	}
