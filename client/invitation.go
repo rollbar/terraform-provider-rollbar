@@ -44,7 +44,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 	l := log.With().
 		Int("teamID", teamID).
 		Logger()
-	l.Debug().Msg("Listing invitations")
+	l.Info().Msg("Listing invitations")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"teamId": strconv.Itoa(teamID),
@@ -63,7 +63,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 	}
 	r := resp.Result().(*invitationListResponse)
 	invs = r.Result
-	l.Debug().Msg("Successfully listed invitations")
+	l.Info().Msg("Successfully listed invitations")
 	return
 }
 
@@ -73,7 +73,7 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 		Int("teamID", teamID).
 		Str("email", email).
 		Logger()
-	l.Debug().Msg("Creating new invitation")
+	l.Info().Msg("Creating new invitation")
 
 	u := apiUrl + pathInvitations
 	var inv Invitation
@@ -97,6 +97,7 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 	}
 	r := resp.Result().(*invitationResponse)
 	inv = r.Result
+	l.Info().Msg("Successfully created new invitation")
 	return inv, nil
 }
 
@@ -105,7 +106,7 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 	l := log.With().
 		Int("inviteID", inviteID).
 		Logger()
-	l.Debug().Msg("Reading invitation from Rollbar API")
+	l.Info().Msg("Reading invitation from Rollbar API")
 	u := apiUrl + pathInvitation
 	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(inviteID))
 	resp, err := c.Resty.R().
@@ -122,7 +123,7 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 		return
 	}
 	inv = resp.Result().(*invitationResponse).Result
-	l.Debug().
+	l.Info().
 		Interface("invitation", inv).
 		Msg("Successfully read invitation from API")
 	return
@@ -136,7 +137,7 @@ func (c *RollbarApiClient) DeleteInvitation(id int) (err error) {
 // CancelInvitation cancels a Rollbar team invitation.
 func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 	l := log.With().Int("id", id).Logger()
-	l.Debug().Msg("Canceling invitation")
+	l.Info().Msg("Canceling invitation")
 
 	u := apiUrl + pathInvitation
 	resp, err := c.Resty.R().
@@ -154,7 +155,7 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 		l.Err(err).Msg("Error canceling invitation")
 		return
 	}
-	l.Debug().
+	l.Info().
 		Msg("Successfully canceled invitation")
 	return
 }
