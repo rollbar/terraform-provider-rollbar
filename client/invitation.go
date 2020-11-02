@@ -58,7 +58,9 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
-		l.Err(err).Msg("Error listing invitations")
+		l.Err(err).
+			Str("status", resp.Status()).
+			Msg("Error listing invitations")
 		return
 	}
 	r := resp.Result().(*invitationListResponse)
