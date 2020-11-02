@@ -260,6 +260,8 @@ github.com/jhump/protoreflect v1.6.0 h1:h5jfMVslIg6l29nsMs0D8Wj17RDVdNYti0vDN/PZ
 github.com/jhump/protoreflect v1.6.0/go.mod h1:eaTn3RZAmMBcV0fifFvlm6VHNz3wSkYyXYWUh7ymB74=
 github.com/jmcvetta/zerolog v1.20.1-0.20201102121249-d2074ebd2927 h1:FofM2zu6ob/RUX2p6Ht+EjeACHyKT5IfgcercCVclqk=
 github.com/jmcvetta/zerolog v1.20.1-0.20201102121249-d2074ebd2927/go.mod h1:IzD0RJ65iWH0w97OQQebJEvTZYvsCUm9WVLWBQrJRjo=
+github.com/jmcvetta/zerolog v1.20.1-0.20201102133610-4cc56b8f3f5a h1:Aq1y0PdR91txMiLwlG+OrDdDhz+y/lfGIvlpT3TUarc=
+github.com/jmcvetta/zerolog v1.20.1-0.20201102133610-4cc56b8f3f5a/go.mod h1:IzD0RJ65iWH0w97OQQebJEvTZYvsCUm9WVLWBQrJRjo=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
