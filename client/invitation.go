@@ -203,7 +203,7 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 		// If the invite has already been canceled, API returns HTTP status '422
 		// Unprocessable Entity'.  This is considered success.
 		statusUnprocessable := resp.StatusCode() == http.StatusUnprocessableEntity
-		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already canceled")
+		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already cancelled")
 		if statusUnprocessable && alreadyCanceledMsg {
 			l.Debug().Msg("invite already cancelled")
 			return nil
