@@ -168,7 +168,7 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		Str("email", email).
 		Logger()
 
-	l.Info().Msg("Finding invitations for email")
+	l.Info().Msg("Finding invitations")
 	teams, err := c.ListTeams()
 	if err != nil {
 		return
@@ -177,6 +177,9 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 	for _, t := range teams {
 		teamInvs, err := c.ListInvitations(t.ID)
 		if err != nil {
+			l.Err(err).
+				Str("team_name", t.Name).
+				Msg("error finding invitations")
 			return invs, err
 		}
 		allInvs = append(allInvs, teamInvs...)
@@ -187,10 +190,10 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		}
 	}
 	if len(invs) == 0 {
-		l.Info().Msg("No invitations found for email")
+		l.Info().Msg("No invitations found")
 		return invs, ErrNotFound
 	}
-	l.Info().Msg("Successfully found invitations for email")
+	l.Info().Msg("Successfully found invitations")
 	return
 }
 
