@@ -66,8 +66,52 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 	}
 	r := resp.Result().(*invitationListResponse)
 	invs = r.Result
-	l.Debug().Msg("Successfully listed invitations")
+	l.Debug().
+		Int("invitation_count", len(invs)).
+		Msg("Successfully listed invitations")
 	return
+}
+
+// ListPendingInvitations lists a Rollbar team's pending invitations.
+func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, error) {
+	l := log.With().Int("teamID", teamID).Logger()
+	l.Info().Msg("Listing pending invitations")
+	var pending []Invitation
+	all, err := c.ListInvitations(teamID)
+	if err != nil {
+		l.Err(err).Send()
+		return pending, err
+	}
+	for _, inv := range all {
+		if inv.Status == "pending" {
+			pending = append(pending, inv)
+		}
+	}
+	l.Debug().
+		Int("invitation_count", len(pending)).
+		Msg("Successfully listed pending invitations")
+	return pending, nil
+}
+
+// FindPendingInvitations finds Rollbar team invitations for the given email.
+func (c *RollbarApiClient) FindPendingInvitations(email string) ([]Invitation, error) {
+	l := log.With().Str("email", email).Logger()
+	l.Info().Msg("Finding pending invitations")
+	var pending []Invitation
+	all, err := c.FindInvitations(email)
+	if err != nil {
+		l.Err(err).Send()
+		return pending, err
+	}
+	for _, inv := range all {
+		if inv.Status == "pending" {
+			pending = append(pending, inv)
+		}
+	}
+	l.Debug().
+		Int("invitation_count", len(pending)).
+		Msg("Successfully found pending invitations")
+	return pending, nil
 }
 
 // CreateInvitation sends a Rollbar team invitation to a user.
@@ -210,7 +254,9 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		l.Info().Msg("No invitations found")
 		return invs, ErrNotFound
 	}
-	l.Info().Msg("Successfully found invitations")
+	l.Info().
+		Int("invitation_count", len(invs)).
+		Msg("Successfully found invitations")
 	return
 }
 

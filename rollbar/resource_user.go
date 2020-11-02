@@ -242,8 +242,9 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	// Add pending invitations to team IDs
-	invitations, err := c.FindInvitations(email)
+	invitations, err := c.FindPendingInvitations(email)
 	if err != nil {
+		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	for _, inv := range invitations {
