@@ -121,7 +121,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			Msg("Successfully deleted a default access token")
 	}
 
-	l.Info().Msg("Successfully created Rollbar project resource")
+	l.Debug().Msg("Successfully created Rollbar project resource")
 	return resourceProjectRead(ctx, d, m)
 }
 
@@ -162,7 +162,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	d.SetId(strconv.Itoa(proj.Id))
-	l.Info().Msg("Successfully read Rollbar project resource from the API")
+	l.Debug().Msg("Successfully read Rollbar project resource from the API")
 	return nil
 }
 
@@ -189,6 +189,6 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	l.Info().Msg("Successfully deleted Rollbar project resource")
+	l.Debug().Msg("Successfully deleted Rollbar project resource")
 	return nil
 }

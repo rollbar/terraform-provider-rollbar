@@ -52,7 +52,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	d.SetId(strconv.Itoa(t.ID))
-	l.Info().Int("id", t.ID).Msg("Successfully created Rollbar team")
+	l.Debug().Int("id", t.ID).Msg("Successfully created Rollbar team")
 	return resourceTeamRead(ctx, d, m)
 }
 
@@ -61,7 +61,9 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	l := log.With().Int("id", id).Logger()
+	l := log.With().
+		Int("id", id).
+		Logger()
 	l.Info().Msg("Reading Rollbar team from API")
 	c := m.(*client.RollbarApiClient)
 	t, err := c.ReadTeam(id)
@@ -69,6 +71,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		return handleErrNotFound(d, "team")
 	}
 	if err != nil {
+		l.Err(err).Msg("error reading team resource")
 		return diag.FromErr(err)
 	}
 	var errs []error
@@ -81,7 +84,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 			return diag.FromErr(errs[0])
 		}
 	}
-	l.Info().Msg("Successfully read Rollbar team from API")
+	l.Debug().Msg("Successfully read Rollbar team from API")
 	return nil
 }
 
@@ -91,13 +94,13 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	l := log.With().Int("id", id).Logger()
-	l.Info().Msg("Deleting Rollbar team")
+	l.Info().Msg("Deleting team resource")
 	c := m.(*client.RollbarApiClient)
 	err = c.DeleteTeam(id)
 	if err != nil {
-		l.Err(err).Send()
+		l.Err(err).Msg("error deleting team resource")
 		return diag.FromErr(err)
 	}
-	l.Info().Msg("Successfully deleted Rollbar team")
+	l.Debug().Msg("Successfully deleted team resource")
 	return nil
 }
