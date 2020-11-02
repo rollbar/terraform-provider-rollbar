@@ -45,7 +45,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 	l := log.With().
 		Int("teamID", teamID).
 		Logger()
-	l.Info().Msg("Listing invitations")
+	l.Debug().Msg("Listing invitations")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"teamId": strconv.Itoa(teamID),
@@ -75,7 +75,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 // ListPendingInvitations lists a Rollbar team's pending invitations.
 func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, error) {
 	l := log.With().Int("teamID", teamID).Logger()
-	l.Info().Msg("Listing pending invitations")
+	l.Debug().Msg("Listing pending invitations")
 	var pending []Invitation
 	all, err := c.ListInvitations(teamID)
 	if err != nil {
@@ -96,7 +96,7 @@ func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, err
 // FindPendingInvitations finds Rollbar team invitations for the given email.
 func (c *RollbarApiClient) FindPendingInvitations(email string) ([]Invitation, error) {
 	l := log.With().Str("email", email).Logger()
-	l.Info().Msg("Finding pending invitations")
+	l.Debug().Msg("Finding pending invitations")
 	var pending []Invitation
 	all, err := c.FindInvitations(email)
 	if err != nil {
@@ -120,7 +120,7 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 		Int("teamID", teamID).
 		Str("email", email).
 		Logger()
-	l.Info().Msg("Creating new invitation")
+	l.Debug().Msg("Creating new invitation")
 
 	u := apiUrl + pathInvitations
 	var inv Invitation
@@ -154,7 +154,7 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 	l := log.With().
 		Int("inviteID", inviteID).
 		Logger()
-	l.Info().Msg("Reading invitation from Rollbar API")
+	l.Debug().Msg("Reading invitation from Rollbar API")
 	u := apiUrl + pathInvitation
 	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(inviteID))
 	resp, err := c.Resty.R().
@@ -185,7 +185,7 @@ func (c *RollbarApiClient) DeleteInvitation(id int) (err error) {
 // CancelInvitation cancels a Rollbar team invitation.
 func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 	l := log.With().Int("id", id).Logger()
-	l.Info().Msg("Canceling invitation")
+	l.Debug().Msg("Canceling invitation")
 
 	u := apiUrl + pathInvitation
 	resp, err := c.Resty.R().
@@ -228,7 +228,7 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		Str("email", email).
 		Logger()
 
-	l.Info().Msg("Finding invitations")
+	l.Debug().Msg("Finding invitations")
 	teams, err := c.ListTeams()
 	if err != nil {
 		l.Err(err).Send()
@@ -251,10 +251,10 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		}
 	}
 	if len(invs) == 0 {
-		l.Info().Msg("No invitations found")
+		l.Debug().Msg("No invitations found")
 		return invs, ErrNotFound
 	}
-	l.Info().
+	l.Debug().
 		Int("invitation_count", len(invs)).
 		Msg("Successfully found invitations")
 	return

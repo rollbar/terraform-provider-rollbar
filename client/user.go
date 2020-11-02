@@ -91,7 +91,7 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 // potentially slow call.  Don't repeat it unnecessarily.
 func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 	l := log.With().Str("email", email).Logger()
-	l.Info().Msg("Getting user ID from email")
+	l.Debug().Msg("Getting user ID from email")
 	users, err := c.ListUsers()
 	if err != nil {
 		l.Err(err).Msg("Error getting user ID from email")
@@ -108,7 +108,7 @@ func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 // ListUserTeams lists a Rollbar user's teams.
 func (c *RollbarApiClient) ListUserTeams(userID int) (teamIDs []int, err error) {
 	l := log.With().Int("userID", userID).Logger()
-	l.Info().Msg("Reading teams for Rollbar user")
+	l.Debug().Msg("Reading teams for Rollbar user")
 	u := apiUrl + pathUserTeams
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{"userId": strconv.Itoa(userID)}).

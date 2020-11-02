@@ -46,7 +46,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 		Str("name", name).
 		Str("access_level", level).
 		Logger()
-	l.Info().Msg("Creating new team")
+	l.Debug().Msg("Creating new team")
 
 	// Sanity check
 	if name == "" {
@@ -81,7 +81,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 
 // ListTeams lists all Rollbar teams.
 func (c *RollbarApiClient) ListTeams() ([]Team, error) {
-	log.Info().Msg("Listing all teams")
+	log.Debug().Msg("Listing all teams")
 	var teams []Team
 	u := apiUrl + pathTeamList
 	resp, err := c.Resty.R().
@@ -110,7 +110,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	l := log.With().
 		Int("id", id).
 		Logger()
-	l.Info().Msg("Reading Rollbar team from API")
+	l.Debug().Msg("Reading Rollbar team from API")
 
 	// Sanity check
 	if id == 0 {
@@ -146,7 +146,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 	l := log.With().
 		Int("id", id).
 		Logger()
-	l.Info().Msg("Deleting team")
+	l.Debug().Msg("Deleting team")
 
 	// Sanity check
 	if id == 0 {
@@ -174,7 +174,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 // AssignUserToTeam assigns a user to a Rollbar team.
 func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
-	l.Info().Msg("Assigning user to team")
+	l.Debug().Msg("Assigning user to team")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"teamId": strconv.Itoa(teamID),
@@ -204,7 +204,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 // RemoveUserFromTeam removes a user from a Rollbar team.
 func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
-	l.Info().Msg("Removing user from team")
+	l.Debug().Msg("Removing user from team")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"teamId": strconv.Itoa(teamID),
