@@ -61,8 +61,9 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 		case nil:
 			return nil
 		case client.ErrNotFound:
-			return resource.RetryableError(fmt.Errorf(
-				"waiting for Rollbar team: %d", teamID))
+			msg := fmt.Sprintf("waiting for Rollbar team: %d", teamID)
+			l.Debug().Msg(msg)
+			return resource.RetryableError(fmt.Errorf(msg))
 		default:
 			return resource.NonRetryableError(fmt.Errorf(
 				"error reading Rollbar team: %s", err))
