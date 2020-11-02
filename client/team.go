@@ -24,6 +24,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
@@ -65,7 +66,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 		l.Err(err).Msg("Error creating team")
 		return t, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		l.Err(err).Msg("Error creating team")
 		return t, err
@@ -91,7 +92,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 		log.Err(err).Msg("Error listing teams")
 		return teams, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		log.Err(err).Msg("Error listing teams")
 		return teams, err
@@ -126,15 +127,8 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
-		// FIXME: Workaround API bug
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/79
-		statusForbidden := resp.StatusCode() == http.StatusForbidden
-		msgNotFound := strings.Contains(err.Error(), "Team not found in this account")
-		if statusForbidden && msgNotFound {
-			return t, ErrNotFound
-		}
 		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
@@ -168,7 +162,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 		l.Err(err).Msg("Error deleting team")
 		return err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		l.Err(err).Msg("Error deleting team")
 		return err
@@ -192,7 +186,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 		l.Err(err).Msg("Error assigning user to team")
 		return err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		// API returns status `403 Forbidden` on invalid user to team assignment
 		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
@@ -222,7 +216,7 @@ func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 		l.Err(err).Msg("Error removing user from team")
 		return err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		// API returns status `422 Unprocessable Entity` on invalid user to team
 		// assignment.
@@ -237,6 +231,27 @@ func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 	l.Debug().Msg("Successfully removed user from team")
 	return nil
 
+}
+
+// teamNotFoundErrFromResponse wraps errorFromResponse as a workaround for a
+// known API bug, wherein the Rollbar API returns HTTP status '403 Forbidden',
+// instead of `404 Not Found`, when a team is not found.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/79
+func teamNotFoundErrFromResponse(resp *resty.Response) error {
+	err := errorFromResponse(resp)
+	if err != nil {
+		statusForbidden := resp.StatusCode() == http.StatusForbidden
+		msgNotFound := strings.Contains(err.Error(), "Team not found in this account")
+		if statusForbidden && msgNotFound {
+			log.Debug().
+				Str("status", resp.Status()).
+				Int("status_code", resp.StatusCode()).
+				Str("error", err.Error()).
+				Msg("Workaround team not found API bug")
+			return ErrNotFound
+		}
+	}
+	return err
 }
 
 /*
