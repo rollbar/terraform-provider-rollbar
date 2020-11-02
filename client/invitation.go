@@ -24,6 +24,7 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -65,7 +66,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 	}
 	r := resp.Result().(*invitationListResponse)
 	invs = r.Result
-	l.Info().Msg("Successfully listed invitations")
+	l.Debug().Msg("Successfully listed invitations")
 	return
 }
 
@@ -95,11 +96,12 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 	}
 	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
+		l.Err(err).Send()
 		return inv, err
 	}
 	r := resp.Result().(*invitationResponse)
 	inv = r.Result
-	l.Info().Msg("Successfully created new invitation")
+	l.Debug().Msg("Successfully created new invitation")
 	return inv, nil
 }
 
@@ -125,7 +127,7 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 		return
 	}
 	inv = resp.Result().(*invitationResponse).Result
-	l.Info().
+	l.Debug().
 		Interface("invitation", inv).
 		Msg("Successfully read invitation from API")
 	return
@@ -154,10 +156,22 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
-		l.Err(err).Msg("Error canceling invitation")
+		// If the invite has already been canceled, API returns HTTP status '422
+		// Unprocessable Entity'.  This is considered success.
+		statusUnprocessable := resp.StatusCode() == http.StatusUnprocessableEntity
+		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already canceled")
+		if statusUnprocessable && alreadyCanceledMsg {
+			l.Debug().Msg("invite already cancelled")
+			return nil
+		}
+		l.Err(err).
+			Interface("error", err).
+			Str("status", resp.Status()).
+			Int("status_code", resp.StatusCode()).
+			Msg("Error canceling invitation")
 		return
 	}
-	l.Info().
+	l.Debug().
 		Msg("Successfully canceled invitation")
 	return
 }
@@ -173,6 +187,7 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 	l.Info().Msg("Finding invitations")
 	teams, err := c.ListTeams()
 	if err != nil {
+		l.Err(err).Send()
 		return
 	}
 	var allInvs []Invitation
