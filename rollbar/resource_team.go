@@ -55,10 +55,12 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	teamID := t.ID
+	l = l.With().Int("teamID", teamID).Logger()
 	err = resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
-		_, err := c.ReadTeam(teamID)
+		_, err := c.ListInvitations(teamID)
 		switch err {
 		case nil:
+			l.Debug().Msg("Confirmed can list invitations without error")
 			return nil
 		case client.ErrNotFound:
 			msg := fmt.Sprintf("waiting for Rollbar team: %d", teamID)
