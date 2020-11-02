@@ -269,7 +269,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
-	teamIDs := getValueAsIntSlice(d, "teams")
+	teamIDs := getValueAsIntSlice(d, "team_ids")
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
