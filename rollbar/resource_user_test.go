@@ -23,7 +23,7 @@ func (s *AccSuite) TestAccUserCreate() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -94,6 +94,7 @@ func (s *AccSuite) TestAccUserAddTeam() {
 		}
 	`
 	configOrigin := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	// language=hcl
 	tmpl = `
 		resource "rollbar_team" "test_team_1" {
 			name = "%s-team-1"
@@ -116,7 +117,7 @@ func (s *AccSuite) TestAccUserAddTeam() {
 		}
 	`
 	configAddTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
