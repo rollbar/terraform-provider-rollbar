@@ -8,40 +8,7 @@ BINARY=terraform-provider-${NAME}
 VERSION=0.2.0
 OS_ARCH=linux_amd64
 
-#default: install
-default: dev
-
-dev: install _dev_cleanup _dev_init _dev_apply _dev_log
-plan: install _dev_cleanup _dev_init _dev_plan
-
-dev_auto_apply: install _dev_cleanup _dev_init _dev_apply_auto _dev_log
-
-dev_no_debug: install _dev_cleanup _dev_init _dev_apply_nodebug
-
-
-_dev_cleanup:
-	# Cleanup last run
-	rm -vrf example/.terraform /tmp/terraform-provider-rollbar.log
-_dev_init:
-	# Initialize terraform
-	(cd example && terraform init)
-_dev_apply:
-	# Test the provider
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
-_dev_apply_nodebug:
-	# Test the provider
-	(cd example && terraform apply) || true
-_dev_apply_auto:
-	# Test the provider
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
-_dev_log:
-	# Print the debug log
-	cat /tmp/terraform-provider-rollbar.log
-
-_dev_plan:
-	# Test the provider
-	(cd example && terraform plan)
-
+default: install
 
 build:
 	go build -o ${BINARY}
@@ -82,3 +49,33 @@ sweep:
 	then \
 		go test $(SWEEP_DIR) -v -sweep=$(SWEEP) $(SWEEPARGS) -timeout 60m; \
 	fi
+
+
+#-------------------------------------------------------------------------------
+#
+# Terraform - easily run Terraform commands with a the latest provider code.
+#
+#-------------------------------------------------------------------------------
+apply: install _terraform_cleanup _terraform_init _terraform_apply _terraform_log
+plan: install _terraform_cleanup _terraform_init _terraform_plan _terraform_log
+destroy: install _terraform_cleanup _terraform_init _terraform_destroy _terraform_log
+
+_terraform_cleanup:
+	# Cleanup last run
+	rm -vrf example/.terraform /tmp/terraform-provider-rollbar.log
+_terraform_init:
+	# Initialize terraform
+	(cd example && terraform init)
+_terraform_log:
+	# Print the debug log
+	cat /tmp/terraform-provider-rollbar.log
+_terraform_apply:
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
+_terraform_apply_nodebug:
+	(cd example && terraform apply) || true
+_terraform_apply_auto:
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
+_terraform_plan:
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform plan)
+_terraform_destroy:
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform destroy)
