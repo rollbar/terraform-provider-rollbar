@@ -210,3 +210,37 @@ func (s *Suite) TestFindInvitations() {
 	s.Nil(err)
 	s.Equal(expected, actual)
 }
+
+// TestFindPendingInvitations tests finding pending Rollbar team invitations for
+// a given email.
+func (s *Suite) TestFindPendingInvitations() {
+	email := "jason.mcvetta+test10@gmail.com"
+
+	// Mock list all teams
+	u := apiUrl + pathTeamList
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	// Mock list invitations for each team
+	for _, teamID := range []string{"662036", "662037", "676971"} {
+		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
+		r = responderFromFixture(fixturePath, http.StatusOK)
+		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamId}", teamID)
+		httpmock.RegisterResponder("GET", u, r)
+	}
+
+	expected := []Invitation{
+		{
+			ID:           153783,
+			FromUserID:   238101,
+			TeamID:       676971,
+			ToEmail:      "jason.mcvetta+test10@gmail.com",
+			Status:       "pending",
+			DateCreated:  1603294122,
+			DateRedeemed: 0,
+		},
+	}
+	actual, err := s.client.FindPendingInvitations(email)
+	s.Nil(err)
+	s.Equal(expected, actual)
+}
