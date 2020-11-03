@@ -209,6 +209,11 @@ func (s *Suite) TestFindInvitations() {
 	actual, err := s.client.FindInvitations(email)
 	s.Nil(err)
 	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindInvitations(email)
+		return err
+	})
 }
 
 // TestFindPendingInvitations tests finding pending Rollbar team invitations for
@@ -243,4 +248,9 @@ func (s *Suite) TestFindPendingInvitations() {
 	actual, err := s.client.FindPendingInvitations(email)
 	s.Nil(err)
 	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindPendingInvitations(email)
+		return err
+	})
 }
