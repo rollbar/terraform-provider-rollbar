@@ -8,8 +8,9 @@ import (
 	"regexp"
 )
 
-// TestAccUserCreate tests creating a new rollbar_user resource.
-func (s *AccSuite) TestAccUserCreate() {
+// TestAccUserCreateInvite tests creating a new rollbar_user resource with an
+// invitation to email is not registered as a Rollbar user.
+func (s *AccSuite) TestAccUserCreateInvite() {
 	rn := "rollbar_user.test_user"
 	// language=hcl
 	tmpl := `
@@ -23,6 +24,41 @@ func (s *AccSuite) TestAccUserCreate() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName, s.randName)
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkUserTeams(rn),
+				),
+			},
+		},
+	})
+}
+
+// TestAccUserCreateAssign tests creating a new rollbar_user resource by
+// assigning an already-registered Rollbar user to the team.
+// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/91
+func (s *AccSuite) TestAccUserCreateAssign() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			# This email already has an account.  
+			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
+			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
