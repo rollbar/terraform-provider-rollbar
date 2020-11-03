@@ -291,13 +291,13 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	userID, _ := c.FindUserID(email)
 	if userID != 0 {
 		teamIDs, err := c.ListUserTeams(userID)
-		if err != nil {
+		if err != nil && err != client.ErrNotFound {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 		for _, teamID := range teamIDs {
 			err := c.RemoveUserFromTeam(userID, teamID)
-			if err != nil {
+			if err != nil && err != client.ErrNotFound {
 				l.Err(err).Send()
 				return diag.FromErr(err)
 			}
@@ -312,7 +312,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	}
 	for _, inv := range invitations {
 		err := c.CancelInvitation(inv.ID)
-		if err != nil {
+		if err != nil && err != client.ErrNotFound {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
