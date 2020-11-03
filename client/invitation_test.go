@@ -172,6 +172,13 @@ func (s *Suite) TestCancelInvitation() {
 	err = s.client.DeleteInvitation(invitationId)
 	s.Nil(err)
 
+	// Invitation is already cancelled
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnprocessableEntity,
+		ErrorResult{Err: 1, Message: "Invite already cancelled"})
+	httpmock.RegisterResponder("DELETE", u, r)
+	err = s.client.CancelInvitation(invitationId)
+	s.Nil(err)
+
 	s.checkServerErrors("DELETE", u, func() error {
 		err := s.client.CancelInvitation(invitationId)
 		return err
@@ -209,6 +216,10 @@ func (s *Suite) TestFindInvitations() {
 	actual, err := s.client.FindInvitations(email)
 	s.Nil(err)
 	s.Equal(expected, actual)
+
+	// No invitations found
+	_, err = s.client.FindInvitations("nonexistent@email.com")
+	s.Equal(ErrNotFound, err)
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.FindInvitations(email)
