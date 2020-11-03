@@ -256,7 +256,9 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 		// Error if any team was not found
 		for teamID, found := range teamFound {
 			if !found {
-				return fmt.Errorf("team %d not found", teamID)
+				msg := fmt.Sprintf("team %d not found", teamID)
+				log.Debug().Msg(msg)
+				return fmt.Errorf(msg)
 			}
 		}
 
