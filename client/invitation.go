@@ -93,7 +93,8 @@ func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, err
 	return pending, nil
 }
 
-// FindPendingInvitations finds Rollbar team invitations for the given email.
+// FindPendingInvitations finds pending Rollbar team invitations for the given
+// email.
 func (c *RollbarApiClient) FindPendingInvitations(email string) ([]Invitation, error) {
 	l := log.With().Str("email", email).Logger()
 	l.Debug().Msg("Finding pending invitations")

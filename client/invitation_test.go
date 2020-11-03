@@ -31,7 +31,7 @@ import (
 	"strings"
 )
 
-// TestListInvitations tests creating a Rollbar team invitation.
+// TestListInvitations tests listing Rollbar team invitations.
 func (s *Suite) TestListInvitations() {
 	teamID := 572097
 	u := apiUrl + pathInvitations
@@ -66,6 +66,36 @@ func (s *Suite) TestListInvitations() {
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ListInvitations(teamID)
+		return err
+	})
+}
+
+// TestListPendingInvitations tests listing pending Rollbar team invitations.
+func (s *Suite) TestListPendingInvitations() {
+	teamID := 662037
+	u := apiUrl + pathInvitations
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+
+	// Success
+	r := responderFromFixture("invitation/list_662037.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []Invitation{
+		{
+			ID:           153648,
+			FromUserID:   5325,
+			TeamID:       662037,
+			ToEmail:      "jason.mcvetta+test0@gmail.com",
+			Status:       "pending",
+			DateCreated:  1603191497,
+			DateRedeemed: 0,
+		},
+	}
+	actual, err := s.client.ListPendingInvitations(teamID)
+	s.Nil(err)
+	s.ElementsMatch(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListPendingInvitations(teamID)
 		return err
 	})
 }
