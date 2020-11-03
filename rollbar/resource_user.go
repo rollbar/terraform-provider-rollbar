@@ -196,7 +196,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	d.SetId(email)
-	l.Info().Msg("Successfully created or updated rollbar_user resource")
+	l.Debug().Msg("Successfully created or updated rollbar_user resource")
 	return resourceUserRead(ctx, d, meta)
 }
 
@@ -264,7 +264,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		l.Err(es.err).Msg("Error setting state")
 		return diag.FromErr(err)
 	}
-	l.Info().Msg("Successfully read user resource")
+	l.Debug().Msg("Successfully read user resource")
 	return nil
 }
 
@@ -320,7 +320,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 
 	d.SetId("")
 
-	l.Info().Msg("Successfully deleted user resource")
+	l.Debug().Msg("Successfully deleted user resource")
 	return nil
 }
 
