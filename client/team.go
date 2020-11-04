@@ -109,7 +109,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 // "Everyone" and "Owners".
 // FIXME: This function needs a better name.
 func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
-	log.Info().Msg("Listing custom teams")
+	log.Debug().Msg("Listing custom teams")
 	var customTeams []Team
 	allTeams, err := c.ListTeams()
 	if err != nil {
