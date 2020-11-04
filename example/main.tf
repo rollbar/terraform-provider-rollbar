@@ -87,7 +87,7 @@ resource "rollbar_team" "test_team_0" {
 }
 
 resource "rollbar_user" "test_user_0" {
-  email = "jason.mcvetta+terraform-rollbar-provider-example@gmail.com"
+  email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
   team_ids = [rollbar_team.test_team_0.id]
 }
 
