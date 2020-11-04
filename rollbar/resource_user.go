@@ -102,7 +102,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	teamIDs := getValueAsIntSlice(d, "team_ids")
 	l := log.With().
 		Str("email", email).
-		Ints("teamIDs", teamIDs).
+		Ints("team_ids", teamIDs).
 		Logger()
 	l.Debug().Msg("Creating or updating rollbar_user resource")
 
@@ -110,74 +110,90 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	userID, err := c.FindUserID(email)
 	switch err {
 	case nil:
+		l.Debug().Int("id", userID).Msg("Found existing user")
 		es.Set("user_id", userID)
-	case client.ErrNotFound: // Do nothing
+	case client.ErrNotFound:
+		l.Debug().Int("id", userID).Msg("Existing user not found")
 	default: // Actual error
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 
 	// Teams to which this user SHOULD belong
-	teamsDesired := make(map[int]bool)
+	teamsExpected := make(map[int]bool)
 	for _, id := range teamIDs {
-		teamsDesired[id] = false
+		teamsExpected[id] = false
 	}
+	l.Debug().Interface("teams", teamsExpected).Msg("Expected teams")
 
 	// Teams to which this user currently belongs
 	teamsCurrent := make(map[int]bool)
 	if userID != 0 { // If user doesn't exist, they don't belong to any teams
-		ut, err := c.ListUserTeams(userID)
+		ut, err := c.ListUserCustomTeams(userID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 		for _, t := range ut {
-			teamsCurrent[t] = true
+			teamsCurrent[t.ID] = true
 		}
 	}
+	l.Debug().Interface("teams", teamsCurrent).Msg("Current teams")
 
 	// Teams to which this user should be added
 	teamsToJoin := make(map[int]bool)
-	for id, _ := range teamsDesired {
+	for id, _ := range teamsExpected {
 		if !teamsCurrent[id] {
 			teamsToJoin[id] = true
 		}
 	}
+	l.Debug().Interface("teams", teamsToJoin).Msg("Teams to join")
 	// Join those teams
 	for teamID, join := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
 		if !join {
 			continue
 		}
-		// If user already exists we can assign to teams without invitation.  If
-		// user does not already exist we must send an invitation.
-		if userID != 0 {
-			err = c.AssignUserToTeam(teamID, userID)
-			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
-			}
-			l.Debug().Msg("Assigned user to team")
-		} else {
-			inv, err := c.CreateInvitation(teamID, email)
-			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
-			}
-			l.Debug().
-				Int("inviteID", inv.ID).
-				Msg("Assigned user to team")
+		inv, err := c.CreateInvitation(teamID, email)
+		if err != nil {
+			l.Err(err).Send()
+			return diag.FromErr(err)
 		}
+		l.Debug().
+			Int("inviteID", inv.ID).
+			Msg("Invited user to team")
+		//// If user already exists we can assign to teams without invitation.  If
+		//// user does not already exist we must send an invitation.
+		//if userID != 0 {
+		//	err = c.AssignUserToTeam(teamID, userID)
+		//	if err != nil {
+		//		l.Err(err).Send()
+		//		return diag.FromErr(err)
+		//	}
+		//	l.Debug().Msg("Assigned user to team")
+		//} else {
+		//	inv, err := c.CreateInvitation(teamID, email)
+		//	if err != nil {
+		//		l.Err(err).Send()
+		//		return diag.FromErr(err)
+		//	}
+		//	l.Debug().
+		//		Int("inviteID", inv.ID).
+		//		Msg("Invited user to team")
+		//}
 		teamsToJoin[teamID] = false // Task complete
 	}
+
+	// FIXME: problem is here!  Maybe.  Maybe problem is use of Assign rather than Invite for all team adds
 
 	// Teams from which this user should be removed
 	teamsToLeave := make(map[int]bool)
 	for id, _ := range teamsCurrent {
-		if !teamsDesired[id] {
+		if !teamsExpected[id] {
 			teamsToLeave[id] = true
 		}
 	}
+	l.Debug().Interface("teams", teamsToLeave).Msg("Teams to leave")
 	// Leave those teams
 	for teamID, leave := range teamsToLeave {
 		if !leave {
@@ -207,7 +223,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Str("email", email).
 		Int("userID", userID).
 		Logger()
-	l.Info().Msg("Reading user resource")
+	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(*client.RollbarApiClient)
 	es := errSetter{d: d}
 	teamIDs := make(map[int]bool)
@@ -231,13 +247,13 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 			return diag.FromErr(err)
 		}
 		es.Set("username", u.Username)
-		ids, err := c.ListUserTeams(userID)
+		teams, err := c.ListUserCustomTeams(userID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
-		for _, id := range ids {
-			teamIDs[id] = true
+		for _, t := range teams {
+			teamIDs[t.ID] = true
 		}
 	}
 
@@ -264,7 +280,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		l.Err(es.err).Msg("Error setting state")
 		return diag.FromErr(err)
 	}
-	l.Debug().Msg("Successfully read user resource")
+	l.Debug().Msg("Successfully read rollbar_user resource")
 	return nil
 }
 
@@ -275,7 +291,7 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
 		Logger()
-	l.Info().Msg("Updating resource rollbar_user")
+	l.Info().Msg("Updating rollbar_user resource")
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
@@ -284,17 +300,23 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	l := log.With().
 		Str("email", email).
 		Logger()
-	l.Info().Msg("Deleting user resource")
+	l.Info().Msg("Deleting rollbar_user resource")
 	c := meta.(*client.RollbarApiClient)
 
-	// If user ID is known, remove user from teams
-	userID, _ := c.FindUserID(email)
+	// Try to get user ID
+	userID := d.Get("user_id").(int)
+	if userID == 0 {
+		userID, _ = c.FindUserID(email)
+	}
+
+	// If user ID is known, remove user from Terraform-managed teams
 	if userID != 0 {
-		teamIDs, err := c.ListUserTeams(userID)
-		if err != nil && err != client.ErrNotFound {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
+		teamIDs := getValueAsIntSlice(d, "team_ids")
+		//teamIDs, err := c.ListUserTeams(userID)
+		//if err != nil && err != client.ErrNotFound {
+		//	l.Err(err).Send()
+		//	return diag.FromErr(err)
+		//}
 		for _, teamID := range teamIDs {
 			err := c.RemoveUserFromTeam(userID, teamID)
 			if err != nil && err != client.ErrNotFound {
@@ -305,7 +327,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	// Cancel user's invitations
-	invitations, err := c.FindInvitations(email)
+	invitations, err := c.FindPendingInvitations(email)
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -320,7 +342,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 
 	d.SetId("")
 
-	l.Debug().Msg("Successfully deleted user resource")
+	l.Debug().Msg("Successfully deleted rollbar_user resource")
 	return nil
 }
 
