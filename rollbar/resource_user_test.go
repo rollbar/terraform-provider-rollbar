@@ -111,8 +111,9 @@ func (s *AccSuite) DontTestAccUserImport() {
 	})
 }
 
-// TestAccUserAddTeam tests adding a team to an existing rollbar_user resource.
-func (s *AccSuite) TestAccUserAddTeam() {
+// TestAccInvitedUserAddTeam tests adding a rollbar_user resource based on an
+// invited but not yet registered email.
+func (s *AccSuite) TestAccInvitedUserAddTeam() {
 	rn := "rollbar_user.test_user"
 	// language=hcl
 	tmpl := `
@@ -130,6 +131,73 @@ func (s *AccSuite) TestAccUserAddTeam() {
 		}
 	`
 	configOrigin := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	// language=hcl
+	tmpl = `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s-team-1"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s-team-2"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			team_ids = [
+				rollbar_team.test_team_1.id,
+				rollbar_team.test_team_2.id,
+			]
+			depends_on = [
+				rollbar_team.test_team_1, 
+				rollbar_team.test_team_2
+			]
+		}
+	`
+	configAddTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: configOrigin,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+				),
+			},
+			{
+				Config: configAddTeam,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkUserTeams(rn),
+				),
+			},
+		},
+	})
+}
+
+// TestAccRegisteredUserAddTeam tests adding a rollbar_user resource based on an
+// already registered user.
+func (s *AccSuite) TestAccRegisteredUserAddTeam() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s-team-1"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s-team-2"
+		}
+
+		resource "rollbar_user" "test_user" {
+			# This email already has an account.  
+			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
+			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			team_ids = [rollbar_team.test_team_1.id]
+		}
+	`
+	configOrigin := fmt.Sprintf(tmpl, s.randName, s.randName)
 	// language=hcl
 	tmpl = `
 		resource "rollbar_team" "test_team_1" {
