@@ -55,8 +55,9 @@ func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 		return
 	}
 	users = resp.Result().(*userListResponse).Result.Users
+	count := len(users)
 	log.Debug().
-		Interface("users", users).
+		Int("count", count).
 		Msg("Successfully listed users")
 	return
 }
