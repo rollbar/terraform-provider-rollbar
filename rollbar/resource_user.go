@@ -93,7 +93,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.RollbarApiClient)
-	es := errSetter{d: d}
 	email := d.Get("email").(string)
 	teamIDs := getUserTeamIDs(d)
 	l := log.With().
@@ -213,10 +212,6 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	if es.err != nil {
-		l.Err(es.err).Msg("Error setting state value")
-		return diag.FromErr(err)
-	}
 	d.SetId(email)
 	l.Debug().Msg("Successfully created or updated rollbar_user resource")
 	return resourceUserRead(ctx, d, meta)
