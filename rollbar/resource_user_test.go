@@ -209,7 +209,7 @@ func (s *AccSuite) TestAccRegisteredUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -220,7 +220,7 @@ func (s *AccSuite) TestAccRegisteredUserAddTeam() {
 			]
 		}
 	`
-	configAddTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	configAddTeam := fmt.Sprintf(tmpl, s.randName, s.randName)
 	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
