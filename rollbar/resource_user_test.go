@@ -111,8 +111,8 @@ func (s *AccSuite) DontTestAccUserImport() {
 	})
 }
 
-// TestAccInvitedUserAddTeam tests adding a rollbar_user resource based on an
-// invited but not yet registered email.
+// TestAccInvitedUserAddTeam tests adding a team to a rollbar_user resource that
+// is based on an invited but not yet registered email.
 func (s *AccSuite) TestAccInvitedUserAddTeam() {
 	rn := "rollbar_user.test_user"
 	// language=hcl
@@ -167,6 +167,71 @@ func (s *AccSuite) TestAccInvitedUserAddTeam() {
 			},
 			{
 				Config: configAddTeam,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkUserTeams(rn),
+				),
+			},
+		},
+	})
+}
+
+// TestAccInvitedUserRemoveTeam tests adding a team to a rollbar_user resource
+// that is based on an invited but not yet registered email.
+func (s *AccSuite) TestAccInvitedUserRemoveTeam() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s-team-1"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s-team-2"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			team_ids = [
+				rollbar_team.test_team_1.id,
+				rollbar_team.test_team_2.id,
+			]
+			depends_on = [
+				rollbar_team.test_team_1, 
+				rollbar_team.test_team_2
+			]
+		}
+	`
+	configOrigin := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	// language=hcl
+	tmpl = `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s-team-1"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s-team-2"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			team_ids = [rollbar_team.test_team_1.id]
+		}
+	`
+	configRemoveTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: configOrigin,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+				),
+			},
+			{
+				Config: configRemoveTeam,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					s.checkUserTeams(rn),
