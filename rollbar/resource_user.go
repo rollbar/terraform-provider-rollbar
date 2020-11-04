@@ -84,11 +84,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Logger()
 	l.Info().Msg("Creating rollbar_user resource")
 	d.SetId(email)
-	err := d.Set("status", "invited")
-	if err != nil {
-		l.Err(err).Send()
-		return diag.FromErr(err)
-	}
+	mustSet(d, "status", "invited")
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
@@ -112,7 +108,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	case nil:
 		l = l.With().Int("user_id", userID).Logger()
 		l.Debug().Int("id", userID).Msg("Found existing user")
-		es.Set("user_id", userID)
+		mustSet(d, "user_id", userID)
 	case client.ErrNotFound:
 		l.Debug().Int("id", userID).Msg("Existing user not found")
 	default: // Actual error
@@ -235,7 +231,6 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(*client.RollbarApiClient)
-	es := errSetter{d: d}
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -250,13 +245,13 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	// If Rollbar user already exists, list user's teamIDs
 	var teamIDs []int
 	if userID != 0 {
-		es.Set("status", "registered")
+		mustSet(d, "status", "registered")
 		u, err := c.ReadUser(userID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
-		es.Set("username", u.Username)
+		mustSet(d, "username", u.Username)
 		teams, err := c.ListUserCustomTeams(userID)
 		if err != nil {
 			l.Err(err).Send()
@@ -277,12 +272,8 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		teamIDs = append(teamIDs, inv.TeamID)
 	}
 
-	es.Set("team_ids", teamIDs)
+	mustSet(d, "team_ids", teamIDs)
 
-	if es.err != nil {
-		l.Err(es.err).Msg("Error setting state")
-		return diag.FromErr(err)
-	}
 	l.Debug().Msg("Successfully read rollbar_user resource")
 	return nil
 }

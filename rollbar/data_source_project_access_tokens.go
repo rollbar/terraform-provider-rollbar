@@ -135,14 +135,7 @@ func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceDa
 			}
 		}
 	}
-
-	err = d.Set("access_tokens", filtered)
-	if err != nil {
-		log.Err(err).
-			Interface("access_tokens", tokens).
-			Msg("Error setting resource data")
-		return diag.FromErr(err)
-	}
+	mustSet(d, "access_tokens", filtered)
 
 	// Set resource ID to current timestamp (every resource must have an ID or
 	// it will be destroyed).

@@ -155,10 +155,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		if k == "id" {
 			continue
 		}
-		err = d.Set(k, v)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+		mustSet(d, k, v)
 	}
 
 	d.SetId(strconv.Itoa(proj.Id))

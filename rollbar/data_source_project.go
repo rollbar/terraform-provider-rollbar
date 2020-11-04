@@ -89,22 +89,9 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 
 	id := fmt.Sprintf("%d", project.Id)
 	d.SetId(id)
-	err = d.Set("account_id", project.AccountId)
-	if err != nil {
-		return err
-	}
-	err = d.Set("date_created", project.DateCreated)
-	if err != nil {
-		return err
-	}
-	err = d.Set("date_modified", project.DateModified)
-	if err != nil {
-		return err
-	}
-	err = d.Set("status", project.Status)
-	if err != nil {
-		return err
-	}
-
+	mustSet(d, "account_id", project.AccountId)
+	mustSet(d, "date_created", project.DateCreated)
+	mustSet(d, "date_modified", project.DateModified)
+	mustSet(d, "status", project.Status)
 	return nil
 }

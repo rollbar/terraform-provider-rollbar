@@ -76,16 +76,9 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		l.Err(err).Msg("error reading team resource")
 		return diag.FromErr(err)
 	}
-	var errs []error
-	errs = append(errs, d.Set("name", t.Name))
-	errs = append(errs, d.Set("account_id", t.AccountID))
-	errs = append(errs, d.Set("access_level", t.AccessLevel))
-	for _, err = range errs {
-		if err != nil {
-			l.Error().Interface("errs", errs).Send()
-			return diag.FromErr(errs[0])
-		}
-	}
+	mustSet(d, "name", t.Name)
+	mustSet(d, "account_id", t.AccountID)
+	mustSet(d, "access_level", t.AccessLevel)
 	l.Debug().Msg("Successfully read rollbar_team resource")
 	return nil
 }
