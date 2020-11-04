@@ -149,7 +149,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 	l.Debug().Interface("teams_to_join", teamsToJoin).Msg("Teams to join")
-	// Join those teams
+	// Add user to those teams
 	for _, teamID := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
 		// If user already exists we can assign to teams without invitation.  If
@@ -173,20 +173,15 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	// FIXME: problem is here!  Maybe.  Maybe problem is use of Assign rather than Invite for all team adds
-
 	// Teams from which this user should be removed
-	//teamsToRemove := make(map[int]bool)
 	var teamsToRemove []int
 	for id, _ := range teamsCurrent {
 		if !teamsExpected[id] {
-			//teamsToRemove[id] = true
 			teamsToRemove = append(teamsToRemove, id)
 		}
 	}
 	l.Debug().Ints("teams_to_remove", teamsToRemove).Msg("Teams to leave")
-
-	// Leave those teams
+	// Remove user from those teams
 	if userID != 0 {
 		l.Debug().Msg("Removing user from teams")
 		for _, teamID := range teamsToRemove {
@@ -198,7 +193,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	// Invitations to this user which should be cancelled
+	// Invitations which should be cancelled
 	var invitationsToCancel []int
 	invitations, err := c.FindPendingInvitations(email)
 	if err != nil {
@@ -213,6 +208,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	l.Debug().
 		Int("count", len(invitationsToCancel)).
 		Msg("Canceling invitations")
+	// Cancel those invitations
 	for _, invitationID := range invitationsToCancel {
 		err := c.CancelInvitation(invitationID)
 		if err != nil {
