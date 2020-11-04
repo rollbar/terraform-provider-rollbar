@@ -149,11 +149,8 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 	l.Debug().Interface("teams_to_join", teamsToJoin).Msg("Teams to join")
 	// Join those teams
-	for teamID, join := range teamsToJoin {
+	for teamID, _ := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
-		if !join {
-			continue
-		}
 		// If user already exists we can assign to teams without invitation.  If
 		// user does not already exist we must send an invitation.
 		if userID != 0 {
