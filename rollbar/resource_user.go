@@ -119,6 +119,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
+	l = l.With().Int("user_id", userID).Logger()
 
 	// Teams to which this user SHOULD belong
 	teamsExpected := make(map[int]bool)
@@ -182,18 +183,45 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			teamsToLeave[id] = true
 		}
 	}
-	l.Debug().Interface("teams", teamsToLeave).Msg("Teams to leave")
+	l.Debug().Interface("teams_to_leave", teamsToLeave).Msg("Teams to leave")
+
 	// Leave those teams
-	for teamID, leave := range teamsToLeave {
-		if !leave {
-			continue
+	if userID != 0 {
+		l.Debug().Msg("Removing user from teams")
+		for teamID, leave := range teamsToLeave {
+			if !leave {
+				continue
+			}
+			err := c.RemoveUserFromTeam(userID, teamID)
+			if err != nil {
+				l.Err(err).Send()
+				return diag.FromErr(err)
+			}
+			teamsToLeave[teamID] = false // Task complete
 		}
-		err := c.RemoveUserFromTeam(userID, teamID)
+	}
+
+	// Invitations to this user which should be cancelled
+	var invitationsToCancel []int
+	invitations, err := c.FindPendingInvitations(email)
+	if err != nil {
+		l.Err(err).Send()
+		return diag.FromErr(err)
+	}
+	for _, inv := range invitations {
+		if !teamsExpected[inv.TeamID] {
+			invitationsToCancel = append(invitationsToCancel, inv.ID)
+		}
+	}
+	l.Debug().
+		Int("count", len(invitationsToCancel)).
+		Msg("Canceling invitations")
+	for _, invitationID := range invitationsToCancel {
+		err := c.CancelInvitation(invitationID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
-		teamsToLeave[teamID] = false // Task complete
 	}
 
 	if es.err != nil {
@@ -215,7 +243,6 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(*client.RollbarApiClient)
 	es := errSetter{d: d}
-	//teamIDs := make(map[int]bool)
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -243,7 +270,6 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 			return diag.FromErr(err)
 		}
 		for _, t := range teams {
-			//teamIDs[t.ID] = true
 			teamIDs = append(teamIDs, t.ID)
 		}
 	}
@@ -255,16 +281,9 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		return diag.FromErr(err)
 	}
 	for _, inv := range invitations {
-		//teamIDs[inv.TeamID] = true
 		teamIDs = append(teamIDs, inv.TeamID)
 	}
 
-	//// Flatten the teamIDs map and set state
-	//var tids []int
-	//for id, _ := range teamIDs {
-	//	tids = append(tids, id)
-	//}
-	//es.Set("team_ids", tids)
 	es.Set("team_ids", teamIDs)
 
 	if es.err != nil {
