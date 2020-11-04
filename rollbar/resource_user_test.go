@@ -239,7 +239,7 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 		}
 		log.Debug().
 			Interface("teamFound", teamFound).
-			Msg("Team memberships")
+			Msg("Existing team memberships")
 
 		// If we are expecting team IDs that were not found, check the user's
 		// invitations.
