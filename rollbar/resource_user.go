@@ -142,15 +142,15 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	l.Debug().Interface("current_teams", teamsCurrent).Msg("Current teams")
 
 	// Teams to which this user should be added
-	teamsToJoin := make(map[int]bool)
+	var teamsToJoin []int
 	for id, _ := range teamsExpected {
 		if !teamsCurrent[id] {
-			teamsToJoin[id] = true
+			teamsToJoin = append(teamsToJoin, id)
 		}
 	}
 	l.Debug().Interface("teams_to_join", teamsToJoin).Msg("Teams to join")
 	// Join those teams
-	for teamID, _ := range teamsToJoin {
+	for _, teamID := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
 		// If user already exists we can assign to teams without invitation.  If
 		// user does not already exist we must send an invitation.
@@ -171,33 +171,30 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 				Int("inviteID", inv.ID).
 				Msg("Invited user to team")
 		}
-		teamsToJoin[teamID] = false // Task complete
 	}
 
 	// FIXME: problem is here!  Maybe.  Maybe problem is use of Assign rather than Invite for all team adds
 
 	// Teams from which this user should be removed
-	teamsToLeave := make(map[int]bool)
+	//teamsToRemove := make(map[int]bool)
+	var teamsToRemove []int
 	for id, _ := range teamsCurrent {
 		if !teamsExpected[id] {
-			teamsToLeave[id] = true
+			//teamsToRemove[id] = true
+			teamsToRemove = append(teamsToRemove, id)
 		}
 	}
-	l.Debug().Interface("teams_to_leave", teamsToLeave).Msg("Teams to leave")
+	l.Debug().Ints("teams_to_remove", teamsToRemove).Msg("Teams to leave")
 
 	// Leave those teams
 	if userID != 0 {
 		l.Debug().Msg("Removing user from teams")
-		for teamID, leave := range teamsToLeave {
-			if !leave {
-				continue
-			}
+		for _, teamID := range teamsToRemove {
 			err := c.RemoveUserFromTeam(userID, teamID)
 			if err != nil {
 				l.Err(err).Send()
 				return diag.FromErr(err)
 			}
-			teamsToLeave[teamID] = false // Task complete
 		}
 	}
 
