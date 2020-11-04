@@ -230,7 +230,7 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		Logger()
 
 	l.Debug().Msg("Finding invitations")
-	teams, err := c.ListTeams()
+	teams, err := c.ListCustomTeams()
 	if err != nil {
 		l.Err(err).Send()
 		return
