@@ -2,14 +2,11 @@ package rollbar
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
-	"time"
 )
 
 // resourceTeam constructs a resource representing a Rollbar team.
@@ -56,26 +53,6 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	teamID := t.ID
 	l = l.With().Int("teamID", teamID).Logger()
-	l.Debug().Msg("Confirming can list invitations without error")
-	err = resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
-		_, err := c.ListInvitations(teamID)
-		switch err {
-		case nil:
-			l.Debug().Msg("Successfully confirmed can list invitations without error")
-			return nil
-		case client.ErrNotFound:
-			msg := fmt.Sprintf("waiting for Rollbar team: %d", teamID)
-			l.Debug().Msg(msg)
-			return resource.RetryableError(fmt.Errorf(msg))
-		default:
-			return resource.NonRetryableError(fmt.Errorf(
-				"error reading Rollbar team: %s", err))
-		}
-	})
-	if err != nil {
-		l.Err(err).Send()
-		return diag.FromErr(err)
-	}
 	d.SetId(strconv.Itoa(teamID))
 	l.Debug().Int("id", teamID).Msg("Successfully created rollbar_team resource")
 	return resourceTeamRead(ctx, d, m)
