@@ -344,39 +344,3 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	l.Debug().Msg("Successfully deleted rollbar_user resource")
 	return nil
 }
-
-/*
-// userStateID represents the data used to identify a Rollbar user in Terraform
-// state. As the prospective user progresses through the stages from invitation
-// through becoming a registered user - so do the prospective user's API-side
-// identifier change from Email to UserID.
-type userStateID struct {
-	UserID int
-	Email  string
-}
-
-func (u userStateID) String() string {
-	return fmt.Sprintf("%d:%s", u.UserID, u.Email)
-}
-
-func userStateIDFromString(s string) (u userStateID, err error) {
-	components := strings.Split(s, ":")
-	if len(components) != 2 {
-		err = fmt.Errorf("invalid user state ID string: %s", s)
-		log.Err(err).Send()
-		return
-	}
-	userID, err := strconv.Atoi(components[0])
-	if err != nil {
-		log.Err(err).Send()
-		return
-	}
-	email := components[1]
-	u = userStateID{
-		UserID: userID,
-		Email:  email,
-	}
-	return
-}
-
-*/
