@@ -47,7 +47,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	name := d.Get("name").(string)
 	level := d.Get("access_level").(string)
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
-	l.Info().Msg("Creating new Rollbar team")
+	l.Info().Msg("Creating rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
 	t, err := c.CreateTeam(name, level)
 	if err != nil {
@@ -56,11 +56,12 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	teamID := t.ID
 	l = l.With().Int("teamID", teamID).Logger()
+	l.Debug().Msg("Confirming can list invitations without error")
 	err = resource.RetryContext(ctx, 1*time.Minute, func() *resource.RetryError {
 		_, err := c.ListInvitations(teamID)
 		switch err {
 		case nil:
-			l.Debug().Msg("Confirmed can list invitations without error")
+			l.Debug().Msg("Successfully confirmed can list invitations without error")
 			return nil
 		case client.ErrNotFound:
 			msg := fmt.Sprintf("waiting for Rollbar team: %d", teamID)
@@ -76,7 +77,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	d.SetId(strconv.Itoa(teamID))
-	l.Debug().Int("id", teamID).Msg("Successfully created Rollbar team")
+	l.Debug().Int("id", teamID).Msg("Successfully created rollbar_team resource")
 	return resourceTeamRead(ctx, d, m)
 }
 
@@ -108,7 +109,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 			return diag.FromErr(errs[0])
 		}
 	}
-	l.Debug().Msg("Successfully read Rollbar team from API")
+	l.Debug().Msg("Successfully read rollbar_team resource")
 	return nil
 }
 
@@ -122,9 +123,9 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 	c := m.(*client.RollbarApiClient)
 	err = c.DeleteTeam(id)
 	if err != nil {
-		l.Err(err).Msg("error deleting team resource")
+		l.Err(err).Msg("Error deleting rollbar_team resource")
 		return diag.FromErr(err)
 	}
-	l.Debug().Msg("Successfully deleted team resource")
+	l.Debug().Msg("Successfully deleted rollbar_team resource")
 	return nil
 }
