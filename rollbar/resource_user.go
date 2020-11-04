@@ -37,7 +37,6 @@ func resourceUser() *schema.Resource {
 		UpdateContext: resourceUserUpdate,
 		DeleteContext: resourceUserDelete,
 
-		// TODO: Import functionality
 		//Importer: &schema.ResourceImporter{
 		//	StateContext: schema.ImportStatePassthroughContext,
 		//},
@@ -343,3 +342,17 @@ func getUserTeamIDs(d *schema.ResourceData) []int {
 	}
 	return teamIDs
 }
+
+//func resourceUserImporter(ctx context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+//	email := data.Id()
+//	l := log.With().Str("email", email).Logger()
+//	l.Info().Msg("Importing rollbar_user resource")
+//	c := meta.(*client.RollbarApiClient)
+//	userID, err := c.FindUserID(email)
+//	if err != nil {
+//		l.Err(err).Send()
+//		return nil, err
+//	}
+//	mustSet(data, "user_id", userID)
+//	return []*schema.ResourceData{data}, nil
+//}
