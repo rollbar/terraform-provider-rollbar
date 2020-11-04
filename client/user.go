@@ -107,7 +107,7 @@ func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 }
 
 // ListUserTeams lists a Rollbar user's teams.
-func (c *RollbarApiClient) ListUserTeams(userID int) (teamIDs []int, err error) {
+func (c *RollbarApiClient) ListUserTeams(userID int) (teams []Team, err error) {
 	l := log.With().Int("userID", userID).Logger()
 	l.Debug().Msg("Reading teams for Rollbar user")
 	u := apiUrl + pathUserTeams
@@ -125,13 +125,18 @@ func (c *RollbarApiClient) ListUserTeams(userID int) (teamIDs []int, err error) 
 		log.Err(err).Msg("Error reading Rollbar user's teams from API")
 		return
 	}
-	teams := resp.Result().(*userTeamListResponse).Result.Teams
-	for _, t := range teams {
-		teamIDs = append(teamIDs, t.ID)
-	}
+	teams = resp.Result().(*userTeamListResponse).Result.Teams
 	log.Debug().
-		Ints("teamIDs", teamIDs).
+		Interface("teams", teams).
 		Msg("Successfully read Rollbar user's teams from API")
+	return
+}
+
+// ListUserCustomTeams lists a Rollbar user's custom defined teams, excluding
+// system teams "Everyone" and "Owners".
+func (c *RollbarApiClient) ListUserCustomTeams(userID int) (teams []Team, err error) {
+	teams, err = c.ListUserTeams(userID)
+	teams = filterSystemTeams(teams)
 	return
 }
 

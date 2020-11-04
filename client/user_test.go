@@ -116,10 +116,25 @@ func (s *Suite) TestListUserTeams() {
 	// Success
 	r := responderFromFixture("user/list_teams.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	expected := []int{
-		662036,
-		662037,
-		676971,
+	expected := []Team{
+		{
+			AccessLevel: "owner",
+			AccountID:   317418,
+			ID:          662036,
+			Name:        "Owners",
+		},
+		{
+			AccessLevel: "everyone",
+			AccountID:   317418,
+			ID:          662037,
+			Name:        "Everyone",
+		},
+		{
+			AccessLevel: "standard",
+			AccountID:   317418,
+			ID:          676971,
+			Name:        "my-test-team",
+		},
 	}
 	actual, err := s.client.ListUserTeams(userID)
 	s.Nil(err)

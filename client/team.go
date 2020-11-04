@@ -116,16 +116,7 @@ func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
 		log.Err(err).Msg("Error listing custom teams")
 		return customTeams, err
 	}
-	for _, t := range allTeams {
-		if t.Name == "Everyone" || t.Name == "Owners" {
-			continue
-		}
-		customTeams = append(customTeams, t)
-		log.Debug().
-			Str("name", t.Name).
-			Int("id", t.ID).
-			Msg("Custom defined team")
-	}
+	customTeams = filterSystemTeams(allTeams)
 	count := len(customTeams)
 	log.Debug().Int("count", count).Msg("Successfully listed custom teams")
 	return customTeams, nil
@@ -260,6 +251,23 @@ func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 	l.Debug().Msg("Successfully removed user from team")
 	return nil
 
+}
+
+// filterSystemTeams filters out the system teams "Everyone" and "Owners" from a
+// list of Rollbar teams.
+func filterSystemTeams(teams []Team) []Team {
+	var customTeams []Team
+	for _, t := range teams {
+		if t.Name == "Everyone" || t.Name == "Owners" {
+			continue
+		}
+		customTeams = append(customTeams, t)
+		log.Debug().
+			Str("name", t.Name).
+			Int("id", t.ID).
+			Msg("Custom defined team")
+	}
+	return customTeams
 }
 
 // teamNotFoundErrFromResponse wraps errorFromResponse as a workaround for a
