@@ -154,33 +154,25 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		if !join {
 			continue
 		}
-		inv, err := c.CreateInvitation(teamID, email)
-		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
+		// If user already exists we can assign to teams without invitation.  If
+		// user does not already exist we must send an invitation.
+		if userID != 0 {
+			err = c.AssignUserToTeam(teamID, userID)
+			if err != nil {
+				l.Err(err).Send()
+				return diag.FromErr(err)
+			}
+			l.Debug().Msg("Assigned user to team")
+		} else {
+			inv, err := c.CreateInvitation(teamID, email)
+			if err != nil {
+				l.Err(err).Send()
+				return diag.FromErr(err)
+			}
+			l.Debug().
+				Int("inviteID", inv.ID).
+				Msg("Invited user to team")
 		}
-		l.Debug().
-			Int("inviteID", inv.ID).
-			Msg("Invited user to team")
-		//// If user already exists we can assign to teams without invitation.  If
-		//// user does not already exist we must send an invitation.
-		//if userID != 0 {
-		//	err = c.AssignUserToTeam(teamID, userID)
-		//	if err != nil {
-		//		l.Err(err).Send()
-		//		return diag.FromErr(err)
-		//	}
-		//	l.Debug().Msg("Assigned user to team")
-		//} else {
-		//	inv, err := c.CreateInvitation(teamID, email)
-		//	if err != nil {
-		//		l.Err(err).Send()
-		//		return diag.FromErr(err)
-		//	}
-		//	l.Debug().
-		//		Int("inviteID", inv.ID).
-		//		Msg("Invited user to team")
-		//}
 		teamsToJoin[teamID] = false // Task complete
 	}
 
