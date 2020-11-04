@@ -121,6 +121,10 @@ func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
 			continue
 		}
 		customTeams = append(customTeams, t)
+		log.Debug().
+			Str("name", t.Name).
+			Int("id", t.ID).
+			Msg("Custom defined team")
 	}
 	count := len(customTeams)
 	log.Debug().Int("count", count).Msg("Successfully listed custom teams")
