@@ -199,7 +199,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		if !leave {
 			continue
 		}
-		err := c.RemoveUserFromTeam(teamID, userID)
+		err := c.RemoveUserFromTeam(userID, teamID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
@@ -259,7 +259,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 
 	// Add pending invitations to team IDs
 	invitations, err := c.FindPendingInvitations(email)
-	if err != nil && err != client.ErrNotFound {
+	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
@@ -309,17 +309,16 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		userID, _ = c.FindUserID(email)
 	}
 
-	// If user ID is known, remove user from Terraform-managed teams
+	// If user ID is known, remove user from teams
 	if userID != 0 {
-		teamIDs := getValueAsIntSlice(d, "team_ids")
-		//teamIDs, err := c.ListUserTeams(userID)
-		//if err != nil && err != client.ErrNotFound {
-		//	l.Err(err).Send()
-		//	return diag.FromErr(err)
-		//}
-		for _, teamID := range teamIDs {
-			err := c.RemoveUserFromTeam(userID, teamID)
-			if err != nil && err != client.ErrNotFound {
+		teams, err := c.ListUserCustomTeams(userID)
+		if err != nil && err != client.ErrNotFound {
+			l.Err(err).Send()
+			return diag.FromErr(err)
+		}
+		for _, t := range teams {
+			err := c.RemoveUserFromTeam(userID, t.ID)
+			if err != nil {
 				l.Err(err).Send()
 				return diag.FromErr(err)
 			}
@@ -328,13 +327,13 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 
 	// Cancel user's invitations
 	invitations, err := c.FindPendingInvitations(email)
-	if err != nil && err != client.ErrNotFound {
+	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	for _, inv := range invitations {
 		err := c.CancelInvitation(inv.ID)
-		if err != nil && err != client.ErrNotFound {
+		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
