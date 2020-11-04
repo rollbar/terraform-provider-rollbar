@@ -218,8 +218,9 @@ func (s *Suite) TestFindInvitations() {
 	s.Equal(expected, actual)
 
 	// No invitations found
-	_, err = s.client.FindInvitations("nonexistent@email.com")
-	s.Equal(ErrNotFound, err)
+	invitations, err := s.client.FindInvitations("nonexistent@email.com")
+	s.Nil(err)
+	s.Empty(invitations)
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.FindInvitations(email)
