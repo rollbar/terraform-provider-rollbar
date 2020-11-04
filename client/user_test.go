@@ -107,7 +107,7 @@ func (s *Suite) TestUserIdFromEmail() {
 	})
 }
 
-// TestListUserTeams tests listing all Rollbar users.
+// TestListUserTeams tests listing all teams for a Rollbar user.
 func (s *Suite) TestListUserTeams() {
 	userID := 238101
 	u := apiUrl + pathUserTeams
@@ -143,6 +143,34 @@ func (s *Suite) TestListUserTeams() {
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ListUserTeams(userID)
+		return err
+	})
+}
+
+// TestListUserTeams tests listing custom defined teams for a Rollbar user.
+func (s *Suite) TestListUserCustomTeams() {
+	userID := 238101
+	u := apiUrl + pathUserTeams
+	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+
+	// Success
+	r := responderFromFixture("user/list_teams.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []Team{
+		{
+			AccessLevel: "standard",
+			AccountID:   317418,
+			ID:          676971,
+			Name:        "my-test-team",
+		},
+	}
+	actual, err := s.client.ListUserCustomTeams(userID)
+	s.Nil(err)
+	s.Subset(actual, expected)
+	s.Len(actual, len(expected))
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListUserCustomTeams(userID)
 		return err
 	})
 }
