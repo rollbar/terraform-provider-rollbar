@@ -44,9 +44,10 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 	var t Team
 	l := log.With().
 		Str("name", name).
-		Str("access_level", level).
 		Logger()
-	l.Debug().Msg("Creating new team")
+	l.Debug().
+		Str("access_level", level).
+		Msg("Creating new team")
 
 	// Sanity check
 	if name == "" {
@@ -100,7 +101,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	r := resp.Result().(*teamListResponse)
 	teams = r.Result
 	count := len(teams)
-	log.Debug().Int("count", count).Msg("Listed teams")
+	log.Debug().Int("count", count).Msg("Successfully listed teams")
 	return teams, nil
 }
 
@@ -122,7 +123,7 @@ func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
 		customTeams = append(customTeams, t)
 	}
 	count := len(customTeams)
-	log.Debug().Int("count", count).Msg("Listed custom teams")
+	log.Debug().Int("count", count).Msg("Successfully listed custom teams")
 	return customTeams, nil
 }
 
@@ -160,7 +161,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	l.Debug().
 		Int("id", t.ID).
 		Str("name", t.Name).
-		Msg("Read team")
+		Msg("Successfully read team")
 	return t, nil
 }
 
@@ -191,7 +192,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 		l.Err(err).Msg("Error deleting team")
 		return err
 	}
-	l.Debug().Msg("Deleted team")
+	l.Debug().Msg("Successfully deleted team")
 	return nil
 }
 
@@ -221,7 +222,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 		l.Err(err).Msg("Error assigning user to team")
 		return err
 	}
-	l.Debug().Msg("Assigned user to team")
+	l.Debug().Msg("Successfully assigned user to team")
 	return nil
 }
 
