@@ -50,7 +50,7 @@ func resourceUser() *schema.Resource {
 				ForceNew: true,
 			},
 			"team_ids": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
@@ -77,7 +77,7 @@ func resourceUser() *schema.Resource {
 // resourceUserCreate creates a new Rollbar user resource.
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
-	teamIDs := getValueAsIntSlice(d, "team_ids")
+	teamIDs := getUserTeamIDs(d)
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
@@ -99,10 +99,10 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	c := meta.(*client.RollbarApiClient)
 	es := errSetter{d: d}
 	email := d.Get("email").(string)
-	teamIDs := getValueAsIntSlice(d, "team_ids")
+	teamIDs := getUserTeamIDs(d)
 	l := log.With().
 		Str("email", email).
-		Ints("team_ids", teamIDs).
+		Ints("expected_team_ids", teamIDs).
 		Logger()
 	l.Debug().Msg("Creating or updating rollbar_user resource")
 
@@ -110,6 +110,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	userID, err := c.FindUserID(email)
 	switch err {
 	case nil:
+		l = l.With().Int("user_id", userID).Logger()
 		l.Debug().Int("id", userID).Msg("Found existing user")
 		es.Set("user_id", userID)
 	case client.ErrNotFound:
@@ -122,9 +123,8 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	// Teams to which this user SHOULD belong
 	teamsExpected := make(map[int]bool)
 	for _, id := range teamIDs {
-		teamsExpected[id] = false
+		teamsExpected[id] = true
 	}
-	l.Debug().Interface("teams", teamsExpected).Msg("Expected teams")
 
 	// Teams to which this user currently belongs
 	teamsCurrent := make(map[int]bool)
@@ -138,7 +138,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			teamsCurrent[t.ID] = true
 		}
 	}
-	l.Debug().Interface("teams", teamsCurrent).Msg("Current teams")
+	l.Debug().Interface("current_teams", teamsCurrent).Msg("Current teams")
 
 	// Teams to which this user should be added
 	teamsToJoin := make(map[int]bool)
@@ -147,7 +147,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 			teamsToJoin[id] = true
 		}
 	}
-	l.Debug().Interface("teams", teamsToJoin).Msg("Teams to join")
+	l.Debug().Interface("teams_to_join", teamsToJoin).Msg("Teams to join")
 	// Join those teams
 	for teamID, join := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
@@ -218,7 +218,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(*client.RollbarApiClient)
 	es := errSetter{d: d}
-	teamIDs := make(map[int]bool)
+	//teamIDs := make(map[int]bool)
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -231,6 +231,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	}
 
 	// If Rollbar user already exists, list user's teamIDs
+	var teamIDs []int
 	if userID != 0 {
 		es.Set("status", "registered")
 		u, err := c.ReadUser(userID)
@@ -245,7 +246,8 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 			return diag.FromErr(err)
 		}
 		for _, t := range teams {
-			teamIDs[t.ID] = true
+			//teamIDs[t.ID] = true
+			teamIDs = append(teamIDs, t.ID)
 		}
 	}
 
@@ -256,17 +258,17 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		return diag.FromErr(err)
 	}
 	for _, inv := range invitations {
-		if inv.Status == "pending" {
-			teamIDs[inv.TeamID] = true
-		}
+		//teamIDs[inv.TeamID] = true
+		teamIDs = append(teamIDs, inv.TeamID)
 	}
 
-	// Flatten the teamIDs map and set state
-	var tids []int
-	for id, _ := range teamIDs {
-		tids = append(tids, id)
-	}
-	es.Set("team_ids", tids)
+	//// Flatten the teamIDs map and set state
+	//var tids []int
+	//for id, _ := range teamIDs {
+	//	tids = append(tids, id)
+	//}
+	//es.Set("team_ids", tids)
+	es.Set("team_ids", teamIDs)
 
 	if es.err != nil {
 		l.Err(es.err).Msg("Error setting state")
@@ -278,7 +280,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
-	teamIDs := getValueAsIntSlice(d, "team_ids")
+	teamIDs := getUserTeamIDs(d)
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
@@ -335,4 +337,14 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 
 	l.Debug().Msg("Successfully deleted rollbar_user resource")
 	return nil
+}
+
+// getUserTeamIDs gets the team IDs for a rollbar_user resource.
+func getUserTeamIDs(d *schema.ResourceData) []int {
+	set := d.Get("team_ids").(*schema.Set)
+	teamIDs := make([]int, set.Len())
+	for i, teamID := range set.List() {
+		teamIDs[i] = teamID.(int)
+	}
+	return teamIDs
 }
