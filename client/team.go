@@ -74,7 +74,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 	r := resp.Result().(*teamCreateResponse)
 	t = r.Result
 	l.Debug().
-		Interface("team", t).
+		Int("id", t.ID).
 		Msg("Successfully created new team")
 	return t, nil
 }
