@@ -227,11 +227,11 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 
 		// If state contains a Rollbar user ID, check the users teams
 		if userID, err := s.getResourceAttrInt(ts, resourceName, "user_id"); err == nil {
-			foundTeamIDs, err := c.ListUserTeams(userID)
+			existingTeams, err := c.ListUserCustomTeams(userID)
 			s.Nil(err)
 			for teamID, _ := range teamFound {
-				for _, id := range foundTeamIDs {
-					if id == teamID {
+				for _, t := range existingTeams {
+					if t.ID == teamID {
 						teamFound[teamID] = true
 					}
 				}
