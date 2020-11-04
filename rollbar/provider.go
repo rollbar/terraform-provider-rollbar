@@ -107,11 +107,11 @@ func (es *errSetter) Set(key string, value interface{}) {
 	es.err = es.d.Set(key, value)
 }
 
+*/
+
 func mustSet(d *schema.ResourceData, key string, value interface{}) {
 	err := d.Set(key, value)
 	if err != nil {
 		panic(err)
 	}
 }
-
-*/
