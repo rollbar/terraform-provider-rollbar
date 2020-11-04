@@ -222,7 +222,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 }
 
 // RemoveUserFromTeam removes a user from a Rollbar team.
-func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
+func (c *RollbarApiClient) RemoveUserFromTeam(userID, teamID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
 	l.Debug().Msg("Removing user from team")
 	resp, err := c.Resty.R().

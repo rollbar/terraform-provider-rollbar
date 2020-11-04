@@ -205,11 +205,11 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
 	r := responderFromFixture("team/remove_user.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err := s.client.RemoveUserFromTeam(teamID, userID)
+	err := s.client.RemoveUserFromTeam(userID, teamID)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
-		err = s.client.RemoveUserFromTeam(teamID, userID) // non-existent user
+		err = s.client.RemoveUserFromTeam(userID, teamID) // non-existent user
 		return err
 	})
 
@@ -219,7 +219,7 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	u = strings.ReplaceAll(u, "{userId}", "0")
 	r = responderFromFixture("team/remove_user_not_found.json", http.StatusUnprocessableEntity)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err = s.client.RemoveUserFromTeam(teamID, 0) // non-existent user
+	err = s.client.RemoveUserFromTeam(0, teamID) // non-existent user
 	s.Equal(ErrNotFound, err)
 }
 
