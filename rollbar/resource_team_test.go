@@ -70,7 +70,7 @@ func (s *AccSuite) TestAccTeam() {
 			{
 				PreConfig: func() {
 					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
-					teams, err := c.ListTeams()
+					teams, err := c.ListCustomTeams()
 					s.Nil(err)
 					for _, t := range teams {
 						if t.Name == teamName1 {
@@ -160,7 +160,7 @@ func sweepResourceTeam(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar teams from acceptance test runs.")
 
 	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
-	teams, err := c.ListTeams()
+	teams, err := c.ListCustomTeams()
 	if err != nil {
 		log.Err(err).Send()
 		return err
