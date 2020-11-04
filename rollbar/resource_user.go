@@ -129,12 +129,12 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	// Teams to which this user currently belongs
 	teamsCurrent := make(map[int]bool)
 	if userID != 0 { // If user doesn't exist, they don't belong to any teams
-		ut, err := c.ListUserCustomTeams(userID)
+		teams, err := c.ListUserCustomTeams(userID)
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
-		for _, t := range ut {
+		for _, t := range teams {
 			teamsCurrent[t.ID] = true
 		}
 	}
