@@ -222,3 +222,27 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	err = s.client.RemoveUserFromTeam(teamID, 0) // non-existent user
 	s.Equal(ErrNotFound, err)
 }
+
+// TestListCustomTeams tests listing custom defined teams.
+func (s *Suite) TestListCustomTeams() {
+	u := apiUrl + pathTeamList
+	expected := []Team{
+		{
+			ID:          676971,
+			AccountID:   317418,
+			Name:        "my-test-team",
+			AccessLevel: "standard",
+		},
+	}
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.ListCustomTeams()
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListCustomTeams()
+		return err
+	})
+}

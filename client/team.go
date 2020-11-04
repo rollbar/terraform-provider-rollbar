@@ -99,8 +99,31 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 	}
 	r := resp.Result().(*teamListResponse)
 	teams = r.Result
-	log.Debug().Msg("Successfully listed teams")
+	count := len(teams)
+	log.Debug().Int("count", count).Msg("Listed teams")
 	return teams, nil
+}
+
+// ListCustomTeams lists all custom defined teams, excluding system teams
+// "Everyone" and "Owners".
+// FIXME: This function needs a better name.
+func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
+	log.Info().Msg("Listing custom teams")
+	var customTeams []Team
+	allTeams, err := c.ListTeams()
+	if err != nil {
+		log.Err(err).Msg("Error listing custom teams")
+		return customTeams, err
+	}
+	for _, t := range allTeams {
+		if t.Name == "Everyone" || t.Name == "Owners" {
+			continue
+		}
+		customTeams = append(customTeams, t)
+	}
+	count := len(customTeams)
+	log.Debug().Int("count", count).Msg("Listed custom teams")
+	return customTeams, nil
 }
 
 // ReadTeam reads a Rollbar team from the API. If no matching team is found,
@@ -110,7 +133,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	l := log.With().
 		Int("id", id).
 		Logger()
-	l.Debug().Msg("Reading Rollbar team from API")
+	l.Debug().Msg("Reading team from API")
 
 	// Sanity check
 	if id == 0 {
@@ -135,8 +158,9 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	r := resp.Result().(*teamReadResponse)
 	t = r.Result
 	l.Debug().
-		Interface("team", t).
-		Msg("Successfully read team")
+		Int("id", t.ID).
+		Str("name", t.Name).
+		Msg("Read team")
 	return t, nil
 }
 
@@ -167,7 +191,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 		l.Err(err).Msg("Error deleting team")
 		return err
 	}
-	l.Debug().Msg("Successfully deleted team")
+	l.Debug().Msg("Deleted team")
 	return nil
 }
 
@@ -197,7 +221,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 		l.Err(err).Msg("Error assigning user to team")
 		return err
 	}
-	l.Debug().Msg("Successfully assigned user to team")
+	l.Debug().Msg("Assigned user to team")
 	return nil
 }
 
