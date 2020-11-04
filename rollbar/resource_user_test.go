@@ -203,14 +203,17 @@ func (s *AccSuite) TestAccUserInvalidConfig() {
 	})
 }
 
-// checkUserTeams checks team memberships on a rollbar_user resource.
+// checkUserTeams checks a rollbar_user resource's teams
 func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
+		l := log.With().Logger()
+		l.Info().Msg("Checking rollbar_user resource's teams")
 		c := s.client()
 		email, err := s.getResourceIDString(ts, resourceName)
 		s.Nil(err)
 
-		teamFound := make(map[int]bool)
+		var expectedTeamIDs []int
+		teamFound := make(map[int]bool) // Which teams have been found for this user
 		teamCount, err := s.getResourceAttrInt(ts, resourceName, "team_ids.#")
 		s.Nil(err)
 		for i := 0; i < teamCount; i++ {
@@ -218,7 +221,9 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 			teamID, err := s.getResourceAttrInt(ts, resourceName, attr)
 			s.Nil(err)
 			teamFound[teamID] = false
+			expectedTeamIDs = append(expectedTeamIDs, teamID)
 		}
+		l = l.With().Ints("expectedTeamIDs", expectedTeamIDs).Logger()
 
 		// If state contains a Rollbar user ID, check the users teams
 		if userID, err := s.getResourceAttrInt(ts, resourceName, "user_id"); err == nil {
@@ -232,6 +237,9 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 				}
 			}
 		}
+		log.Debug().
+			Interface("teamFound", teamFound).
+			Msg("Team memberships")
 
 		// If we are expecting team IDs that were not found, check the user's
 		// invitations.
@@ -241,6 +249,9 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 				remaining++
 			}
 		}
+		log.Debug().
+			Int("count", remaining).
+			Msg("Count of expected teams where user is not yet a member")
 		if remaining > 0 {
 			invitations, err := c.FindInvitations(email)
 			s.Nil(err)
@@ -252,12 +263,15 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 				}
 			}
 		}
+		log.Debug().
+			Interface("teamFound", teamFound).
+			Msg("Team invitations plus memberships")
 
 		// Error if any team was not found
 		for teamID, found := range teamFound {
 			if !found {
 				msg := fmt.Sprintf("team %d not found", teamID)
-				log.Debug().Msg(msg)
+				log.Error().Msg(msg)
 				return fmt.Errorf(msg)
 			}
 		}
