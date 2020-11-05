@@ -75,8 +75,9 @@ func (s *AccSuite) TestAccUserCreateAssign() {
 	})
 }
 
-// TestAccUserImport tests importing a rollbar_user resource.
-func (s *AccSuite) TestAccUserImport() {
+// TestAccUserImportInvited tests importing a rollbar_user resource based on an
+// invited email.
+func (s *AccSuite) TestAccUserImportInvited() {
 	rn := "rollbar_user.test_user"
 	// language=hcl
 	tmpl := `
@@ -102,10 +103,39 @@ func (s *AccSuite) TestAccUserImport() {
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateCheck: func(iss []*terraform.InstanceState) error {
-					log.Warn().Interface("iss", iss).Send()
-					return nil
-				},
+			},
+		},
+	})
+}
+
+// tests importing a rollbar_user resource based on an
+// invited email.
+func (s *AccSuite) TestAccUserImportRegistered() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+tf-acc-test-terraform-provider-rollbar@gmail.com"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
+			{
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
