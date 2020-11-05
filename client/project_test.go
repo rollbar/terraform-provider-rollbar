@@ -31,8 +31,6 @@ import (
 	"strings"
 )
 
-var errResult500 = ErrorResult{Err: 500, Message: "Internal Server Error"}
-
 func (s *Suite) TestListProjects() {
 	u := apiUrl + pathProjectList
 
