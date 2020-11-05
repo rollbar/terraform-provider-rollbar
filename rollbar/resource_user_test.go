@@ -119,7 +119,7 @@ func (s *AccSuite) TestAccUserImportRegistered() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-terraform-provider-rollbar@gmail.com"
+			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
