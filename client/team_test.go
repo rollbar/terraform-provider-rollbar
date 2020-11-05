@@ -246,3 +246,23 @@ func (s *Suite) TestListCustomTeams() {
 		return err
 	})
 }
+
+func (s *Suite) TestFindTeamID() {
+	expected := 676971
+	u := apiUrl + pathTeamList
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.FindTeamID("my-test-team")
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	// Non-existent team name
+	_, err = s.client.FindTeamID("does-not-exist")
+	s.Equal(ErrNotFound, err)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindTeamID("my-test-team")
+		return err
+	})
+}

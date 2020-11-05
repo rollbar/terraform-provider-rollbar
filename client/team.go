@@ -253,6 +253,27 @@ func (c *RollbarApiClient) RemoveUserFromTeam(userID, teamID int) error {
 
 }
 
+// FindTeamID finds the ID for a team.
+func (c *RollbarApiClient) FindTeamID(name string) (int, error) {
+	l := log.With().
+		Str("team_name", name).
+		Logger()
+	l.Debug().Msg("Finding team ID")
+	teams, err := c.ListTeams()
+	if err != nil {
+		l.Err(err).Send()
+		return 0, err
+	}
+	for _, t := range teams {
+		if t.Name == name {
+			l.Debug().Int("team_id", t.ID).Msg("Found team ID")
+			return t.ID, nil
+		}
+	}
+	l.Debug().Msg("Could not find team ID")
+	return 0, ErrNotFound
+}
+
 // filterSystemTeams filters out the system teams "Everyone" and "Owners" from a
 // list of Rollbar teams.
 func filterSystemTeams(teams []Team) []Team {
