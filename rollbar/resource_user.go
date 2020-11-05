@@ -137,7 +137,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	// Teams to which this user should be added
 	var teamsToJoin []int
-	for id, _ := range teamsExpected {
+	for id := range teamsExpected {
 		if !teamsCurrent[id] {
 			teamsToJoin = append(teamsToJoin, id)
 		}
@@ -169,7 +169,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	// Teams from which this user should be removed
 	var teamsToRemove []int
-	for id, _ := range teamsCurrent {
+	for id := range teamsCurrent {
 		if !teamsExpected[id] {
 			teamsToRemove = append(teamsToRemove, id)
 		}

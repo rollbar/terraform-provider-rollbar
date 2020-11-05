@@ -459,7 +459,7 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 		if userID, err := s.getResourceAttrInt(ts, resourceName, "user_id"); err == nil {
 			existingTeams, err := c.ListUserCustomTeams(userID)
 			s.Nil(err)
-			for teamID, _ := range teamFound {
+			for teamID := range teamFound {
 				for _, t := range existingTeams {
 					if t.ID == teamID {
 						teamFound[teamID] = true
