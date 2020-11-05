@@ -37,9 +37,9 @@ func resourceUser() *schema.Resource {
 		UpdateContext: resourceUserUpdate,
 		DeleteContext: resourceUserDelete,
 
-		//Importer: &schema.ResourceImporter{
-		//	StateContext: schema.ImportStatePassthroughContext,
-		//},
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceUserImporter,
+		},
 
 		Schema: map[string]*schema.Schema{
 			// Required
@@ -343,16 +343,44 @@ func getUserTeamIDs(d *schema.ResourceData) []int {
 	return teamIDs
 }
 
-//func resourceUserImporter(ctx context.Context, data *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-//	email := data.Id()
-//	l := log.With().Str("email", email).Logger()
-//	l.Info().Msg("Importing rollbar_user resource")
-//	c := meta.(*client.RollbarApiClient)
-//	userID, err := c.FindUserID(email)
-//	if err != nil {
-//		l.Err(err).Send()
-//		return nil, err
-//	}
-//	mustSet(data, "user_id", userID)
-//	return []*schema.ResourceData{data}, nil
-//}
+func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	email := d.Id()
+	mustSet(d, "email", email)
+	teamIDsSet := d.Get("team_ids").(*schema.Set)
+	l := log.With().
+		Str("email", email).
+		Interface("team_ids", teamIDsSet.List()).
+		Logger()
+	l.Info().Msg("Importing rollbar_user resource")
+
+	var teamIDs []int
+	c := meta.(*client.RollbarApiClient)
+
+	invitations, err := c.FindInvitations(email)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	mustSet(d, "status", "invited")
+	for _, inv := range invitations {
+		teamIDs = append(teamIDs, inv.TeamID)
+	}
+
+	userID, err := c.FindUserID(email)
+	if err == nil {
+		mustSet(d, "user_id", userID)
+		mustSet(d, "status", "registered")
+		teams, err := c.ListUserTeams(userID)
+		if err != nil {
+			l.Err(err).Send()
+			return nil, err
+		}
+		for _, t := range teams {
+			teamIDs = append(teamIDs, t.ID)
+		}
+	}
+
+	mustSet(d, "team_ids", teamIDs)
+
+	return []*schema.ResourceData{d}, nil
+}

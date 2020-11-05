@@ -76,7 +76,7 @@ func (s *AccSuite) TestAccUserCreateAssign() {
 }
 
 // TestAccUserImport tests importing a rollbar_user resource.
-func (s *AccSuite) DontTestAccUserImport() {
+func (s *AccSuite) TestAccUserImport() {
 	rn := "rollbar_user.test_user"
 	// language=hcl
 	tmpl := `
