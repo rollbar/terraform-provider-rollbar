@@ -126,11 +126,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		log.Err(err).Msg("Error converting Id to integer")
-		return diag.FromErr(err)
-	}
+	id := mustGetID(d)
 	l := log.With().
 		Int("id", id).
 		Logger()
@@ -172,16 +168,13 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 */
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectId, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	projectId := mustGetID(d)
 	l := log.With().
 		Int("projectId", projectId).
 		Logger()
 	l.Info().Msg("Deleting Rollbar project resource")
 	c := m.(*client.RollbarApiClient)
-	err = c.DeleteProject(projectId)
+	err := c.DeleteProject(projectId)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)

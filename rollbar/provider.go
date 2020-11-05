@@ -32,6 +32,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"strconv"
 	"strings"
 )
 
@@ -115,4 +116,14 @@ func mustSet(d *schema.ResourceData, key string, value interface{}) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// mustGetID gets the ID of the resource as an integer, or panics if string ID
+// value cannot be cast to int.
+func mustGetID(d *schema.ResourceData) int {
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		panic(err)
+	}
+	return id
 }

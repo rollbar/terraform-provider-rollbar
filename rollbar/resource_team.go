@@ -59,10 +59,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	id := mustGetID(d)
 	l := log.With().
 		Int("id", id).
 		Logger()
@@ -85,14 +82,12 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 }
 
 func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	id := mustGetID(d)
+
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
-	err = c.DeleteTeam(id)
+	err := c.DeleteTeam(id)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_team resource")
 		return diag.FromErr(err)
