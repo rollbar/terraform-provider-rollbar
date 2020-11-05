@@ -24,7 +24,7 @@ func (s *AccSuite) TestAccUserCreateInvite() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName, s.randName)
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -91,7 +91,7 @@ func (s *AccSuite) TestAccUserImportInvited() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName, s.randName)
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -184,7 +184,7 @@ func (s *AccSuite) TestAccInvitedUserAddTeam() {
 		}
 	`
 	configAddTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -249,7 +249,7 @@ func (s *AccSuite) TestAccInvitedUserRemoveTeam() {
 		}
 	`
 	configRemoveTeam := fmt.Sprintf(tmpl, s.randName, s.randName, s.randName)
-	resource.Test(s.T(), resource.TestCase{
+	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
