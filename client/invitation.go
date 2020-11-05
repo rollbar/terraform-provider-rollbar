@@ -241,6 +241,7 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 		// Team may have been deleted by another process after we listed all
 		// teams, but before we queried the team for invitations.  Therefore we
 		// ignore ErrNotFound.
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/88
 		if err != nil && err != ErrNotFound {
 			l.Err(err).
 				Str("team_name", t.Name).
