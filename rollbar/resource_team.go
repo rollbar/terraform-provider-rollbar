@@ -66,14 +66,15 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	l := log.With().
 		Int("id", id).
 		Logger()
-	l.Info().Msg("Reading Rollbar team from API")
+	l.Info().Msg("Reading rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
 	t, err := c.ReadTeam(id)
 	if err == client.ErrNotFound {
+		l.Err(err).Send()
 		return handleErrNotFound(d, "team")
 	}
 	if err != nil {
-		l.Err(err).Msg("error reading team resource")
+		l.Err(err).Msg("error reading rollbar_team resource")
 		return diag.FromErr(err)
 	}
 	mustSet(d, "name", t.Name)
@@ -89,7 +90,7 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	l := log.With().Int("id", id).Logger()
-	l.Info().Msg("Deleting team resource")
+	l.Info().Msg("Deleting rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
 	err = c.DeleteTeam(id)
 	if err != nil {
