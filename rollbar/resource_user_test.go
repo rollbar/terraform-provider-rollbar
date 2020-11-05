@@ -662,6 +662,7 @@ func (s *AccSuite) checkUserIsInvited(userEmail, teamName string) resource.TestC
 		teamID, err := c.FindTeamID(teamName)
 		s.Nil(err)
 		invitations, err := c.ListPendingInvitations(teamID)
+		s.Nil(err)
 		for _, inv := range invitations {
 			if inv.ToEmail == userEmail {
 				l.Debug().Msg("Confirmed user is invited to team")
@@ -687,6 +688,7 @@ func (s *AccSuite) checkUserIsNotInvited(userEmail, teamName string) resource.Te
 		teamID, err := c.FindTeamID(teamName)
 		s.Nil(err)
 		invitations, err := c.ListPendingInvitations(teamID)
+		s.Nil(err)
 		for _, inv := range invitations {
 			if inv.ToEmail == userEmail {
 				err = fmt.Errorf("user %s is invited to team %s", userEmail, teamName)
