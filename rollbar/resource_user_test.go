@@ -91,7 +91,7 @@ func (s *AccSuite) TestAccUserImportInvited() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -124,7 +124,7 @@ func (s *AccSuite) TestAccUserImportRegistered() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
