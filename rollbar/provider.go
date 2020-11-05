@@ -109,6 +109,7 @@ func (es *errSetter) Set(key string, value interface{}) {
 
 */
 
+// mustSet sets a value for a key in a schema, or panics on error.
 func mustSet(d *schema.ResourceData, key string, value interface{}) {
 	err := d.Set(key, value)
 	if err != nil {
