@@ -255,6 +255,9 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 			invs = append(invs, inv)
 		}
 	}
+	if len(invs) == 0 {
+		return invs, ErrNotFound
+	}
 	l.Debug().
 		Int("invitation_count", len(invs)).
 		Msg("Successfully found invitations")
