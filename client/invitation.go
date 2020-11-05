@@ -238,7 +238,10 @@ func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err
 	var allInvs []Invitation
 	for _, t := range teams {
 		teamInvs, err := c.ListInvitations(t.ID)
-		if err != nil {
+		// Team may have been deleted by another process after we listed all
+		// teams, but before we queried the team for invitations.  Therefore we
+		// ignore ErrNotFound.
+		if err != nil && err != ErrNotFound {
 			l.Err(err).
 				Str("team_name", t.Name).
 				Msg("error finding invitations")
