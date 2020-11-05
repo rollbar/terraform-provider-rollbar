@@ -480,3 +480,191 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 		return nil
 	}
 }
+
+// TestAccMoveUserBetweenTeams tests moving a Rollbar user from one team to another.
+func (s *AccSuite) TestAccUserMoveBetweenTeams() {
+	team1Name := fmt.Sprintf("%s-team-1", s.randName)
+	team2Name := fmt.Sprintf("%s-team-2", s.randName)
+	user1Email := "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+	user2Email := fmt.Sprintf("jason.mcvetta+%s@gmail.com", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s"
+		}
+
+		# Registered user
+		resource "rollbar_user" "test_user_1" {
+			email = "%s"
+			team_ids = [ rollbar_team.test_team_1.id ]
+		}
+
+		# Invited user
+		resource "rollbar_user" "test_user_2" {
+			email = "%s"
+			team_ids = [ rollbar_team.test_team_1.id ]
+		}
+	`
+	configOrigin := fmt.Sprintf(tmpl, team1Name, team2Name, user1Email, user2Email)
+	// language=hcl
+	tmpl = `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s"
+		}
+
+		# Registered user
+		resource "rollbar_user" "test_user_1" {
+			email = "%s"
+			team_ids = [ rollbar_team.test_team_2.id ]
+		}
+
+		# Invited user
+		resource "rollbar_user" "test_user_2" {
+			email = "%s"
+			team_ids = [ rollbar_team.test_team_2.id ]
+		}
+	`
+	configChangeTeams := fmt.Sprintf(tmpl, team1Name, team2Name, user1Email, user2Email)
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: configOrigin,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("rollbar_team.test_team_1", "name", team1Name),
+					resource.TestCheckResourceAttr("rollbar_team.test_team_2", "name", team2Name),
+					resource.TestCheckTypeSetElemAttrPair("rollbar_user.test_user_1", "team_ids.0", "rollbar_team.test_team_1", "id"),
+					resource.TestCheckTypeSetElemAttrPair("rollbar_user.test_user_2", "team_ids.0", "rollbar_team.test_team_1", "id"),
+					s.checkUserIsOnTeam(user1Email, team1Name),
+					s.checkUserIsInvited(user2Email, team1Name),
+				),
+			},
+			{
+				Config: configChangeTeams,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckTypeSetElemAttrPair("rollbar_user.test_user_1", "team_ids.0", "rollbar_team.test_team_2", "id"),
+					resource.TestCheckTypeSetElemAttrPair("rollbar_user.test_user_2", "team_ids.0", "rollbar_team.test_team_2", "id"),
+					s.checkUserIsOnTeam(user1Email, team2Name),
+					s.checkUserIsInvited(user2Email, team2Name),
+					s.checkUserIsNotOnTeam(user1Email, team1Name),
+					s.checkUserIsNotInvited(user2Email, team1Name),
+				),
+			},
+		},
+	})
+}
+
+// checkUserIsOnTeam checks that a Rollbar user is on a team.
+func (s *AccSuite) checkUserIsOnTeam(userEmail, teamName string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		l := log.With().
+			Str("user_email", userEmail).
+			Str("team_name", teamName).
+			Logger()
+		l.Info().Msg("Checking that user is member of team")
+		c := s.client()
+
+		// Find user ID
+		userID, err := c.FindUserID(userEmail)
+		s.Nil(err)
+		s.NotZero(userID)
+
+		teams, err := c.ListUserTeams(userID)
+		s.Nil(err)
+		for _, t := range teams {
+			if t.Name == teamName {
+				l.Debug().Msg("Confirmed that user is member of team")
+				return nil
+			}
+		}
+		err = fmt.Errorf("could not confirm that user %s is member of team %s", userEmail, teamName)
+		l.Err(err).Send()
+		return err
+	}
+}
+
+// checkUserIsNotOnTeam checks that a Rollbar user is not on a team.
+func (s *AccSuite) checkUserIsNotOnTeam(userEmail, teamName string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		l := log.With().
+			Str("user_email", userEmail).
+			Str("team_name", teamName).
+			Logger()
+		l.Info().Msg("Checking that user is not member of team")
+		c := s.client()
+
+		userID, err := c.FindUserID(userEmail)
+		s.Nil(err)
+		teams, err := c.ListUserTeams(userID)
+		s.Nil(err)
+		for _, t := range teams {
+			if t.Name == teamName {
+				err = fmt.Errorf("check failed, user %s is member of team %s", userEmail, teamName)
+				l.Err(err).Send()
+				return err
+			}
+		}
+		l.Debug().Msg("Confirmed that user is not member of team")
+		return nil
+	}
+}
+
+// checkUserIsInvited checks that a Rollbar user has been invited to a team.
+func (s *AccSuite) checkUserIsInvited(userEmail, teamName string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		l := log.With().
+			Str("user_email", userEmail).
+			Str("team_name", teamName).
+			Logger()
+		l.Info().Msg("Checking that user has been invited to team")
+		c := s.client()
+
+		teamID, err := c.FindTeamID(teamName)
+		s.Nil(err)
+		invitations, err := c.ListPendingInvitations(teamID)
+		for _, inv := range invitations {
+			if inv.ToEmail == userEmail {
+				l.Debug().Msg("Confirmed user is invited to team")
+				return nil
+			}
+		}
+		err = fmt.Errorf("could not confirm user %s is invited to team %s", userEmail, teamName)
+		l.Err(err).Send()
+		return err
+	}
+}
+
+// checkUserIsInvited checks that a Rollbar user is not invited to a team.
+func (s *AccSuite) checkUserIsNotInvited(userEmail, teamName string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		l := log.With().
+			Str("user_email", userEmail).
+			Str("team_name", teamName).
+			Logger()
+		l.Info().Msg("Checking that user is not invited to team")
+		c := s.client()
+
+		teamID, err := c.FindTeamID(teamName)
+		s.Nil(err)
+		invitations, err := c.ListPendingInvitations(teamID)
+		for _, inv := range invitations {
+			if inv.ToEmail == userEmail {
+				err = fmt.Errorf("user %s is invited to team %s", userEmail, teamName)
+				l.Err(err).Send()
+				return err
+			}
+		}
+		l.Debug().Msg("Confirmed user is not invited to team")
+		return nil
+	}
+}
