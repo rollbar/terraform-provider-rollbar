@@ -226,51 +226,51 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	errMsg := "Error removing user from team"
 
 	// Teams from which this user should be removed
-	var teamsToRemove []int
+	teamsToRemove := make(map[int]bool)
 	for id := range args.teamsCurrent {
 		if !args.teamsExpected[id] {
-			teamsToRemove = append(teamsToRemove, id)
+			teamsToRemove[id] = true
 		}
 	}
-	l.Debug().Ints("teams_to_remove", teamsToRemove).Msg("Teams to leave")
+	l.Debug().Interface("teams_to_remove", teamsToRemove).Msg("Teams to leave")
 
 	// Remove user from those teams
 	if args.userID != 0 {
 		l.Debug().Msg("Removing user from teams")
-		for _, teamID := range teamsToRemove {
-			err := args.client.RemoveUserFromTeam(args.userID, teamID)
-			if err != nil {
-				l.Err(err).Msg(errMsg)
-				return err
+		currentTeams, err := args.client.ListUserCustomTeams(args.userID)
+		if err != nil {
+			l.Err(err).Msg(errMsg)
+			return err
+
+		}
+		for _, t := range currentTeams {
+			if teamsToRemove[t.ID] {
+				err := args.client.RemoveUserFromTeam(args.userID, t.ID)
+				if err != nil {
+					l.Err(err).Msg(errMsg)
+					return err
+				}
 			}
 		}
 	}
 
-	// Invitations which should be cancelled
-	var invitationsToCancel []int
+	// Cancel invitations
 	invitations, err := args.client.FindPendingInvitations(args.email)
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Msg(errMsg)
 		return err
 	}
 	for _, inv := range invitations {
-		if !args.teamsExpected[inv.TeamID] {
-			invitationsToCancel = append(invitationsToCancel, inv.ID)
-		}
-	}
-	l.Debug().
-		Int("count", len(invitationsToCancel)).
-		Msg("Canceling invitations")
+		if teamsToRemove[inv.TeamID] {
+			err := args.client.CancelInvitation(inv.ID)
+			if err != nil {
+				l.Err(err).Msg(errMsg)
+				return err
+			}
 
-	// Cancel those invitations
-	for _, invitationID := range invitationsToCancel {
-		err := args.client.CancelInvitation(invitationID)
-		if err != nil {
-			l.Err(err).Msg(errMsg)
-			return err
 		}
-	}
 
+	}
 	return nil
 }
 
