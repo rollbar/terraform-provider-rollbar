@@ -442,8 +442,9 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 		email, err := s.getResourceIDString(ts, resourceName)
 		s.Nil(err)
 
-		var expectedTeamIDs []int
-		teamFound := make(map[int]bool) // Which teams have been found for this user
+		teamExpected := make(map[int]bool) // Teams user is expected to have
+		teamFound := make(map[int]bool)    // Teams found for this user
+		var unexpectedTeams []int
 		teamCount, err := s.getResourceAttrInt(ts, resourceName, "team_ids.#")
 		s.Nil(err)
 		for i := 0; i < teamCount; i++ {
@@ -451,49 +452,49 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 			teamID, err := s.getResourceAttrInt(ts, resourceName, attr)
 			s.Nil(err)
 			teamFound[teamID] = false
-			expectedTeamIDs = append(expectedTeamIDs, teamID)
+			teamExpected[teamID] = true
 		}
-		l = l.With().Ints("expectedTeamIDs", expectedTeamIDs).Logger()
+		l = l.With().Interface("teamExpected", teamExpected).Logger()
 
-		// If state contains a Rollbar user ID, check the users teams
+		// Check team memberships, if state contains a Rollbar user ID.
 		if userID, err := s.getResourceAttrInt(ts, resourceName, "user_id"); err == nil {
-			existingTeams, err := c.ListUserCustomTeams(userID)
+			currentTeams, err := c.ListUserCustomTeams(userID)
 			s.Nil(err)
 			for teamID := range teamFound {
-				for _, t := range existingTeams {
+				// Did we find an expected team?
+				for _, t := range currentTeams {
 					if t.ID == teamID {
 						teamFound[teamID] = true
 					}
 				}
-			}
-		}
-		log.Debug().
-			Interface("teamFound", teamFound).
-			Msg("Existing team memberships")
-
-		// If we are expecting team IDs that were not found, check the user's
-		// invitations.
-		remaining := 0
-		for _, found := range teamFound {
-			if !found {
-				remaining++
-			}
-		}
-		log.Debug().
-			Int("count", remaining).
-			Msg("Count of expected teams where user is not yet a member")
-		if remaining > 0 {
-			invitations, err := c.FindInvitations(email)
-			s.Nil(err)
-			for teamID, _ := range teamFound {
-				for _, inv := range invitations {
-					if inv.TeamID == teamID {
-						teamFound[teamID] = true
-					}
+				// Did we find an unexpected team?
+				if !teamExpected[teamID] {
+					unexpectedTeams = append(unexpectedTeams, teamID)
 				}
 			}
 		}
-		log.Debug().
+		l.Debug().
+			Interface("teamFound", teamFound).
+			Msg("Existing team memberships")
+
+		// Check invitations
+		invitations, err := c.FindInvitations(email)
+		s.Nil(err)
+		// Did we find any expected teams?
+		for teamID, _ := range teamFound {
+			for _, inv := range invitations {
+				if inv.TeamID == teamID {
+					teamFound[teamID] = true
+				}
+			}
+		}
+		// Did we find any unexpected teams?
+		for _, inv := range invitations {
+			if !teamExpected[inv.TeamID] {
+				unexpectedTeams = append(unexpectedTeams, inv.TeamID)
+			}
+		}
+		l.Debug().
 			Interface("teamFound", teamFound).
 			Msg("Team invitations plus memberships")
 
@@ -501,12 +502,26 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 		for teamID, found := range teamFound {
 			if !found {
 				msg := fmt.Sprintf("team %d not found", teamID)
-				log.Error().Msg(msg)
+				l.Error().Msg(msg)
 				return fmt.Errorf(msg)
 			}
 		}
 
-		// Test passed!
+		// Error if any unexpected team was found
+		if len(unexpectedTeams) != 0 {
+			for _, teamID := range unexpectedTeams {
+				t, err := c.ReadTeam(teamID)
+				s.Nil(err)
+				l.Error().
+					Interface("team", t).
+					Msg("Found unexpected team")
+			}
+			msg := fmt.Sprintf("found unexpected teams: %v", unexpectedTeams)
+			log.Error().Msg(msg)
+			return fmt.Errorf(msg)
+		}
+
+		// Check passed!
 		return nil
 	}
 }
