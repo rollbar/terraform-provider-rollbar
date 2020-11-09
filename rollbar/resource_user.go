@@ -44,13 +44,15 @@ func resourceUser() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required
 			"email": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Description: "The user's email address",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 			},
 			"team_ids": {
-				Type:     schema.TypeSet,
-				Required: true,
+				Description: "IDs of the teams to which this user belongs",
+				Type:        schema.TypeSet,
+				Required:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
@@ -58,16 +60,19 @@ func resourceUser() *schema.Resource {
 
 			// Computed
 			"username": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "The user's username",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"user_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "The ID of the user",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Status of the user.  Either `invited` or `subscribed`",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
