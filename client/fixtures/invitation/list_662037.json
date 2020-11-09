@@ -1,0 +1,41 @@
+{
+  "err": 0,
+  "result": [
+    {
+      "id": 153556,
+      "from_user_id": 5325,
+      "team_id": 662037,
+      "to_email": "jason.mcvetta+test0@gmail.com",
+      "status": "canceled",
+      "date_created": 1603117463,
+      "date_redeemed": null
+    },
+    {
+      "id": 153644,
+      "from_user_id": 5325,
+      "team_id": 662037,
+      "to_email": "jason.mcvetta+test0@gmail.com",
+      "status": "canceled",
+      "date_created": 1603189778,
+      "date_redeemed": null
+    },
+    {
+      "id": 153646,
+      "from_user_id": 5325,
+      "team_id": 662037,
+      "to_email": "jason.mcvetta+test0@gmail.com",
+      "status": "canceled",
+      "date_created": 1603190899,
+      "date_redeemed": null
+    },
+    {
+      "id": 153648,
+      "from_user_id": 5325,
+      "team_id": 662037,
+      "to_email": "jason.mcvetta+test0@gmail.com",
+      "status": "pending",
+      "date_created": 1603191497,
+      "date_redeemed": null
+    }
+  ]
+}

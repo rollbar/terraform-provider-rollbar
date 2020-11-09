@@ -55,8 +55,9 @@ func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 		return
 	}
 	users = resp.Result().(*userListResponse).Result.Users
+	count := len(users)
 	log.Debug().
-		Interface("users", users).
+		Int("count", count).
 		Msg("Successfully listed users")
 	return
 }
@@ -87,9 +88,9 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 	return
 }
 
-// UserIdFromEmail finds the user ID for a given email.  WARNING: this is a
+// FindUserID finds the user ID for a given email.  WARNING: this is a
 // potentially slow call.  Don't repeat it unnecessarily.
-func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
+func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 	l := log.With().Str("email", email).Logger()
 	l.Debug().Msg("Getting user ID from email")
 	users, err := c.ListUsers()
@@ -103,6 +104,40 @@ func (c *RollbarApiClient) UserIdFromEmail(email string) (int, error) {
 		}
 	}
 	return 0, ErrNotFound
+}
+
+// ListUserTeams lists a Rollbar user's teams.
+func (c *RollbarApiClient) ListUserTeams(userID int) (teams []Team, err error) {
+	l := log.With().Int("userID", userID).Logger()
+	l.Debug().Msg("Reading teams for Rollbar user")
+	u := apiUrl + pathUserTeams
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{"userId": strconv.Itoa(userID)}).
+		SetResult(userTeamListResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	if err != nil {
+		log.Err(err).Msg("Error reading Rollbar user's teams from API")
+		return
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error reading Rollbar user's teams from API")
+		return
+	}
+	teams = resp.Result().(*userTeamListResponse).Result.Teams
+	log.Debug().
+		Interface("teams", teams).
+		Msg("Successfully read Rollbar user's teams from API")
+	return
+}
+
+// ListUserCustomTeams lists a Rollbar user's custom defined teams, excluding
+// system teams "Everyone" and "Owners".
+func (c *RollbarApiClient) ListUserCustomTeams(userID int) (teams []Team, err error) {
+	teams, err = c.ListUserTeams(userID)
+	teams = filterSystemTeams(teams)
+	return
 }
 
 /*
@@ -119,4 +154,11 @@ type userListResponse struct {
 type userReadResponse struct {
 	Error  int  `json:"err"`
 	Result User `json:"result"`
+}
+
+type userTeamListResponse struct {
+	Error  int `json:"err"`
+	Result struct {
+		Teams []Team `json:"teams"`
+	} `json:"result"`
 }

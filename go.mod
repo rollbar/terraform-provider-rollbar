@@ -2,6 +2,10 @@ module github.com/rollbar/terraform-provider-rollbar
 
 go 1.14
 
+// Until https://github.com/rs/zerolog/pull/266 or https://github.com/rs/zerolog/pull/267
+// is included in the next release
+replace github.com/rs/zerolog => github.com/jmcvetta/zerolog v1.20.1-0.20201102133610-4cc56b8f3f5a
+
 require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect

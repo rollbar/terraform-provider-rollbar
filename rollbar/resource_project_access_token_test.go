@@ -141,7 +141,7 @@ func (s *AccSuite) configResourceProjectAccessToken() string {
 			status = "enabled"
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenUpdatedRateLimit() string {
@@ -160,7 +160,7 @@ func (s *AccSuite) configResourceProjectAccessTokenUpdatedRateLimit() string {
 			rate_limit_window_count = 500
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenUpdatedScopes() string {
@@ -179,7 +179,7 @@ func (s *AccSuite) configResourceProjectAccessTokenUpdatedScopes() string {
 			rate_limit_window_count = 500
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenNonExistentProject() string {
@@ -213,7 +213,7 @@ func (s *AccSuite) configResourceProjectAccessTokenInvalidScopes() string {
 			rate_limit_window_count = 500
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenInvalidStatus() string {
@@ -232,7 +232,7 @@ func (s *AccSuite) configResourceProjectAccessTokenInvalidStatus() string {
 			rate_limit_window_count = 500
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 // checkProjectAccessToken tests that the newly created project exists.

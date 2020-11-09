@@ -24,6 +24,7 @@ package client
 
 import (
 	"github.com/rs/zerolog/log"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -56,15 +57,62 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 		l.Err(err).Msg("Error listing invitations")
 		return
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
-		l.Err(err).Msg("Error listing invitations")
+		l.Err(err).
+			Str("status", resp.Status()).
+			Msg("Error listing invitations")
 		return
 	}
 	r := resp.Result().(*invitationListResponse)
 	invs = r.Result
-	l.Debug().Msg("Successfully listed invitations")
+	l.Debug().
+		Int("invitation_count", len(invs)).
+		Msg("Successfully listed invitations")
 	return
+}
+
+// ListPendingInvitations lists a Rollbar team's pending invitations.
+func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, error) {
+	l := log.With().Int("teamID", teamID).Logger()
+	l.Debug().Msg("Listing pending invitations")
+	var pending []Invitation
+	all, err := c.ListInvitations(teamID)
+	if err != nil {
+		l.Err(err).Send()
+		return pending, err
+	}
+	for _, inv := range all {
+		if inv.Status == "pending" {
+			pending = append(pending, inv)
+		}
+	}
+	l.Debug().
+		Int("invitation_count", len(pending)).
+		Msg("Successfully listed pending invitations")
+	return pending, nil
+}
+
+// FindPendingInvitations finds pending Rollbar team invitations for the given
+// email.
+func (c *RollbarApiClient) FindPendingInvitations(email string) ([]Invitation, error) {
+	l := log.With().Str("email", email).Logger()
+	l.Debug().Msg("Finding pending invitations")
+	var pending []Invitation
+	all, err := c.FindInvitations(email)
+	if err != nil {
+		l.Err(err).Send()
+		return pending, err
+	}
+	for _, inv := range all {
+		if inv.Status == "pending" {
+			pending = append(pending, inv)
+		}
+	}
+	l.Debug().
+		Int("invitation_count", len(pending)).
+		Msg("Successfully found pending invitations")
+	return pending, nil
 }
 
 // CreateInvitation sends a Rollbar team invitation to a user.
@@ -91,12 +139,14 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 		l.Err(err).Msg("Error creating invitation")
 		return inv, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
+		l.Err(err).Send()
 		return inv, err
 	}
 	r := resp.Result().(*invitationResponse)
 	inv = r.Result
+	l.Debug().Msg("Successfully created new invitation")
 	return inv, nil
 }
 
@@ -151,11 +201,66 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
-		l.Err(err).Msg("Error canceling invitation")
+		// If the invite has already been canceled, API returns HTTP status '422
+		// Unprocessable Entity'.  This is considered success.
+		statusUnprocessable := resp.StatusCode() == http.StatusUnprocessableEntity
+		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already cancelled")
+		if statusUnprocessable && alreadyCanceledMsg {
+			l.Debug().Msg("invite already cancelled")
+			return nil
+		}
+		l.Err(err).
+			Interface("error", err).
+			Str("status", resp.Status()).
+			Int("status_code", resp.StatusCode()).
+			Msg("Error canceling invitation")
 		return
 	}
 	l.Debug().
 		Msg("Successfully canceled invitation")
+	return
+}
+
+// FindInvitations finds all Rollbar team invitations for a given email. Note
+// this method is quite inefficient, as it must read all invitations for all
+// teams.
+func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err error) {
+	l := log.With().
+		Str("email", email).
+		Logger()
+
+	l.Debug().Msg("Finding invitations")
+	teams, err := c.ListCustomTeams()
+	if err != nil {
+		l.Err(err).Send()
+		return
+	}
+	var allInvs []Invitation
+	for _, t := range teams {
+		teamInvs, err := c.ListInvitations(t.ID)
+		// Team may have been deleted by another process after we listed all
+		// teams, but before we queried the team for invitations.  Therefore we
+		// ignore ErrNotFound.
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/88
+		if err != nil && err != ErrNotFound {
+			l.Err(err).
+				Str("team_name", t.Name).
+				Msg("error finding invitations")
+			return invs, err
+		}
+		allInvs = append(allInvs, teamInvs...)
+	}
+	for _, inv := range allInvs {
+		if inv.ToEmail == email {
+			invs = append(invs, inv)
+		}
+	}
+	if len(invs) == 0 {
+		return invs, ErrNotFound
+	}
+	l.Debug().
+		Int("invitation_count", len(invs)).
+		Msg("Successfully found invitations")
 	return
 }
 

@@ -69,5 +69,5 @@ func (s *AccSuite) configDataSourceProjectAccessToken() string {
 			depends_on = [rollbar_project.test]
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }

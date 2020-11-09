@@ -136,10 +136,7 @@ func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 	for key, value := range tokenMap {
-		err = d.Set(key, value)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+		mustSet(d, key, value)
 	}
 
 	// Set ID based on current time.

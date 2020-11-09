@@ -22,7 +22,9 @@
 
 package client
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // ErrorResult represents an error result returned by Rollbar API.
 type ErrorResult struct {

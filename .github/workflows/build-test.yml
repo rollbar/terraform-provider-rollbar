@@ -9,6 +9,7 @@ jobs:
     env:
       ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
 
+
     steps:
 
       # Install Go and Terraform
@@ -52,6 +53,8 @@ jobs:
       # Acceptance
       - name: Acceptance tests
         run: make testacc
+        env:
+          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
       - name: Convert Go coverage file to lcov format
         run: |
           go install github.com/jandelgado/gcov2lcov

@@ -28,6 +28,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -61,7 +62,7 @@ type AccSuite struct {
 	providers map[string]*schema.Provider
 
 	// The following variables are populated before each test by SetupTest():
-	projectName string // Name of a Rollbar project
+	randName string // Name of a Rollbar project
 }
 
 func (s *AccSuite) SetupSuite() {
@@ -81,7 +82,7 @@ func (s *AccSuite) preCheck() {
 
 func (s *AccSuite) SetupTest() {
 	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	s.projectName = fmt.Sprintf("tf-acc-test-%s", randString)
+	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
 
 func TestAccSuite(t *testing.T) {
@@ -156,4 +157,9 @@ func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, 
 		return 0, err
 	}
 	return i, nil
+}
+
+// client returns the current Rollbar API client
+func (s *AccSuite) client() *client.RollbarApiClient {
+	return s.provider.Meta().(*client.RollbarApiClient)
 }

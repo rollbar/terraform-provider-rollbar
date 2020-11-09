@@ -24,13 +24,14 @@ package client
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-// TestListInvitations tests creating a Rollbar team invitation.
+// TestListInvitations tests listing Rollbar team invitations.
 func (s *Suite) TestListInvitations() {
 	teamID := 572097
 	u := apiUrl + pathInvitations
@@ -65,6 +66,36 @@ func (s *Suite) TestListInvitations() {
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ListInvitations(teamID)
+		return err
+	})
+}
+
+// TestListPendingInvitations tests listing pending Rollbar team invitations.
+func (s *Suite) TestListPendingInvitations() {
+	teamID := 662037
+	u := apiUrl + pathInvitations
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+
+	// Success
+	r := responderFromFixture("invitation/list_662037.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	expected := []Invitation{
+		{
+			ID:           153648,
+			FromUserID:   5325,
+			TeamID:       662037,
+			ToEmail:      "jason.mcvetta+test0@gmail.com",
+			Status:       "pending",
+			DateCreated:  1603191497,
+			DateRedeemed: 0,
+		},
+	}
+	actual, err := s.client.ListPendingInvitations(teamID)
+	s.Nil(err)
+	s.ElementsMatch(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListPendingInvitations(teamID)
 		return err
 	})
 }
@@ -141,9 +172,96 @@ func (s *Suite) TestCancelInvitation() {
 	err = s.client.DeleteInvitation(invitationId)
 	s.Nil(err)
 
+	// Invitation is already cancelled
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnprocessableEntity,
+		ErrorResult{Err: 1, Message: "Invite already cancelled"})
+	httpmock.RegisterResponder("DELETE", u, r)
+	err = s.client.CancelInvitation(invitationId)
+	s.Nil(err)
+
 	s.checkServerErrors("DELETE", u, func() error {
 		err := s.client.CancelInvitation(invitationId)
 		return err
 	})
 
+}
+
+func (s *Suite) TestFindInvitations() {
+	email := "jason.mcvetta+test10@gmail.com"
+
+	// Mock list all teams
+	u := apiUrl + pathTeamList
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	// Mock list invitations for each team
+	for _, teamID := range []string{"662036", "662037", "676971"} {
+		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
+		r = responderFromFixture(fixturePath, http.StatusOK)
+		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamId}", teamID)
+		httpmock.RegisterResponder("GET", u, r)
+	}
+
+	expected := []Invitation{
+		{
+			ID:           153783,
+			FromUserID:   238101,
+			TeamID:       676971,
+			ToEmail:      "jason.mcvetta+test10@gmail.com",
+			Status:       "pending",
+			DateCreated:  1603294122,
+			DateRedeemed: 0,
+		},
+	}
+	actual, err := s.client.FindInvitations(email)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	// No invitations found
+	_, err = s.client.FindInvitations("nonexistent@email.com")
+	s.Equal(ErrNotFound, err)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindInvitations(email)
+		return err
+	})
+}
+
+// TestFindPendingInvitations tests finding pending Rollbar team invitations for
+// a given email.
+func (s *Suite) TestFindPendingInvitations() {
+	email := "jason.mcvetta+test10@gmail.com"
+
+	// Mock list all teams
+	u := apiUrl + pathTeamList
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	// Mock list invitations for each team
+	for _, teamID := range []string{"662036", "662037", "676971"} {
+		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
+		r = responderFromFixture(fixturePath, http.StatusOK)
+		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamId}", teamID)
+		httpmock.RegisterResponder("GET", u, r)
+	}
+
+	expected := []Invitation{
+		{
+			ID:           153783,
+			FromUserID:   238101,
+			TeamID:       676971,
+			ToEmail:      "jason.mcvetta+test10@gmail.com",
+			Status:       "pending",
+			DateCreated:  1603294122,
+			DateRedeemed: 0,
+		},
+	}
+	actual, err := s.client.FindPendingInvitations(email)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindPendingInvitations(email)
+		return err
+	})
 }

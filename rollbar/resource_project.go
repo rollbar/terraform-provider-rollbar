@@ -121,16 +121,12 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			Msg("Successfully deleted a default access token")
 	}
 
-	l.Info().Msg("Successfully created Rollbar project resource")
+	l.Debug().Msg("Successfully created Rollbar project resource")
 	return resourceProjectRead(ctx, d, m)
 }
 
 func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		log.Err(err).Msg("Error converting Id to integer")
-		return diag.FromErr(err)
-	}
+	id := mustGetID(d)
 	l := log.With().
 		Int("id", id).
 		Logger()
@@ -155,14 +151,11 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		if k == "id" {
 			continue
 		}
-		err = d.Set(k, v)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+		mustSet(d, k, v)
 	}
 
 	d.SetId(strconv.Itoa(proj.Id))
-	l.Info().Msg("Successfully read Rollbar project resource from the API")
+	l.Debug().Msg("Successfully read Rollbar project resource from the API")
 	return nil
 }
 
@@ -175,20 +168,17 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 */
 
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectId, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	projectId := mustGetID(d)
 	l := log.With().
 		Int("projectId", projectId).
 		Logger()
 	l.Info().Msg("Deleting Rollbar project resource")
 	c := m.(*client.RollbarApiClient)
-	err = c.DeleteProject(projectId)
+	err := c.DeleteProject(projectId)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	l.Info().Msg("Successfully deleted Rollbar project resource")
+	l.Debug().Msg("Successfully deleted Rollbar project resource")
 	return nil
 }

@@ -21,8 +21,8 @@ func init() {
 // TestAccTeam tests CRUD operations for a Rollbar team.
 func (s *AccSuite) TestAccTeam() {
 	rn := "rollbar_team.test"
-	teamName0 := fmt.Sprintf("%s-team-0", s.projectName)
-	teamName1 := fmt.Sprintf("%s-team-0", s.projectName)
+	teamName0 := fmt.Sprintf("%s-team-0", s.randName)
+	teamName1 := fmt.Sprintf("%s-team-0", s.randName)
 
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
@@ -70,7 +70,7 @@ func (s *AccSuite) TestAccTeam() {
 			{
 				PreConfig: func() {
 					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
-					teams, err := c.ListTeams()
+					teams, err := c.ListCustomTeams()
 					s.Nil(err)
 					for _, t := range teams {
 						if t.Name == teamName1 {
@@ -160,7 +160,7 @@ func sweepResourceTeam(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar teams from acceptance test runs.")
 
 	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
-	teams, err := c.ListTeams()
+	teams, err := c.ListCustomTeams()
 	if err != nil {
 		log.Err(err).Send()
 		return err
@@ -183,4 +183,85 @@ func sweepResourceTeam(_ string) error {
 
 	log.Info().Msg("Teams cleanup complete")
 	return nil
+}
+
+// TestAccUserRemoveTeamWithUsers tests deleting a Rollbar team that has a
+// non-zero count of users.
+func (s *AccSuite) TestAccDeleteTeamWithUsers() {
+	team1Name := fmt.Sprintf("%s-team-1", s.randName)
+	team2Name := fmt.Sprintf("%s-team-2", s.randName)
+	user1Email := "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+	user2Email := fmt.Sprintf("jason.mcvetta+%s@gmail.com", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s"
+		}
+
+		# Registered user
+		resource "rollbar_user" "test_user_1" {
+			email = "%s"
+			team_ids = [ rollbar_team.test_team_1.id ]
+		}
+
+		# Invited user
+		resource "rollbar_user" "test_user_2" {
+			email = "%s"
+			team_ids = [ rollbar_team.test_team_1.id ]
+		}
+	`
+	configOrigin := fmt.Sprintf(tmpl, team1Name, team2Name, user1Email, user2Email)
+	// language=hcl
+	tmpl = `
+		resource "rollbar_team" "test_team_2" {
+			name = "%s"
+		}
+	`
+	configRemoveTeam := fmt.Sprintf(tmpl, team2Name)
+	resource.Test(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: configOrigin,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("rollbar_team.test_team_1", "name", team1Name),
+					resource.TestCheckResourceAttr("rollbar_team.test_team_2", "name", team2Name),
+					resource.TestCheckTypeSetElemAttrPair("rollbar_user.test_user_1", "team_ids.*", "rollbar_team.test_team_1", "id"),
+					resource.TestCheckTypeSetElemAttrPair("rollbar_user.test_user_2", "team_ids.*", "rollbar_team.test_team_1", "id"),
+				),
+			},
+			{
+				Config: configRemoveTeam,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkTeamIsDeleted(team1Name),
+					resource.TestCheckResourceAttr("rollbar_team.test_team_2", "name", team2Name),
+				),
+			},
+		},
+	})
+}
+
+func (s *AccSuite) checkTeamIsDeleted(teamName string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		l := log.With().Str("team_name", teamName).Logger()
+		l.Info().Msg("Checking that team is deleted")
+		c := s.client()
+		teams, err := c.ListCustomTeams()
+		s.Nil(err)
+		for _, t := range teams {
+			if t.Name == teamName {
+				err := fmt.Errorf("team was NOT deleted: %s", teamName)
+				l.Err(err).Send()
+				return err
+			}
+		}
+		l.Debug().Msg("Confirmed that team is deleted")
+		return nil
+	}
 }

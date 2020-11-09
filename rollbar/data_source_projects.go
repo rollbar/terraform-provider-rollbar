@@ -82,12 +82,7 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if err := d.Set("projects", projects); err != nil {
-		log.Err(err).
-			Interface("projects", projects).
-			Msg("Error setting resource data")
-		return diag.FromErr(err)
-	}
+	mustSet(d, "projects", projects)
 
 	// Set resource ID to current timestamp (every resource must have an ID or
 	// it will be destroyed).

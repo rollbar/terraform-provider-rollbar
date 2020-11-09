@@ -32,6 +32,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"strconv"
 	"strings"
 )
 
@@ -53,6 +54,7 @@ func Provider() *schema.Provider {
 			"rollbar_project":              resourceProject(),
 			"rollbar_project_access_token": resourceProjectAccessToken(),
 			"rollbar_team":                 resourceTeam(),
+			"rollbar_user":                 resourceUser(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_project":               dataSourceProject(),
@@ -87,4 +89,41 @@ func handleErrNotFound(d *schema.ResourceData, resourceName string) diag.Diagnos
 		Summary:  summary,
 		Detail:   detail,
 	}}
+}
+
+/*
+
+// errSetter sets Terraform state values until an error occurs, whereupon it
+// becomes a no-op but preserves the error value.
+// Based on Rob Pike's errWriter - https://blog.golang.org/errors-are-values
+type errSetter struct {
+	d   *schema.ResourceData
+	err error
+}
+
+func (es *errSetter) Set(key string, value interface{}) {
+	if es.err != nil {
+		return
+	}
+	es.err = es.d.Set(key, value)
+}
+
+*/
+
+// mustSet sets a value for a key in a schema, or panics on error.
+func mustSet(d *schema.ResourceData, key string, value interface{}) {
+	err := d.Set(key, value)
+	if err != nil {
+		panic(err)
+	}
+}
+
+// mustGetID gets the ID of the resource as an integer, or panics if string ID
+// value cannot be cast to int.
+func mustGetID(d *schema.ResourceData) int {
+	id, err := strconv.Atoi(d.Id())
+	if err != nil {
+		panic(err)
+	}
+	return id
 }

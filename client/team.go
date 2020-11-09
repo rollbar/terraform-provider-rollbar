@@ -24,6 +24,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
@@ -43,9 +44,10 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 	var t Team
 	l := log.With().
 		Str("name", name).
-		Str("access_level", level).
 		Logger()
-	l.Debug().Msg("Creating new team")
+	l.Debug().
+		Str("access_level", level).
+		Msg("Creating new team")
 
 	// Sanity check
 	if name == "" {
@@ -65,7 +67,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 		l.Err(err).Msg("Error creating team")
 		return t, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		l.Err(err).Msg("Error creating team")
 		return t, err
@@ -73,7 +75,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 	r := resp.Result().(*teamCreateResponse)
 	t = r.Result
 	l.Debug().
-		Interface("team", t).
+		Int("id", t.ID).
 		Msg("Successfully created new team")
 	return t, nil
 }
@@ -91,17 +93,33 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 		log.Err(err).Msg("Error listing teams")
 		return teams, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		log.Err(err).Msg("Error listing teams")
 		return teams, err
 	}
 	r := resp.Result().(*teamListResponse)
 	teams = r.Result
-	log.Debug().
-		Interface("teams", teams).
-		Msg("Successfully listed teams")
+	count := len(teams)
+	log.Debug().Int("count", count).Msg("Successfully listed teams")
 	return teams, nil
+}
+
+// ListCustomTeams lists all custom defined teams, excluding system teams
+// "Everyone" and "Owners".
+// FIXME: This function needs a better name.
+func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
+	log.Debug().Msg("Listing custom teams")
+	var customTeams []Team
+	allTeams, err := c.ListTeams()
+	if err != nil {
+		log.Err(err).Msg("Error listing custom teams")
+		return customTeams, err
+	}
+	customTeams = filterSystemTeams(allTeams)
+	count := len(customTeams)
+	log.Debug().Int("count", count).Msg("Successfully listed custom teams")
+	return customTeams, nil
 }
 
 // ReadTeam reads a Rollbar team from the API. If no matching team is found,
@@ -111,7 +129,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	l := log.With().
 		Int("id", id).
 		Logger()
-	l.Debug().Msg("Reading team")
+	l.Debug().Msg("Reading team from API")
 
 	// Sanity check
 	if id == 0 {
@@ -128,22 +146,16 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
-		// FIXME: Workaround API bug
-		//  https://github.com/rollbar/terraform-provider-rollbar/issues/79
-		statusForbidden := resp.StatusCode() == http.StatusForbidden
-		msgNotFound := strings.Contains(err.Error(), "Team not found in this account")
-		if statusForbidden && msgNotFound {
-			return t, ErrNotFound
-		}
 		l.Err(err).Msg("Error reading team")
 		return t, err
 	}
 	r := resp.Result().(*teamReadResponse)
 	t = r.Result
 	l.Debug().
-		Interface("team", t).
+		Int("id", t.ID).
+		Str("name", t.Name).
 		Msg("Successfully read team")
 	return t, nil
 }
@@ -170,7 +182,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 		l.Err(err).Msg("Error deleting team")
 		return err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		l.Err(err).Msg("Error deleting team")
 		return err
@@ -194,7 +206,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 		l.Err(err).Msg("Error assigning user to team")
 		return err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		// API returns status `403 Forbidden` on invalid user to team assignment
 		// https://github.com/rollbar/terraform-provider-rollbar/issues/66
@@ -210,7 +222,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 }
 
 // RemoveUserFromTeam removes a user from a Rollbar team.
-func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
+func (c *RollbarApiClient) RemoveUserFromTeam(userID, teamID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
 	l.Debug().Msg("Removing user from team")
 	resp, err := c.Resty.R().
@@ -224,7 +236,7 @@ func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 		l.Err(err).Msg("Error removing user from team")
 		return err
 	}
-	err = errorFromResponse(resp)
+	err = teamNotFoundErrFromResponse(resp)
 	if err != nil {
 		// API returns status `422 Unprocessable Entity` on invalid user to team
 		// assignment.
@@ -239,6 +251,65 @@ func (c *RollbarApiClient) RemoveUserFromTeam(teamID, userID int) error {
 	l.Debug().Msg("Successfully removed user from team")
 	return nil
 
+}
+
+// FindTeamID finds the ID for a team.
+func (c *RollbarApiClient) FindTeamID(name string) (int, error) {
+	l := log.With().
+		Str("team_name", name).
+		Logger()
+	l.Debug().Msg("Finding team ID")
+	teams, err := c.ListTeams()
+	if err != nil {
+		l.Err(err).Send()
+		return 0, err
+	}
+	for _, t := range teams {
+		if t.Name == name {
+			l.Debug().Int("team_id", t.ID).Msg("Found team ID")
+			return t.ID, nil
+		}
+	}
+	l.Debug().Msg("Could not find team ID")
+	return 0, ErrNotFound
+}
+
+// filterSystemTeams filters out the system teams "Everyone" and "Owners" from a
+// list of Rollbar teams.
+func filterSystemTeams(teams []Team) []Team {
+	var customTeams []Team
+	for _, t := range teams {
+		if t.Name == "Everyone" || t.Name == "Owners" {
+			continue
+		}
+		customTeams = append(customTeams, t)
+		log.Debug().
+			Str("name", t.Name).
+			Int("id", t.ID).
+			Msg("Custom defined team")
+	}
+	return customTeams
+}
+
+// teamNotFoundErrFromResponse wraps errorFromResponse as a workaround for a
+// known API bug, wherein the Rollbar API returns HTTP status '403 Forbidden',
+// instead of `404 Not Found`, when a team is not found.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/79
+func teamNotFoundErrFromResponse(resp *resty.Response) error {
+	err := errorFromResponse(resp)
+	if err != nil {
+		statusForbidden := resp.StatusCode() == http.StatusForbidden
+		msgNotFound := strings.Contains(err.Error(), "Team not found in this account")
+		if statusForbidden && msgNotFound {
+			log.Debug().
+				Str("status", resp.Status()).
+				Int("status_code", resp.StatusCode()).
+				Str("error", err.Error()).
+				Msg("Workaround team not found API bug")
+			return ErrNotFound
+		}
+	}
+	return err
 }
 
 /*

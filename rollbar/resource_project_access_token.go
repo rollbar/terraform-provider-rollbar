@@ -173,11 +173,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 	for k, v := range mPat {
-		err = d.Set(k, v)
-		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
+		mustSet(d, k, v)
 	}
 
 	return diags
@@ -252,11 +248,7 @@ func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceDat
 		Int("project_id", projectId).
 		Str("access_token", accessToken).
 		Send()
-	err = d.Set("project_id", projectId)
-	if err != nil {
-		log.Err(err).Send()
-		return nil, err
-	}
+	mustSet(d, "project_id", projectId)
 	d.SetId(accessToken)
 	return []*schema.ResourceData{d}, nil
 }

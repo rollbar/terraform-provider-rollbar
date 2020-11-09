@@ -2,22 +2,22 @@
   "err": 0,
   "result": [
     {
-      "access_level": "everyone",
-      "account_id": 317418,
       "id": 662037,
-      "name": "Everyone"
+      "account_id": 317418,
+      "name": "Everyone",
+      "access_level": "everyone"
     },
     {
-      "access_level": "standard",
+      "id": 676971,
       "account_id": 317418,
-      "id": 676974,
-      "name": "foobar"
+      "name": "my-test-team",
+      "access_level": "standard"
     },
     {
-      "access_level": "owner",
-      "account_id": 317418,
       "id": 662036,
-      "name": "Owners"
+      "account_id": 317418,
+      "name": "Owners",
+      "access_level": "owner"
     }
   ]
 }

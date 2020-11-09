@@ -44,60 +44,54 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	name := d.Get("name").(string)
 	level := d.Get("access_level").(string)
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
-	l.Info().Msg("Creating new Rollbar team")
+	l.Info().Msg("Creating rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
 	t, err := c.CreateTeam(name, level)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	d.SetId(strconv.Itoa(t.ID))
-	l.Info().Int("id", t.ID).Msg("Successfully created Rollbar team")
+	teamID := t.ID
+	l = l.With().Int("teamID", teamID).Logger()
+	d.SetId(strconv.Itoa(teamID))
+	l.Debug().Int("id", teamID).Msg("Successfully created rollbar_team resource")
 	return resourceTeamRead(ctx, d, m)
 }
 
 func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	l := log.With().Int("id", id).Logger()
-	l.Info().Msg("Reading Rollbar team from API")
+	id := mustGetID(d)
+	l := log.With().
+		Int("id", id).
+		Logger()
+	l.Info().Msg("Reading rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
 	t, err := c.ReadTeam(id)
 	if err == client.ErrNotFound {
+		l.Err(err).Send()
 		return handleErrNotFound(d, "team")
 	}
 	if err != nil {
+		l.Err(err).Msg("error reading rollbar_team resource")
 		return diag.FromErr(err)
 	}
-	var errs []error
-	errs = append(errs, d.Set("name", t.Name))
-	errs = append(errs, d.Set("account_id", t.AccountID))
-	errs = append(errs, d.Set("access_level", t.AccessLevel))
-	for _, err = range errs {
-		if err != nil {
-			l.Error().Interface("errs", errs).Send()
-			return diag.FromErr(errs[0])
-		}
-	}
-	l.Info().Msg("Successfully read Rollbar team from API")
+	mustSet(d, "name", t.Name)
+	mustSet(d, "account_id", t.AccountID)
+	mustSet(d, "access_level", t.AccessLevel)
+	l.Debug().Msg("Successfully read rollbar_team resource")
 	return nil
 }
 
 func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	id, err := strconv.Atoi(d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	id := mustGetID(d)
+
 	l := log.With().Int("id", id).Logger()
-	l.Info().Msg("Deleting Rollbar team")
+	l.Info().Msg("Deleting rollbar_team resource")
 	c := m.(*client.RollbarApiClient)
-	err = c.DeleteTeam(id)
+	err := c.DeleteTeam(id)
 	if err != nil {
-		l.Err(err).Send()
+		l.Err(err).Msg("Error deleting rollbar_team resource")
 		return diag.FromErr(err)
 	}
-	l.Info().Msg("Successfully deleted Rollbar team")
+	l.Debug().Msg("Successfully deleted rollbar_team resource")
 	return nil
 }

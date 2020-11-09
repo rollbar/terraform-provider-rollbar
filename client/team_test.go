@@ -81,9 +81,9 @@ func (s *Suite) TestListTeams() {
 			Name:        "Everyone",
 		},
 		{
-			ID:          676974,
+			ID:          676971,
 			AccountID:   317418,
-			Name:        "foobar",
+			Name:        "my-test-team",
 			AccessLevel: "standard",
 		},
 		{
@@ -174,7 +174,7 @@ func (s *Suite) TestAssignUserToTeam() {
 	u := apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
-	r := responderFromFixture("team_user/assign.json", http.StatusOK)
+	r := responderFromFixture("team/assign_user.json", http.StatusOK)
 	httpmock.RegisterResponder("PUT", u, r)
 	err := s.client.AssignUserToTeam(teamID, userID)
 	s.Nil(err)
@@ -188,7 +188,7 @@ func (s *Suite) TestAssignUserToTeam() {
 	u = apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", "0")
-	r = responderFromFixture("team_user/assign_not_found.json", http.StatusForbidden)
+	r = responderFromFixture("team/assign_user_not_found.json", http.StatusForbidden)
 	httpmock.RegisterResponder("PUT", u, r)
 	err = s.client.AssignUserToTeam(teamID, 0) // non-existent user
 	s.Equal(ErrNotFound, err)
@@ -203,13 +203,13 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	u := apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
-	r := responderFromFixture("team_user/remove.json", http.StatusOK)
+	r := responderFromFixture("team/remove_user.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err := s.client.RemoveUserFromTeam(teamID, userID)
+	err := s.client.RemoveUserFromTeam(userID, teamID)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
-		err = s.client.RemoveUserFromTeam(teamID, userID) // non-existent user
+		err = s.client.RemoveUserFromTeam(userID, teamID) // non-existent user
 		return err
 	})
 
@@ -217,8 +217,52 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	u = apiUrl + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userId}", "0")
-	r = responderFromFixture("team_user/remove_not_found.json", http.StatusUnprocessableEntity)
+	r = responderFromFixture("team/remove_user_not_found.json", http.StatusUnprocessableEntity)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err = s.client.RemoveUserFromTeam(teamID, 0) // non-existent user
+	err = s.client.RemoveUserFromTeam(0, teamID) // non-existent user
 	s.Equal(ErrNotFound, err)
+}
+
+// TestListCustomTeams tests listing custom defined teams.
+func (s *Suite) TestListCustomTeams() {
+	u := apiUrl + pathTeamList
+	expected := []Team{
+		{
+			ID:          676971,
+			AccountID:   317418,
+			Name:        "my-test-team",
+			AccessLevel: "standard",
+		},
+	}
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.ListCustomTeams()
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ListCustomTeams()
+		return err
+	})
+}
+
+func (s *Suite) TestFindTeamID() {
+	expected := 676971
+	u := apiUrl + pathTeamList
+	r := responderFromFixture("team/list.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.FindTeamID("my-test-team")
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	// Non-existent team name
+	_, err = s.client.FindTeamID("does-not-exist")
+	s.Equal(ErrNotFound, err)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindTeamID("my-test-team")
+		return err
+	})
 }

@@ -53,8 +53,8 @@ func (s *AccSuite) TestAccProject() {
 				Config: s.configResourceProject(),
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", s.projectName),
-					s.checkProjectExists(rn, s.projectName),
+					resource.TestCheckResourceAttr(rn, "name", s.randName),
+					s.checkProjectExists(rn, s.randName),
 					s.checkProjectInProjectList(rn),
 				),
 			},
@@ -74,7 +74,7 @@ func (s *AccSuite) configResourceProject() string {
 		  name         = "%s"
 		}
 	`
-	return fmt.Sprintf(tmpl, s.projectName)
+	return fmt.Sprintf(tmpl, s.randName)
 }
 
 // checkProjectExists tests that the newly created project exists
