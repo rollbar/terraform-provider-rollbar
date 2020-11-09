@@ -152,6 +152,10 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected: teamsExpected,
 		teamsCurrent:  teamsCurrent,
 	})
+	if err != nil {
+		l.Err(err).Send()
+		return diag.FromErr(err)
+	}
 
 	d.SetId(email)
 	l.Debug().Msg("Successfully created or updated rollbar_user resource")
@@ -338,7 +342,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		return diag.FromErr(err)
 	}
 	var teamIDs []int
-	for teamID, _ := range currentTeams {
+	for teamID := range currentTeams {
 		teamIDs = append(teamIDs, teamID)
 	}
 	mustSet(d, "team_ids", teamIDs)

@@ -484,7 +484,7 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 			s.Nil(err)
 		}
 		// Did we find any expected teams?
-		for teamID, _ := range teamFound {
+		for teamID := range teamFound {
 			for _, inv := range invitations {
 				if inv.TeamID == teamID {
 					teamFound[teamID] = true
