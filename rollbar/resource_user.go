@@ -230,15 +230,16 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	errMsg := "Error removing user from team"
 
 	// Teams from which this user should be removed
-	teamsToRemove := make(map[int]bool)
+	unwantedTeams := make(map[int]bool)
 	for id := range args.teamsCurrent {
 		if !args.teamsExpected[id] {
-			teamsToRemove[id] = true
+			unwantedTeams[id] = true
 		}
 	}
-	l.Debug().Interface("teams_to_remove", teamsToRemove).Msg("Teams to leave")
+	l.Debug().Interface("unwanted_teams", unwantedTeams).Msg("Unwanted teams")
 
-	// Remove user from those teams
+	// Leave teams
+	var teamsToRemove []int
 	if args.userID != 0 {
 		l.Debug().Msg("Removing user from teams")
 		currentTeams, err := args.client.ListUserCustomTeams(args.userID)
@@ -248,33 +249,42 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 
 		}
 		for _, t := range currentTeams {
-			if teamsToRemove[t.ID] {
-				err := args.client.RemoveUserFromTeam(args.userID, t.ID)
-				if err != nil {
-					l.Err(err).Msg(errMsg)
-					return err
-				}
+			if unwantedTeams[t.ID] {
+				teamsToRemove = append(teamsToRemove, t.ID)
 			}
+		}
+	}
+	l.Debug().Ints("teams_to_remove", teamsToRemove)
+	for _, teamID := range teamsToRemove {
+		err := args.client.RemoveUserFromTeam(args.userID, teamID)
+		if err != nil {
+			l.Err(err).Msg(errMsg)
+			return err
 		}
 	}
 
 	// Cancel invitations
+	var invitationsToCancel []int
 	invitations, err := args.client.FindPendingInvitations(args.email)
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Msg(errMsg)
 		return err
 	}
 	for _, inv := range invitations {
-		if teamsToRemove[inv.TeamID] {
-			err := args.client.CancelInvitation(inv.ID)
-			if err != nil {
-				l.Err(err).Msg(errMsg)
-				return err
-			}
-
+		if unwantedTeams[inv.TeamID] {
+			invitationsToCancel = append(invitationsToCancel, inv.ID)
 		}
 
 	}
+	l.Debug().Ints("invitations_to_cancel", invitationsToCancel).Msg("Invitations to cancel")
+	for _, invID := range invitationsToCancel {
+		err := args.client.CancelInvitation(invID)
+		if err != nil {
+			l.Err(err).Msg(errMsg)
+			return err
+		}
+	}
+
 	return nil
 }
 
