@@ -297,7 +297,7 @@ func resourceUserCurrentTeams(c *client.RollbarApiClient, email string, userID i
 
 	// Teams to which email has been invited
 	var invitations []client.Invitation
-	invitations, err = c.FindInvitations(email)
+	invitations, err = c.FindPendingInvitations(email)
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return
