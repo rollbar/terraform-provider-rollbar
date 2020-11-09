@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"regexp"
 )
@@ -478,8 +479,10 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 			Msg("Existing team memberships")
 
 		// Check invitations
-		invitations, err := c.FindInvitations(email)
-		s.Nil(err)
+		invitations, err := c.FindPendingInvitations(email)
+		if err != nil && err != client.ErrNotFound {
+			s.Nil(err)
+		}
 		// Did we find any expected teams?
 		for teamID, _ := range teamFound {
 			for _, inv := range invitations {
