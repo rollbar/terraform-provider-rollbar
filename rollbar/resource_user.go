@@ -106,20 +106,19 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	// Check if a Rollbar user exists for this email
 	userID, err := c.FindUserID(email)
+	l = l.With().Int("user_id", userID).Logger()
 	switch err {
 	case nil:
-		l = l.With().Int("user_id", userID).Logger()
-		l.Debug().Int("id", userID).Msg("Found existing user")
+		l.Debug().Msg("Found existing user")
 		mustSet(d, "user_id", userID)
 		mustSet(d, "status", "registered")
 	case client.ErrNotFound:
-		l.Debug().Int("id", userID).Msg("Existing user not found")
+		l.Debug().Msg("Existing user not found")
 		mustSet(d, "status", "invited")
 	default: // Actual error
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	l = l.With().Int("user_id", userID).Logger()
 
 	// Teams to which this user SHOULD belong
 	teamsExpected := make(map[int]bool)
@@ -242,12 +241,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	var teamsToRemove []int
 	if args.userID != 0 {
 		l.Debug().Msg("Removing user from teams")
-		currentTeams, err := args.client.ListUserCustomTeams(args.userID)
-		if err != nil {
-			l.Err(err).Msg(errMsg)
-			return err
-
-		}
+		currentTeams, _ := args.client.ListUserCustomTeams(args.userID)
 		for _, t := range currentTeams {
 			if unwantedTeams[t.ID] {
 				teamsToRemove = append(teamsToRemove, t.ID)
@@ -265,11 +259,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 
 	// Cancel invitations
 	var invitationsToCancel []int
-	invitations, err := args.client.FindPendingInvitations(args.email)
-	if err != nil && err != client.ErrNotFound {
-		l.Err(err).Msg(errMsg)
-		return err
-	}
+	invitations, _ := args.client.FindPendingInvitations(args.email)
 	for _, inv := range invitations {
 		if unwantedTeams[inv.TeamID] {
 			invitationsToCancel = append(invitationsToCancel, inv.ID)
