@@ -126,19 +126,11 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected[id] = true
 	}
 
-	// Teams to which this user currently belongs
-	teamsCurrent := make(map[int]bool)
-	if userID != 0 { // If user doesn't exist, they don't belong to any teams
-		teams, err := c.ListUserCustomTeams(userID)
-		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
-		for _, t := range teams {
-			teamsCurrent[t.ID] = true
-		}
+	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID)
+	if err != nil {
+		l.Err(err).Send()
+		return diag.FromErr(err)
 	}
-	l.Debug().Interface("current_teams", teamsCurrent).Msg("Current teams")
 
 	err = resourceUserAddTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
@@ -281,6 +273,44 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	return nil
 }
 
+// resourceUserCurrentTeams returns user's current team memberships.
+func resourceUserCurrentTeams(c *client.RollbarApiClient, email string, userID int) (currentTeams map[int]bool, err error) {
+	l := log.With().
+		Str("email", email).
+		Int("user_id", userID).
+		Logger()
+	currentTeams = make(map[int]bool)
+
+	// Registered user team memberships
+	if userID != 0 {
+		var teams []client.Team
+		teams, err = c.ListUserCustomTeams(userID)
+		if err != nil && err != client.ErrNotFound {
+			l.Err(err).Send()
+			return
+		}
+		for _, t := range teams {
+			currentTeams[t.ID] = true
+		}
+	}
+
+	// Teams to which email has been invited
+	var invitations []client.Invitation
+	invitations, err = c.FindInvitations(email)
+	if err != nil && err != client.ErrNotFound {
+		l.Err(err).Send()
+		return
+	}
+	for _, inv := range invitations {
+		currentTeams[inv.TeamID] = true
+	}
+
+	l.Debug().
+		Interface("current_teams", currentTeams).
+		Msg("Current teams")
+	return currentTeams, nil
+}
+
 func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Id()
 	userID := d.Get("user_id").(int)
@@ -323,7 +353,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 
 	// Add pending invitations to team IDs
 	invitations, err := c.FindPendingInvitations(email)
-	if err != nil {
+	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
@@ -380,7 +410,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 
 	// Cancel user's invitations
 	invitations, err := c.FindPendingInvitations(email)
-	if err != nil {
+	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
