@@ -88,7 +88,6 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 		Logger()
 	l.Info().Msg("Creating rollbar_user resource")
 	d.SetId(email)
-	mustSet(d, "status", "invited")
 	return resourceUserCreateOrUpdate(ctx, d, meta)
 }
 
@@ -112,8 +111,10 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		l = l.With().Int("user_id", userID).Logger()
 		l.Debug().Int("id", userID).Msg("Found existing user")
 		mustSet(d, "user_id", userID)
+		mustSet(d, "status", "registered")
 	case client.ErrNotFound:
 		l.Debug().Int("id", userID).Msg("Existing user not found")
+		mustSet(d, "status", "invited")
 	default: // Actual error
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -248,7 +249,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	// Invitations which should be cancelled
 	var invitationsToCancel []int
 	invitations, err := args.client.FindPendingInvitations(args.email)
-	if err != nil {
+	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Msg(errMsg)
 		return err
 	}
@@ -331,12 +332,15 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		}
 	}
 
-	teamIDs, err := resourceUserCurrentTeams(c, email, userID)
+	currentTeams, err := resourceUserCurrentTeams(c, email, userID)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-
+	var teamIDs []int
+	for teamID, _ := range currentTeams {
+		teamIDs = append(teamIDs, teamID)
+	}
 	mustSet(d, "team_ids", teamIDs)
 
 	l.Debug().Msg("Successfully read rollbar_user resource")
