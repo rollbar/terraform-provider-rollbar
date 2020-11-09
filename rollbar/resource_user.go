@@ -229,27 +229,27 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	errMsg := "Error removing user from team"
 
 	// Teams from which this user should be removed
-	unwantedTeams := make(map[int]bool)
+	teamsToRemove := make(map[int]bool)
 	for id := range args.teamsCurrent {
 		if !args.teamsExpected[id] {
-			unwantedTeams[id] = true
+			teamsToRemove[id] = true
 		}
 	}
-	l.Debug().Interface("unwanted_teams", unwantedTeams).Msg("Unwanted teams")
+	l.Debug().Interface("unwanted_teams", teamsToRemove).Msg("Unwanted teams")
 
 	// Leave teams
-	var teamsToRemove []int
+	var removeMemberships []int
 	if args.userID != 0 {
 		l.Debug().Msg("Removing user from teams")
 		currentTeams, _ := args.client.ListUserCustomTeams(args.userID)
 		for _, t := range currentTeams {
-			if unwantedTeams[t.ID] {
-				teamsToRemove = append(teamsToRemove, t.ID)
+			if teamsToRemove[t.ID] {
+				removeMemberships = append(removeMemberships, t.ID)
 			}
 		}
 	}
-	l.Debug().Ints("teams_to_remove", teamsToRemove)
-	for _, teamID := range teamsToRemove {
+	l.Debug().Ints("teams_to_remove", removeMemberships)
+	for _, teamID := range removeMemberships {
 		err := args.client.RemoveUserFromTeam(args.userID, teamID)
 		if err != nil {
 			l.Err(err).Msg(errMsg)
@@ -261,7 +261,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	var invitationsToCancel []int
 	invitations, _ := args.client.FindPendingInvitations(args.email)
 	for _, inv := range invitations {
-		if unwantedTeams[inv.TeamID] {
+		if teamsToRemove[inv.TeamID] {
 			invitationsToCancel = append(invitationsToCancel, inv.ID)
 		}
 
