@@ -140,85 +140,145 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 	l.Debug().Interface("current_teams", teamsCurrent).Msg("Current teams")
 
+	err = resourceUserAddTeams(resourceUserAddRemoveTeamsArgs{
+		client:        c,
+		userID:        userID,
+		email:         email,
+		teamsExpected: teamsExpected,
+		teamsCurrent:  teamsCurrent,
+	})
+	if err != nil {
+		l.Err(err).Send()
+		return diag.FromErr(err)
+	}
+
+	err = resourceUserRemoveTeams(resourceUserAddRemoveTeamsArgs{
+		client:        c,
+		userID:        userID,
+		email:         email,
+		teamsExpected: teamsExpected,
+		teamsCurrent:  teamsCurrent,
+	})
+
+	d.SetId(email)
+	l.Debug().Msg("Successfully created or updated rollbar_user resource")
+	return resourceUserRead(ctx, d, meta)
+}
+
+// resourceUserAddRemoveTeamsArgs encapsulates the arguments to
+// resourceUserAddTeams and resourceUserRemoveTeams.
+type resourceUserAddRemoveTeamsArgs struct {
+	client        *client.RollbarApiClient
+	userID        int
+	email         string
+	teamsExpected map[int]bool
+	teamsCurrent  map[int]bool
+}
+
+// resourceUserAddTeams adds new team memberships to a Rollbar user, either by
+// assigning a registered user to the team or by inviting an email address to
+// the team.
+func resourceUserAddTeams(args resourceUserAddRemoveTeamsArgs) error {
+	l := log.With().
+		Int("user_id", args.userID).
+		Str("email", args.email).
+		Interface("expected_teams", args.teamsExpected).
+		Interface("current_teams", args.teamsCurrent).
+		Logger()
+	errMsg := "Error joining teams"
+
 	// Teams to which this user should be added
 	var teamsToJoin []int
-	for id := range teamsExpected {
-		if !teamsCurrent[id] {
+	for id := range args.teamsExpected {
+		if !args.teamsCurrent[id] {
 			teamsToJoin = append(teamsToJoin, id)
 		}
 	}
 	l.Debug().Interface("teams_to_join", teamsToJoin).Msg("Teams to join")
+
 	// Add user to those teams
 	for _, teamID := range teamsToJoin {
 		l = l.With().Int("teamID", teamID).Logger()
 		// If user already exists we can assign to teams without invitation.  If
 		// user does not already exist we must send an invitation.
-		if userID != 0 {
-			err = c.AssignUserToTeam(teamID, userID)
+		if args.userID != 0 {
+			err := args.client.AssignUserToTeam(teamID, args.userID)
 			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
+				l.Err(err).Msg(errMsg)
+				return err
 			}
 			l.Debug().Msg("Assigned user to team")
 		} else {
-			inv, err := c.CreateInvitation(teamID, email)
+			inv, err := args.client.CreateInvitation(teamID, args.email)
 			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
+				l.Err(err).Msg(errMsg)
+				return err
 			}
 			l.Debug().
 				Int("inviteID", inv.ID).
 				Msg("Invited user to team")
 		}
 	}
+	return nil
+}
+
+// resourceUserRemoveTeams removes team memberships from a Rollbar user.
+func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
+	l := log.With().
+		Int("user_id", args.userID).
+		Str("email", args.email).
+		Interface("expected_teams", args.teamsExpected).
+		Interface("current_teams", args.teamsCurrent).
+		Logger()
+	errMsg := "Error removing user from team"
 
 	// Teams from which this user should be removed
 	var teamsToRemove []int
-	for id := range teamsCurrent {
-		if !teamsExpected[id] {
+	for id := range args.teamsCurrent {
+		if !args.teamsExpected[id] {
 			teamsToRemove = append(teamsToRemove, id)
 		}
 	}
 	l.Debug().Ints("teams_to_remove", teamsToRemove).Msg("Teams to leave")
+
 	// Remove user from those teams
-	if userID != 0 {
+	if args.userID != 0 {
 		l.Debug().Msg("Removing user from teams")
 		for _, teamID := range teamsToRemove {
-			err := c.RemoveUserFromTeam(userID, teamID)
+			err := args.client.RemoveUserFromTeam(args.userID, teamID)
 			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
+				l.Err(err).Msg(errMsg)
+				return err
 			}
 		}
 	}
 
 	// Invitations which should be cancelled
 	var invitationsToCancel []int
-	invitations, err := c.FindPendingInvitations(email)
+	invitations, err := args.client.FindPendingInvitations(args.email)
 	if err != nil {
-		l.Err(err).Send()
-		return diag.FromErr(err)
+		l.Err(err).Msg(errMsg)
+		return err
 	}
 	for _, inv := range invitations {
-		if !teamsExpected[inv.TeamID] {
+		if !args.teamsExpected[inv.TeamID] {
 			invitationsToCancel = append(invitationsToCancel, inv.ID)
 		}
 	}
 	l.Debug().
 		Int("count", len(invitationsToCancel)).
 		Msg("Canceling invitations")
+
 	// Cancel those invitations
 	for _, invitationID := range invitationsToCancel {
-		err := c.CancelInvitation(invitationID)
+		err := args.client.CancelInvitation(invitationID)
 		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
+			l.Err(err).Msg(errMsg)
+			return err
 		}
 	}
 
-	d.SetId(email)
-	l.Debug().Msg("Successfully created or updated rollbar_user resource")
-	return resourceUserRead(ctx, d, meta)
+	return nil
 }
 
 func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
