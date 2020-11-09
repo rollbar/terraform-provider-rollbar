@@ -331,34 +331,10 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		}
 	}
 
-	// If Rollbar user already exists, list user's teamIDs
-	var teamIDs []int
-	if userID != 0 {
-		mustSet(d, "status", "registered")
-		u, err := c.ReadUser(userID)
-		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
-		mustSet(d, "username", u.Username)
-		teams, err := c.ListUserCustomTeams(userID)
-		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
-		for _, t := range teams {
-			teamIDs = append(teamIDs, t.ID)
-		}
-	}
-
-	// Add pending invitations to team IDs
-	invitations, err := c.FindPendingInvitations(email)
-	if err != nil && err != client.ErrNotFound {
+	teamIDs, err := resourceUserCurrentTeams(c, email, userID)
+	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
-	}
-	for _, inv := range invitations {
-		teamIDs = append(teamIDs, inv.TeamID)
 	}
 
 	mustSet(d, "team_ids", teamIDs)
@@ -392,34 +368,22 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		userID, _ = c.FindUserID(email)
 	}
 
-	// If user ID is known, remove user from teams
-	if userID != 0 {
-		teams, err := c.ListUserCustomTeams(userID)
-		if err != nil && err != client.ErrNotFound {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
-		for _, t := range teams {
-			err := c.RemoveUserFromTeam(userID, t.ID)
-			if err != nil {
-				l.Err(err).Send()
-				return diag.FromErr(err)
-			}
-		}
-	}
-
-	// Cancel user's invitations
-	invitations, err := c.FindPendingInvitations(email)
-	if err != nil && err != client.ErrNotFound {
+	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID)
+	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	for _, inv := range invitations {
-		err := c.CancelInvitation(inv.ID)
-		if err != nil {
-			l.Err(err).Send()
-			return diag.FromErr(err)
-		}
+	teamsExpected := make(map[int]bool) // Empty
+	err = resourceUserRemoveTeams(resourceUserAddRemoveTeamsArgs{
+		client:        c,
+		email:         email,
+		userID:        userID,
+		teamsCurrent:  teamsCurrent,
+		teamsExpected: teamsExpected,
+	})
+	if err != nil {
+		l.Err(err).Send()
+		return diag.FromErr(err)
 	}
 
 	d.SetId("")
@@ -452,11 +416,13 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	c := meta.(*client.RollbarApiClient)
 
 	invitations, err := c.FindInvitations(email)
-	if err != nil {
+	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return nil, err
 	}
-	mustSet(d, "status", "invited")
+	if len(invitations) > 0 {
+		mustSet(d, "status", "invited")
+	}
 	for _, inv := range invitations {
 		teamIDs = append(teamIDs, inv.TeamID)
 	}
