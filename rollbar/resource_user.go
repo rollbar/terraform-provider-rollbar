@@ -81,7 +81,7 @@ func resourceUser() *schema.Resource {
 // resourceUserCreate creates a new Rollbar user resource.
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
-	teamIDs := getUserTeamIDs(d)
+	teamIDs := getTeamIDs(d)
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
@@ -97,7 +97,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*client.RollbarApiClient)
 	email := d.Get("email").(string)
-	teamIDs := getUserTeamIDs(d)
+	teamIDs := getTeamIDs(d)
 	l := log.With().
 		Str("email", email).
 		Ints("expected_team_ids", teamIDs).
@@ -348,7 +348,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 
 func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	email := d.Get("email").(string)
-	teamIDs := getUserTeamIDs(d)
+	teamIDs := getTeamIDs(d)
 	l := log.With().
 		Str("email", email).
 		Ints("teamIDs", teamIDs).
@@ -395,8 +395,8 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	return nil
 }
 
-// getUserTeamIDs gets the team IDs for a rollbar_user resource.
-func getUserTeamIDs(d *schema.ResourceData) []int {
+// getTeamIDs gets team IDs for a resource.
+func getTeamIDs(d *schema.ResourceData) []int {
 	set := d.Get("team_ids").(*schema.Set)
 	teamIDs := make([]int, set.Len())
 	for i, teamID := range set.List() {

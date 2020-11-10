@@ -195,24 +195,38 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	return nil
 }
 
-// resourceProjectUpdate handles updates for a `rollbar_project` resource.
+// resourceProjectUpdate handles update for a `rollbar_project` resource.
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	log.Warn().Msg("Not yet implemented")
+	teamIDs := getTeamIDs(d)
+	projectID := mustGetID(d)
+	l := log.With().
+		Int("project_id", projectID).
+		Ints("team_ids", teamIDs).
+		Logger()
+	l.Debug().Msg("Updating rollbar_project resource")
+	c := m.(*client.RollbarApiClient)
+	err := c.UpdateProjectTeams(projectID, teamIDs)
+	if err != nil {
+		l.Err(err).Msg("Error updating rollbar_project resource")
+		return diag.FromErr(err)
+	}
+	l.Debug().Msg("Successfully updated rollbar_project resource")
 	return resourceProjectRead(ctx, d, m)
 }
 
+// resourceProjectDelete handles delete for a `rollbar_project` resource.
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectId := mustGetID(d)
 	l := log.With().
 		Int("projectId", projectId).
 		Logger()
-	l.Info().Msg("Deleting Rollbar project resource")
+	l.Info().Msg("Deleting rollbar_project resource")
 	c := m.(*client.RollbarApiClient)
 	err := c.DeleteProject(projectId)
 	if err != nil {
-		l.Err(err).Send()
+		l.Err(err).Msg("Error deleting rollbar_project resource")
 		return diag.FromErr(err)
 	}
-	l.Debug().Msg("Successfully deleted Rollbar project resource")
+	l.Debug().Msg("Successfully deleted rollbar_project resource")
 	return nil
 }
