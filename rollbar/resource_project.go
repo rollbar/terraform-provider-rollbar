@@ -47,26 +47,44 @@ func resourceProject() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			// Required
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Description: "The human readable name for the project",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 			},
+
+			// Optional
+			"team_ids": {
+				Description: "IDs of the teams assigned to the project",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeInt,
+				},
+			},
+
+			// Computed
 			"account_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "ID of the account that owns the project",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_created": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was created",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_modified": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was last modified",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Status of the project",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
