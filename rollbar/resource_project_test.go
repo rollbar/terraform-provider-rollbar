@@ -67,6 +67,43 @@ func (s *AccSuite) TestAccProject() {
 	})
 }
 
+// TestAccTeamAssignProject tests assigning a team to a project
+func (s *AccSuite) TestAccTeamAssignProject() {
+	projectResourceName := "rollbar_project.test_project"
+	teamName := fmt.Sprintf("%s-team-0", s.randName)
+	projectName := s.randName
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s"
+		}
+
+		resource "rollbar_project" "test_project" {
+			name = "%s"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, teamName, projectName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(projectResourceName),
+					s.checkProjectTeams(projectResourceName),
+				),
+			},
+		},
+	})
+}
+
+/*
+ * Convenience functions
+ */
+
 func (s *AccSuite) configResourceProject() string {
 	// language=hcl
 	tmpl := `
@@ -110,6 +147,8 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 	}
 }
 
+// sweepResourceProject cleans up orphaned projects created by failed acceptance
+// test runs.
 func sweepResourceProject(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar projects from acceptance test runs.")
 
@@ -138,38 +177,8 @@ func sweepResourceProject(_ string) error {
 	log.Info().Msg("Projects cleanup complete")
 	return nil
 }
-func (s *AccSuite) TestAccTeamAssignProject() {
-	projectResourceName := "rollbar_project.test_project"
-	teamName := fmt.Sprintf("%s-team-0", s.randName)
-	projectName := s.randName
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test_team" {
-			name = "%s"
-		}
 
-		resource "rollbar_project" "test_project" {
-			name = "%s"
-			team_ids = [rollbar_team.test_team.id]
-		}
-	`
-	config := fmt.Sprintf(tmpl, teamName, projectName)
-	resource.ParallelTest(s.T(), resource.TestCase{
-		PreCheck:     func() { s.preCheck() },
-		Providers:    s.providers,
-		CheckDestroy: nil,
-		Steps: []resource.TestStep{
-			{
-				Config: config,
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(projectResourceName),
-					s.checkProjectTeams(projectResourceName),
-				),
-			},
-		},
-	})
-}
-
+// checkProjectTeams checks that the project is assigned to the correct teams.
 func (s *AccSuite) checkProjectTeams(projectResourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		l := log.With().Logger()
