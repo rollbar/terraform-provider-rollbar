@@ -163,3 +163,22 @@ func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, 
 func (s *AccSuite) client() *client.RollbarApiClient {
 	return s.provider.Meta().(*client.RollbarApiClient)
 }
+
+// getResourceAttrIntSlice returns value of a named attribute of a Terraform
+// state resource as a slice of integers.
+func (s *AccSuite) getResourceAttrIntSlice(ts *terraform.State, resourceName string, attribute string) ([]int, error) {
+	var value []int
+	count, err := s.getResourceAttrInt(ts, resourceName, attribute+".#")
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < count; i++ {
+		elementAttr := fmt.Sprintf("%s.%d", attribute, i)
+		element, err := s.getResourceAttrInt(ts, resourceName, elementAttr)
+		if err != nil {
+			return nil, err
+		}
+		value = append(value, element)
+	}
+	return value, nil
+}
