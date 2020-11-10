@@ -226,7 +226,7 @@ func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 	for _, t := range allTeams {
 		teamID := t.ID
 		projectIDs, err := c.ListTeamProjectIDs(teamID)
-		if err != nil {
+		if err != nil && err != ErrNotFound {
 			l.Err(err).Send()
 			return nil, err
 		}
