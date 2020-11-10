@@ -138,3 +138,44 @@ func sweepResourceProject(_ string) error {
 	log.Info().Msg("Projects cleanup complete")
 	return nil
 }
+func (s *AccSuite) TestAccTeamAssignProject() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_project" "test_project" {
+			name = "%s"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkProjectTeams(rn),
+				),
+			},
+		},
+	})
+}
+
+func (s *AccSuite) checkProjectTeams(resourceName string) resource.TestCheckFunc {
+	return func(ts *terraform.State) error {
+		l := log.With().Logger()
+		l.Info().Msg("Checking rollbar_project resource's teams")
+		teamIDsSet, err := s.getResourceAttr(ts, resourceName, "team_ids")
+		s.Nil(err)
+
+		c := s.client()
+		return nil
+	}
+}
