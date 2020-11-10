@@ -165,9 +165,19 @@ func (s *Suite) TestFindProjectTeamIDs() {
 	s.Nil(err)
 	s.Equal(expected, actual)
 
+	expectedCallCount :=
+		map[string]int{
+			"GET https://api.rollbar.com/api/1/team/689492/projects": 1,
+			"GET https://api.rollbar.com/api/1/team/689493/projects": 1,
+			"GET https://api.rollbar.com/api/1/teams":                1,
+		}
+	actualCallCount := httpmock.GetCallCountInfo()
+	for call, count := range expectedCallCount {
+		s.Equal(count, actualCallCount[call])
+	}
+
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.FindProjectTeamIDs(projectID)
 		return err
 	})
-
 }
