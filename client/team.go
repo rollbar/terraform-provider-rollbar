@@ -274,9 +274,9 @@ func (c *RollbarApiClient) FindTeamID(name string) (int, error) {
 	return 0, ErrNotFound
 }
 
-// ListTeamProjects lists IDs of all Rollbar projects to which a given team is
+// ListTeamProjectIDs lists IDs of all Rollbar projects to which a given team is
 // assigned.
-func (c *RollbarApiClient) ListTeamProjects(teamID int) ([]int, error) {
+func (c *RollbarApiClient) ListTeamProjectIDs(teamID int) ([]int, error) {
 	l := log.With().Int("teamID", teamID).Logger()
 	l.Debug().Msg("Listing projects for team")
 	resp, err := c.Resty.R().

@@ -275,12 +275,12 @@ func (s *Suite) TestListTeamProjects() {
 	r := responderFromFixture("team/list_projects.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
-	actual, err := s.client.ListTeamProjects(teamID)
+	actual, err := s.client.ListTeamProjectIDs(teamID)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ListTeamProjects(teamID)
+		_, err := s.client.ListTeamProjectIDs(teamID)
 		return err
 	})
 }
