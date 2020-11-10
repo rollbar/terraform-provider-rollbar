@@ -139,3 +139,35 @@ func (s *Suite) TestDeleteProject() {
 		return s.client.DeleteProject(delId)
 	})
 }
+func (s *Suite) TestFindProjectTeamIDs() {
+	var u string // URL
+	var r httpmock.Responder
+	projectID := 423092
+	teamID := 689492
+	expected := []int{teamID}
+
+	// Mock list team projects
+	u = apiUrl + pathTeamProjects
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	u = apiUrl + pathTeamProjects
+	u = strings.ReplaceAll(u, "{teamId}", "689493")
+	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	// Mock list teams
+	u = apiUrl + pathTeamList
+	r = responderFromFixture("team/list_2.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.FindProjectTeamIDs(projectID)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindProjectTeamIDs(projectID)
+		return err
+	})
+
+}

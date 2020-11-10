@@ -210,6 +210,39 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 	return nil
 }
 
+// FindProjectTeamIDs finds IDs of all teams assigned to the project. Caution:
+// this is a potentially slow operation that makes multiple calls to the API.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/104
+func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
+	l := log.With().Int("project_id", projectID).Logger()
+	l.Debug().Msg("Finding teams assigned to project")
+	var projectTeamIDs []int
+
+	allTeams, err := c.ListCustomTeams()
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	for _, t := range allTeams {
+		teamID := t.ID
+		projectIDs, err := c.ListTeamProjectIDs(teamID)
+		if err != nil {
+			l.Err(err).Send()
+			return nil, err
+		}
+		for _, id := range projectIDs {
+			if id == projectID {
+				projectTeamIDs = append(projectTeamIDs, teamID)
+			}
+		}
+	}
+	count := len(projectTeamIDs)
+	l.Debug().
+		Int("team_count", count).
+		Msg("Successfully found teams assigned to project")
+	return projectTeamIDs, nil
+}
+
 /*
  * Containers for unmarshalling API responses
  */

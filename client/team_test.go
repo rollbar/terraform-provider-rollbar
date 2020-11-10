@@ -272,7 +272,7 @@ func (s *Suite) TestListTeamProjects() {
 	expected := []int{423092}
 	u := apiUrl + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	r := responderFromFixture("team/list_projects.json", http.StatusOK)
+	r := responderFromFixture("team/list_projects_689492.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	actual, err := s.client.ListTeamProjectIDs(teamID)
