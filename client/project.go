@@ -243,6 +243,64 @@ func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 	return projectTeamIDs, nil
 }
 
+// UpdateProjectTeams updates the Rollbar teams assigned to a project, assigning
+// and removing teams as necessary. Caution: this is a potentially slow
+// operation that makes multiple calls to the API.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/104
+func (c *RollbarApiClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
+	l := log.With().
+		Int("project_id", projectID).
+		Ints("team_ids", teamIDs).
+		Logger()
+	l.Debug().Msg("Updating teams for project")
+
+	// Compute which teams to assign and to remove
+	var assignTeamIDs, removeTeamIDs []int
+	currentTeamIDs, err := c.FindProjectTeamIDs(projectID) // Potential slowness is here
+	if err != nil {
+		l.Err(err).Send()
+		return err
+	}
+	current := make(map[int]bool)
+	for _, id := range currentTeamIDs {
+		current[id] = true
+	}
+	desired := make(map[int]bool)
+	for _, id := range teamIDs {
+		desired[id] = true
+	}
+	for id := range current {
+		if !desired[id] {
+			removeTeamIDs = append(removeTeamIDs, id)
+		}
+	}
+	for id := range desired {
+		if !current[id] {
+			assignTeamIDs = append(assignTeamIDs, id)
+		}
+	}
+	l.Debug().
+		Ints("assign_team_ids", assignTeamIDs).
+		Ints("remove_team_ids", removeTeamIDs).
+		Msg("Teams to assign and remove")
+
+	for _, teamID := range assignTeamIDs {
+		err = c.AssignTeamToProject(teamID, projectID)
+		if err != nil {
+			l.Err(err).Send()
+			return err
+		}
+	}
+	for _, teamID := range removeTeamIDs {
+		err = c.RemoveTeamFromProject(teamID, projectID)
+		if err != nil {
+			l.Err(err).Send()
+			return err
+		}
+	}
+	return nil
+}
+
 /*
  * Containers for unmarshalling API responses
  */

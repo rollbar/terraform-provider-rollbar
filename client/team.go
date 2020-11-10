@@ -371,10 +371,10 @@ func filterSystemTeams(teams []Team) []Team {
 			continue
 		}
 		customTeams = append(customTeams, t)
-		log.Debug().
-			Str("name", t.Name).
-			Int("id", t.ID).
-			Msg("Custom defined team")
+		//log.Debug().
+		//	Str("name", t.Name).
+		//	Int("id", t.ID).
+		//	Msg("Custom defined team")
 	}
 	return customTeams
 }
