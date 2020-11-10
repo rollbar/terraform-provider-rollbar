@@ -139,11 +139,13 @@ func sweepResourceProject(_ string) error {
 	return nil
 }
 func (s *AccSuite) TestAccTeamAssignProject() {
-	rn := "rollbar_user.test_user"
+	projectResourceName := "rollbar_project.test_project"
+	teamName := fmt.Sprintf("%s-team-0", s.randName)
+	projectName := s.randName
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team" {
-			name = "%s-team-0"
+			name = "%s"
 		}
 
 		resource "rollbar_project" "test_project" {
@@ -151,7 +153,7 @@ func (s *AccSuite) TestAccTeamAssignProject() {
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
-	config := fmt.Sprintf(tmpl, s.randName, s.randName)
+	config := fmt.Sprintf(tmpl, teamName, projectName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
@@ -160,22 +162,25 @@ func (s *AccSuite) TestAccTeamAssignProject() {
 			{
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					s.checkProjectTeams(rn),
+					s.checkResourceStateSanity(projectResourceName),
+					s.checkProjectTeams(projectResourceName),
 				),
 			},
 		},
 	})
 }
 
-func (s *AccSuite) checkProjectTeams(resourceName string) resource.TestCheckFunc {
+func (s *AccSuite) checkProjectTeams(projectResourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		l := log.With().Logger()
 		l.Info().Msg("Checking rollbar_project resource's teams")
-		teamIDsSet, err := s.getResourceAttr(ts, resourceName, "team_ids")
+		projectID, err := s.getResourceIDInt(ts, projectResourceName)
 		s.Nil(err)
-
-		c := s.client()
+		expected, err := s.getResourceAttrIntSlice(ts, projectResourceName, "team_ids")
+		s.Nil(err)
+		actual, err := s.client().FindProjectTeamIDs(projectID)
+		s.Nil(err)
+		s.ElementsMatch(expected, actual)
 		return nil
 	}
 }
