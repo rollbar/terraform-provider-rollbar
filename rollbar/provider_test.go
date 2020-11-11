@@ -24,6 +24,8 @@ package rollbar_test
 
 import (
 	"fmt"
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,6 +35,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
+	"net/http"
 	"os"
 	"strconv"
 	"testing"
@@ -64,8 +67,9 @@ type AccSuite struct {
 	// The following variables are populated before each test by SetupTest():
 	randName string // Name of a Rollbar project
 
-	// Run in VCR mode
-	vcr bool
+	// VCR Mode
+	vcr      bool // Is VCR mode enabled?
+	recorder *recorder.Recorder
 }
 
 func (s *AccSuite) SetupSuite() {
@@ -75,9 +79,11 @@ func (s *AccSuite) SetupSuite() {
 		"rollbar": s.provider,
 	}
 	useVCR := os.Getenv("TF_ACC_VCR")
-	if useVCR != "" {
+	if useVCR == "1" {
 		s.vcr = true
+		log.Warn().Msg("VCR mode enabled")
 	}
+	s.T().Parallel()
 }
 
 // preCheck ensures we are ready to run the test
@@ -88,14 +94,28 @@ func (s *AccSuite) preCheck() {
 }
 
 func (s *AccSuite) SetupTest() {
-	var randString string
-	// For VCR mode we need deterministic names
+	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
 	if s.vcr {
+		// For VCR mode we need deterministic names
 		randString = "vcr"
-	} else {
-		randString = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+		cassetteName := fmt.Sprintf("vcr/%s", s.T().Name())
+		log.Warn().
+			Str("cassette_name", cassetteName).
+			Msg("using VCR cassette")
+		r, err := recorder.New(cassetteName)
+		s.Nil(err)
+		s.recorder = r
+		r.AddFilter(func(i *cassette.Interaction) error {
+			delete(i.Request.Headers, "X-Rollbar-Access-Token")
+			return nil
+		})
+		http.DefaultTransport = s.recorder
 	}
 	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
+}
+
+func (s *AccSuite) TearDownTest() {
+	s.recorder.Stop()
 }
 
 func TestAccSuite(t *testing.T) {
