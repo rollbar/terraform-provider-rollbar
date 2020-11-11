@@ -37,7 +37,7 @@ import (
 func (s *AccSuite) TestAccProjectAccessToken() {
 	rn := "rollbar_project_access_token.test" // Resource name
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

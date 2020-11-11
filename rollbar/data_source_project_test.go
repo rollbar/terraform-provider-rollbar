@@ -34,7 +34,7 @@ import (
 func (s *AccSuite) TestAccProjectDataSource() {
 	rn := "data.rollbar_project.test"
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

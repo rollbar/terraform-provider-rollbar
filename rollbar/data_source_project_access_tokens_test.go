@@ -32,7 +32,7 @@ import (
 // specified.
 func (s *AccSuite) TestAccProjectAccessTokensDataSourceNoPrefix() {
 	rn := "data.rollbar_project_access_tokens.test"
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -57,7 +57,7 @@ func (s *AccSuite) TestAccProjectAccessTokensDataSourceNoPrefix() {
 // prefix.
 func (s *AccSuite) TestAccProjectAccessTokensDataSourceWithPrefix() {
 	rn := "data.rollbar_project_access_tokens.test"
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

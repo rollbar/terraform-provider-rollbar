@@ -215,3 +215,15 @@ func (s *AccSuite) getResourceAttrIntSlice(ts *terraform.State, resourceName str
 	}
 	return value, nil
 }
+
+// parallelTestVCR runs a resource.TestCase using s.parallelTestVCR( unless
+// VCR mode is enabled, whereupon it runs the test with resource.Test.
+func (s *AccSuite) parallelTestVCR(t *testing.T, c resource.TestCase) {
+	if s.vcr {
+		resource.Test(t, c)
+	} else {
+		resource.ParallelTest(t, c)
+	}
+}
+
+//s.parallelTestVCR((s.T(), resource.TestCase{

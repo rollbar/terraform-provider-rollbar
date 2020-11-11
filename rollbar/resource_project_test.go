@@ -43,7 +43,7 @@ func init() {
 func (s *AccSuite) TestAccProject() {
 	rn := "rollbar_project.foo"
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
@@ -84,7 +84,7 @@ func (s *AccSuite) TestAccTeamAssignProject() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, teamName, projectName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -142,7 +142,7 @@ func (s *AccSuite) TestAccTeamAddProject() {
 	`
 	config2 := fmt.Sprintf(tmpl2, team1Name, team2Name, projectName)
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

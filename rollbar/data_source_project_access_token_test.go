@@ -32,7 +32,7 @@ import (
 func (s *AccSuite) TestAccProjectAccessTokenDataSource() {
 	rn := "data.rollbar_project_access_token.test"
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

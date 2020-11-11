@@ -24,7 +24,7 @@ func (s *AccSuite) TestAccTeam() {
 	teamName0 := fmt.Sprintf("%s-team-0", s.randName)
 	teamName1 := fmt.Sprintf("%s-team-0", s.randName)
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
