@@ -11,6 +11,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.31.9 // indirect
 	github.com/brianvoe/gofakeit/v5 v5.9.3
+	github.com/dnaeon/go-vcr v1.1.0
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/go-resty/resty/v2 v2.3.0
 	github.com/golang/protobuf v1.4.3 // indirect

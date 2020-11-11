@@ -25,10 +25,15 @@ package client
 import (
 	"encoding/json"
 	"github.com/brianvoe/gofakeit/v5"
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+	"testing"
 )
 
 func (s *Suite) TestListProjects() {
@@ -180,4 +185,60 @@ func (s *Suite) TestFindProjectTeamIDs() {
 		_, err := s.client.FindProjectTeamIDs(projectID)
 		return err
 	})
+}
+
+func TestUpdateProjectTeams(t *testing.T) {
+	// Setup go-vcr
+	httpmock.Deactivate()
+	r, err := recorder.New("fixtures/vcr/update_project_teams")
+	assert.Nil(t, err)
+	defer r.Stop()
+	r.AddFilter(func(i *cassette.Interaction) error {
+		delete(i.Request.Headers, "X-Rollbar-Access-Token")
+		return nil
+	})
+
+	c := NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c.Resty.GetClient().Transport = r
+
+	prefix := "tf-acc-test-updateprojectteams"
+	projectName := prefix
+	team0Name := prefix + "-0"
+	team1Name := prefix + "-1"
+	team2Name := prefix + "-2"
+
+	project, err := c.CreateProject(projectName)
+	assert.Nil(t, err)
+	team0, err := c.CreateTeam(team0Name, "standard")
+	assert.Nil(t, err)
+	team1, err := c.CreateTeam(team1Name, "standard")
+	assert.Nil(t, err)
+	team2, err := c.CreateTeam(team2Name, "standard")
+	assert.Nil(t, err)
+	err = c.AssignTeamToProject(team0.ID, project.Id)
+	assert.Nil(t, err)
+	err = c.AssignTeamToProject(team1.ID, project.Id)
+	assert.Nil(t, err)
+
+	expectedTeamIDs := []int{team1.ID, team2.ID}
+	err = c.UpdateProjectTeams(project.Id, expectedTeamIDs)
+	assert.Nil(t, err)
+	actualTeamIDs, err := c.FindProjectTeamIDs(project.Id)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expectedTeamIDs, actualTeamIDs)
+
+	// Bad project ID
+	err = c.UpdateProjectTeams(0, expectedTeamIDs)
+	assert.NotNil(t, err)
+	// Bad team ID
+	err = c.UpdateProjectTeams(project.Id, []int{0})
+	assert.NotNil(t, err)
+
+	// Cleanup
+	for _, teamID := range []int{team0.ID, team1.ID, team2.ID} {
+		err = c.DeleteTeam(teamID)
+		assert.Nil(t, err)
+	}
+	err = c.DeleteProject(project.Id)
+	assert.Nil(t, err)
 }
