@@ -63,6 +63,9 @@ type AccSuite struct {
 
 	// The following variables are populated before each test by SetupTest():
 	randName string // Name of a Rollbar project
+
+	// Run in VCR mode
+	vcr bool
 }
 
 func (s *AccSuite) SetupSuite() {
@@ -70,6 +73,10 @@ func (s *AccSuite) SetupSuite() {
 	s.provider = rollbar.Provider()
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
+	}
+	useVCR := os.Getenv("TF_ACC_VCR")
+	if useVCR != "" {
+		s.vcr = true
 	}
 }
 
@@ -81,7 +88,13 @@ func (s *AccSuite) preCheck() {
 }
 
 func (s *AccSuite) SetupTest() {
-	randString := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	var randString string
+	// For VCR mode we need deterministic names
+	if s.vcr {
+		randString = "vcr"
+	} else {
+		randString = acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	}
 	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
 
