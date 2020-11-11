@@ -35,7 +35,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
-	"net/http"
 	"os"
 	"strconv"
 	"testing"
@@ -109,7 +108,7 @@ func (s *AccSuite) SetupTest() {
 			delete(i.Request.Headers, "X-Rollbar-Access-Token")
 			return nil
 		})
-		http.DefaultTransport = s.recorder
+		rollbar.ProviderTransport = s.recorder
 	}
 	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
