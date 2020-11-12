@@ -23,21 +23,29 @@ func resourceTeam() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			// Required
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Description: "Human readable name for the team",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 			},
+
+			// Optional
 			"access_level": {
+				Description:      `The team's access level.  Must be "standard", "light", or "view".  Defaults to "standard".`,
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "standard",
 				ForceNew:         true,
 				ValidateDiagFunc: resourceTeamValidateAccessLevel,
 			},
+
+			// Computed
 			"account_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "ID of account that owns the team",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 		},
 	}
