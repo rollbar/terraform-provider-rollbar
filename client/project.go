@@ -210,6 +210,97 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 	return nil
 }
 
+// FindProjectTeamIDs finds IDs of all teams assigned to the project. Caution:
+// this is a potentially slow operation that makes multiple calls to the API.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/104
+func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
+	l := log.With().Int("project_id", projectID).Logger()
+	l.Debug().Msg("Finding teams assigned to project")
+	var projectTeamIDs []int
+
+	allTeams, err := c.ListCustomTeams()
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	for _, t := range allTeams {
+		teamID := t.ID
+		projectIDs, err := c.ListTeamProjectIDs(teamID)
+		if err != nil && err != ErrNotFound {
+			l.Err(err).Send()
+			return nil, err
+		}
+		for _, id := range projectIDs {
+			if id == projectID {
+				projectTeamIDs = append(projectTeamIDs, teamID)
+			}
+		}
+	}
+	count := len(projectTeamIDs)
+	l.Debug().
+		Int("team_count", count).
+		Msg("Successfully found teams assigned to project")
+	return projectTeamIDs, nil
+}
+
+// UpdateProjectTeams updates the Rollbar teams assigned to a project, assigning
+// and removing teams as necessary. Caution: this is a potentially slow
+// operation that makes multiple calls to the API.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/104
+func (c *RollbarApiClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
+	l := log.With().
+		Int("project_id", projectID).
+		Ints("team_ids", teamIDs).
+		Logger()
+	l.Debug().Msg("Updating teams for project")
+
+	// Compute which teams to assign and to remove
+	var assignTeamIDs, removeTeamIDs []int
+	currentTeamIDs, err := c.FindProjectTeamIDs(projectID) // Potential slowness is here
+	if err != nil {
+		l.Err(err).Send()
+		return err
+	}
+	current := make(map[int]bool)
+	for _, id := range currentTeamIDs {
+		current[id] = true
+	}
+	desired := make(map[int]bool)
+	for _, id := range teamIDs {
+		desired[id] = true
+	}
+	for id := range current {
+		if !desired[id] {
+			removeTeamIDs = append(removeTeamIDs, id)
+		}
+	}
+	for id := range desired {
+		if !current[id] {
+			assignTeamIDs = append(assignTeamIDs, id)
+		}
+	}
+	l.Debug().
+		Ints("assign_team_ids", assignTeamIDs).
+		Ints("remove_team_ids", removeTeamIDs).
+		Msg("Teams to assign and remove")
+
+	for _, teamID := range assignTeamIDs {
+		err = c.AssignTeamToProject(teamID, projectID)
+		if err != nil {
+			l.Err(err).Send()
+			return err
+		}
+	}
+	for _, teamID := range removeTeamIDs {
+		err = c.RemoveTeamFromProject(teamID, projectID)
+		if err != nil {
+			l.Err(err).Send()
+			return err
+		}
+	}
+	return nil
+}
+
 /*
  * Containers for unmarshalling API responses
  */

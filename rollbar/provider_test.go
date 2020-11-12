@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package rollbar_test
+package rollbar
 
 import (
 	"fmt"
@@ -29,7 +29,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
@@ -67,7 +66,7 @@ type AccSuite struct {
 
 func (s *AccSuite) SetupSuite() {
 	// Setup testing
-	s.provider = rollbar.Provider()
+	s.provider = Provider()
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
 	}
@@ -162,4 +161,23 @@ func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, 
 // client returns the current Rollbar API client
 func (s *AccSuite) client() *client.RollbarApiClient {
 	return s.provider.Meta().(*client.RollbarApiClient)
+}
+
+// getResourceAttrIntSlice returns value of a named attribute of a Terraform
+// state resource as a slice of integers.
+func (s *AccSuite) getResourceAttrIntSlice(ts *terraform.State, resourceName string, attribute string) ([]int, error) {
+	var value []int
+	count, err := s.getResourceAttrInt(ts, resourceName, attribute+".#")
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < count; i++ {
+		elementAttr := fmt.Sprintf("%s.%d", attribute, i)
+		element, err := s.getResourceAttrInt(ts, resourceName, elementAttr)
+		if err != nil {
+			return nil, err
+		}
+		value = append(value, element)
+	}
+	return value, nil
 }

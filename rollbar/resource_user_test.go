@@ -1,4 +1,4 @@
-package rollbar_test
+package rollbar
 
 import (
 	"fmt"

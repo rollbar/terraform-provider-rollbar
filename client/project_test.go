@@ -25,10 +25,15 @@ package client
 import (
 	"encoding/json"
 	"github.com/brianvoe/gofakeit/v5"
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+	"testing"
 )
 
 func (s *Suite) TestListProjects() {
@@ -138,4 +143,107 @@ func (s *Suite) TestDeleteProject() {
 	s.checkServerErrors("DELETE", urlDel, func() error {
 		return s.client.DeleteProject(delId)
 	})
+}
+func (s *Suite) TestFindProjectTeamIDs() {
+	var u string // URL
+	var r httpmock.Responder
+	projectID := 423092
+	teamID := 689492
+	expected := []int{teamID}
+
+	// Mock list team projects
+	u = apiUrl + pathTeamProjects
+	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	u = apiUrl + pathTeamProjects
+	u = strings.ReplaceAll(u, "{teamId}", "689493")
+	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	// Mock list teams
+	u = apiUrl + pathTeamList
+	r = responderFromFixture("team/list_2.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+
+	actual, err := s.client.FindProjectTeamIDs(projectID)
+	s.Nil(err)
+	s.Equal(expected, actual)
+
+	expectedCallCount :=
+		map[string]int{
+			"GET https://api.rollbar.com/api/1/team/689492/projects": 1,
+			"GET https://api.rollbar.com/api/1/team/689493/projects": 1,
+			"GET https://api.rollbar.com/api/1/teams":                1,
+		}
+	actualCallCount := httpmock.GetCallCountInfo()
+	for call, count := range expectedCallCount {
+		s.Equal(count, actualCallCount[call])
+	}
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.FindProjectTeamIDs(projectID)
+		return err
+	})
+}
+
+func TestUpdateProjectTeams(t *testing.T) {
+	// Setup go-vcr
+	httpmock.Deactivate()
+	r, err := recorder.New("fixtures/vcr/update_project_teams")
+	assert.Nil(t, err)
+	defer func() {
+		err := r.Stop()
+		if err != nil {
+			panic(err)
+		}
+	}()
+	r.AddFilter(func(i *cassette.Interaction) error {
+		delete(i.Request.Headers, "X-Rollbar-Access-Token")
+		return nil
+	})
+
+	c := NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c.Resty.GetClient().Transport = r
+
+	prefix := "tf-acc-test-updateprojectteams"
+	projectName := prefix
+	team0Name := prefix + "-0"
+	team1Name := prefix + "-1"
+	team2Name := prefix + "-2"
+
+	project, err := c.CreateProject(projectName)
+	assert.Nil(t, err)
+	team0, err := c.CreateTeam(team0Name, "standard")
+	assert.Nil(t, err)
+	team1, err := c.CreateTeam(team1Name, "standard")
+	assert.Nil(t, err)
+	team2, err := c.CreateTeam(team2Name, "standard")
+	assert.Nil(t, err)
+	err = c.AssignTeamToProject(team0.ID, project.Id)
+	assert.Nil(t, err)
+	err = c.AssignTeamToProject(team1.ID, project.Id)
+	assert.Nil(t, err)
+
+	expectedTeamIDs := []int{team1.ID, team2.ID}
+	err = c.UpdateProjectTeams(project.Id, expectedTeamIDs)
+	assert.Nil(t, err)
+	actualTeamIDs, err := c.FindProjectTeamIDs(project.Id)
+	assert.Nil(t, err)
+	assert.ElementsMatch(t, expectedTeamIDs, actualTeamIDs)
+
+	// Bad project ID
+	err = c.UpdateProjectTeams(0, expectedTeamIDs)
+	assert.NotNil(t, err)
+	// Bad team ID
+	err = c.UpdateProjectTeams(project.Id, []int{0})
+	assert.NotNil(t, err)
+
+	// Cleanup
+	for _, teamID := range []int{team0.ID, team1.ID, team2.ID} {
+		err = c.DeleteTeam(teamID)
+		assert.Nil(t, err)
+	}
+	err = c.DeleteProject(project.Id)
+	assert.Nil(t, err)
 }

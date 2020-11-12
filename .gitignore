@@ -30,3 +30,6 @@ terraform.tfstate*
 
 # ShiftLeft Scan reports
 reports/
+
+# Debug logs
+*.log

@@ -8,9 +8,15 @@ Example Usage
 -------------
 
 ```hcl
-# Create a project
-resource "rollbar_project" "foo" {
-  name         = "Foo"
+# Create a team
+resource "rollbar_team" "foo" {
+  name = "foo"
+}
+
+# Create a project and assign the team
+resource "rollbar_project" "bar" {
+  name         = "Bar"
+  team_ids = [rollbar_team.foo.id]
 }
 ```
 
@@ -19,7 +25,8 @@ Argument Reference
 
 The following arguments are supported:
 
-* `name` - (Required) The human readable name for the project.
+* `name` - (Required) Human readable name for the project
+* `team_ids` - (Optional) IDs of teams assigned to the project
 
 
 Attribute Reference
@@ -27,7 +34,7 @@ Attribute Reference
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the created project.
+* `id` - ID of the project
 * `account_id` - ID of account that owns the project
 * `date_created` - Date the project was created
 * `date_modified` - Date the project was last modified

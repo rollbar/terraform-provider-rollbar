@@ -274,6 +274,94 @@ func (c *RollbarApiClient) FindTeamID(name string) (int, error) {
 	return 0, ErrNotFound
 }
 
+// ListTeamProjectIDs lists IDs of all Rollbar projects to which a given team is
+// assigned.
+func (c *RollbarApiClient) ListTeamProjectIDs(teamID int) ([]int, error) {
+	l := log.With().Int("teamID", teamID).Logger()
+	l.Debug().Msg("Listing projects for team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId": strconv.Itoa(teamID),
+		}).
+		SetResult(teamProjectListResponse{}).
+		SetError(ErrorResult{}).
+		Get(apiUrl + pathTeamProjects)
+	if err != nil {
+		l.Err(err).Msg("Error listing projects for team")
+		return nil, err
+	}
+	err = teamNotFoundErrFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error listing projects for team")
+		return nil, err
+	}
+	result := resp.Result().(*teamProjectListResponse).Result
+	var projectIDs []int
+	for _, item := range result {
+		projectIDs = append(projectIDs, item.ProjectID)
+	}
+	l.Debug().Msg("Successfully listed projects for team")
+	return projectIDs, nil
+}
+
+// AssignTeamToProject assigns a Rollbar team to a project.
+func (c *RollbarApiClient) AssignTeamToProject(teamID, projectID int) error {
+	l := log.With().
+		Int("teamID", teamID).
+		Int("projectID", projectID).
+		Logger()
+	l.Debug().Msg("Assigning team to project")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId":    strconv.Itoa(teamID),
+			"projectId": strconv.Itoa(projectID),
+		}).
+		SetError(ErrorResult{}).
+		Put(apiUrl + pathTeamProject)
+	if err != nil {
+		l.Err(err).Msg("Error assigning team to project")
+		return err
+	}
+	err = teamNotFoundErrFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error assigning team to project")
+		return err
+	}
+	l.Debug().Msg("Successfully assigned team to project")
+	return nil
+}
+
+// RemoveTeamFromProject removes a Rollbar team from a project.
+func (c *RollbarApiClient) RemoveTeamFromProject(teamID, projectID int) error {
+	l := log.With().
+		Int("teamID", teamID).
+		Int("projectID", projectID).
+		Logger()
+	l.Debug().Msg("Removing team from project")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamId":    strconv.Itoa(teamID),
+			"projectId": strconv.Itoa(projectID),
+		}).
+		SetError(ErrorResult{}).
+		Delete(apiUrl + pathTeamProject)
+	if err != nil {
+		l.Err(err).Msg("Error removing team from project")
+		return err
+	}
+	err = teamNotFoundErrFromResponse(resp)
+	if err != nil {
+		l.Err(err).Msg("Error removing team from project")
+		return err
+	}
+	l.Debug().Msg("Successfully removed team from project")
+	return nil
+}
+
+/*
+ * Convenience functions
+ */
+
 // filterSystemTeams filters out the system teams "Everyone" and "Owners" from a
 // list of Rollbar teams.
 func filterSystemTeams(teams []Team) []Team {
@@ -283,10 +371,6 @@ func filterSystemTeams(teams []Team) []Team {
 			continue
 		}
 		customTeams = append(customTeams, t)
-		log.Debug().
-			Str("name", t.Name).
-			Int("id", t.ID).
-			Msg("Custom defined team")
 	}
 	return customTeams
 }
@@ -329,4 +413,12 @@ type teamListResponse struct {
 type teamReadResponse struct {
 	Err    int
 	Result Team
+}
+
+type teamProjectListResponse struct {
+	Err    int
+	Result []struct {
+		ProjectID int `json:"project_id"`
+		TeamID    int `json:"team_id"`
+	}
 }
