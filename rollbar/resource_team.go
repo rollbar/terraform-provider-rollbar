@@ -2,6 +2,8 @@ package rollbar
 
 import (
 	"context"
+	"fmt"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -27,16 +29,34 @@ func resourceTeam() *schema.Resource {
 				ForceNew: true,
 			},
 			"access_level": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "standard",
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "standard",
+				ForceNew:         true,
+				ValidateDiagFunc: resourceTeamValidateAccessLevel,
 			},
 			"account_id": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 		},
+	}
+}
+
+func resourceTeamValidateAccessLevel(v interface{}, p cty.Path) diag.Diagnostics {
+	s := v.(string)
+	switch s {
+	case "standard", "light", "view":
+		return nil
+	default:
+		summary := fmt.Sprintf(`Invalid access_level: "%s"`, s)
+		d := diag.Diagnostic{
+			Severity:      diag.Error,
+			AttributePath: p,
+			Summary:       summary,
+			Detail:        `Must be "standard", "light", or "view"`,
+		}
+		return diag.Diagnostics{d}
 	}
 }
 
