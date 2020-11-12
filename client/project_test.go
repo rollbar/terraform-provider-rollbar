@@ -192,7 +192,12 @@ func TestUpdateProjectTeams(t *testing.T) {
 	httpmock.Deactivate()
 	r, err := recorder.New("fixtures/vcr/update_project_teams")
 	assert.Nil(t, err)
-	defer r.Stop()
+	defer func() {
+		err := r.Stop()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	r.AddFilter(func(i *cassette.Interaction) error {
 		delete(i.Request.Headers, "X-Rollbar-Access-Token")
 		return nil
