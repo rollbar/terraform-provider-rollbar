@@ -2,13 +2,17 @@ package rollbar
 
 import (
 	"fmt"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/assert"
 	"os"
 	"regexp"
 	"strings"
+	"testing"
 )
 
 func init() {
@@ -264,4 +268,22 @@ func (s *AccSuite) checkTeamIsDeleted(teamName string) resource.TestCheckFunc {
 		l.Debug().Msg("Confirmed that team is deleted")
 		return nil
 	}
+}
+
+// TestTeamValidateAccessLevel tests validation of argument `access_level` on a
+// `rollbar_team` resource.
+func TestTeamValidateAccessLevel(t *testing.T) {
+	p := cty.Path{} // placeholder
+	validAccessLevels := []string{
+		"standard",
+		"light",
+		"view",
+	}
+	for _, level := range validAccessLevels {
+		d := resourceTeamValidateAccessLevel(level, p)
+		assert.Nil(t, d)
+	}
+	d := resourceTeamValidateAccessLevel("invalid-level", p)
+	assert.Len(t, d, 1)
+	assert.IsType(t, diag.Diagnostic{}, d[0])
 }
