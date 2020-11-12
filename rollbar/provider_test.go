@@ -219,7 +219,16 @@ func (s *AccSuite) getResourceAttrIntSlice(ts *terraform.State, resourceName str
 // VCR mode is enabled, whereupon it runs the test with resource.Test.
 func (s *AccSuite) parallelTestVCR(t *testing.T, c resource.TestCase) {
 	if s.vcr {
-		resource.Test(t, c)
+		switch s.recorder.Mode() {
+		case recorder.ModeRecording:
+			log.Warn().Msg("VCR Mode Recording")
+			resource.Test(t, c)
+		case recorder.ModeReplaying:
+			log.Warn().Msg("VCR Mode Replaying")
+			resource.ParallelTest(t, c)
+		default:
+			s.Fail("WTF?")
+		}
 	} else {
 		resource.ParallelTest(t, c)
 	}
