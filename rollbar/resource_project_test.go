@@ -215,8 +215,8 @@ func (s *AccSuite) TestAccProjectRemoveTeam() {
 			{
 				Config: config1,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.0", team1ResourceName, "id"),
-					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.1", team2ResourceName, "id"),
+					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.*", team1ResourceName, "id"),
+					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.*", team2ResourceName, "id"),
 				),
 			},
 			{
