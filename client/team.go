@@ -415,14 +415,6 @@ type teamReadResponse struct {
 	Result Team
 }
 
-type teamProjectResponse struct {
-	Err    int
-	Result struct {
-		ProjectID int `json:"project_id"`
-		TeamID    int `json:"team_id"`
-	}
-}
-
 type teamProjectListResponse struct {
 	Err    int
 	Result []struct {
