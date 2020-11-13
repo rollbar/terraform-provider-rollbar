@@ -1,6 +1,8 @@
 package rollbar
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -8,9 +10,10 @@ import (
 // notification.
 func resourceNotificationEmail() *schema.Resource {
 	return &schema.Resource{
-		//CreateContext: resourceEmailCreate,
-		//ReadContext:   resourceEmailRead,
-		//DeleteContext: resourceEmailDelete,
+		CreateContext: resourceNotificationEmailCreate,
+		ReadContext:   resourceNotificationEmailRead,
+		UpdateContext: resourceNotificationEmailUpdate,
+		DeleteContext: resourceNotificationEmailDelete,
 
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -18,6 +21,11 @@ func resourceNotificationEmail() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			// Required
+			"token_id": {
+				Description: `ID of project access token with "write" scope`,
+				Type:        schema.TypeInt,
+				Required:    true,
+			},
 			"rule": {
 				Description: "Notification rule",
 				Type:        schema.TypeSet,
@@ -30,23 +38,31 @@ func resourceNotificationEmail() *schema.Resource {
 							Required:         true,
 							ValidateDiagFunc: resourceNotificationValidateTrigger,
 						},
-						"filters": {
-							Description: "Notification filters",
-							Type:        schema.TypeSet,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"type": {
-										Description:      "Filter type",
-										Type:             schema.TypeString,
-										Required:         true,
-										ValidateDiagFunc: resourceNotificationValidateFilterType,
-									},
-								},
-							},
-						},
+						//"environment_filter": {
+						//	Description: "Environment filter",
+						//	Type:        schema.TypeSet,
+						//	Optional:    true,
+						//	Elem:
+						//},
 					},
 				},
 			},
 		},
 	}
+}
+
+func resourceNotificationEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return nil
+}
+
+func resourceNotificationEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return nil
+}
+
+func resourceNotificationEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return nil
+}
+
+func resourceNotificationEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return nil
 }
