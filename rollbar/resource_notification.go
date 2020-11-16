@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/rs/zerolog/log"
 	"strconv"
 )
 
@@ -74,6 +75,30 @@ var resourceNotificationRuleSchema = &schema.Schema{
 				Optional:    true,
 				Elem:        operationValueFilterSchema([]string{"within", "nwithin", "regex", "nregex"}),
 			},
+			"filename_filter": {
+				Description: "Filename filter",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        operationValueFilterSchema([]string{"within", "nwithin", "regex", "nregex"}),
+			},
+			"context_filter": {
+				Description: "Context filter",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        operationValueFilterSchema([]string{"startswith", "eq", "neq"}),
+			},
+			"method_filter": {
+				Description: "Method filter",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        operationValueFilterSchema([]string{"within", "nwithin", "regex", "nregex"}),
+			},
+			"framework_filter": {
+				Description: "Framework filter",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        operationValueFilterSchema([]string{"eq"}),
+			},
 		},
 	},
 }
@@ -90,25 +115,29 @@ func operationValueFilterSchema(allowedOperators []string) *schema.Resource {
 				Required:    true,
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 					s := v.(string)
+
 					// Check if operator is allowed
-					for _, operator := range allowedOperators {
+					quotedOperators := make([]string, len(allowedOperators)) // Used for error message below
+					for i, operator := range allowedOperators {
 						if operator == s {
 							return nil
 						}
+						quotedOperators[i] = strconv.Quote(allowedOperators[i])
 					}
 
 					// Operator was not allowed, so construct error message
 					detail := "Must be "
 					opCount := len(allowedOperators)
-					finalAllowedOperator := strconv.Quote(allowedOperators[opCount-1])
-					if opCount > 1 {
+					switch opCount {
+					case 1:
+						detail = detail + quotedOperators[0]
+					case 2:
+						detail = detail + quotedOperators[0] + " or " + quotedOperators[1]
+					default:
 						for i := 0; i < opCount-1; i++ {
-							quotedOperator := strconv.Quote(allowedOperators[i])
-							detail = detail + quotedOperator + ", "
+							detail = detail + quotedOperators[i] + ", "
 						}
-						detail = detail + "or " + finalAllowedOperator
-					} else {
-						detail = detail + finalAllowedOperator
+						detail = detail + "or " + quotedOperators[opCount-1]
 					}
 					d := diag.Diagnostic{
 						Severity:      diag.Error,
@@ -116,6 +145,7 @@ func operationValueFilterSchema(allowedOperators []string) *schema.Resource {
 						Detail:        detail,
 						AttributePath: p,
 					}
+					log.Error().Interface("diagnostic", d).Send()
 					return diag.Diagnostics{d}
 				},
 			},
