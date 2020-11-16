@@ -42,58 +42,85 @@ provider "rollbar" {
  * Adapted from @jtsaito
  */
 
-data "rollbar_project" "test" {
-  name = rollbar_project.test.name
-  depends_on = [rollbar_project.test]
-}
-
-data "rollbar_project_access_token" "post_client_item" {
-  project_id = data.rollbar_project.test.id
-  name       = "post_client_item"
-}
-
-data "rollbar_project_access_token" "post_server_item" {
-  project_id = data.rollbar_project.test.id
-  name       = "post_server_item"
-}
+//data "rollbar_project" "test" {
+//  name = rollbar_project.test.name
+//  depends_on = [rollbar_project.test]
+//}
+//
+//data "rollbar_project_access_token" "post_client_item" {
+//  project_id = data.rollbar_project.test.id
+//  name       = "post_client_item"
+//}
+//
+//data "rollbar_project_access_token" "post_server_item" {
+//  project_id = data.rollbar_project.test.id
+//  name       = "post_server_item"
+//}
 
 
 /*
  * Added by @jmcvetta
  */
 
+//resource "rollbar_project" "test" {
+//  name = "tf-acc-test-example-1"
+//}
+
+//resource "rollbar_project_access_token" "test_1" {
+//  name = "test-token-1"
+//  project_id = rollbar_project.test.id
+//  scopes = ["post_client_item"]
+//  depends_on = [rollbar_project.test]
+//  rate_limit_window_size = 60
+//  rate_limit_window_count = 500
+//}
+
+//resource "rollbar_project_access_token" "test_2" {
+//  name = "test-token-2"
+//  project_id = rollbar_project.test.id
+//  scopes = ["post_server_item"]
+//  depends_on = [rollbar_project.test]
+//}
+//
+//resource "rollbar_team" "test_team_0" {
+//  name = "test-team-example"
+//}
+//
+//resource "rollbar_user" "test_user_0" {
+//  email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+//  team_ids = [rollbar_team.test_team_0.id]
+//}
+
+//data "rollbar_projects" "all" {}
+//
+//data "rollbar_project_access_tokens" "test" {
+//  project_id = rollbar_project.test.id
+//  prefix = "post_"
+//}
+
 resource "rollbar_project" "test" {
-  name = "tf-acc-test-syntax-compatibility"
+  name = "tf-acc-test-example-1"
 }
 
-resource "rollbar_project_access_token" "test_1" {
-  name = "test-token-1"
+resource "rollbar_project_access_token" "write_token" {
+  name = "test-write-token"
   project_id = rollbar_project.test.id
-  scopes = ["post_client_item"]
-  depends_on = [rollbar_project.test]
-  rate_limit_window_size = 60
-  rate_limit_window_count = 500
+  scopes = ["write"]
 }
 
-resource "rollbar_project_access_token" "test_2" {
-  name = "test-token-2"
-  project_id = rollbar_project.test.id
-  scopes = ["post_server_item"]
-  depends_on = [rollbar_project.test]
-}
+resource "rollbar_notification_email" "foo" {
+  token_id = rollbar_project_access_token.write_token.id
 
-resource "rollbar_team" "test_team_0" {
-  name = "test-team-example"
-}
+  rule {
+    trigger = "new_item"
+    environment_filter {
+      operation = "eq"
+      value = "foo"
+    }
+    environment_filter {
+      operation = "neq"
+      value = "bar"
+    }
+  }
 
-resource "rollbar_user" "test_user_0" {
-  email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-  team_ids = [rollbar_team.test_team_0.id]
-}
-
-data "rollbar_projects" "all" {}
-
-data "rollbar_project_access_tokens" "test" {
-  project_id = rollbar_project.test.id
-  prefix = "post_"
 }
