@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rs/zerolog/log"
 	"strconv"
+	"strings"
 )
 
 // resourceNotification constructs a schema representing a set of Rollbar
@@ -160,44 +161,10 @@ func operationValueFilterSchema(allowedOperators []string) *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"operation": {
-				Description: "Filter operation",
-				Type:        schema.TypeString,
-				Required:    true,
-				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
-					s := v.(string)
-
-					// Check if operator is allowed
-					quotedOperators := make([]string, len(allowedOperators)) // Used for error message below
-					for i, operator := range allowedOperators {
-						if operator == s {
-							return nil
-						}
-						quotedOperators[i] = strconv.Quote(allowedOperators[i])
-					}
-
-					// Operator was not allowed, so construct error message
-					detail := "Must be "
-					opCount := len(allowedOperators)
-					switch opCount {
-					case 1:
-						detail = detail + quotedOperators[0]
-					case 2:
-						detail = detail + quotedOperators[0] + " or " + quotedOperators[1]
-					default:
-						for i := 0; i < opCount-1; i++ {
-							detail = detail + quotedOperators[i] + ", "
-						}
-						detail = detail + "or " + quotedOperators[opCount-1]
-					}
-					d := diag.Diagnostic{
-						Severity:      diag.Error,
-						Summary:       "Invalid filter operation",
-						Detail:        detail,
-						AttributePath: p,
-					}
-					log.Error().Interface("diagnostic", d).Send()
-					return diag.Diagnostics{d}
-				},
+				Description:      "Filter operation",
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validateStringInSlice(allowedOperators),
 			},
 			"value": {
 				Description: "Filter value",
@@ -258,4 +225,57 @@ var resourceNotificationSlackSchema = &schema.Schema{
 			},
 		},
 	},
+}
+
+// validateStringInSlice constructs a validator function that checks whether a
+// string is one of the specified allowed values.
+//
+// TODO: In the future validation.StringInSlice() may be updated
+//  to work with the new Diag functions; whereupon this manual
+//  validation should be replaced with StringInSlice.
+func validateStringInSlice(allowedStrings []string) schema.SchemaValidateDiagFunc {
+	return func(v interface{}, p cty.Path) diag.Diagnostics {
+		s := v.(string)
+
+		// Check if string is allowed
+		quotedStrings := make([]string, len(allowedStrings)) // Used for error message below
+		for i, allowedString := range allowedStrings {
+			if allowedString == s {
+				return nil
+			}
+			quotedStrings[i] = strconv.Quote(allowedString)
+		}
+
+		// Operator was not allowed, so construct error message
+		detail := "Must be "
+		stringCount := len(allowedStrings)
+		switch stringCount {
+		case 1:
+			detail = detail + quotedStrings[0]
+		case 2:
+			detail = detail + quotedStrings[0] + " or " + quotedStrings[1]
+		default:
+			for i := 0; i < stringCount-1; i++ {
+				detail = detail + quotedStrings[i] + ", "
+			}
+			detail = detail + "or " + quotedStrings[stringCount-1]
+		}
+		var stepNames []string
+		for _, step := range p {
+			attrStep, ok := step.(cty.GetAttrStep)
+			if ok {
+				stepNames = append(stepNames, attrStep.Name)
+			}
+		}
+		path := strings.Join(stepNames, ".")
+		detail = fmt.Sprintf("%s\npath: %v", detail, path)
+		d := diag.Diagnostic{
+			Severity:      diag.Error,
+			Summary:       "Invalid value",
+			Detail:        detail,
+			AttributePath: p,
+		}
+		log.Error().Interface("diagnostic", d).Send()
+		return diag.Diagnostics{d}
+	}
 }
