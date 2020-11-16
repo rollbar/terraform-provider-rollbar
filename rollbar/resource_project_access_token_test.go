@@ -44,13 +44,6 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					log.Info().Msg("Test invalid project access token scopes")
-				},
-				Config:      s.configResourceProjectAccessTokenInvalidScopes(),
-				ExpectError: regexp.MustCompile("invalid scope"),
-			},
-			{
-				PreConfig: func() {
 					log.Info().Msg("Test invalid project access token status")
 				},
 				Config:      s.configResourceProjectAccessTokenInvalidStatus(),
@@ -120,9 +113,43 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 	})
 }
 
+// TestAccTokenInvalidScope tests creating a project access token with an
+// invalid scope.
+func (s *AccSuite) TestAccTokenInvalidScope() {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["avocado"]
+			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
+
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config:      config,
+				ExpectError: regexp.MustCompile("invalid scope"),
+			},
+		},
+	})
+}
+
 // TestAccTokenCreateWithNonExistentProjectID tests creating a project access
 // token with a non-existent project ID.
 func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
+	// language=hcl
 	config := `
 		resource "rollbar_project_access_token" "test" {
 			project_id = 1234567890123457890
