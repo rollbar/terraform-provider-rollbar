@@ -60,7 +60,7 @@ func TestResourceNotificationValidateTrigger(t *testing.T) {
 func TestOperationValueFilterSchema(t *testing.T) {
 	checkOps := func(validOperations []string, expectedErrorDetail string) {
 		ovfs := operationValueFilterSchema(validOperations)
-		p := cty.Path{} // placeholder
+		p := cty.GetAttrPath("foo").GetAttr("bar") // Placeholder
 		validationFunc := ovfs.Schema["operation"].ValidateDiagFunc
 		for _, op := range validOperations {
 			diags := validationFunc(op, p)
@@ -77,15 +77,15 @@ func TestOperationValueFilterSchema(t *testing.T) {
 	// Check single and multiple valid operations
 	checkOps(
 		[]string{"foo"},
-		`Must be "foo".`+"\nPath: ",
+		`Must be "foo".`+"\nPath: foo.bar",
 	)
 	checkOps(
 		[]string{"foo", "bar"},
-		`Must be "foo" or "bar".`+"\nPath: ",
+		`Must be "foo" or "bar".`+"\nPath: foo.bar",
 	)
 	checkOps(
 		[]string{"foo", "bar", "baz"},
-		`Must be "foo", "bar", or "baz".`+"\nPath: ",
+		`Must be "foo", "bar", or "baz".`+"\nPath: foo.bar",
 	)
 }
 
