@@ -107,7 +107,7 @@ func (s *Suite) TestReadProject() {
 		Status:       "enabled",
 	}
 	u := apiUrl + pathProjectRead
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.ID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(expected.ID))
 
 	// Success
 	r := responderFromFixture("project/read.json", http.StatusOK)
@@ -132,7 +132,7 @@ func (s *Suite) TestReadProject() {
 func (s *Suite) TestDeleteProject() {
 	delID := gofakeit.Number(0, 1000000)
 	urlDel := apiUrl + pathProjectDelete
-	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delID))
+	urlDel = strings.ReplaceAll(urlDel, "{projectID}", strconv.Itoa(delID))
 
 	// Success
 	r := responderFromFixture("project/delete.json", http.StatusOK)
@@ -153,11 +153,11 @@ func (s *Suite) TestFindProjectTeamIDs() {
 
 	// Mock list team projects
 	u = apiUrl + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	u = apiUrl + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamId}", "689493")
+	u = strings.ReplaceAll(u, "{teamID}", "689493")
 	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 

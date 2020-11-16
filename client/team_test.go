@@ -172,8 +172,8 @@ func (s *Suite) TestAssignUserToTeam() {
 
 	// Successful assignment
 	u := apiUrl + pathTeamUser
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 	r := responderFromFixture("team/assign_user.json", http.StatusOK)
 	httpmock.RegisterResponder("PUT", u, r)
 	err := s.client.AssignUserToTeam(teamID, userID)
@@ -186,8 +186,8 @@ func (s *Suite) TestAssignUserToTeam() {
 
 	// API returns status 403 when the team or user is not found.
 	u = apiUrl + pathTeamUser
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	u = strings.ReplaceAll(u, "{userId}", "0")
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{userID}", "0")
 	r = responderFromFixture("team/assign_user_not_found.json", http.StatusForbidden)
 	httpmock.RegisterResponder("PUT", u, r)
 	err = s.client.AssignUserToTeam(teamID, 0) // non-existent user
@@ -201,8 +201,8 @@ func (s *Suite) TestRemoveUserFromTeam() {
 
 	// Successful assignment
 	u := apiUrl + pathTeamUser
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 	r := responderFromFixture("team/remove_user.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
 	err := s.client.RemoveUserFromTeam(userID, teamID)
@@ -215,8 +215,8 @@ func (s *Suite) TestRemoveUserFromTeam() {
 
 	// API returns status 422 when the team or user is not found.
 	u = apiUrl + pathTeamUser
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	u = strings.ReplaceAll(u, "{userId}", "0")
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{userID}", "0")
 	r = responderFromFixture("team/remove_user_not_found.json", http.StatusUnprocessableEntity)
 	httpmock.RegisterResponder("DELETE", u, r)
 	err = s.client.RemoveUserFromTeam(0, teamID) // non-existent user
@@ -271,7 +271,7 @@ func (s *Suite) TestListTeamProjects() {
 	teamID := 689492
 	expected := []int{423092}
 	u := apiUrl + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r := responderFromFixture("team/list_projects_689492.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -290,8 +290,8 @@ func (s *Suite) TestAssignTeamToProject() {
 	teamID := 689492
 	projectID := 423092
 	u := apiUrl + pathTeamProject
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 	r := responderFromFixture("team/assign_project.json", http.StatusOK)
 	httpmock.RegisterResponder("PUT", u, r)
 
@@ -309,8 +309,8 @@ func (s *Suite) TestRemoveTeamFromProject() {
 	teamID := 689492
 	projectID := 423092
 	u := apiUrl + pathTeamProject
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 	r := responderFromFixture("team/remove_project.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
 

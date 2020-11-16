@@ -85,8 +85,8 @@ func (s *Suite) TestReadUser() {
 	})
 }
 
-// TestUserIdFromEmail tests getting a Rollbar user ID from an email address.
-func (s *Suite) TestUserIdFromEmail() {
+// TestUserIDFromEmail tests getting a Rollbar user ID from an email address.
+func (s *Suite) TestUserIDFromEmail() {
 	email := "jason.mcvetta@gmail.com"
 	expected := 238101
 
@@ -111,7 +111,7 @@ func (s *Suite) TestUserIdFromEmail() {
 func (s *Suite) TestListUserTeams() {
 	userID := 238101
 	u := apiUrl + pathUserTeams
-	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 
 	// Success
 	r := responderFromFixture("user/list_teams.json", http.StatusOK)
@@ -151,7 +151,7 @@ func (s *Suite) TestListUserTeams() {
 func (s *Suite) TestListUserCustomTeams() {
 	userID := 238101
 	u := apiUrl + pathUserTeams
-	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userID))
+	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 
 	// Success
 	r := responderFromFixture("user/list_teams.json", http.StatusOK)

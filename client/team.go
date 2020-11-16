@@ -137,7 +137,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 	}
 
 	u := apiUrl + pathTeamRead
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(id))
 	resp, err := c.Resty.R().
 		SetResult(teamReadResponse{}).
 		SetError(ErrorResult{}).
@@ -174,7 +174,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 	}
 
 	u := apiUrl + pathTeamDelete
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(id))
 	resp, err := c.Resty.R().
 		SetError(ErrorResult{}).
 		Delete(u)
@@ -197,8 +197,8 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 	l.Debug().Msg("Assigning user to team")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
-			"teamId": strconv.Itoa(teamID),
-			"userId": strconv.Itoa(userID),
+			"teamID": strconv.Itoa(teamID),
+			"userID": strconv.Itoa(userID),
 		}).
 		SetError(ErrorResult{}).
 		Put(apiUrl + pathTeamUser)
@@ -227,8 +227,8 @@ func (c *RollbarApiClient) RemoveUserFromTeam(userID, teamID int) error {
 	l.Debug().Msg("Removing user from team")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
-			"teamId": strconv.Itoa(teamID),
-			"userId": strconv.Itoa(userID),
+			"teamID": strconv.Itoa(teamID),
+			"userID": strconv.Itoa(userID),
 		}).
 		SetError(ErrorResult{}).
 		Delete(apiUrl + pathTeamUser)
@@ -281,7 +281,7 @@ func (c *RollbarApiClient) ListTeamProjectIDs(teamID int) ([]int, error) {
 	l.Debug().Msg("Listing projects for team")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
-			"teamId": strconv.Itoa(teamID),
+			"teamID": strconv.Itoa(teamID),
 		}).
 		SetResult(teamProjectListResponse{}).
 		SetError(ErrorResult{}).
@@ -313,8 +313,8 @@ func (c *RollbarApiClient) AssignTeamToProject(teamID, projectID int) error {
 	l.Debug().Msg("Assigning team to project")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
-			"teamId":    strconv.Itoa(teamID),
-			"projectId": strconv.Itoa(projectID),
+			"teamID":    strconv.Itoa(teamID),
+			"projectID": strconv.Itoa(projectID),
 		}).
 		SetError(ErrorResult{}).
 		Put(apiUrl + pathTeamProject)
@@ -340,8 +340,8 @@ func (c *RollbarApiClient) RemoveTeamFromProject(teamID, projectID int) error {
 	l.Debug().Msg("Removing team from project")
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
-			"teamId":    strconv.Itoa(teamID),
-			"projectId": strconv.Itoa(projectID),
+			"teamID":    strconv.Itoa(teamID),
+			"projectID": strconv.Itoa(projectID),
 		}).
 		SetError(ErrorResult{}).
 		Delete(apiUrl + pathTeamProject)
