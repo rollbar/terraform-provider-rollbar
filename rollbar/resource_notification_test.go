@@ -102,7 +102,7 @@ func (s *AccSuite) TestNotificationNotImplemented() {
 		  scopes = ["write"]
 		}
 
-		resource "rollbar_notification_email" "foo" {
+		resource "rollbar_notification" "foo" {
 		  token_id = rollbar_project_access_token.write_token.id
 
 		  rule {
