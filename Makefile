@@ -76,6 +76,6 @@ _terraform_apply_nodebug:
 _terraform_apply_auto:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
 _terraform_plan:
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform plan)
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform plan) || true
 _terraform_destroy:
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform destroy)
+	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform destroy) || true
