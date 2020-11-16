@@ -26,27 +26,7 @@ func resourceNotificationEmail() *schema.Resource {
 				Type:        schema.TypeInt,
 				Required:    true,
 			},
-			"rule": {
-				Description: "Notification rule",
-				Type:        schema.TypeSet,
-				Required:    true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"trigger": {
-							Description:      "Trigger for the notification",
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: resourceNotificationValidateTrigger,
-						},
-						//"environment_filter": {
-						//	Description: "Environment filter",
-						//	Type:        schema.TypeSet,
-						//	Optional:    true,
-						//	Elem:
-						//},
-					},
-				},
-			},
+			"rule": resourceNotificationRuleSchema,
 		},
 	}
 }

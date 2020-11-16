@@ -51,3 +51,30 @@ func TestResourceNotificationValidateTrigger(t *testing.T) {
 	assert.Len(t, d, 1)
 	assert.Equal(t, diag.Error, d[0].Severity)
 }
+
+// TestOperationValueFilterSchema tests validation in the schema resource
+// constructed by operationValueFilterSchema().
+func TestOperationValueFilterSchema(t *testing.T) {
+	checkOps := func(validOperations []string, expectedErrorDetail string) {
+		ovfs := operationValueFilterSchema(validOperations)
+		p := cty.Path{} // placeholder
+		validationFunc := ovfs.Schema["operation"].ValidateDiagFunc
+		for _, op := range validOperations {
+			diags := validationFunc(op, p)
+			assert.Nil(t, diags)
+		}
+		diags := validationFunc("invalid-operation", p)
+		assert.NotNil(t, diags)
+		assert.Len(t, diags, 1)
+		d := diags[0]
+		assert.Equal(t, d.Severity, diag.Error)
+		assert.Equal(t, expectedErrorDetail, d.Detail)
+	}
+
+	// Check single and multiple valid operations
+	checkOps([]string{"foo"}, `Must be "foo"`)
+	checkOps(
+		[]string{"foo", "bar", "baz"},
+		`Must be "foo", "bar", or "baz"`,
+	)
+}
