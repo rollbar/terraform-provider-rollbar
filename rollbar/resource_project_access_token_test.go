@@ -27,14 +27,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strconv"
 )
 
-// TestAccProjectAccessToken tests creation and deletion of a Rollbar project.
-func (s *AccSuite) TestAccProjectAccessToken() {
+func (s *AccSuite) TestAccTokenImportInvalidID() {
 	rn := "rollbar_project_access_token.test" // Resource name
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
@@ -42,34 +40,28 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				PreConfig: func() {
-					log.Info().Msg("Test updating project access token scopes")
-				},
-				Config: s.configResourceProjectAccessTokenUpdatedScopes(),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
-					resource.TestCheckResourceAttr(rn, "scopes.0", "post_server_item"),
-					s.checkProjectAccessToken(rn),
-				),
-			},
-			{
-				PreConfig: func() {
-					log.Info().Msg("Test importing a project access token")
-				},
-				ResourceName:      rn,
-				ImportState:       true,
-				ImportStateIdFunc: importIdProjectAccessToken(rn),
-				ImportStateVerify: true,
-			},
-			{
-				PreConfig: func() {
-					log.Info().Msg("Test invalid ID format when importing a project access token")
-				},
 				ExpectError:       regexp.MustCompile("unexpected format of ID"),
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateId:     "wrong format",
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// TestAccTokenImport tests importing a Rollbar project access token.
+func (s *AccSuite) TestAccTokenImport() {
+	rn := "rollbar_project_access_token.test" // Resource name
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateIdFunc: importIdProjectAccessToken(rn),
 				ImportStateVerify: true,
 			},
 		},
@@ -183,7 +175,7 @@ func (s *AccSuite) TestAccTokenUpdateRateLimit() {
 				),
 			},
 			{
-				Config: config1,
+				Config: config2,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					// Confirm the update produced the expected values
