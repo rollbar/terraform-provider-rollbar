@@ -44,13 +44,6 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					log.Info().Msg("Test invalid project access token status")
-				},
-				Config:      s.configResourceProjectAccessTokenInvalidStatus(),
-				ExpectError: regexp.MustCompile("invalid status"),
-			},
-			{
-				PreConfig: func() {
 					log.Info().Msg("Test creating project access token")
 				},
 				Config: s.configResourceProjectAccessToken(),
@@ -108,6 +101,45 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				ImportState:       true,
 				ImportStateId:     "wrong format",
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// TestAccTokenCreate tests creating a project access token.
+func (s *AccSuite) TestAccTokenCreate() {
+	rn := "rollbar_project_access_token.test" // Resource name
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttrSet(rn, "access_token"),
+					s.checkProjectAccessToken(rn),
+					s.checkProjectAccessTokenInTokenList(rn),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "0"),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "0"),
+					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
+					resource.TestCheckResourceAttr(rn, "scopes.0", "read"),
+				),
 			},
 		},
 	})
