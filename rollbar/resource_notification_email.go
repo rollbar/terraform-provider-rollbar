@@ -22,8 +22,8 @@ func resourceNotificationEmail() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required
 			"token_id": {
-				Description: `ID of project access token with "write" scope`,
-				Type:        schema.TypeInt,
+				Description: `ID (access token string) of project access token with "write" scope`,
+				Type:        schema.TypeString,
 				Required:    true,
 			},
 			"rule": resourceNotificationRuleSchema,
@@ -31,18 +31,24 @@ func resourceNotificationEmail() *schema.Resource {
 	}
 }
 
+var resourceNotificationEmailNotImplementedMessage = "resource `rollbar_notification_email` not yet implemented"
+var resourceNotificationEmailNotImplementedDiagnostics = diag.Diagnostics{diag.Diagnostic{
+	Severity: diag.Error,
+	Summary:  resourceNotificationEmailNotImplementedMessage,
+}}
+
 func resourceNotificationEmailCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
+	return resourceNotificationEmailNotImplementedDiagnostics
 }
 
 func resourceNotificationEmailRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
+	return resourceNotificationEmailNotImplementedDiagnostics
 }
 
 func resourceNotificationEmailUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
+	return resourceNotificationEmailNotImplementedDiagnostics
 }
 
 func resourceNotificationEmailDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
+	return resourceNotificationEmailNotImplementedDiagnostics
 }
