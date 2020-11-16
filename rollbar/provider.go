@@ -163,6 +163,7 @@ func validateStringInSlice(allowedStrings []string) schema.SchemaValidateDiagFun
 			}
 			detail = detail + "or " + quotedStrings[stringCount-1]
 		}
+		detail = detail + "."
 		var stepNames []string
 		for _, step := range p {
 			attrStep, ok := step.(cty.GetAttrStep)
@@ -171,7 +172,7 @@ func validateStringInSlice(allowedStrings []string) schema.SchemaValidateDiagFun
 			}
 		}
 		path := strings.Join(stepNames, ".")
-		detail = fmt.Sprintf("%s\npath: %v", detail, path)
+		detail = fmt.Sprintf("%s\nPath: %v", detail, path)
 		d := diag.Diagnostic{
 			Severity:      diag.Error,
 			Summary:       "Invalid value",
