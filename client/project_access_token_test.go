@@ -35,7 +35,7 @@ import (
 func (s *Suite) TestListProjectAccessTokens() {
 	projectID := 12116
 	u := apiUrl + pathPatList
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
@@ -119,7 +119,7 @@ func (s *Suite) TestListProjectAccessTokens() {
 func (s *Suite) TestReadProjectAccessToken() {
 	projectID := 411334
 	u := apiUrl + pathPatList
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
@@ -160,7 +160,7 @@ func (s *Suite) TestReadProjectAccessToken() {
 func (s *Suite) TestReadProjectAccessTokenByName() {
 	projectID := 411334
 	u := apiUrl + pathPatList
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projectID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
@@ -215,7 +215,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 		Status:    StatusEnabled,
 	}
 	u := apiUrl + pathPatCreate
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
 	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
 		a := ProjectAccessTokenCreateArgs{}
@@ -300,7 +300,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 		RateLimitWindowCount: 2500,
 	}
 	u := apiUrl + pathPatUpdate
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(projID))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
 	u = strings.ReplaceAll(u, "{accessToken}", accessToken)
 	rs := responseFromFixture("project_access_token/update.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {

@@ -322,9 +322,9 @@ func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc 
 		if !ok {
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
-		projectId := rs.Primary.Attributes["project_id"]
+		projectID := rs.Primary.Attributes["project_id"]
 		accessToken := rs.Primary.ID
 
-		return fmt.Sprintf("%s/%s", projectId, accessToken), nil
+		return fmt.Sprintf("%s/%s", projectID, accessToken), nil
 	}
 }

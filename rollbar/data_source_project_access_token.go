@@ -96,17 +96,17 @@ func dataSourceProjectAccessToken() *schema.Resource {
 // dataSourceProjectAccessTokenRead reads a Rollbar project access token from
 // the API
 func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projId := d.Get("project_id").(int)
+	projectID := d.Get("project_id").(int)
 	var name string
 	name, _ = d.Get("name").(string)
 	l := log.With().
-		Int("project_id", projId).
+		Int("project_id", projectID).
 		Str("name", name).
 		Logger()
 	l.Debug().Msg("Reading project access token from Rollbar")
 
 	c := m.(*client.RollbarApiClient)
-	tokens, err := c.ListProjectAccessTokens(projId)
+	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
