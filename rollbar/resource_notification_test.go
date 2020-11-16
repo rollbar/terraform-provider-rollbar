@@ -72,7 +72,14 @@ func TestOperationValueFilterSchema(t *testing.T) {
 	}
 
 	// Check single and multiple valid operations
-	checkOps([]string{"foo"}, `Must be "foo"`)
+	checkOps(
+		[]string{"foo"},
+		`Must be "foo"`,
+	)
+	checkOps(
+		[]string{"foo", "bar"},
+		`Must be "foo" or "bar"`,
+	)
 	checkOps(
 		[]string{"foo", "bar", "baz"},
 		`Must be "foo", "bar", or "baz"`,
