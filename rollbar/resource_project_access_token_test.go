@@ -44,13 +44,6 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					log.Info().Msg("Test create project access token with non-existent project ID")
-				},
-				ExpectError: regexp.MustCompile("not found"),
-				Config:      s.configResourceProjectAccessTokenNonExistentProject(),
-			},
-			{
-				PreConfig: func() {
 					log.Info().Msg("Test invalid project access token scopes")
 				},
 				Config:      s.configResourceProjectAccessTokenInvalidScopes(),
@@ -122,6 +115,32 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				ImportState:       true,
 				ImportStateId:     "wrong format",
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// TestAccTokenCreateWithNonExistentProjectID tests creating a project access
+// token with a non-existent project ID.
+func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
+	config := `
+		resource "rollbar_project_access_token" "test" {
+			project_id = 1234567890123457890
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				ExpectError: regexp.MustCompile("not found"),
+				Config:      config,
 			},
 		},
 	})
