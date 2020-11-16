@@ -71,10 +71,6 @@ _terraform_log:
 	cat /tmp/terraform-provider-rollbar.log
 _terraform_apply:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply) || true
-_terraform_apply_nodebug:
-	(cd example && terraform apply) || true
-_terraform_apply_auto:
-	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform apply --auto-approve) || true
 _terraform_plan:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform plan) || true
 _terraform_destroy:
