@@ -60,7 +60,7 @@ func TestResourceNotificationValidateTrigger(t *testing.T) {
 func TestOperationValueFilterSchema(t *testing.T) {
 	checkOps := func(validOperations []string, expectedErrorDetail string) {
 		ovfs := operationValueFilterSchema(validOperations)
-		p := cty.GetAttrPath("foo").GetAttr("bar") // Placeholder
+		p := cty.GetAttrPath("foo").GetAttr("bar") // Used to test path formatting
 		validationFunc := ovfs.Schema["operation"].ValidateDiagFunc
 		for _, op := range validOperations {
 			diags := validationFunc(op, p)
