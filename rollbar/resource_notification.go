@@ -30,7 +30,9 @@ func resourceNotification() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
-			"rule": resourceNotificationRuleSchema,
+			"rule":  resourceNotificationRuleSchema,
+			"email": resourceNotificationEmailSchema,
+			"slack": resourceNotificationSlackSchema,
 		},
 	}
 }
@@ -205,4 +207,55 @@ func operationValueFilterSchema(allowedOperators []string) *schema.Resource {
 		},
 	}
 
+}
+
+// resourceNotificationEmailSchema constructs a schema for a Rollbar
+// notification rule email config.
+var resourceNotificationEmailSchema = &schema.Schema{
+	Description: "Email config",
+	Type:        schema.TypeSet,
+	Optional:    true,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"teams": {
+				Description: "List of team names to send emails to",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"users": {
+				Description: "List of usernames or email addresses to send emails to",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+		},
+	},
+}
+
+// resourceNotificationSlackSchema constructs a schema for a Rollbar
+// notification rule Slack config.
+var resourceNotificationSlackSchema = &schema.Schema{
+	Description: "Slack config",
+	Type:        schema.TypeSet,
+	Optional:    true,
+	Elem: &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"message_template": {
+				Description: "Custom template for the Slack message",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"show_message_buttons": {
+				Description: "Show the Slack actionable buttons",
+				Type:        schema.TypeBool,
+				Optional:    true,
+			},
+			"channel": {
+				Description: "Slack channel to send the messages",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+		},
+	},
 }
