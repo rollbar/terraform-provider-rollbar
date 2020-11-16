@@ -159,28 +159,28 @@ func (s *Suite) TestReadInvitation() {
 }
 
 func (s *Suite) TestCancelInvitation() {
-	invitationId := 153650
+	invitationID := 153650
 	u := apiUrl + pathInvitation
-	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(invitationId))
+	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(invitationID))
 
 	r := responderFromFixture("invitation/cancel.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err := s.client.CancelInvitation(invitationId)
+	err := s.client.CancelInvitation(invitationID)
 	s.Nil(err)
 
 	// DeleteInvitation is an alias for CancelInvitation.
-	err = s.client.DeleteInvitation(invitationId)
+	err = s.client.DeleteInvitation(invitationID)
 	s.Nil(err)
 
 	// Invitation is already cancelled
 	r = httpmock.NewJsonResponderOrPanic(http.StatusUnprocessableEntity,
 		ErrorResult{Err: 1, Message: "Invite already cancelled"})
 	httpmock.RegisterResponder("DELETE", u, r)
-	err = s.client.CancelInvitation(invitationId)
+	err = s.client.CancelInvitation(invitationID)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
-		err := s.client.CancelInvitation(invitationId)
+		err := s.client.CancelInvitation(invitationID)
 		return err
 	})
 

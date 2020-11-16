@@ -61,9 +61,9 @@ func (s *Suite) TestListUsers() {
 
 // TestReadUser tests reading a Rollbar user from the API.
 func (s *Suite) TestReadUser() {
-	userId := 238101
+	userID := 238101
 	u := apiUrl + pathUser
-	u = strings.ReplaceAll(u, "{userId}", strconv.Itoa(userId))
+	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 
 	// Success
 	r := responderFromFixture("user/read.json", http.StatusOK)
@@ -75,12 +75,12 @@ func (s *Suite) TestReadUser() {
 		// https://github.com/rollbar/terraform-provider-rollbar/issues/65
 		//EmailEnabled: true,
 	}
-	actual, err := s.client.ReadUser(userId)
+	actual, err := s.client.ReadUser(userID)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ReadUser(userId)
+		_, err := s.client.ReadUser(userID)
 		return err
 	})
 }

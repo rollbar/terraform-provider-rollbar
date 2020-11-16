@@ -29,9 +29,9 @@ import (
 
 // Project represents a Rollbar project.
 type Project struct {
-	Id           int    `model:"id" mapstructure:"id"`
+	ID           int    `model:"id" mapstructure:"id"`
 	Name         string `model:"name" mapstructure:"name"`
-	AccountId    int    `json:"account_id" model:"account_id" mapstructure:"account_id"`
+	AccountID    int    `json:"account_id" model:"account_id" mapstructure:"account_id"`
 	DateCreated  int    `json:"date_created" model:"date_created" mapstructure:"date_created"`
 	DateModified int    `json:"date_modified" model:"date_modified" mapstructure:"date_modified"`
 	Status       string `model:"status" mapstructure:"status"`
@@ -144,11 +144,11 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 // ReadProject a Rollbar project from the API. If no matching project is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
+func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
 	u := apiUrl + pathProjectRead
 
 	l := log.With().
-		Int("projectId", projectId).
+		Int("projectID", projectID).
 		Str("url", u).
 		Logger()
 	l.Debug().Msg("Reading project from API")
@@ -157,7 +157,7 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
-			"projectId": strconv.Itoa(projectId),
+			"projectID": strconv.Itoa(projectID),
 		}).
 		Get(u)
 	if err != nil {
@@ -183,10 +183,10 @@ func (c *RollbarApiClient) ReadProject(projectId int) (*Project, error) {
 
 // DeleteProject deletes a Rollbar project. If no matching project is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) DeleteProject(projectId int) error {
+func (c *RollbarApiClient) DeleteProject(projectID int) error {
 	u := apiUrl + pathProjectDelete
 	l := log.With().
-		Int("projectId", projectId).
+		Int("projectID", projectID).
 		Str("url", u).
 		Logger()
 	l.Debug().Msg("Deleting project")
@@ -194,7 +194,7 @@ func (c *RollbarApiClient) DeleteProject(projectId int) error {
 	resp, err := c.Resty.R().
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
-			"projectId": strconv.Itoa(projectId),
+			"projectID": strconv.Itoa(projectID),
 		}).
 		Delete(u)
 	if err != nil {
