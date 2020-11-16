@@ -35,7 +35,7 @@ import (
 func (s *Suite) TestListInvitations() {
 	teamID := 572097
 	u := apiUrl + pathInvitations
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
 	r := responderFromFixture("invitation/list.json", http.StatusOK)
@@ -74,7 +74,7 @@ func (s *Suite) TestListInvitations() {
 func (s *Suite) TestListPendingInvitations() {
 	teamID := 662037
 	u := apiUrl + pathInvitations
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
 	r := responderFromFixture("invitation/list_662037.json", http.StatusOK)
@@ -105,7 +105,7 @@ func (s *Suite) TestCreateInvitation() {
 	teamID := 572097
 	email := "test@rollbar.com"
 	u := apiUrl + pathInvitations
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
 	// FIXME: The actual Rollbar API sends http.StatusOK; but it
@@ -134,7 +134,7 @@ func (s *Suite) TestCreateInvitation() {
 func (s *Suite) TestReadInvitation() {
 	id := 153650
 	u := apiUrl + pathInvitation
-	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{inviteID}", strconv.Itoa(id))
 
 	// Success
 	r := responderFromFixture("invitation/read.json", http.StatusOK)
@@ -159,28 +159,28 @@ func (s *Suite) TestReadInvitation() {
 }
 
 func (s *Suite) TestCancelInvitation() {
-	invitationId := 153650
+	invitationID := 153650
 	u := apiUrl + pathInvitation
-	u = strings.ReplaceAll(u, "{inviteId}", strconv.Itoa(invitationId))
+	u = strings.ReplaceAll(u, "{inviteID}", strconv.Itoa(invitationID))
 
 	r := responderFromFixture("invitation/cancel.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err := s.client.CancelInvitation(invitationId)
+	err := s.client.CancelInvitation(invitationID)
 	s.Nil(err)
 
 	// DeleteInvitation is an alias for CancelInvitation.
-	err = s.client.DeleteInvitation(invitationId)
+	err = s.client.DeleteInvitation(invitationID)
 	s.Nil(err)
 
 	// Invitation is already cancelled
 	r = httpmock.NewJsonResponderOrPanic(http.StatusUnprocessableEntity,
 		ErrorResult{Err: 1, Message: "Invite already cancelled"})
 	httpmock.RegisterResponder("DELETE", u, r)
-	err = s.client.CancelInvitation(invitationId)
+	err = s.client.CancelInvitation(invitationID)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
-		err := s.client.CancelInvitation(invitationId)
+		err := s.client.CancelInvitation(invitationID)
 		return err
 	})
 
@@ -198,7 +198,7 @@ func (s *Suite) TestFindInvitations() {
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
 		r = responderFromFixture(fixturePath, http.StatusOK)
-		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamId}", teamID)
+		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamID}", teamID)
 		httpmock.RegisterResponder("GET", u, r)
 	}
 
@@ -241,7 +241,7 @@ func (s *Suite) TestFindPendingInvitations() {
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
 		r = responderFromFixture(fixturePath, http.StatusOK)
-		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamId}", teamID)
+		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamID}", teamID)
 		httpmock.RegisterResponder("GET", u, r)
 	}
 

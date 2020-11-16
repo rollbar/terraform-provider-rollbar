@@ -68,7 +68,7 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 	l.Debug().Msg("Reading user from API")
 	u := apiUrl + pathUser
 	resp, err := c.Resty.R().
-		SetPathParams(map[string]string{"userId": strconv.Itoa(id)}).
+		SetPathParams(map[string]string{"userID": strconv.Itoa(id)}).
 		SetResult(userReadResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
@@ -112,7 +112,7 @@ func (c *RollbarApiClient) ListUserTeams(userID int) (teams []Team, err error) {
 	l.Debug().Msg("Reading teams for Rollbar user")
 	u := apiUrl + pathUserTeams
 	resp, err := c.Resty.R().
-		SetPathParams(map[string]string{"userId": strconv.Itoa(userID)}).
+		SetPathParams(map[string]string{"userID": strconv.Itoa(userID)}).
 		SetResult(userTeamListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)

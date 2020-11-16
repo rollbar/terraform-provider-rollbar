@@ -268,7 +268,7 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 		s.Nil(err)
 		found := false
 		for _, proj := range projList {
-			if proj.Id == id {
+			if proj.ID == id {
 				found = true
 			}
 		}
@@ -292,10 +292,10 @@ func sweepResourceProject(_ string) error {
 	for _, p := range projects {
 		l := log.With().
 			Str("name", p.Name).
-			Int("id", p.Id).
+			Int("id", p.ID).
 			Logger()
 		if strings.HasPrefix(p.Name, "tf-acc-test-") {
-			err = c.DeleteProject(p.Id)
+			err = c.DeleteProject(p.ID)
 			if err != nil {
 				l.Err(err).Send()
 				return err

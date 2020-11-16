@@ -87,9 +87,9 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("no project with the name %s found", name)
 	}
 
-	id := fmt.Sprintf("%d", project.Id)
+	id := fmt.Sprintf("%d", project.ID)
 	d.SetId(id)
-	mustSet(d, "account_id", project.AccountId)
+	mustSet(d, "account_id", project.AccountID)
 	mustSet(d, "date_created", project.DateCreated)
 	mustSet(d, "date_modified", project.DateModified)
 	mustSet(d, "status", project.Status)

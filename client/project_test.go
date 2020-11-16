@@ -44,17 +44,17 @@ func (s *Suite) TestListProjects() {
 	httpmock.RegisterResponder("GET", u, r)
 	expected := []Project{
 		{
-			Id:           411704,
+			ID:           411704,
 			Name:         "bar",
-			AccountId:    317418,
+			AccountID:    317418,
 			Status:       "enabled",
 			DateCreated:  1602085345,
 			DateModified: 1602085345,
 		},
 		{
-			Id:           411703,
+			ID:           411703,
 			Name:         "foo",
-			AccountId:    317418,
+			AccountID:    317418,
 			Status:       "enabled",
 			DateCreated:  1602085340,
 			DateModified: 1602085340,
@@ -99,25 +99,25 @@ func (s *Suite) TestCreateProject() {
 
 func (s *Suite) TestReadProject() {
 	expected := Project{
-		AccountId:    317418,
+		AccountID:    317418,
 		DateCreated:  1602086539,
 		DateModified: 1602086539,
-		Id:           411708,
+		ID:           411708,
 		Name:         "baz",
 		Status:       "enabled",
 	}
 	u := apiUrl + pathProjectRead
-	u = strings.ReplaceAll(u, "{projectId}", strconv.Itoa(expected.Id))
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(expected.ID))
 
 	// Success
 	r := responderFromFixture("project/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	actual, err := s.client.ReadProject(expected.Id)
+	actual, err := s.client.ReadProject(expected.ID)
 	s.Nil(err)
 	s.Equal(&expected, actual)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ReadProject(expected.Id)
+		_, err := s.client.ReadProject(expected.ID)
 		return err
 	})
 
@@ -125,23 +125,23 @@ func (s *Suite) TestReadProject() {
 	// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/23
 	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProject(expected.Id)
+	_, err = s.client.ReadProject(expected.ID)
 	s.Equal(ErrNotFound, err)
 }
 
 func (s *Suite) TestDeleteProject() {
-	delId := gofakeit.Number(0, 1000000)
+	delID := gofakeit.Number(0, 1000000)
 	urlDel := apiUrl + pathProjectDelete
-	urlDel = strings.ReplaceAll(urlDel, "{projectId}", strconv.Itoa(delId))
+	urlDel = strings.ReplaceAll(urlDel, "{projectID}", strconv.Itoa(delID))
 
 	// Success
 	r := responderFromFixture("project/delete.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", urlDel, r)
-	err := s.client.DeleteProject(delId)
+	err := s.client.DeleteProject(delID)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", urlDel, func() error {
-		return s.client.DeleteProject(delId)
+		return s.client.DeleteProject(delID)
 	})
 }
 func (s *Suite) TestFindProjectTeamIDs() {
@@ -153,11 +153,11 @@ func (s *Suite) TestFindProjectTeamIDs() {
 
 	// Mock list team projects
 	u = apiUrl + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamId}", strconv.Itoa(teamID))
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	u = apiUrl + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamId}", "689493")
+	u = strings.ReplaceAll(u, "{teamID}", "689493")
 	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -220,15 +220,15 @@ func TestUpdateProjectTeams(t *testing.T) {
 	assert.Nil(t, err)
 	team2, err := c.CreateTeam(team2Name, "standard")
 	assert.Nil(t, err)
-	err = c.AssignTeamToProject(team0.ID, project.Id)
+	err = c.AssignTeamToProject(team0.ID, project.ID)
 	assert.Nil(t, err)
-	err = c.AssignTeamToProject(team1.ID, project.Id)
+	err = c.AssignTeamToProject(team1.ID, project.ID)
 	assert.Nil(t, err)
 
 	expectedTeamIDs := []int{team1.ID, team2.ID}
-	err = c.UpdateProjectTeams(project.Id, expectedTeamIDs)
+	err = c.UpdateProjectTeams(project.ID, expectedTeamIDs)
 	assert.Nil(t, err)
-	actualTeamIDs, err := c.FindProjectTeamIDs(project.Id)
+	actualTeamIDs, err := c.FindProjectTeamIDs(project.ID)
 	assert.Nil(t, err)
 	assert.ElementsMatch(t, expectedTeamIDs, actualTeamIDs)
 
@@ -236,7 +236,7 @@ func TestUpdateProjectTeams(t *testing.T) {
 	err = c.UpdateProjectTeams(0, expectedTeamIDs)
 	assert.NotNil(t, err)
 	// Bad team ID
-	err = c.UpdateProjectTeams(project.Id, []int{0})
+	err = c.UpdateProjectTeams(project.ID, []int{0})
 	assert.NotNil(t, err)
 
 	// Cleanup
@@ -244,6 +244,6 @@ func TestUpdateProjectTeams(t *testing.T) {
 		err = c.DeleteTeam(teamID)
 		assert.Nil(t, err)
 	}
-	err = c.DeleteProject(project.Id)
+	err = c.DeleteProject(project.ID)
 	assert.Nil(t, err)
 }
