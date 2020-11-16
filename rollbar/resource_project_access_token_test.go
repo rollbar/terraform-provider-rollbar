@@ -36,41 +36,11 @@ import (
 // TestAccProjectAccessToken tests creation and deletion of a Rollbar project.
 func (s *AccSuite) TestAccProjectAccessToken() {
 	rn := "rollbar_project_access_token.test" // Resource name
-
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
-			{
-				PreConfig: func() {
-					log.Info().Msg("Test creating project access token")
-				},
-				Config: s.configResourceProjectAccessToken(),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttrSet(rn, "access_token"),
-					s.checkProjectAccessToken(rn),
-					s.checkProjectAccessTokenInTokenList(rn),
-					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "0"),
-					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "0"),
-					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
-					resource.TestCheckResourceAttr(rn, "scopes.0", "read"),
-				),
-			},
-			{
-				PreConfig: func() {
-					log.Info().Msg("Test updating project access token rate limit")
-				},
-				Config: s.configResourceProjectAccessTokenUpdatedRateLimit(),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					// Confirm the update produced the expected values
-					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "60"),
-					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "500"),
-					s.checkProjectAccessToken(rn),
-				),
-			},
 			{
 				PreConfig: func() {
 					log.Info().Msg("Test updating project access token scopes")
@@ -101,6 +71,126 @@ func (s *AccSuite) TestAccProjectAccessToken() {
 				ImportState:       true,
 				ImportStateId:     "wrong format",
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// TestAccTokenUpdateScope tests updating the scope on a Rollbar project access
+// token.
+func (s *AccSuite) TestAccTokenUpdateScope() {
+	rn := "rollbar_project_access_token.test" // Resource name
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, s.randName)
+	// language=hcl
+	tmpl2 := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["post_server_item"]
+			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	config2 := fmt.Sprintf(tmpl2, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
+					resource.TestCheckResourceAttr(rn, "scopes.0", "read"),
+				),
+			},
+			{
+				Config: config2,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
+					resource.TestCheckResourceAttr(rn, "scopes.0", "post_server_item"),
+					s.checkProjectAccessToken(rn),
+				),
+			},
+		},
+	})
+}
+
+// TestAccTokenUpdateRateLimit tests updating the rate limit on a Rollbar
+// project access token.
+func (s *AccSuite) TestAccTokenUpdateRateLimit() {
+	rn := "rollbar_project_access_token.test" // Resource name
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, s.randName)
+	// language=hcl
+	tmpl2 := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+			rate_limit_window_size = 60
+			rate_limit_window_count = 500
+		}
+	`
+	config2 := fmt.Sprintf(tmpl2, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "0"),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "0"),
+				),
+			},
+			{
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					// Confirm the update produced the expected values
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "60"),
+					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "500"),
+					s.checkProjectAccessToken(rn),
+				),
 			},
 		},
 	})
@@ -207,7 +297,7 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 
 func (s *AccSuite) configResourceProjectAccessToken() string {
 	// language=hcl
-	tmpl := `
+	tmpl1 := `
 		resource "rollbar_project" "test" {
 		  name         = "%s"
 		}
@@ -219,7 +309,7 @@ func (s *AccSuite) configResourceProjectAccessToken() string {
 			status = "enabled"
 		}
 	`
-	return fmt.Sprintf(tmpl, s.randName)
+	return fmt.Sprintf(tmpl1, s.randName)
 }
 
 func (s *AccSuite) configResourceProjectAccessTokenUpdatedRateLimit() string {
