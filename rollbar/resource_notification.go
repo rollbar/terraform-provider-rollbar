@@ -1,6 +1,7 @@
 package rollbar
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -8,6 +9,53 @@ import (
 	"github.com/rs/zerolog/log"
 	"strconv"
 )
+
+// resourceNotification constructs a schema representing a set of Rollbar
+// notification rules.
+func resourceNotification() *schema.Resource {
+	return &schema.Resource{
+		CreateContext: resourceNotificationCreate,
+		ReadContext:   resourceNotificationRead,
+		UpdateContext: resourceNotificationUpdate,
+		DeleteContext: resourceNotificationDelete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+
+		Schema: map[string]*schema.Schema{
+			// Required
+			"token_id": {
+				Description: `ID (access token string) of project access token with "write" scope`,
+				Type:        schema.TypeString,
+				Required:    true,
+			},
+			"rule": resourceNotificationRuleSchema,
+		},
+	}
+}
+
+var resourceNotificationEmailNotImplementedMessage = "resource `rollbar_notification_email` not yet implemented"
+var resourceNotificationNotImplementedDiagnostics = diag.Diagnostics{diag.Diagnostic{
+	Severity: diag.Error,
+	Summary:  resourceNotificationEmailNotImplementedMessage,
+}}
+
+func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceNotificationNotImplementedDiagnostics
+}
+
+func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceNotificationNotImplementedDiagnostics
+}
+
+func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceNotificationNotImplementedDiagnostics
+}
+
+func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceNotificationNotImplementedDiagnostics
+}
 
 // resourceNotificationValidateFilterType validates the `type` argument for a
 // notification filter resource.
