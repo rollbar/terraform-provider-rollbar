@@ -34,11 +34,28 @@ import (
 
 func (s *AccSuite) TestAccTokenImportInvalidID() {
 	rn := "rollbar_project_access_token.test" // Resource name
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
 			{
 				ExpectError:       regexp.MustCompile("unexpected format of ID"),
 				ResourceName:      rn,
@@ -53,11 +70,28 @@ func (s *AccSuite) TestAccTokenImportInvalidID() {
 // TestAccTokenImport tests importing a Rollbar project access token.
 func (s *AccSuite) TestAccTokenImport() {
 	rn := "rollbar_project_access_token.test" // Resource name
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
+			{
+				Config: config,
+			},
 			{
 				ResourceName:      rn,
 				ImportState:       true,
