@@ -117,8 +117,28 @@ resource "rollbar_notification_email" "foo" {
       operation = "eq"
       value = "foo"
     }
-    environment_filter {
-      operation = "neq"
+    level_filter {
+      operation = "gte"
+      value = "bar"
+    }
+    title_filter {
+      operation = "within"
+      value = "baz"
+    }
+    filename_filter {
+      operation = "regex"
+      value = "spam"
+    }
+    context_filter {
+      operation = "startswith"
+      value = "eggs"
+    }
+    method_filter {
+      operation = "nregex"
+      value = "foo"
+    }
+    framework_filter {
+      operation = "eq"
       value = "bar"
     }
   }
