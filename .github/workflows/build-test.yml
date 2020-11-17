@@ -55,7 +55,7 @@ jobs:
         run: make testacc
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
-          GOMAXPROCS: 16
+          GOMAXPROCS: 8
       - name: Convert Go coverage file to lcov format
         run: |
           go install github.com/jandelgado/gcov2lcov
