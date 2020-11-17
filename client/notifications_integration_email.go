@@ -2,9 +2,9 @@ package client
 
 import "github.com/rs/zerolog/log"
 
-// UpdateNotificationsIntegrationEmail updates settings for Rollbar notifications
+// UpdateNotificationsEmailIntegration updates settings for Rollbar notifications
 // email integration.
-func (c *RollbarApiClient) UpdateNotificationsIntegrationEmail(enabled, includeRequestParams bool) error {
+func (c *RollbarApiClient) UpdateNotificationsEmailIntegration(enabled, includeRequestParams bool) error {
 	l := log.With().
 		Bool("enabled", enabled).
 		Bool("include_request_params", includeRequestParams).
