@@ -44,4 +44,5 @@ const (
 	pathInvitation                   = "/api/1/invite/{inviteID}"
 	pathInvitations                  = "/api/1/team/{teamID}/invites"
 	pathNotificationIntegrationEmail = "/api/1/notifications/email"
+	pathNotificationIntegrationSlack = "/api/1/notifications/slack"
 )
