@@ -45,7 +45,7 @@ func resourceNotificationsEmailIntegrationUpdate(ctx context.Context, d *schema.
 		Bool("enabled", enabled).
 		Bool("include_request_params", includeRequestParams).
 		Logger()
-	l.Info().Msg("Creating " + resNotificationsEmail)
+	l.Info().Msg("Updating " + resNotificationsEmail)
 	c := m.(*client.RollbarApiClient)
 	err := c.UpdateNotificationsEmailIntegration(enabled, includeRequestParams)
 	if err != nil {
@@ -53,7 +53,7 @@ func resourceNotificationsEmailIntegrationUpdate(ctx context.Context, d *schema.
 		return diag.FromErr(err)
 	}
 	d.SetId("singleton")
-	l.Info().Msg("Successfully created " + resNotificationsEmail)
+	l.Info().Msg("Successfully updated " + resNotificationsEmail)
 	return resourceNotificationsEmailIntegrationRead(ctx, d, m)
 }
 
