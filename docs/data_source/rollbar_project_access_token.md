@@ -39,7 +39,6 @@ Attribute Reference
 In addition to all arguments above, the following attributes are exported:
 
 * `access_token` - API token
-* `project_id` - ID of the project that owns the token
 * `cur_rate_limit_window_count` - Number of API hits that occurred in the
   current rate limit window
 * `cur_rate_limit_window_start` - Time when the current rate limit window began
