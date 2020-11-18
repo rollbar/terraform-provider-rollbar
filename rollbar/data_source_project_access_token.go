@@ -42,51 +42,62 @@ func dataSourceProjectAccessToken() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required fields
 			"project_id": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Description: "ID of a Rollbar project",
+				Type:        schema.TypeInt,
+				Required:    true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Description: "Name of the token",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 
 			// Computed fields
 			"access_token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "API token",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"cur_rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Number of API hits that occurred in the current rate limit window",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"cur_rate_limit_window_start": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Time when the current rate limit window began",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_created": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the token was created",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_modified": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the token was last modified",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Maximum allowed API hits during a rate limit window",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"rate_limit_window_size": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Duration of a rate limit window",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"scopes": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `Project access scopes for the token.  Possible values are "read", "write", "post_server_item", or "post_client_item".`,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Status of the token",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
