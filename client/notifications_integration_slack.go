@@ -3,10 +3,10 @@ package client
 import "github.com/rs/zerolog/log"
 
 type SlackIntegrationArgs struct {
-	Enabled            bool
-	ServiceAccountID   int `json:"service_account_id"`
-	Channel            string
-	ShowMessageButtons bool `json:"show_message_buttons"`
+	Enabled            bool   `json:"enabled"`
+	ServiceAccountID   int    `json:"service_account_id"`
+	Channel            string `json:"channel"`
+	ShowMessageButtons bool   `json:"show_message_buttons"`
 }
 
 // UpdateNotificationsSlackIntegration updates settings for Rollbar notifications
