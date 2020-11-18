@@ -56,6 +56,7 @@ func Provider() *schema.Provider {
 			"rollbar_team":                 resourceTeam(),
 			"rollbar_user":                 resourceUser(),
 			resNameNotificationsEmail:      resourceNotificationsEmailIntegration(),
+			resNameNotificationsSlack:      resourceNotificationsSlackIntegration(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_project":               dataSourceProject(),
