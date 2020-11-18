@@ -42,62 +42,76 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required fields
 			"project_id": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Description: "ID of a Rollbar project",
+				Type:        schema.TypeInt,
+				Required:    true,
 			},
 			"prefix": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Description: "Name of the token begins with this prefix",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 
 			// Computed fields
 			"access_tokens": {
+				Description: "List of matching project access tokens",
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"access_token": {
+							Description: "API token",
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"project_id": {
+							Description: "ID of the project that owns the token",
 							Type:     schema.TypeInt,
 							Required: true,
 						},
 						"cur_rate_limit_window_count": {
+							Description: "Number of API hits that occurred in the current rate limit window",
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"cur_rate_limit_window_start": {
+							Description: "Time when the current rate limit window began",
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"date_created": {
+							Description: "Date the token was created",
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"date_modified": {
+							Description: "Date the token was last modified",
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"name": {
+							Description: "Name of the token",
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"rate_limit_window_count": {
+							Description: "Maximum allowed API hits during a rate limit window",
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"rate_limit_window_size": {
+							Description: "Duration of a rate limit window",
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"scopes": {
+							Description: "Project access scopes for the token"
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 						"status": {
+							Description: "Status of the token",
 							Type:     schema.TypeString,
 							Computed: true,
 						},
