@@ -33,6 +33,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
 	"os"
+	"runtime"
 	"strconv"
 	"testing"
 )
@@ -65,6 +66,11 @@ type AccSuite struct {
 }
 
 func (s *AccSuite) SetupSuite() {
+	maxprocs := runtime.GOMAXPROCS(0)
+	log.Debug().
+		Int("GOMAXPROCS", maxprocs).
+		Send()
+
 	// Setup testing
 	s.provider = Provider()
 	s.providers = map[string]*schema.Provider{
