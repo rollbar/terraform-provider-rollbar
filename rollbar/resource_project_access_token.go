@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
@@ -48,67 +47,78 @@ func resourceProjectAccessToken() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required fields
 			"project_id": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
+				Description: "ID of the Rollbar project to which this token belongs",
+				Type:        schema.TypeInt,
+				Required:    true,
+				ForceNew:    true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+				Description: "The human readable name for the token",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 			"scopes": {
-				Type:     schema.TypeList,
-				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+				Description: `List of access scopes granted to the token.  Possible values are "read", "write", "post_server_item", and "post_client_server".`,
+				Type:        schema.TypeList,
+				Required:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 
 			// Optional fields
 			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "enabled",
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+				Description: `Status of the token.  Possible values are "enabled" and "disabled"`,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "enabled",
+				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 			"rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
+				Description: "Total number of calls allowed within the rate limit window",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
 			},
 			"rate_limit_window_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
+				Description: "Total number of seconds that makes up the rate limit window",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
 			},
 
 			// Computed fields
 			"access_token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Access token for Rollbar API",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"date_created": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was created",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_modified": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was last modified",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"cur_rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Count of calls in the current window",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"cur_rate_limit_window_start": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Time when the current window began",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 		},
 	}
 }
 
 func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectId := d.Get("project_id").(int)
+	projectID := d.Get("project_id").(int)
 	name := d.Get("name").(string)
 	scopesInterface := d.Get("scopes").([]interface{})
 	var scopes []client.Scope
@@ -120,7 +130,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	size := d.Get("rate_limit_window_size").(int)
 	count := d.Get("rate_limit_window_count").(int)
 	l := log.With().
-		Int("project_id", projectId).
+		Int("project_id", projectID).
 		Str("name", name).
 		Int("rate_limit_window_size", size).
 		Int("rate_limit_window_count", count).
@@ -132,7 +142,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	c := m.(*client.RollbarApiClient)
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
-		ProjectID:            projectId,
+		ProjectID:            projectID,
 		Scopes:               scopes,
 		Status:               status,
 		RateLimitWindowSize:  size,
@@ -151,14 +161,14 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	var diags diag.Diagnostics
 
 	accessToken := d.Id()
-	projectId := d.Get("project_id").(int)
+	projectID := d.Get("project_id").(int)
 	l := log.With().
 		Str("accessToken", accessToken).
 		Logger()
 	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(*client.RollbarApiClient)
-	pat, err := c.ReadProjectAccessToken(projectId, accessToken)
+	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 	if err == client.ErrNotFound {
 		return handleErrNotFound(d, "project access token")
 	}
@@ -167,11 +177,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	var mPat map[string]interface{}
-	err = mapstructure.Decode(pat, &mPat)
-	if err != nil {
-		l.Err(err).Send()
-		return diag.FromErr(err)
-	}
+	mustDecodeMapStructure(pat, &mPat)
 	for k, v := range mPat {
 		mustSet(d, k, v)
 	}
@@ -206,16 +212,16 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	var diags diag.Diagnostics
 
 	accessToken := d.Id()
-	projectId := d.Get("project_id").(int)
+	projectID := d.Get("project_id").(int)
 
 	l := log.With().
-		Int("projectId", projectId).
+		Int("projectID", projectID).
 		Str("accessToken", accessToken).
 		Logger()
 	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(*client.RollbarApiClient)
-	err := c.DeleteProjectAccessToken(projectId, accessToken)
+	err := c.DeleteProjectAccessToken(projectID, accessToken)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -237,18 +243,18 @@ func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceDat
 	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
 		return nil, fmt.Errorf("unexpected format of ID (%q), expected PROJECT-ID/ACCESS-TOKEN", d.Id())
 	}
-	projectIdString := idParts[0]
+	projectIDString := idParts[0]
 	accessToken := idParts[1]
-	projectId, err := strconv.Atoi(projectIdString)
+	projectID, err := strconv.Atoi(projectIDString)
 	if err != nil {
 		log.Err(err).Send()
 		return nil, err
 	}
 	l.Debug().
-		Int("project_id", projectId).
+		Int("project_id", projectID).
 		Str("access_token", accessToken).
 		Send()
-	mustSet(d, "project_id", projectId)
+	mustSet(d, "project_id", projectID)
 	d.SetId(accessToken)
 	return []*schema.ResourceData{d}, nil
 }

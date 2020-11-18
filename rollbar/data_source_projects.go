@@ -38,33 +38,40 @@ func dataSourceProjects() *schema.Resource {
 		ReadContext: dataSourceProjectsRead,
 		Schema: map[string]*schema.Schema{
 			"projects": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Description: "Rollbar projects",
+				Type:        schema.TypeList,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "ID of project",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Description: "Name of project",
+							Type:        schema.TypeString,
+							Computed:    true,
 						},
 						"account_id": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "ID of account that owns the project",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"date_created": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Date the project was created",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"date_modified": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Date the project was last modified",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"status": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Description: "Status of the project",
+							Type:        schema.TypeString,
+							Computed:    true,
 						},
 					},
 				},

@@ -25,7 +25,7 @@ Argument Reference
 
 The following arguments are supported:
 
-* `name` - (Required) The human readable name for the project.
+* `name` - (Required) Human readable name for the project.
 
 
 Attribute Reference

@@ -42,64 +42,78 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required fields
 			"project_id": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Description: "ID of a Rollbar project",
+				Type:        schema.TypeInt,
+				Required:    true,
 			},
 			"prefix": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Description: "Name of the token begins with this prefix",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 
 			// Computed fields
 			"access_tokens": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Description: "List of matching project access tokens",
+				Type:        schema.TypeList,
+				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"access_token": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Description: "API token",
+							Type:        schema.TypeString,
+							Computed:    true,
 						},
 						"project_id": {
-							Type:     schema.TypeInt,
-							Required: true,
+							Description: "ID of the project that owns the token",
+							Type:        schema.TypeInt,
+							Required:    true,
 						},
 						"cur_rate_limit_window_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Number of API hits that occurred in the current rate limit window",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"cur_rate_limit_window_start": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Time when the current rate limit window began",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"date_created": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Date the token was created",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"date_modified": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Date the token was last modified",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Description: "Name of the token",
+							Type:        schema.TypeString,
+							Computed:    true,
 						},
 						"rate_limit_window_count": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Maximum allowed API hits during a rate limit window",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"rate_limit_window_size": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Description: "Duration of a rate limit window",
+							Type:        schema.TypeInt,
+							Computed:    true,
 						},
 						"scopes": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Description: "Project access scopes for the token",
+							Type:        schema.TypeList,
+							Computed:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"status": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Description: "Status of the token",
+							Type:        schema.TypeString,
+							Computed:    true,
 						},
 					},
 				},
@@ -110,17 +124,17 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 
 // dataSourceProjectAccessTokensRead reads project access token data from Rollbar
 func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projId := d.Get("project_id").(int)
+	projectID := d.Get("project_id").(int)
 	var prefix string
 	prefix, _ = d.Get("prefix").(string)
 	l := log.With().
-		Int("project_id", projId).
+		Int("project_id", projectID).
 		Str("prefix", prefix).
 		Logger()
 	l.Debug().Msg("Reading project access token data from Rollbar")
 
 	c := m.(*client.RollbarApiClient)
-	tokens, err := c.ListProjectAccessTokens(projId)
+	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

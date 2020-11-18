@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package rollbar_test
+package rollbar
 
 import (
 	"fmt"
@@ -31,12 +31,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"os"
+	"runtime"
 	"strconv"
 	"testing"
 )
@@ -73,8 +73,13 @@ type AccSuite struct {
 }
 
 func (s *AccSuite) SetupSuite() {
+	maxprocs := runtime.GOMAXPROCS(0)
+	log.Debug().
+		Int("GOMAXPROCS", maxprocs).
+		Send()
+
 	// Setup testing
-	s.provider = rollbar.Provider()
+	s.provider = Provider()
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
 	}

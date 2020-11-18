@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
@@ -100,7 +99,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 	l.Debug().Interface("project", p).Msg("CreateProject() result")
-	projectID := p.Id
+	projectID := p.ID
 	l = l.With().Int("project_id", projectID).Logger()
 	d.SetId(strconv.Itoa(projectID))
 
@@ -172,10 +171,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	var mProj map[string]interface{}
-	err = mapstructure.Decode(proj, &mProj)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	mustDecodeMapStructure(proj, &mProj)
 	for k, v := range mProj {
 		if k == "id" {
 			continue
@@ -190,7 +186,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 	mustSet(d, "team_ids", teamIDs)
 
-	d.SetId(strconv.Itoa(proj.Id))
+	d.SetId(strconv.Itoa(proj.ID))
 	l.Debug().Msg("Successfully read Rollbar project resource from the API")
 	return nil
 }
@@ -216,13 +212,13 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 
 // resourceProjectDelete handles delete for a `rollbar_project` resource.
 func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	projectId := mustGetID(d)
+	projectID := mustGetID(d)
 	l := log.With().
-		Int("projectId", projectId).
+		Int("projectID", projectID).
 		Logger()
 	l.Info().Msg("Deleting rollbar_project resource")
 	c := m.(*client.RollbarApiClient)
-	err := c.DeleteProject(projectId)
+	err := c.DeleteProject(projectID)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_project resource")
 		return diag.FromErr(err)

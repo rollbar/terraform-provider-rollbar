@@ -30,6 +30,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"net/http"
@@ -128,4 +129,14 @@ func mustGetID(d *schema.ResourceData) int {
 		panic(err)
 	}
 	return id
+}
+
+// Decode takes an input structure and uses reflection to translate it to the
+// output structure, panicking on error. Output must be a pointer to a map or
+// struct.
+func mustDecodeMapStructure(input, output interface{}) {
+	err := mapstructure.Decode(input, &output)
+	if err != nil {
+		panic(err)
+	}
 }

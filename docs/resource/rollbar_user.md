@@ -37,3 +37,12 @@ In addition to all arguments above, the following attributes are exported:
 * `user_id` - The ID of the user
 * `status` - Status of the user.  Either `invited` or `subscribed`
 
+
+Import
+------
+
+Users can be imported using the user ID, e.g.
+
+```
+$ terraform import rollbar_user.foo 238101
+```

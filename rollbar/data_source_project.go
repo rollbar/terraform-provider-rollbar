@@ -36,30 +36,36 @@ func dataSourceProject() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "Human readable name for the project",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 
 			// Computed values
 			"id": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "ID of project",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"account_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "ID of account that owns the project",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_created": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was created",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_modified": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was last modified",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Status of the project",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 		},
 	}
@@ -87,9 +93,9 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("no project with the name %s found", name)
 	}
 
-	id := fmt.Sprintf("%d", project.Id)
+	id := fmt.Sprintf("%d", project.ID)
 	d.SetId(id)
-	mustSet(d, "account_id", project.AccountId)
+	mustSet(d, "account_id", project.AccountID)
 	mustSet(d, "date_created", project.DateCreated)
 	mustSet(d, "date_modified", project.DateModified)
 	mustSet(d, "status", project.Status)

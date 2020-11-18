@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package rollbar_test
+package rollbar
 
 import (
 	"fmt"
@@ -100,8 +100,8 @@ func (s *AccSuite) TestAccTeamAssignProject() {
 	})
 }
 
-// TestAccTeamAddProject tests adding teams to a project
-func (s *AccSuite) TestAccTeamAddProject() {
+// TestAccTeamAddProject tests adding a team to a project.
+func (s *AccSuite) TestAccProjectAddTeam() {
 	team1ResourceName := "rollbar_team.test_team_1"
 	team1Name := fmt.Sprintf("%s-team-1", s.randName)
 	team2ResourceName := "rollbar_team.test_team_2"
@@ -165,6 +165,71 @@ func (s *AccSuite) TestAccTeamAddProject() {
 	})
 }
 
+// TestAccProjectRemoveTeam tests removing a team from a project.
+func (s *AccSuite) TestAccProjectRemoveTeam() {
+	team1ResourceName := "rollbar_team.test_team_1"
+	team1Name := fmt.Sprintf("%s-team-1", s.randName)
+	team2ResourceName := "rollbar_team.test_team_2"
+	team2Name := fmt.Sprintf("%s-team-2", s.randName)
+	projectResourceName := "rollbar_project.test_project"
+	projectName := s.randName
+
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s"
+		}
+
+		resource "rollbar_team" "test_team_2" {
+			name = "%s"
+		}
+
+		resource "rollbar_project" "test_project" {
+			name = "%s"
+			team_ids = [
+				rollbar_team.test_team_1.id,
+				rollbar_team.test_team_2.id,
+			]
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, team1Name, team2Name, projectName)
+
+	// language=hcl
+	tmpl2 := `
+		resource "rollbar_team" "test_team_1" {
+			name = "%s"
+		}
+
+		resource "rollbar_project" "test_project" {
+			name = "%s"
+			team_ids = [rollbar_team.test_team_1.id]
+		}
+	`
+	config2 := fmt.Sprintf(tmpl2, team1Name, projectName)
+
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.*", team1ResourceName, "id"),
+					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.*", team2ResourceName, "id"),
+				),
+			},
+			{
+				Config: config2,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckTypeSetElemAttrPair(projectResourceName, "team_ids.0", team1ResourceName, "id"),
+					s.checkProjectTeams(projectResourceName),
+				),
+			},
+		},
+	})
+}
+
 /*
  * Convenience functions
  */
@@ -203,7 +268,7 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 		s.Nil(err)
 		found := false
 		for _, proj := range projList {
-			if proj.Id == id {
+			if proj.ID == id {
 				found = true
 			}
 		}
@@ -227,10 +292,10 @@ func sweepResourceProject(_ string) error {
 	for _, p := range projects {
 		l := log.With().
 			Str("name", p.Name).
-			Int("id", p.Id).
+			Int("id", p.ID).
 			Logger()
 		if strings.HasPrefix(p.Name, "tf-acc-test-") {
-			err = c.DeleteProject(p.Id)
+			err = c.DeleteProject(p.ID)
 			if err != nil {
 				l.Err(err).Send()
 				return err
