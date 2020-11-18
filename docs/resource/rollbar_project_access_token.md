@@ -50,6 +50,8 @@ In addition to all arguments above, the following attributes are exported:
 * `access_token` - Access token for Rollbar API
 * `date_created` - Date the project was created
 * `date_modified` - Date the project was last modified
+* `cur_rate_limit_window_count` - Count of calls in the current window
+* `cur_rate_limit_window_start` - Time when the current window began
 
 
 Import
