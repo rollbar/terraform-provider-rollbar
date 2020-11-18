@@ -120,7 +120,9 @@ func (s *AccSuite) SetupTest() {
 }
 
 func (s *AccSuite) TearDownTest() {
-	s.recorder.Stop()
+	if s.vcr {
+		s.recorder.Stop()
+	}
 }
 
 func TestAccSuite(t *testing.T) {
