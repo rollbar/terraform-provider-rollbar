@@ -9,7 +9,8 @@ import (
 // TestAccNotificationsSlackIntegrationCreateNotImplemented tests creating a
 // Rollbar notifications Slack integration - it expects an error because this
 // resource's read method is not yet implemented.
-func (s *AccSuite) TestAccNotificationsSlackIntegrationCreateNotImplemented() {
+// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/120
+func (s *AccSuite) DontTestAccNotificationsSlackIntegrationCreateNotImplemented() {
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
