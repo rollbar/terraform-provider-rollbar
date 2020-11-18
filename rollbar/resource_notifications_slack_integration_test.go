@@ -42,3 +42,40 @@ func (s *AccSuite) DontTestAccNotificationsSlackIntegrationCreateNotImplemented(
 		},
 	})
 }
+
+// TestAccNotificationsSlackIntegrationCreateBadArguments tests creating a
+// Rollbar notifications Slack integration using invalid arguments.  It expects
+// an error.
+func (s *AccSuite) TestAccNotificationsSlackIntegrationCreateBadArguments() {
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+			name = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test_%s"
+			scopes = ["write"]
+		}
+
+		resource "rollbar_notifications_slack_integration" "singleton" {
+			enabled = true
+			project_access_token = rollbar_project_access_token.test.access_token
+			service_account_id = 0  # non-existent
+			channel = "non-existent-channel"
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config:      config,
+				ExpectError: regexp.MustCompile("channel cannot be found"),
+			},
+		},
+	})
+}
