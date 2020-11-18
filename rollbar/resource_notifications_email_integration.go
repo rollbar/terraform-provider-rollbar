@@ -24,6 +24,13 @@ func resourceNotificationsEmailIntegration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Required:    true,
 			},
+			// FIXME: This should be the ID of the token, when that becomes available.
+			//  https://github.com/rollbar/terraform-provider-rollbar/issues/73
+			"project_access_token": {
+				Description: "Project access token with 'write' scope",
+				Type:        schema.TypeString,
+				Required:    true,
+			},
 
 			// Optional
 			"include_request_params": {
@@ -41,13 +48,18 @@ func resourceNotificationsEmailIntegration() *schema.Resource {
 func resourceNotificationsEmailIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	enabled := d.Get("enabled").(bool)
 	includeRequestParams := d.Get("include_request_params").(bool)
+	token := d.Get("project_access_token").(string)
 	l := log.With().
 		Bool("enabled", enabled).
 		Bool("include_request_params", includeRequestParams).
 		Logger()
 	l.Info().Msg("Updating " + resNotificationsEmail)
 	c := m.(*client.RollbarApiClient)
-	err := c.UpdateNotificationsEmailIntegration(enabled, includeRequestParams)
+	err := c.UpdateNotificationsEmailIntegration(client.EmailIntegrationArgs{
+		Token:                token,
+		Enabled:              enabled,
+		IncludeRequestParams: includeRequestParams,
+	})
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -60,6 +72,7 @@ func resourceNotificationsEmailIntegrationUpdate(ctx context.Context, d *schema.
 // resourceNotificationsEmailIntegrationRead reads a Rollbar notifications email
 // integration resource.
 func resourceNotificationsEmailIntegrationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/111
 	return diag.Diagnostics{{
 		Severity: diag.Error,
 		Summary:  "Read not yet implemented for " + resNotificationsEmail,
