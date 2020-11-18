@@ -24,6 +24,13 @@ func resourceNotificationsSlackIntegration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Required:    true,
 			},
+			// FIXME: This should be the ID of the token, when that becomes available.
+			//  https://github.com/rollbar/terraform-provider-rollbar/issues/73
+			"project_access_token": {
+				Description: "Project access token with 'write' scope",
+				Type:        schema.TypeString,
+				Required:    true,
+			},
 
 			// Optional
 			"service_account_id": {
@@ -53,6 +60,7 @@ func resourceNotificationsSlackIntegrationUpdate(ctx context.Context, d *schema.
 		ServiceAccountID:   d.Get("service_account_id").(int),
 		Channel:            d.Get("channel").(string),
 		ShowMessageButtons: d.Get("show_message_buttons").(bool),
+		Token:              d.Get("project_access_token").(string),
 	}
 	l := log.With().
 		Interface("args", args).
