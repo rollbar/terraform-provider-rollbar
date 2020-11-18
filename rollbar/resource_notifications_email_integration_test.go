@@ -41,6 +41,8 @@ func (s *AccSuite) TestAccNotificationsEmailIntegrationCreateNotImplemented() {
 	})
 }
 
+// TestAccNotificationsEmailIntegrationBadSyntax tests bad syntax configuring a
+// Rollbar notifications email integration.
 func (s *AccSuite) TestAccNotificationsEmailIntegrationBadSyntax() {
 	// language=hcl
 	tmplNoEnabled := `
