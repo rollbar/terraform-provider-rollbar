@@ -39,8 +39,6 @@ import (
 
 const schemaKeyToken = "api_key"
 
-var ProviderTransport http.RoundTripper
-
 // Provider is a Terraform provider for Rollbar.
 func Provider() *schema.Provider {
 	return &schema.Provider{
@@ -74,7 +72,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	var diags diag.Diagnostics
 	token := d.Get(schemaKeyToken).(string)
 	c := client.NewClient(token)
-	c.Resty.GetClient().Transport = ProviderTransport
+	c.Resty.GetClient().Transport = http.DefaultTransport
 	return c, diags
 }
 
