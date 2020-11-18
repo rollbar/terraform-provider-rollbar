@@ -84,7 +84,7 @@ func (s *AccSuite) TestAccTokenImport() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -136,7 +136,7 @@ func (s *AccSuite) TestAccTokenUpdateScope() {
 		}
 	`
 	config2 := fmt.Sprintf(tmpl2, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -195,7 +195,7 @@ func (s *AccSuite) TestAccTokenUpdateRateLimit() {
 		}
 	`
 	config2 := fmt.Sprintf(tmpl2, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -239,7 +239,7 @@ func (s *AccSuite) TestAccTokenCreate() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -281,7 +281,7 @@ func (s *AccSuite) TestAccTokenInvalidScope() {
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
 
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -308,7 +308,7 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 			rate_limit_window_count = 500
 		}
 	`
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
