@@ -48,60 +48,71 @@ func resourceProjectAccessToken() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Required fields
 			"project_id": {
-				Type:     schema.TypeInt,
-				Required: true,
-				ForceNew: true,
+				Description: "ID of the Rollbar project to which this token belongs",
+				Type:        schema.TypeInt,
+				Required:    true,
+				ForceNew:    true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+				Description: "The human readable name for the token",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 			"scopes": {
-				Type:     schema.TypeList,
-				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+				Description: `List of access scopes granted to the token.  Possible values are "read", "write", "post_server_item", and "post_client_server".`,
+				Type:        schema.TypeList,
+				Required:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 
 			// Optional fields
 			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "enabled",
-				ForceNew: true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
+				Description: `Status of the token.  Possible values are "enabled" and "disabled"`,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "enabled",
+				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
 			},
 			"rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
+				Description: "Total number of calls allowed within the rate limit window",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
 			},
 			"rate_limit_window_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
+				Description: "Total number of seconds that makes up the rate limit window",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
 			},
 
 			// Computed fields
 			"access_token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Description: "Access token for Rollbar API",
+				Type:        schema.TypeString,
+				Computed:    true,
 			},
 			"date_created": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was created",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"date_modified": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Date the project was last modified",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"cur_rate_limit_window_count": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Count of calls in the current window",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 			"cur_rate_limit_window_start": {
-				Type:     schema.TypeInt,
-				Computed: true,
+				Description: "Time when the current window began",
+				Type:        schema.TypeInt,
+				Computed:    true,
 			},
 		},
 	}
