@@ -3,10 +3,11 @@ package client
 import "github.com/rs/zerolog/log"
 
 type SlackIntegrationArgs struct {
+	Token              string `json:"-"`
 	Enabled            bool   `json:"enabled"`
 	ServiceAccountID   int    `json:"service_account_id"`
 	Channel            string `json:"channel"`
-	ShowMessageButtons bool   `json:"show_message_buttons"`
+	ShowMessageButtons bool   `json:"show_message_buttons,omitempty"`
 }
 
 // UpdateNotificationsSlackIntegration updates settings for Rollbar notifications
@@ -19,6 +20,7 @@ func (c *RollbarApiClient) UpdateNotificationsSlackIntegration(args SlackIntegra
 
 	u := apiUrl + pathNotificationIntegrationSlack
 	resp, err := c.Resty.R().
+		SetHeader("X-Rollbar-Access-Token", args.Token).
 		SetBody(args).
 		SetError(ErrorResult{}).
 		Put(u)
