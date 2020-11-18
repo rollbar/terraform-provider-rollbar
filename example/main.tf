@@ -63,7 +63,9 @@ data "rollbar_project_access_token" "post_server_item" {
  */
 
 resource "rollbar_project" "test" {
-  name = "tf-acc-test-syntax-compatibility"
+  name = "tf-acc-test-example"
+  team_ids = [rollbar_team.test_team_0.id]
+  depends_on = [rollbar_team.test_team_0]
 }
 
 resource "rollbar_project_access_token" "test_1" {
