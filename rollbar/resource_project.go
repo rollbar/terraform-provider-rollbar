@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
@@ -172,10 +171,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	var mProj map[string]interface{}
-	err = mapstructure.Decode(proj, &mProj)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	mustDecodeMapStructure(proj, &mProj)
 	for k, v := range mProj {
 		if k == "id" {
 			continue

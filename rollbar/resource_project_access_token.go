@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
@@ -167,11 +166,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	}
 
 	var mPat map[string]interface{}
-	err = mapstructure.Decode(pat, &mPat)
-	if err != nil {
-		l.Err(err).Send()
-		return diag.FromErr(err)
-	}
+	mustDecodeMapStructure(pat, &mPat)
 	for k, v := range mPat {
 		mustSet(d, k, v)
 	}
