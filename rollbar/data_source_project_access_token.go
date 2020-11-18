@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"strconv"
@@ -120,9 +119,6 @@ func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceDat
 	}
 
 	// Error if no token matches.
-	// FIXME: Is an error appropriate for this situation?  Is there some better
-	//  way to say we didn't find anything that matches, but there was no
-	//  internal error?
 	if found == nil {
 		msg := "could not find access token with name matching name"
 		l.Error().Msg(msg)
@@ -131,10 +127,7 @@ func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceDat
 
 	// Write the values from API to Terraform state
 	tokenMap := make(map[string]interface{})
-	err = mapstructure.Decode(found, &tokenMap)
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	mustDecodeMapStructure(found, &tokenMap)
 	for key, value := range tokenMap {
 		mustSet(d, key, value)
 	}
