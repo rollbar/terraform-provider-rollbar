@@ -6,12 +6,7 @@ MAINTAINER Jason McVetta <jmcvetta@protonmail.com>
 RUN apk update && apk upgrade --no-cache
 
 
-# Terraform version - supports 0.12.x and 0.13.x
-ARG version=0.13.5
-
-
 # Build folder
-ENV buildfolder=/srv/terraform-provider-rollbar
 
 
 # Build dependencies
@@ -29,12 +24,14 @@ RUN echo "set -o vi" >> ~/.bashrc
 
 
 # Install Terraform
+# Versions 0.12.x and 0.13.x are supported
+ARG version=0.13.5
 RUN curl https://releases.hashicorp.com/terraform/${version}/terraform_${version}_linux_amd64.zip -o /tmp/terraform.zip
 RUN unzip /tmp/terraform.zip -d /usr/local/bin/
 
 
 # Install Go modules
-WORKDIR ${buildfolder}
+WORKDIR  /srv/terraform-provider-rollbar
 COPY go.mod go.sum ./
 RUN go mod download -x
 
