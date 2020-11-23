@@ -42,12 +42,26 @@ COPY Makefile main.go ./
 COPY client client
 COPY rollbar rollbar
 RUN make build
-ENV TF_LOG=TRACE
 RUN make install012
 
 
-# Test provider
+# Terraform configuration
 RUN mkdir example
-COPY example/main.tf example/
-COPY example/providers012.tf.example example/providers012.tf
-RUN make plan
+COPY example/*.tf example/*.override example/
+WORKDIR example/
+# Terraform 0.13 `required_providers` syntax is not entirely supported by 0.12,
+# so we override it.
+RUN ["/bin/bash", "-c", "if [[ $version == 0.12* ]]; then mv -v providers012.tf.override providers.tf; fi"]
+
+
+# Initialize provider
+RUN terraform init
+
+
+# Required environment variable
+ENV ROLLBAR_API_KEY=
+
+#ENV TF_LOG=TRACE
+
+#ENTRYPOINT terraform -var rollbar_token=$ROLLBAR_API_KEY
+CMD echo $ROLLBAR_API_KEY && terraform plan -var rollbar_token=$ROLLBAR_API_KEY
