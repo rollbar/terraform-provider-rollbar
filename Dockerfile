@@ -58,13 +58,9 @@ RUN ["/bin/bash", "-c", "echo $version; if [[ $version == 0.12* ]]; then mv -v p
 RUN terraform init
 
 
-# Required environment variable
-ENV ROLLBAR_API_KEY=
-
-
 # Enable trace logging
 #ENV TF_LOG=TRACE
 
 
 # Terraform plan
-CMD echo $ROLLBAR_API_KEY && terraform plan -var rollbar_token=$ROLLBAR_API_KEY
+ENTRYPOINT ["terraform"]
