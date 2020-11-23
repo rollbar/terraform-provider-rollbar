@@ -1,0 +1,47 @@
+FROM golang:alpine
+MAINTAINER Jason McVetta <jmcvetta@protonmail.com>
+
+
+# Update system packages
+RUN apk update && apk upgrade --no-cache
+
+
+# Terraform version
+ARG version=0.12.29
+
+
+# Build folder
+ENV buildfolder=/srv/terraform-provider-rollbar
+
+
+# Build dependencies
+RUN apk add --no-cache \
+        bash \
+        curl \
+        git \
+        make \
+        unzip
+
+
+# Install Terraform
+RUN curl https://releases.hashicorp.com/terraform/${version}/terraform_${version}_linux_amd64.zip -o /tmp/terraform.zip
+RUN unzip /tmp/terraform.zip -d /usr/local/bin/
+
+
+# Install Go modules
+WORKDIR ${buildfolder}
+COPY go.mod go.sum ./
+RUN go mod download -x
+
+
+# Build provider
+COPY Makefile main.go ./
+COPY client client
+COPY rollbar rollbar
+RUN make build
+
+
+# Test provider
+RUN mkdir example
+COPY example/*.tf example/
+RUN make plan
