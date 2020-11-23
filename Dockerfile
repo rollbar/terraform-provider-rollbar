@@ -20,7 +20,10 @@ RUN apk add --no-cache \
         curl \
         git \
         make \
-        unzip
+        unzip \
+        vim
+
+RUN echo "set -o vi" >> ~/.bashrc
 
 
 # Install Terraform
@@ -39,9 +42,12 @@ COPY Makefile main.go ./
 COPY client client
 COPY rollbar rollbar
 RUN make build
+ENV TF_LOG=TRACE
+RUN make install012
 
 
 # Test provider
 RUN mkdir example
-COPY example/*.tf example/
+COPY example/main.tf example/
+COPY example/providers012.tf.example example/providers012.tf
 RUN make plan
