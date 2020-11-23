@@ -6,8 +6,8 @@ MAINTAINER Jason McVetta <jmcvetta@protonmail.com>
 RUN apk update && apk upgrade --no-cache
 
 
-# Terraform version
-ARG version=0.12.29
+# Terraform version - supports 0.12.x and 0.13.x
+ARG version=0.13.5
 
 
 # Build folder
@@ -23,6 +23,8 @@ RUN apk add --no-cache \
         unzip \
         vim
 
+
+# Enable VI-keys
 RUN echo "set -o vi" >> ~/.bashrc
 
 
@@ -37,11 +39,12 @@ COPY go.mod go.sum ./
 RUN go mod download -x
 
 
-# Build provider
+# Build and install provider
 COPY Makefile main.go ./
 COPY client client
 COPY rollbar rollbar
 RUN make build
+RUN make install
 RUN make install012
 
 
@@ -61,7 +64,10 @@ RUN terraform init
 # Required environment variable
 ENV ROLLBAR_API_KEY=
 
+
+# Enable trace logging
 #ENV TF_LOG=TRACE
 
-#ENTRYPOINT terraform -var rollbar_token=$ROLLBAR_API_KEY
+
+# Terraform plan
 CMD echo $ROLLBAR_API_KEY && terraform plan -var rollbar_token=$ROLLBAR_API_KEY
