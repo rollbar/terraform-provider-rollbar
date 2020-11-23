@@ -51,7 +51,7 @@ COPY example/*.tf example/*.override example/
 WORKDIR example/
 # Terraform 0.13 `required_providers` syntax is not entirely supported by 0.12,
 # so we override it.
-RUN ["/bin/bash", "-c", "if [[ $version == 0.12* ]]; then mv -v providers012.tf.override providers.tf; fi"]
+RUN ["/bin/bash", "-c", "echo $version; if [[ $version == 0.12* ]]; then mv -v providers012.tf.override providers.tf; fi"]
 
 
 # Initialize provider
