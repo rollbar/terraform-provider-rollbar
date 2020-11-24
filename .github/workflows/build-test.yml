@@ -68,7 +68,7 @@ jobs:
         uses: paambaati/codeclimate-action@v2.7.4
         with:
           coverageLocations: |
-            ${{github.workspace}}/*lcov*:lcov
+            ${{github.workspace}}/*coverage*:gocov
 
 
         env:
