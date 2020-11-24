@@ -76,6 +76,7 @@ data "rollbar_project" "test" {
 }
 
 data "rollbar_project_access_token" "test_token_1" {
-  project_id = data.rollbar_project.test.id
+  project_id = rollbar_project.test.id
   name       = "test-token-1"
+  depends_on = [rollbar_project_access_token.test_1]
 }
