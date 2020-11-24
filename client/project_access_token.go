@@ -168,7 +168,7 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 		Logger()
 	l.Debug().Msg("Listing project access tokens")
 
-	u := apiUrl + pathPatList
+	u := apiUrl + pathProjectTokens
 	resp, err := c.Resty.R().
 		SetResult(patListResponse{}).
 		SetError(ErrorResult{}).
@@ -250,9 +250,29 @@ func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name stri
 }
 
 func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string) error {
-	// FIXME: Implement this functionality when the API is ready!
-	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
-	log.Warn().Msg("Deleting project access tokens not yet implemented by Rollbar API.")
+	l := log.With().
+		Int("projectID", projectID).
+		Str("token", token).
+		Logger()
+	l.Debug().Msg("Deleting project access token")
+
+	u := apiUrl + pathProjectToken
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"projectID":   strconv.Itoa(projectID),
+			"accessToken": token,
+		}).
+		SetError(ErrorResult{}).
+		Delete(u)
+	if err != nil {
+		l.Err(err).Send()
+		return err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return err
+	}
 	return nil
 }
 
@@ -270,7 +290,7 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 		return pat, err
 	}
 
-	u := apiUrl + pathPatCreate
+	u := apiUrl + pathProjectTokens
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID": strconv.Itoa(args.ProjectID),
@@ -309,7 +329,7 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 		return err
 	}
 
-	u := apiUrl + pathPatUpdate
+	u := apiUrl + pathProjectToken
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID":   strconv.Itoa(args.ProjectID),

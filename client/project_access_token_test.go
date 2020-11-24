@@ -34,7 +34,7 @@ import (
 // TestListProjectAccessTokens tests listing Rollbar project access tokens.
 func (s *Suite) TestListProjectAccessTokens() {
 	projectID := 12116
-	u := apiUrl + pathPatList
+	u := apiUrl + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
@@ -118,7 +118,7 @@ func (s *Suite) TestListProjectAccessTokens() {
 // the API.
 func (s *Suite) TestReadProjectAccessToken() {
 	projectID := 411334
-	u := apiUrl + pathPatList
+	u := apiUrl + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
@@ -159,7 +159,7 @@ func (s *Suite) TestReadProjectAccessToken() {
 // from the API.
 func (s *Suite) TestReadProjectAccessTokenByName() {
 	projectID := 411334
-	u := apiUrl + pathPatList
+	u := apiUrl + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
@@ -198,11 +198,22 @@ func (s *Suite) TestReadProjectAccessTokenByName() {
 
 // TestDeleteProjectAccessToken tests deleting a Rollbar project access token.
 func (s *Suite) TestDeleteProjectAccessToken() {
-	// FIXME: actually test this
-	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
-	err := s.client.DeleteProjectAccessToken(1234, "does_not_matter")
+	projectID := 428325
+	token := "bccf06c897d74020a80cb72407abb4ee"
+	u := apiUrl + pathProjectToken
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
+	u = strings.ReplaceAll(u, "{accessToken}", token)
+
+	r := responderFromFixture("project_access_token/delete.json", http.StatusOK)
+	httpmock.RegisterResponder("DELETE", u, r)
+
+	err := s.client.DeleteProjectAccessToken(projectID, token)
 	s.Nil(err)
-	log.Warn().Msg("Delete project access token is not yet implemented in Rollbar API")
+
+	s.checkServerErrors("DELETE", u, func() error {
+		err := s.client.DeleteProjectAccessToken(projectID, token)
+		return err
+	})
 }
 
 func (s *Suite) TestCreateProjectAccessToken() {
@@ -214,7 +225,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 		Scopes:    []Scope{ScopeRead, ScopeWrite},
 		Status:    StatusEnabled,
 	}
-	u := apiUrl + pathPatCreate
+	u := apiUrl + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
 	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
@@ -299,7 +310,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 		RateLimitWindowSize:  1000,
 		RateLimitWindowCount: 2500,
 	}
-	u := apiUrl + pathPatUpdate
+	u := apiUrl + pathProjectToken
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
 	u = strings.ReplaceAll(u, "{accessToken}", accessToken)
 	rs := responseFromFixture("project_access_token/update.json", http.StatusOK)
