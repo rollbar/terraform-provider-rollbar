@@ -322,7 +322,8 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 	})
 }
 
-// checkProjectAccessToken tests that the newly created project exists.
+// checkProjectAccessToken checks that a PAT exists and has the expected
+// properties.
 func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		accessToken, err := s.getResourceIDString(ts, resourceName)
