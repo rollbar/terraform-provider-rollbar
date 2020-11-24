@@ -131,7 +131,7 @@ func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceDat
 
 	// Error if no token matches.
 	if found == nil {
-		msg := "could not find access token with name matching name"
+		msg := fmt.Sprintf(`could not find access token with name matching "%s"`, name)
 		l.Error().Msg(msg)
 		return diag.FromErr(fmt.Errorf(msg))
 	}
