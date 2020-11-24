@@ -27,6 +27,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"regexp"
 	"strconv"
@@ -225,7 +226,8 @@ func (s *AccSuite) DontTestAccTokenUpdateRateLimit() {
 
 // TestAccTokenCreate tests creating a project access token.
 func (s *AccSuite) TestAccTokenCreate() {
-	rn := "rollbar_project_access_token.test" // Resource name
+	projectResourceName := "rollbar_project.test"
+	tokenResourceName := "rollbar_project_access_token.test"
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
@@ -248,14 +250,58 @@ func (s *AccSuite) TestAccTokenCreate() {
 			{
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttrSet(rn, "access_token"),
-					s.checkProjectAccessToken(rn),
-					s.checkProjectAccessTokenInTokenList(rn),
-					resource.TestCheckResourceAttr(rn, "rate_limit_window_size", "0"),
-					resource.TestCheckResourceAttr(rn, "rate_limit_window_count", "0"),
-					resource.TestCheckResourceAttr(rn, "scopes.#", `1`),
-					resource.TestCheckResourceAttr(rn, "scopes.0", "read"),
+					s.checkResourceStateSanity(tokenResourceName),
+					resource.TestCheckResourceAttrSet(tokenResourceName, "access_token"),
+					s.checkProjectAccessToken(tokenResourceName),
+					s.checkProjectAccessTokenInTokenList(tokenResourceName),
+					s.checkNoUnexpectedTokens(projectResourceName, []string{"test-token"}),
+					resource.TestCheckResourceAttr(tokenResourceName, "rate_limit_window_size", "0"),
+					resource.TestCheckResourceAttr(tokenResourceName, "rate_limit_window_count", "0"),
+					resource.TestCheckResourceAttr(tokenResourceName, "scopes.#", `1`),
+					resource.TestCheckResourceAttr(tokenResourceName, "scopes.0", "read"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccTokenDelete tests deleting a project access token.
+func (s *AccSuite) TestAccTokenDelete() {
+	projectResourceName := "rollbar_project.test"
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, s.randName)
+	// language=hcl
+	tmpl2 := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+	`
+	config2 := fmt.Sprintf(tmpl2, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config1,
+			},
+			{
+				Config: config2,
+				Check: resource.ComposeTestCheckFunc(
+					// Project should have zero tokens
+					s.checkNoUnexpectedTokens(projectResourceName, []string{}),
 				),
 			},
 		},
@@ -414,5 +460,35 @@ func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc 
 		accessToken := rs.Primary.ID
 
 		return fmt.Sprintf("%s/%s", projectID, accessToken), nil
+	}
+}
+
+// checkNoUnexpectedTokens checks that a project does not have any unexpected
+// access tokens.
+func (s *AccSuite) checkNoUnexpectedTokens(projectResourceName string, expectedTokenNames []string) resource.TestCheckFunc {
+	l := log.With().
+		Strs("expected_token_names", expectedTokenNames).
+		Logger()
+	expected := make(map[string]bool)
+	for _, name := range expectedTokenNames {
+		expected[name] = true
+	}
+	return func(ts *terraform.State) error {
+		projectID, err := s.getResourceIDInt(ts, projectResourceName)
+		if err != nil {
+			return err
+		}
+		c := s.provider.Meta().(*client.RollbarApiClient)
+		tokens, err := c.ListProjectAccessTokens(projectID)
+		s.Nil(err)
+		for _, t := range tokens {
+			if !expected[t.Name] {
+				msg := fmt.Sprintf("unexpected token name: %s", t.Name)
+				l.Error().Str("unexpected_name", t.Name).Msg(msg)
+				err = fmt.Errorf(msg)
+				return err
+			}
+		}
+		return nil
 	}
 }
