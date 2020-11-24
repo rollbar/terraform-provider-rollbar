@@ -27,49 +27,82 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-// TestAccProjectAccessTokensDataSourceNoPrefix tests reading project access
-// tokens with `rollbar_project_access_tokens` data source, with no prefix
-// specified.
-func (s *AccSuite) TestAccProjectAccessTokensDataSourceNoPrefix() {
+// TestAccProjectAccessTokensDataSourceNoTokensNoPrefix tests reading project
+// access tokens with `rollbar_project_access_tokens` data source, with no
+// prefix specified, from a project with zero tokens.
+func (s *AccSuite) TestAccProjectAccessTokensDataSourceNoTokensNoPrefix() {
 	rn := "data.rollbar_project_access_tokens.test"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		data "rollbar_project_access_tokens" "test" {
+			project_id = rollbar_project.test.id
+			depends_on = [rollbar_project.test]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceProjectAccessTokens(""),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					s.checkResourceStateSanity(rn),
-
-					// By default Rollbar provisions a new project with 4 access
-					// tokens.
-					resource.TestCheckResourceAttr(rn, "access_tokens.#", "4"),
+					resource.TestCheckResourceAttr(rn, "access_tokens.#", "0"),
 				),
 			},
 		},
 	})
 }
 
-// TestAccProjectAccessTokensDataSourceWithPrefix tests reading project access
-// tokens with `rollbar_project_access_tokens` data source, with a specific
-// prefix.
-func (s *AccSuite) TestAccProjectAccessTokensDataSourceWithPrefix() {
+// TestAccProjectAccessTokensDataSourceTwoTokensNoPrefix tests reading project
+// access tokens with `rollbar_project_access_tokens` data source, with no
+// prefix specified, from a project with two tokens.
+func (s *AccSuite) TestAccProjectAccessTokensDataSourceTwoTokensNoPrefix() {
 	rn := "data.rollbar_project_access_tokens.test"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test1" {
+			name = "test-token-1"
+			project_id = rollbar_project.test.id
+			scopes = ["read"]
+		}
+
+		resource "rollbar_project_access_token" "test2" {
+			name = "test-token-2"
+			project_id = rollbar_project.test.id
+			scopes = ["post_server_item"]
+		}
+
+		data "rollbar_project_access_tokens" "test" {
+			project_id = rollbar_project.test.id
+			depends_on = [
+				rollbar_project_access_token.test1,
+				rollbar_project_access_token.test2,
+			]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceProjectAccessTokens("post"),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					s.checkResourceStateSanity(rn),
-
-					// By default Rollbar provisions a new project with 4 access
-					// tokens, 2 of whose names beging with "post".
 					resource.TestCheckResourceAttr(rn, "access_tokens.#", "2"),
 				),
 			},
@@ -77,25 +110,87 @@ func (s *AccSuite) TestAccProjectAccessTokensDataSourceWithPrefix() {
 	})
 }
 
-// configDataSourceProjectAccessTokens generates Terraform configuration for
-// resource `rollbar_project_access_tokens`. If `prefix` is not empty, it will
-// be supplied as the `prefix` argument to the data source.
-func (s *AccSuite) configDataSourceProjectAccessTokens(prefix string) string {
-	var configPrefix string
-	if prefix != "" {
-		configPrefix = fmt.Sprintf(`prefix = "%s"`, prefix)
-	}
+// TestAccProjectAccessTokensDataSourceNoTokensWithPrefix tests reading project
+// access tokens with `rollbar_project_access_tokens` data source, with a prefix
+// specified, from a project with zero tokens.
+func (s *AccSuite) TestAccProjectAccessTokensDataSourceNoTokensWithPrefix() {
+	rn := "data.rollbar_project_access_tokens.test"
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
 		  name         = "%s"
 		}
-	
+
 		data "rollbar_project_access_tokens" "test" {
 			project_id = rollbar_project.test.id
-			depends_on = [rollbar_project.test]
-			%s
+			#depends_on = [rollbar_project.test]
+			prefix = "test-"
 		}
 	`
-	return fmt.Sprintf(tmpl, s.randName, configPrefix)
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(rn, "project_id"),
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "access_tokens.#", "0"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccProjectAccessTokensDataSourceWithTokensWithPrefix tests reading
+// project access tokens with `rollbar_project_access_tokens` data source from a
+// project with two tokens, with a prefix matching one of those tokens.
+func (s *AccSuite) TestAccProjectAccessTokensDataSourceWithTokensWithPrefix() {
+	rn := "data.rollbar_project_access_tokens.test"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test1" {
+			name = "foo-token"
+			project_id = rollbar_project.test.id
+			scopes = ["read"]
+		}
+
+		resource "rollbar_project_access_token" "test2" {
+			name = "bar-token"
+			project_id = rollbar_project.test.id
+			scopes = ["post_server_item"]
+		}
+
+		data "rollbar_project_access_tokens" "test" {
+			project_id = rollbar_project.test.id
+			prefix = "foo"
+			depends_on = [
+				rollbar_project_access_token.test1,
+				rollbar_project_access_token.test2,
+			]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet(rn, "project_id"),
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "access_tokens.#", "1"),
+				),
+			},
+		},
+	})
 }

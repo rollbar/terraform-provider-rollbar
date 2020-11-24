@@ -31,43 +31,41 @@ import (
 // `rollbar_project_access_token` data source.
 func (s *AccSuite) TestAccProjectAccessTokenDataSource() {
 	rn := "data.rollbar_project_access_token.test"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
 
+		resource "rollbar_project_access_token" "test" {
+			name = "test-token"
+			project_id = rollbar_project.test.id
+			scopes = ["read"]
+		}
+
+		data "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			depends_on = [rollbar_project_access_token.test]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: s.configDataSourceProjectAccessToken(),
+				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttrSet(rn, "access_token"),
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					resource.TestCheckResourceAttrSet(rn, "date_created"),
 					resource.TestCheckResourceAttrSet(rn, "date_modified"),
-					resource.TestCheckResourceAttr(rn, "name", "post_client_item"),
+					resource.TestCheckResourceAttr(rn, "name", "test-token"),
 				),
 			},
 		},
 	})
-
-}
-
-// configDataSourceProjectAccessToken generates Terraform configuration
-// for resource `rollbar_project_access_tokens`. If `prefix` is not empty, it
-// will be supplied as the `prefix` argument to the data source.
-func (s *AccSuite) configDataSourceProjectAccessToken() string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_project" "test" {
-		  name         = "%s"
-		}
-	
-		data "rollbar_project_access_token" "test" {
-			project_id = rollbar_project.test.id
-			name = "post_client_item"
-			depends_on = [rollbar_project.test]
-		}
-	`
-	return fmt.Sprintf(tmpl, s.randName)
 }
