@@ -209,8 +209,6 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	accessToken := d.Id()
 	projectID := d.Get("project_id").(int)
 
@@ -226,14 +224,7 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	// FIXME: Implement this functionality when the API is ready!
-	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
-	diags = diag.Diagnostics{{
-		Severity: diag.Warning,
-		Summary:  "Delete not implemented for resource `rollbar_project_access_token`",
-		Detail:   "https://github.com/rollbar/terraform-provider-rollbar/issues/12",
-	}}
-	return diags
+	return nil
 }
 
 func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
