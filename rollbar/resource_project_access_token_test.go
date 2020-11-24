@@ -164,7 +164,6 @@ func (s *AccSuite) TestAccTokenUpdateScope() {
 
 // TestAccTokenUpdateRateLimit tests updating the rate limit on a Rollbar
 // project access token.
-// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/128
 func (s *AccSuite) TestAccTokenUpdateRateLimit() {
 	rn := "rollbar_project_access_token.test" // Resource name
 	// language=hcl
