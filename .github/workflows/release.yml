@@ -1,112 +1,54 @@
-# Create a new GitHub release on pushed tag stating with 'v'.
-# Run tests, build and uploads binaries.
-
-name: Release
-
-on:
-  push:
-    tags:
-    - 'v*'
-
-jobs:
-
-  test:
-    name: Release Test
-    runs-on: ubuntu-latest
-    steps:
-
-    - name: set up Go 1.13
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13
-
-    - name: check out code into the Go module directory
-      uses: actions/checkout@v2
-
-    - name: get dependencies
-      run: |
-        go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
-
-    - name: sanity-check
-      run: make test
-
-  # See https://github.com/actions/upload-release-asset
-  build:
-    name: Build and Release
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-
-    - name: set up Go 1.13
-      uses: actions/setup-go@v1
-      with:
-        go-version: 1.13
-
-    - name: check out code into the Go module directory
-      uses: actions/checkout@v2
-
-    - name: get dependencies
-      run: |
-        go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
-
-    - name: parse version string
-      id: parse_version
-      run: |
-        export BUILD_VERSION=$(echo $GITHUB_REF | sed -e 's/refs.tags.\(.*\)$/\1/')
-        export BUILD_NAME=terraform-provider-rollbar_$BUILD_VERSION
-        echo "::set-output name=BUILD_NAME::$BUILD_NAME"
-        echo ::set-output name=ZIP_NAME_LINUX::"$BUILD_NAME"_linux_amd64.zip
-        echo ::set-output name=ZIP_NAME_DARWIN::"$BUILD_NAME"_darwin_amd64.zip
-
-    - name: build Linux
-      run: |
-        make build-linux
-        mv terraform-provider-rollbar ${{ steps.parse_version.outputs.BUILD_NAME }}
-        zip --junk-paths ${{ steps.parse_version.outputs.ZIP_NAME_LINUX }} ${{ steps.parse_version.outputs.BUILD_NAME }}
-
-    - name: build Darwin
-      run: |
-        make build-darwin
-        mv terraform-provider-rollbar ${{ steps.parse_version.outputs.BUILD_NAME }}
-        zip --junk-paths ${{ steps.parse_version.outputs.ZIP_NAME_DARWIN }} ${{ steps.parse_version.outputs.BUILD_NAME }}
-
-    - name: create release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: upload Release Asset Linux
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.parse_version.outputs.ZIP_NAME_LINUX }}
-        asset_name: ${{ steps.parse_version.outputs.ZIP_NAME_LINUX }}
-
-        asset_content_type: application/zip
-
-    - name: Upload Release Asset Darwin
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./${{ steps.parse_version.outputs.ZIP_NAME_DARWIN }}
-        asset_name: ${{ steps.parse_version.outputs.ZIP_NAME_DARWIN }}
-
-        asset_content_type: application/zip
+# Visit https://goreleaser.com for documentation on how to customize this
+# behavior.
+before:
+  hooks:
+    # this is just an example and not a requirement for provider building/publishing
+    - go mod tidy
+builds:
+- env:
+    # goreleaser does not work with CGO, it could also complicate
+    # usage by users in CI/CD systems like Terraform Cloud where
+    # they are unable to install libraries.
+    - CGO_ENABLED=0
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  flags:
+    - -trimpath
+  ldflags:
+    - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+  goos:
+    - freebsd
+    - windows
+    - linux
+    - darwin
+  goarch:
+    - amd64
+    - '386'
+    - arm
+    - arm64
+  ignore:
+    - goos: darwin
+      goarch: '386'
+  binary: '{{ .ProjectName }}_v{{ .Version }}'
+archives:
+- format: zip
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  algorithm: sha256
+signs:
+  - artifacts: checksum
+    args:
+      # if you are using this is a GitHub action or some other automated pipeline, you 
+      # need to pass the batch flag to indicate its not interactive.
+      - "--batch"
+      - "--local-user"
+      - "{{ .Env.GPG_FINGERPRINT }}" # set this environment variable for your signing key
+      - "--output"
+      - "${signature}"
+      - "--detach-sign"
+      - "${artifact}"
+release:
+  # If you want to manually examine the release before its live, uncomment this line:
+  draft: true
+changelog:
+  skip: true
