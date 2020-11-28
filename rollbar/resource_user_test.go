@@ -2,10 +2,14 @@ package rollbar
 
 import (
 	"fmt"
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"github.com/sqweek/dialog"
+	"net/http"
 	"regexp"
 )
 
@@ -717,4 +721,70 @@ func (s *AccSuite) checkUserIsNotInvited(userEmail, teamName string) resource.Te
 		l.Debug().Msg("Confirmed user is not invited to team")
 		return nil
 	}
+}
+
+// TestAccUserInvitedToRegistered tests the transition of a Rollbar user from
+// invited to registered status.
+func (s *AccSuite) TestAccUserInvitedToRegistered() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			email = "jason.mcvetta+%s@gmail.com"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, s.randName, s.randName)
+	var r *recorder.Recorder
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				PreConfig: func() {
+					var err error
+					r, err = recorder.New("vcr/invited-user")
+					s.Nil(err)
+					r.AddFilter(func(i *cassette.Interaction) error {
+						delete(i.Request.Headers, "X-Rollbar-Access-Token")
+						return nil
+					})
+					http.DefaultTransport = r
+				},
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+				),
+			},
+			{
+				PreConfig: func() {
+					ok := dialog.Message(
+						"%s",
+						"Accept the email invitation then continue",
+					).Title("Invitation accepted?").YesNo()
+					if !ok {
+						s.FailNow("User did not accept the invitation")
+					}
+					var err error
+					r, err = recorder.New("vcr/registered-user")
+					s.Nil(err)
+					r.AddFilter(func(i *cassette.Interaction) error {
+						delete(i.Request.Headers, "X-Rollbar-Access-Token")
+						return nil
+					})
+					http.DefaultTransport = r
+
+				},
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+				),
+			},
+		},
+	})
 }
