@@ -32,6 +32,7 @@ require (
 	github.com/mitchellh/mapstructure v1.3.3
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.20.0
+	github.com/sqweek/dialog v0.0.0-20200911184034-8a3d98e8211d
 	github.com/stretchr/testify v1.6.1
 	github.com/zclconf/go-cty v1.7.0 // indirect
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
