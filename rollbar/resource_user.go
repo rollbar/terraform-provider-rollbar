@@ -331,6 +331,13 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		}
 	}
 
+	// If no user ID was found, user has been invited but not yet registered.
+	if userID == 0 {
+		mustSet(d, "status", "invited")
+	} else {
+		mustSet(d, "status", "registered")
+	}
+
 	currentTeams, err := resourceUserCurrentTeams(c, email, userID)
 	if err != nil {
 		l.Err(err).Send()
