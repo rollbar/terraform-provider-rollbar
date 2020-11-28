@@ -45,6 +45,44 @@ func (s *AccSuite) TestAccUserCreateInvite() {
 	})
 }
 
+// TestAccUserCreateInviteMixedCase tests creating a new rollbar_user resource
+// with an invitation to email is not registered as a Rollbar user, and contains
+// mixed case characters.  The mixed case characters must be tested because the
+// API converts all submitted email addresses to lower-case.  That's okay,
+// standards say email addresses are NOT case sensitive.
+//
+// Demonstrates https://github.com/rollbar/terraform-provider-rollbar/issues/139
+func (s *AccSuite) TestAccUserCreateInviteMixedCase() {
+	rn := "rollbar_user.test_user"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test_team" {
+			name = "%s-team-0"
+		}
+
+		resource "rollbar_user" "test_user" {
+			# Note capital "X" in the email address below
+			email = "jason.mcvetta+X-%s@gmail.com"
+			team_ids = [rollbar_team.test_team.id]
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkUserTeams(rn),
+				),
+			},
+		},
+	})
+}
+
 // TestAccUserCreateAssign tests creating a new rollbar_user resource by
 // assigning an already-registered Rollbar user to the team.
 // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/91
