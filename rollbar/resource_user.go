@@ -325,7 +325,16 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	// If user ID is not in state, try to query it from Rollbar
 	if userID == 0 {
 		userID, err = c.FindUserID(email)
-		if err != client.ErrNotFound && err != nil {
+		switch err {
+		case nil:
+			l = log.With().
+				Str("email", email).
+				Int("userID", userID).
+				Logger()
+			l.Debug().Msg("Found registered user")
+		case client.ErrNotFound:
+			l.Debug().Msg("No registered user found")
+		default:
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
