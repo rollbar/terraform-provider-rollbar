@@ -52,11 +52,13 @@ Terraform via gRPC.  Anything that child process writes to stdout/stderr is
 lost.  So if we want debug logging we must write to a file.
 
 
-### Dev Script
+### Dev Scripts
 
-Running `make dev` will:
-* Build and install the provider 
-* Run `terraform apply` in the `examples` folder with debug logging enabled
+Running `make plan`, `make apply`, or `make destroy` will:
+* Build the provider from your working directory, and install for local
+  Terraform.
+* Run `terraform <plan|apply|destroy>` in the `examples` folder with debug
+  logging enabled.
 * Display the logs on completion.
 
 
