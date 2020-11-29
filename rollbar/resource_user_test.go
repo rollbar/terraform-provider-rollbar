@@ -840,7 +840,7 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 func vcrFilterHeaders(i *cassette.Interaction) error {
 	delete(i.Request.Headers, "X-Rollbar-Access-Token")
 	delete(i.Request.Headers, "User-Agent")
-	for key, _ := range i.Response.Headers {
+	for key := range i.Response.Headers {
 		deleteHeader := false
 		if strings.HasPrefix(key, "X-") {
 			deleteHeader = true
