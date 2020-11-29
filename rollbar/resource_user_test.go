@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"github.com/sqweek/dialog"
 	"net/http"
 	"regexp"
 	"strings"
@@ -766,8 +765,8 @@ func (s *AccSuite) checkUserIsNotInvited(userEmail, teamName string) resource.Te
 // invited to registered status.
 func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	rn := "rollbar_user.test_user"
-	//randString := "tf-acc-test-xzdpje09gd" // Must be constant across VCR record/playback runs
-	randString := s.randName
+	//randString := s.randName
+	randString := "tf-acc-test-7lppmg40pk" // Must be constant across VCR record/playback runs
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team" {
@@ -781,13 +780,6 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	`
 	config := fmt.Sprintf(tmpl, randString, randString)
 	var r *recorder.Recorder
-	//r, err := recorder.New("vcr/user-registered-invited")
-	//s.Nil(err)
-	//r.AddFilter(func(i *cassette.Interaction) error {
-	//	delete(i.Request.Headers, "X-Rollbar-Access-Token")
-	//	return nil
-	//})
-	//http.DefaultTransport = r
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
@@ -798,25 +790,7 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 					var err error
 					r, err = recorder.New("vcr/invited_user")
 					s.Nil(err)
-					r.AddFilter(func(i *cassette.Interaction) error {
-						for key, _ := range i.Request.Headers {
-							deleteHeader := false
-							if strings.HasPrefix(key, "X-") {
-								deleteHeader = true
-							}
-							if strings.HasPrefix(key, "Access-Control-") {
-								deleteHeader = true
-							}
-							switch key {
-							case "Alt-Svc", "Content-Length", "Etag", "Server", "Via":
-								deleteHeader = true
-							}
-							if deleteHeader {
-								delete(i.Request.Headers, key)
-							}
-						}
-						return nil
-					})
+					r.AddFilter(vcrFilterHeaders)
 					http.DefaultTransport = r
 				},
 				Config: config,
@@ -827,21 +801,18 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 			},
 			{
 				PreConfig: func() {
-					ok := dialog.Message(
-						"%s",
-						"Accept the email invitation then continue",
-					).Title("Invitation accepted?").YesNo()
-					if !ok {
-						s.FailNow("User did not accept the invitation")
-					}
+					//ok := dialog.Message(
+					//	"%s",
+					//	"Accept the email invitation then continue",
+					//).Title("Invitation accepted?").YesNo()
+					//if !ok {
+					//	s.FailNow("User did not accept the invitation")
+					//}
 					err := r.Stop() // Stop the previous recorder
 					s.Nil(err)
 					r, err = recorder.New("vcr/registered_user")
 					s.Nil(err)
-					r.AddFilter(func(i *cassette.Interaction) error {
-						delete(i.Request.Headers, "X-Rollbar-Access-Token")
-						return nil
-					})
+					r.AddFilter(vcrFilterHeaders)
 					http.DefaultTransport = r
 
 				},
@@ -855,4 +826,27 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	})
 	err := r.Stop() // Stop the last recorder
 	s.Nil(err)
+}
+
+// vcrFilterHeaders removes unnecessary headers from VCR recordings.
+func vcrFilterHeaders(i *cassette.Interaction) error {
+	delete(i.Request.Headers, "X-Rollbar-Access-Token")
+	delete(i.Request.Headers, "User-Agent")
+	for key, _ := range i.Response.Headers {
+		deleteHeader := false
+		if strings.HasPrefix(key, "X-") {
+			deleteHeader = true
+		}
+		if strings.HasPrefix(key, "Access-Control-") {
+			deleteHeader = true
+		}
+		switch key {
+		case "Alt-Svc", "Content-Length", "Etag", "Server", "Via":
+			deleteHeader = true
+		}
+		if deleteHeader {
+			delete(i.Response.Headers, key)
+		}
+	}
+	return nil
 }
