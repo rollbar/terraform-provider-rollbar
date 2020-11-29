@@ -45,6 +45,9 @@ func NewClient(token string) *RollbarApiClient {
 	// New Resty HTTP client
 	r := resty.New()
 
+	// Use default transport - needed for VCR
+	r.SetTransport(http.DefaultTransport)
+
 	// Authentication
 	if token != "" {
 		r = r.SetHeader("X-Rollbar-Access-Token", token)
