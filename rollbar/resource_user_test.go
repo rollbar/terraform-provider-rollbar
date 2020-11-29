@@ -801,6 +801,11 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 			},
 			{
 				PreConfig: func() {
+					// When recording the cassette, we use
+					// github.com/sqweek/dialog to pop up a GUI dialog and wait
+					// for confirmation; thereby allowing the developer to
+					// manually accept the invitation.
+
 					//ok := dialog.Message(
 					//	"%s",
 					//	"Accept the email invitation then continue",
@@ -808,6 +813,7 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 					//if !ok {
 					//	s.FailNow("User did not accept the invitation")
 					//}
+
 					err := r.Stop() // Stop the previous recorder
 					s.Nil(err)
 					r, err = recorder.New("vcr/registered_user")
