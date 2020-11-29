@@ -24,7 +24,7 @@ Status
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x or 0.13.x
 - [Go](https://golang.org/doc/install) 1.14.x
 
 
