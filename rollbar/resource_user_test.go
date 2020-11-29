@@ -780,7 +780,8 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	`
 	config := fmt.Sprintf(tmpl, randString, randString)
 	var r *recorder.Recorder
-	resource.ParallelTest(s.T(), resource.TestCase{
+	origTransport := http.DefaultTransport
+	resource.Test(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -832,6 +833,7 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	})
 	err := r.Stop() // Stop the last recorder
 	s.Nil(err)
+	http.DefaultTransport = origTransport
 }
 
 // vcrFilterHeaders removes unnecessary headers from VCR recordings.
