@@ -766,16 +766,16 @@ func (s *AccSuite) checkUserIsNotInvited(userEmail, teamName string) resource.Te
 // invited to registered status.
 func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	rn := "rollbar_user.test_user"
-	//randString := "t2ueouxmrx" // Must be constant across VCR record/playback runs
+	//randString := "tf-acc-test-xzdpje09gd" // Must be constant across VCR record/playback runs
 	randString := s.randName
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team" {
-			name = "tf-acc-test-%s"
+			name = "%s"
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-%s@gmail.com"
+			email = "jason.mcvetta+%s@gmail.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
