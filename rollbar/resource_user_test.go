@@ -11,6 +11,7 @@ import (
 	"github.com/sqweek/dialog"
 	"net/http"
 	"regexp"
+	"strings"
 )
 
 // TestAccUserCreateInvite tests creating a new rollbar_user resource with an
@@ -765,12 +766,12 @@ func (s *AccSuite) checkUserIsNotInvited(userEmail, teamName string) resource.Te
 // invited to registered status.
 func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	rn := "rollbar_user.test_user"
-	randString := "a4mi14cqy9" // Must be constant across VCR record/playback runs
-	//randString := s.randName
+	//randString := "t2ueouxmrx" // Must be constant across VCR record/playback runs
+	randString := s.randName
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team" {
-			name = "%s"
+			name = "tf-acc-test-%s"
 		}
 
 		resource "rollbar_user" "test_user" {
@@ -779,30 +780,45 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, randString, randString)
-	//var r *recorder.Recorder
-	r, err := recorder.New("vcr/user-registered-invited")
-	s.Nil(err)
-	r.AddFilter(func(i *cassette.Interaction) error {
-		delete(i.Request.Headers, "X-Rollbar-Access-Token")
-		return nil
-	})
-	http.DefaultTransport = r
+	var r *recorder.Recorder
+	//r, err := recorder.New("vcr/user-registered-invited")
+	//s.Nil(err)
+	//r.AddFilter(func(i *cassette.Interaction) error {
+	//	delete(i.Request.Headers, "X-Rollbar-Access-Token")
+	//	return nil
+	//})
+	//http.DefaultTransport = r
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				//PreConfig: func() {
-				//	var err error
-				//	r, err = recorder.New("vcr/invited_user")
-				//	s.Nil(err)
-				//	r.AddFilter(func(i *cassette.Interaction) error {
-				//		delete(i.Request.Headers, "X-Rollbar-Access-Token")
-				//		return nil
-				//	})
-				//	http.DefaultTransport = r
-				//},
+				PreConfig: func() {
+					var err error
+					r, err = recorder.New("vcr/invited_user")
+					s.Nil(err)
+					r.AddFilter(func(i *cassette.Interaction) error {
+						for key, _ := range i.Request.Headers {
+							deleteHeader := false
+							if strings.HasPrefix(key, "X-") {
+								deleteHeader = true
+							}
+							if strings.HasPrefix(key, "Access-Control-") {
+								deleteHeader = true
+							}
+							switch key {
+							case "Alt-Svc", "Content-Length", "Etag", "Server", "Via":
+								deleteHeader = true
+							}
+							if deleteHeader {
+								delete(i.Request.Headers, key)
+							}
+						}
+						return nil
+					})
+					http.DefaultTransport = r
+				},
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
@@ -818,15 +834,15 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 					if !ok {
 						s.FailNow("User did not accept the invitation")
 					}
-					//err := r.Stop() // Stop the previous recorder
-					//s.Nil(err)
-					//r, err = recorder.New("vcr/registered_user")
-					//s.Nil(err)
-					//r.AddFilter(func(i *cassette.Interaction) error {
-					//	delete(i.Request.Headers, "X-Rollbar-Access-Token")
-					//	return nil
-					//})
-					//http.DefaultTransport = r
+					err := r.Stop() // Stop the previous recorder
+					s.Nil(err)
+					r, err = recorder.New("vcr/registered_user")
+					s.Nil(err)
+					r.AddFilter(func(i *cassette.Interaction) error {
+						delete(i.Request.Headers, "X-Rollbar-Access-Token")
+						return nil
+					})
+					http.DefaultTransport = r
 
 				},
 				Config: config,
@@ -837,5 +853,6 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 			},
 		},
 	})
-	r.Stop() // Stop the last recorder
+	err := r.Stop() // Stop the last recorder
+	s.Nil(err)
 }
