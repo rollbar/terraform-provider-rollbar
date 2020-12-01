@@ -64,3 +64,12 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./lcov.info
+      - name: Upload coverage data to CodeClimate
+        uses: paambaati/codeclimate-action@v2.7.4
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/*lcov*:lcov
+
+
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

@@ -100,9 +100,11 @@ func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 	}
 	for _, u := range users {
 		if u.Email == email {
+			l.Debug().Int("user_id", u.ID).Msg("Found user")
 			return u.ID, nil
 		}
 	}
+	l.Debug().Msg("No user found")
 	return 0, ErrNotFound
 }
 

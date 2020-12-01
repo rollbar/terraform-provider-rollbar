@@ -16,13 +16,15 @@ Status
 [![Coverage Status](https://coveralls.io/repos/github/rollbar/terraform-provider-rollbar/badge.svg)](https://coveralls.io/github/rollbar/terraform-provider-rollbar)
 [![CodeQL](https://github.com/rollbar/terraform-provider-rollbar/workflows/CodeQL/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3ACodeQL)
 [![ShiftLeft Scan](https://github.com/rollbar/terraform-provider-rollbar/workflows/ShiftLeft%20Scan/badge.svg)](https://github.com/rollbar/terraform-provider-rollbar/actions?query=workflow%3A%22ShiftLeft+Scan%22)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c5097d1a11f6f2310089/maintainability)](https://codeclimate.com/github/rollbar/terraform-provider-rollbar/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c5097d1a11f6f2310089/test_coverage)](https://codeclimate.com/github/rollbar/terraform-provider-rollbar/test_coverage)
 
 
 
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.13.x
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x or 0.13.x
 - [Go](https://golang.org/doc/install) 1.14.x
 
 
@@ -50,11 +52,13 @@ Terraform via gRPC.  Anything that child process writes to stdout/stderr is
 lost.  So if we want debug logging we must write to a file.
 
 
-### Dev Script
+### Dev Scripts
 
-Running `make dev` will:
-* Build and install the provider 
-* Run `terraform apply` in the `examples` folder with debug logging enabled
+Running `make plan`, `make apply`, or `make destroy` will:
+* Build the provider from your working directory, and install for local
+  Terraform.
+* Run `terraform <plan|apply|destroy>` in the `examples` folder with debug
+  logging enabled.
 * Display the logs on completion.
 
 

@@ -67,23 +67,21 @@ type ProjectAccessTokenCreateArgs struct {
 
 // sanityCheck checks that the arguments are sane.
 func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
+	var errors []error
 	l := log.With().
 		Interface("args", args).
 		Logger()
 	if args.ProjectID <= 0 {
 		err := fmt.Errorf("project ID cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if args.Name == "" {
 		err := fmt.Errorf("name cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if len(args.Scopes) < 1 {
 		err := fmt.Errorf("at least one scope must be specified")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	for _, s := range args.Scopes {
 		switch s {
@@ -93,8 +91,7 @@ func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 			// FIXME: Default switch case needs test coverage.
 			//  https://github.com/rollbar/terraform-provider-rollbar/issues/39
 			err := fmt.Errorf("invalid scope")
-			l.Err(err).Msg("Failed sanity check")
-			return err
+			errors = append(errors, err)
 		}
 	}
 	switch args.Status {
@@ -104,18 +101,21 @@ func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 		// FIXME: Default switch case needs test coverage.
 		//  https://github.com/rollbar/terraform-provider-rollbar/issues/39
 		err := fmt.Errorf("invalid status")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if args.RateLimitWindowCount < 0 {
 		err := fmt.Errorf("rate limit window count must be zero or greater")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if args.RateLimitWindowSize < 0 {
 		err := fmt.Errorf("rate limit window size must be zero or greater")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
+	}
+	if len(errors) != 0 {
+		l.Error().
+			Interface("errors", errors).
+			Msg("Failed sanity check")
+		return errors[0]
 	}
 	return nil // Sanity check passed
 }
@@ -134,28 +134,31 @@ type ProjectAccessTokenUpdateArgs struct {
 
 // sanityCheck checks that the arguments are sane.
 func (args *ProjectAccessTokenUpdateArgs) sanityCheck() error {
+	var errors []error
 	l := log.With().
 		Interface("args", args).
 		Logger()
 	if args.ProjectID <= 0 {
 		err := fmt.Errorf("project ID cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if args.AccessToken == "" {
 		err := fmt.Errorf("access token cannot be blank")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if args.RateLimitWindowCount < 0 {
 		err := fmt.Errorf("rate limit window count must be zero or greater")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
 	}
 	if args.RateLimitWindowSize < 0 {
 		err := fmt.Errorf("rate limit window size must be zero or greater")
-		l.Err(err).Msg("Failed sanity check")
-		return err
+		errors = append(errors, err)
+	}
+	if len(errors) != 0 {
+		l.Error().
+			Interface("errors", errors).
+			Msg("Failed sanity check")
+		return errors[0]
 	}
 	return nil // Sanity check passed
 }
@@ -168,7 +171,7 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 		Logger()
 	l.Debug().Msg("Listing project access tokens")
 
-	u := apiUrl + pathPatList
+	u := apiUrl + pathProjectTokens
 	resp, err := c.Resty.R().
 		SetResult(patListResponse{}).
 		SetError(ErrorResult{}).
@@ -250,9 +253,29 @@ func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name stri
 }
 
 func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string) error {
-	// FIXME: Implement this functionality when the API is ready!
-	//  https://github.com/rollbar/terraform-provider-rollbar/issues/12
-	log.Warn().Msg("Deleting project access tokens not yet implemented by Rollbar API.")
+	l := log.With().
+		Int("projectID", projectID).
+		Str("token", token).
+		Logger()
+	l.Debug().Msg("Deleting project access token")
+
+	u := apiUrl + pathProjectToken
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"projectID":   strconv.Itoa(projectID),
+			"accessToken": token,
+		}).
+		SetError(ErrorResult{}).
+		Delete(u)
+	if err != nil {
+		l.Err(err).Send()
+		return err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return err
+	}
 	return nil
 }
 
@@ -270,7 +293,7 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 		return pat, err
 	}
 
-	u := apiUrl + pathPatCreate
+	u := apiUrl + pathProjectTokens
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID": strconv.Itoa(args.ProjectID),
@@ -309,7 +332,7 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 		return err
 	}
 
-	u := apiUrl + pathPatUpdate
+	u := apiUrl + pathProjectToken
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID":   strconv.Itoa(args.ProjectID),

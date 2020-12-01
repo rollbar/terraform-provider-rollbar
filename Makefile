@@ -31,6 +31,10 @@ install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
+install012: build
+	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}/
+	mv ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}/terraform-provider-${NAME}_v${VERSION}
+
 test: 
 	go test -covermode=atomic -coverprofile=coverage.out $(TEST) || exit 1
 	@#echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
@@ -79,3 +83,11 @@ _terraform_plan:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform plan)
 _terraform_destroy:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform destroy)
+
+docker12:
+	docker build . --build-arg version=0.12.5 -t terraform-0.12-provider-rollbar 
+	docker run terraform-0.12-provider-rollbar plan -var rollbar_token=$$ROLLBAR_API_KEY
+
+docker13:
+	docker build . --build-arg version=0.13.5 -t terraform-0.13-provider-rollbar 
+	docker run terraform-0.13-provider-rollbar plan -var rollbar_token=$$ROLLBAR_API_KEY

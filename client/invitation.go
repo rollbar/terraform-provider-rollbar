@@ -225,6 +225,9 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 // this method is quite inefficient, as it must read all invitations for all
 // teams.
 func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err error) {
+	// API converts all invited emails to lowercase.
+	// https://github.com/rollbar/terraform-provider-rollbar/issues/139
+	email = strings.ToLower(email)
 	l := log.With().
 		Str("email", email).
 		Logger()

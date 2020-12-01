@@ -35,7 +35,8 @@ jobs:
         # type: credscan,java
         # type: python
 
-    - name: Upload report
-      uses: github/codeql-action/upload-sarif@v1
+    - name: Upload scan reports
+      uses: actions/upload-artifact@v1.0.0
       with:
-        sarif_file: reports
+        name: shiftleft-scan-reports
+        path: reports
