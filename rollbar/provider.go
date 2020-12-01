@@ -64,17 +64,14 @@ func Provider() *schema.Provider {
 			"rollbar_project_access_token":  dataSourceProjectAccessToken(),
 			"rollbar_project_access_tokens": dataSourceProjectAccessTokens(),
 		},
-		ConfigureContextFunc: providerConfigure,
+		ConfigureContextFunc: func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+			var diags diag.Diagnostics
+			token := d.Get(schemaKeyToken).(string)
+			c := client.NewClient(token)
+			c.Resty.GetClient().Transport = http.DefaultTransport
+			return c, diags
+		},
 	}
-}
-
-// providerConfigure sets up authentication in a Resty HTTP client.
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	token := d.Get(schemaKeyToken).(string)
-	c := client.NewClient(token)
-	c.Resty.GetClient().Transport = http.DefaultTransport
-	return c, diags
 }
 
 // handleErrNotFound handles an ErrNotFound when reading a resource, by removing
