@@ -88,7 +88,7 @@ func (s *AccSuite) SetupSuite() {
 		s.vcr = true
 		log.Warn().Msg("VCR mode enabled")
 	}
-	s.T().Parallel()
+	//s.T().Parallel()  // FIXME: Why??!!
 }
 
 // preCheck ensures we are ready to run the test
@@ -233,13 +233,15 @@ func (s *AccSuite) parallelTestVCR(t *testing.T, c resource.TestCase) {
 			resource.Test(t, c)
 		case recorder.ModeReplaying:
 			log.Warn().Msg("VCR Mode Replaying")
+			resource.Test(t, c)
+		case recorder.ModeDisabled: // Will this ever actually happen?
+			log.Warn().Msg("VCR Mode Disabled")
 			resource.ParallelTest(t, c)
 		default:
 			s.Fail("WTF?")
 		}
 	} else {
+		log.Warn().Msg("No VCR Mode")
 		resource.ParallelTest(t, c)
 	}
 }
-
-//s.parallelTestVCR((s.T(), resource.TestCase{
