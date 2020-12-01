@@ -38,6 +38,7 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -110,10 +111,7 @@ func (s *AccSuite) SetupTest() {
 		r, err := recorder.New(cassetteName)
 		s.Nil(err)
 		s.recorder = r
-		r.AddFilter(func(i *cassette.Interaction) error {
-			delete(i.Request.Headers, "X-Rollbar-Access-Token")
-			return nil
-		})
+		r.AddFilter(vcrFilterHeaders)
 		http.DefaultTransport = s.recorder
 	}
 	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
@@ -244,4 +242,27 @@ func (s *AccSuite) parallelTestVCR(t *testing.T, c resource.TestCase) {
 		log.Warn().Msg("No VCR Mode")
 		resource.ParallelTest(t, c)
 	}
+}
+
+// vcrFilterHeaders removes unnecessary headers from VCR recordings.
+func vcrFilterHeaders(i *cassette.Interaction) error {
+	delete(i.Request.Headers, "X-Rollbar-Access-Token")
+	delete(i.Request.Headers, "User-Agent")
+	for key := range i.Response.Headers {
+		deleteHeader := false
+		if strings.HasPrefix(key, "X-") {
+			deleteHeader = true
+		}
+		if strings.HasPrefix(key, "Access-Control-") {
+			deleteHeader = true
+		}
+		switch key {
+		case "Alt-Svc", "Content-Length", "Etag", "Server", "Via":
+			deleteHeader = true
+		}
+		if deleteHeader {
+			delete(i.Response.Headers, key)
+		}
+	}
+	return nil
 }

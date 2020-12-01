@@ -2,7 +2,6 @@ package rollbar
 
 import (
 	"fmt"
-	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -10,7 +9,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"regexp"
-	"strings"
 )
 
 // TestAccUserCreateInvite tests creating a new rollbar_user resource with an
@@ -834,27 +832,4 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	err := r.Stop() // Stop the last recorder
 	s.Nil(err)
 	http.DefaultTransport = origTransport
-}
-
-// vcrFilterHeaders removes unnecessary headers from VCR recordings.
-func vcrFilterHeaders(i *cassette.Interaction) error {
-	delete(i.Request.Headers, "X-Rollbar-Access-Token")
-	delete(i.Request.Headers, "User-Agent")
-	for key := range i.Response.Headers {
-		deleteHeader := false
-		if strings.HasPrefix(key, "X-") {
-			deleteHeader = true
-		}
-		if strings.HasPrefix(key, "Access-Control-") {
-			deleteHeader = true
-		}
-		switch key {
-		case "Alt-Svc", "Content-Length", "Etag", "Server", "Via":
-			deleteHeader = true
-		}
-		if deleteHeader {
-			delete(i.Response.Headers, key)
-		}
-	}
-	return nil
 }
