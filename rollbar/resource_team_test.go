@@ -194,8 +194,8 @@ func sweepResourceTeam(_ string) error {
 func (s *AccSuite) TestAccDeleteTeamWithUsers() {
 	team1Name := fmt.Sprintf("%s-team-1", s.randName)
 	team2Name := fmt.Sprintf("%s-team-2", s.randName)
-	user1Email := "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-	user2Email := fmt.Sprintf("jason.mcvetta+%s@gmail.com", s.randName)
+	user1Email := "terraform-provider-test@rollbar.com"
+	user2Email := fmt.Sprintf("terraform-provider-test+%s@rollbar.com", s.randName)
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team_1" {
