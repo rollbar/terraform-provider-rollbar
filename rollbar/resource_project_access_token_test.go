@@ -288,7 +288,7 @@ func (s *AccSuite) TestAccTokenDelete() {
 		}
 	`
 	config2 := fmt.Sprintf(tmpl2, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
