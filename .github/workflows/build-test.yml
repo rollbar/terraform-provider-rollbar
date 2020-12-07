@@ -16,12 +16,6 @@ jobs:
       runs-on: ubuntu-latest
       timeout-minutes: 5
       steps:
-        - name: 'Block Concurrent Executions'
-          uses: softprops/turnstyle@v1
-          with:
-            poll-interval-seconds: 10
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
     steps:
@@ -65,6 +59,12 @@ jobs:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
       # Acceptance
+      - name: Block Concurrent Executions
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Acceptance tests
         run: make testacc
         env:
