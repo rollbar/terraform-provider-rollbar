@@ -31,8 +31,7 @@ func (s *AccSuite) TestAccTeamInvalidName() {
 		}
 	`
 	resource.ParallelTest(s.T(), resource.TestCase{
-		PreCheck: func() { s.preCheck() },
-		//ProviderFactories: testAccProviderFactories(),
+		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
@@ -40,6 +39,34 @@ func (s *AccSuite) TestAccTeamInvalidName() {
 			{
 				Config:      config,
 				ExpectError: regexp.MustCompile("name cannot be blank"),
+			},
+		},
+	})
+}
+
+// TestAccTeamCreate tests creating a Rollbar team.
+func (s *AccSuite) TestAccTeamCreate() {
+	rn := "rollbar_team.test"
+	teamName := fmt.Sprintf("%s-team-0", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config := fmt.Sprintf(tmpl, teamName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName),
+					s.checkTeam(rn, teamName, "standard"),
+				),
 			},
 		},
 	})
