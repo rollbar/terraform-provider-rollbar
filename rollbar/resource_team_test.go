@@ -27,7 +27,6 @@ func (s *AccSuite) TestAccTeam() {
 	rn := "rollbar_team.test"
 	teamName0 := fmt.Sprintf("%s-team-0", s.randName)
 	teamName1 := fmt.Sprintf("%s-team-0", s.randName)
-
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
@@ -39,7 +38,6 @@ func (s *AccSuite) TestAccTeam() {
 				Config:      s.configResourceTeamInvalidname(),
 				ExpectError: regexp.MustCompile("name cannot be blank"),
 			},
-
 			// Initial create
 			{
 				Config: s.configResourceTeam(teamName0),
@@ -49,7 +47,6 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName0, "standard"),
 				),
 			},
-
 			// Update team access level
 			{
 				Config: s.configResourceTeamUpdateAccessLevel(teamName0),
@@ -59,7 +56,6 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName0, "light"),
 				),
 			},
-
 			// Update team name
 			{
 				Config: s.configResourceTeamUpdateTeamName(teamName1),
@@ -69,7 +65,6 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName1, "light"),
 				),
 			},
-
 			// Before running Terraform, delete the team on Rollbar but not in local state
 			{
 				PreConfig: func() {
@@ -82,7 +77,6 @@ func (s *AccSuite) TestAccTeam() {
 							s.Nil(err)
 						}
 					}
-
 				},
 				Config: s.configResourceTeamUpdateTeamName(teamName1),
 				Check: resource.ComposeTestCheckFunc(
@@ -91,7 +85,6 @@ func (s *AccSuite) TestAccTeam() {
 					s.checkTeam(rn, teamName1, "light"),
 				),
 			},
-
 			// Import a team
 			{
 				ResourceName:      rn,
