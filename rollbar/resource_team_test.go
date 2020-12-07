@@ -22,6 +22,29 @@ func init() {
 	})
 }
 
+// TestAccTeamInvalidName tests failure when team name is an empty string.
+func (s *AccSuite) TestAccTeamInvalidName() {
+	// language=hcl
+	config := `
+		resource "rollbar_team" "test" {
+			name = ""
+		}
+	`
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Invalid name - failure expected
+			{
+				Config:      config,
+				ExpectError: regexp.MustCompile("name cannot be blank"),
+			},
+		},
+	})
+}
+
 // TestAccTeam tests CRUD operations for a Rollbar team.
 func (s *AccSuite) TestAccTeam() {
 	rn := "rollbar_team.test"
@@ -33,11 +56,6 @@ func (s *AccSuite) TestAccTeam() {
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
-			// Invalid name - failure expected
-			{
-				Config:      s.configResourceTeamInvalidname(),
-				ExpectError: regexp.MustCompile("name cannot be blank"),
-			},
 			// Initial create
 			{
 				Config: s.configResourceTeam(teamName0),
@@ -93,16 +111,6 @@ func (s *AccSuite) TestAccTeam() {
 			},
 		},
 	})
-}
-
-func (s *AccSuite) configResourceTeamInvalidname() string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = ""
-		}
-	`
-	return tmpl
 }
 
 func (s *AccSuite) configResourceTeam(teamName string) string {
