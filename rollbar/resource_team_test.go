@@ -72,6 +72,54 @@ func (s *AccSuite) TestAccTeamCreate() {
 	})
 }
 
+// TestAccTeamUpdateAccessLevel tests updating the access level on a Rollbar
+// team.
+func (s *AccSuite) TestAccTeamUpdateAccessLevel() {
+	rn := "rollbar_team.test"
+	teamName := fmt.Sprintf("%s-team-0", s.randName)
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, teamName)
+	// language=hcl
+	tmpl2 := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+			access_level = "light"
+		}
+	`
+	config2 := fmt.Sprintf(tmpl1, teamName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName),
+					s.checkTeam(rn, teamName, "standard"),
+				),
+			},
+			// Update team access level
+			{
+				Config: config2,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName),
+					s.checkTeam(rn, teamName, "light"),
+				),
+			},
+		},
+	})
+}
+
 // TestAccTeam tests CRUD operations for a Rollbar team.
 func (s *AccSuite) TestAccTeam() {
 	rn := "rollbar_team.test"
@@ -84,6 +132,7 @@ func (s *AccSuite) TestAccTeam() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			// Initial create
+
 			{
 				Config: s.configResourceTeam(teamName0),
 				Check: resource.ComposeTestCheckFunc(
