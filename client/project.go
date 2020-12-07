@@ -187,7 +187,6 @@ func (c *RollbarApiClient) DeleteProject(projectID int) error {
 	u := apiUrl + pathProjectDelete
 	l := log.With().
 		Int("projectID", projectID).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Deleting project")
 
