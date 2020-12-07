@@ -233,38 +233,6 @@ func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
 	})
 }
 
-func (s *AccSuite) configResourceTeam(teamName string) string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = "%s"
-		}
-	`
-	return fmt.Sprintf(tmpl, teamName)
-}
-
-func (s *AccSuite) configResourceTeamUpdateAccessLevel(teamName string) string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = "%s"
-			access_level = "light"
-		}
-	`
-	return fmt.Sprintf(tmpl, teamName)
-}
-
-func (s *AccSuite) configResourceTeamUpdateTeamName(teamName string) string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = "%s"
-			access_level = "light"
-		}
-	`
-	return fmt.Sprintf(tmpl, teamName)
-}
-
 // checkTeam checks that the newly created team exists and has correct
 // attributes.
 func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestCheckFunc {
