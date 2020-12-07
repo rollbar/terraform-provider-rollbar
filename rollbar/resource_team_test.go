@@ -212,6 +212,9 @@ func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
 			// Before running Terraform, delete the team on Rollbar but not in local state
 			{
 				PreConfig: func() {
+					log.Debug().
+						Str("team_name", teamName1).
+						Msg("Deleting team from API before re-applying Terraform config")
 					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
 					teams, err := c.ListCustomTeams()
 					s.Nil(err)
