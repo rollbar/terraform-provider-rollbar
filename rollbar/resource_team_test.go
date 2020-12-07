@@ -310,9 +310,9 @@ func sweepResourceTeam(_ string) error {
 	return nil
 }
 
-// TestAccUserRemoveTeamWithUsers tests deleting a Rollbar team that has a
+// TestAccTeamDeleteTeamWithUsers tests deleting a Rollbar team that has a
 // non-zero count of users.
-func (s *AccSuite) TestAccDeleteTeamWithUsers() {
+func (s *AccSuite) TestAccTeamDeleteTeamWithUsers() {
 	team1Name := fmt.Sprintf("%s-team-1", s.randName)
 	team2Name := fmt.Sprintf("%s-team-2", s.randName)
 	user1Email := "terraform-provider-test@rollbar.com"
