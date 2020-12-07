@@ -9,9 +9,17 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
+
+func init() {
+	resource.AddTestSweepers("rollbar_user", &resource.Sweeper{
+		Name: "rollbar_user",
+		F:    sweepResourceUser,
+	})
+}
 
 // TestAccUserCreateInvite tests creating a new rollbar_user resource with an
 // invitation to email is not registered as a Rollbar user.
@@ -856,5 +864,51 @@ func vcrFilterHeaders(i *cassette.Interaction) error {
 			delete(i.Response.Headers, key)
 		}
 	}
+	return nil
+}
+
+// sweepResourceUser cleans up orphaned Rollbar users.
+func sweepResourceUser(_ string) error {
+	log.Info().Msg("Cleaning up Rollbar users from acceptance test runs.")
+
+	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	users, err := c.ListUsers()
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	// Find the ID for this account's "Everyone" team
+	var everyoneTeamID int
+	teams, err := c.ListTeams()
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+	for _, t := range teams {
+		if t.Name == "Everyone" {
+			everyoneTeamID = t.ID
+		}
+	}
+	log.Debug().Int("everyone_team_id", everyoneTeamID).Send()
+
+	// Remove users from Everyone team, thereby removing them from the account.
+	for _, u := range users {
+		// Used for registered user acceptance tests.
+		if u.Username == "tf-acc-test-rollbar-provider" {
+			continue
+		}
+
+		// Disposable users
+		if strings.HasPrefix(u.Username, "tf-acc-test-") {
+			err = c.RemoveUserFromTeam(u.ID, everyoneTeamID)
+		}
+		if err != nil {
+			log.Err(err).Send()
+			return err
+		}
+	}
+
+	log.Info().Msg("Users cleanup complete")
 	return nil
 }
