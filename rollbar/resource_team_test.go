@@ -91,7 +91,7 @@ func (s *AccSuite) TestAccTeamUpdateAccessLevel() {
 			access_level = "light"
 		}
 	`
-	config2 := fmt.Sprintf(tmpl1, teamName)
+	config2 := fmt.Sprintf(tmpl2, teamName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
@@ -120,11 +120,19 @@ func (s *AccSuite) TestAccTeamUpdateAccessLevel() {
 	})
 }
 
-// TestAccTeam tests CRUD operations for a Rollbar team.
-func (s *AccSuite) TestAccTeam() {
+// TestAccTeamUpdateName tests updating the name of a Rollbar team.
+func (s *AccSuite) TestAccTeamUpdateName() {
 	rn := "rollbar_team.test"
-	teamName0 := fmt.Sprintf("%s-team-0", s.randName)
-	teamName1 := fmt.Sprintf("%s-team-0", s.randName)
+	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
+	teamName2 := fmt.Sprintf("%s-team-2", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl, teamName1)
+	config2 := fmt.Sprintf(tmpl, teamName2)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
@@ -132,32 +140,74 @@ func (s *AccSuite) TestAccTeam() {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			// Initial create
-
 			{
-				Config: s.configResourceTeam(teamName0),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName0),
-					s.checkTeam(rn, teamName0, "standard"),
-				),
-			},
-			// Update team access level
-			{
-				Config: s.configResourceTeamUpdateAccessLevel(teamName0),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName0),
-					s.checkTeam(rn, teamName0, "light"),
-				),
+				Config: config1,
 			},
 			// Update team name
 			{
-				Config: s.configResourceTeamUpdateTeamName(teamName1),
+				Config: config2,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName1),
-					s.checkTeam(rn, teamName1, "light"),
+					resource.TestCheckResourceAttr(rn, "name", teamName2),
 				),
+			},
+		},
+	})
+}
+
+// TestAccTeamImport tests importing a Rollbar team into Terraform.
+func (s *AccSuite) TestAccTeamImport() {
+	rn := "rollbar_team.test"
+	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl, teamName1)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config1,
+			},
+			// Import the team
+			{
+				ResourceName:      rn,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// TestAccTeamDeleteOnAPIBeforeApply tests creating a Rollbar team with
+// Terraform, then deleting the team via API, before again applying Terraform
+// config.
+func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
+	rn := "rollbar_team.test"
+	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl, teamName1)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config1,
 			},
 			// Before running Terraform, delete the team on Rollbar but not in local state
 			{
@@ -172,18 +222,12 @@ func (s *AccSuite) TestAccTeam() {
 						}
 					}
 				},
-				Config: s.configResourceTeamUpdateTeamName(teamName1),
+				Config: config1,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttr(rn, "name", teamName1),
-					s.checkTeam(rn, teamName1, "light"),
+					s.checkTeam(rn, teamName1, "standard"),
 				),
-			},
-			// Import a team
-			{
-				ResourceName:      rn,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
