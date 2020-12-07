@@ -42,13 +42,17 @@ const schemaKeyToken = "api_key"
 
 // Provider is a Terraform provider for Rollbar.
 func Provider() *schema.Provider {
+	return ProviderWithTransport(http.DefaultTransport)
+}
+
+// ProviderWithTransport is a Terraform provider, making use of the specified
+// HTTP transport in the underlying Rollbar API client.
+func ProviderWithTransport(transport http.RoundTripper) *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			schemaKeyToken: {
-				Type:     schema.TypeString,
-				Optional: true,
-				// FIXME: Should the environment variable be ROLLBAR_API_KEY to
-				//  match the name of this field?
+				Type:        schema.TypeString,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_KEY", nil),
 			},
 		},
@@ -68,7 +72,7 @@ func Provider() *schema.Provider {
 			var diags diag.Diagnostics
 			token := d.Get(schemaKeyToken).(string)
 			c := client.NewClient(token)
-			c.Resty.GetClient().Transport = http.DefaultTransport
+			c.Resty.GetClient().Transport = transport
 			return c, diags
 		},
 	}

@@ -34,7 +34,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
-	"net/http"
 	"os"
 	"runtime"
 	"strconv"
@@ -74,11 +73,6 @@ type AccSuite struct {
 }
 
 func (s *AccSuite) SetupSuite() {
-	maxprocs := runtime.GOMAXPROCS(0)
-	log.Debug().
-		Int("GOMAXPROCS", maxprocs).
-		Send()
-
 	// Setup testing
 	s.provider = Provider()
 	s.providers = map[string]*schema.Provider{
@@ -88,8 +82,15 @@ func (s *AccSuite) SetupSuite() {
 	if useVCR == "1" {
 		s.vcr = true
 		log.Warn().Msg("VCR mode enabled")
+		runtime.GOMAXPROCS(1)
 	}
-	//s.T().Parallel()  // FIXME: Why??!!
+
+	// Log GOMAXPROCS
+	maxprocs := runtime.GOMAXPROCS(0)
+	log.Debug().
+		Int("GOMAXPROCS", maxprocs).
+		Send()
+
 }
 
 // preCheck ensures we are ready to run the test
@@ -112,7 +113,10 @@ func (s *AccSuite) SetupTest() {
 		s.Nil(err)
 		s.recorder = r
 		r.AddFilter(vcrFilterHeaders)
-		http.DefaultTransport = s.recorder
+		s.provider = ProviderWithTransport(s.recorder)
+		s.providers = map[string]*schema.Provider{
+			"rollbar": s.provider,
+		}
 	}
 	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
