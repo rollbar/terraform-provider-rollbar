@@ -38,7 +38,7 @@ import (
 )
 
 const schemaKeyToken = "api_key"
-const schemaKeyBaseURL = "base_url"
+const schemaKeyBaseURL = "api_url"
 
 // Provider is a Terraform provider for Rollbar.
 func Provider() *schema.Provider {
