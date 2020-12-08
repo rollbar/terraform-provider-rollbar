@@ -59,6 +59,7 @@ jobs:
         uses: softprops/turnstyle@v1
         with:
           poll-interval-seconds: 10
+          same-branch-only: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Acceptance tests
