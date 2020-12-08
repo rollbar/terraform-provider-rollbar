@@ -171,7 +171,7 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 		Logger()
 	l.Debug().Msg("Listing project access tokens")
 
-	u := apiUrl + pathProjectTokens
+	u := c.BaseURL + pathProjectTokens
 	resp, err := c.Resty.R().
 		SetResult(patListResponse{}).
 		SetError(ErrorResult{}).
@@ -259,7 +259,7 @@ func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string)
 		Logger()
 	l.Debug().Msg("Deleting project access token")
 
-	u := apiUrl + pathProjectToken
+	u := c.BaseURL + pathProjectToken
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID":   strconv.Itoa(projectID),
@@ -293,7 +293,7 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 		return pat, err
 	}
 
-	u := apiUrl + pathProjectTokens
+	u := c.BaseURL + pathProjectTokens
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID": strconv.Itoa(args.ProjectID),
@@ -332,7 +332,7 @@ func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdat
 		return err
 	}
 
-	u := apiUrl + pathProjectToken
+	u := c.BaseURL + pathProjectToken
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"projectID":   strconv.Itoa(args.ProjectID),

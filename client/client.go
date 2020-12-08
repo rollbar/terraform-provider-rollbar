@@ -31,15 +31,17 @@ import (
 	"net/http"
 )
 
-const apiUrl = "https://api.rollbar.com"
+// DefaultBaseURL is the default base URL for the Rollbar API.
+const DefaultBaseURL = "https://api.rollbar.com"
 
 // RollbarApiClient is a client for the Rollbar API.
 type RollbarApiClient struct {
-	Resty *resty.Client
+	BaseURL string // Base URL for Rollbar API
+	Resty   *resty.Client
 }
 
 // NewClient sets up a new Rollbar API client.
-func NewClient(token string) *RollbarApiClient {
+func NewClient(baseURL, token string) *RollbarApiClient {
 	log.Debug().Msg("Initializing Rollbar client")
 
 	// New Resty HTTP client
@@ -55,11 +57,19 @@ func NewClient(token string) *RollbarApiClient {
 		log.Warn().Msg("Rollbar API token not set")
 	}
 
+	// Authentication
+	if baseURL == "" {
+		log.Fatal().Msg("Rollbar API base URL not set")
+	}
+
 	// Configure Resty to use Zerolog for logging
 	r.SetLogger(restyZeroLogger{log.Logger})
 
 	// Rollbar client
-	c := RollbarApiClient{Resty: r}
+	c := RollbarApiClient{
+		Resty:   r,
+		BaseURL: baseURL,
+	}
 	return &c
 }
 

@@ -76,7 +76,7 @@ type Project struct {
 
 // ListProjects lists all Rollbar projects.
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
-	u := apiUrl + pathProjectList
+	u := c.BaseURL + pathProjectList
 
 	resp, err := c.Resty.R().
 		SetResult(projectListResponse{}).
@@ -112,7 +112,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 
 // CreateProject creates a new Rollbar project.
 func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
-	u := apiUrl + pathProjectCreate
+	u := c.BaseURL + pathProjectCreate
 	l := log.With().
 		Str("name", name).
 		Logger()
@@ -141,7 +141,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 // ReadProject a Rollbar project from the API. If no matching project is found,
 // returns error ErrNotFound.
 func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
-	u := apiUrl + pathProjectRead
+	u := c.BaseURL + pathProjectRead
 
 	l := log.With().
 		Int("projectID", projectID).
@@ -179,7 +179,7 @@ func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
 // DeleteProject deletes a Rollbar project. If no matching project is found,
 // returns error ErrNotFound.
 func (c *RollbarApiClient) DeleteProject(projectID int) error {
-	u := apiUrl + pathProjectDelete
+	u := c.BaseURL + pathProjectDelete
 	l := log.With().
 		Int("projectID", projectID).
 		Logger()
