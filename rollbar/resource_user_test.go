@@ -32,7 +32,7 @@ func (s *AccSuite) TestAccUserCreateInvite() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -70,7 +70,7 @@ func (s *AccSuite) TestAccUserCreateInviteMixedCase() {
 
 		resource "rollbar_user" "test_user" {
 			# Note capital "X" in the email address below
-			email = "jason.mcvetta+X-%s@gmail.com"
+			email = "terraform-provider-test+X-%s@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -105,7 +105,7 @@ func (s *AccSuite) TestAccUserCreateAssign() {
 		resource "rollbar_user" "test_user" {
 			# This email already has an account.  
 			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -137,7 +137,7 @@ func (s *AccSuite) TestAccUserImportInvited() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -170,7 +170,7 @@ func (s *AccSuite) TestAccUserImportRegistered() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -207,7 +207,7 @@ func (s *AccSuite) TestAccInvitedUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -223,7 +223,7 @@ func (s *AccSuite) TestAccInvitedUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -272,7 +272,7 @@ func (s *AccSuite) TestAccInvitedUserRemoveTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -295,7 +295,7 @@ func (s *AccSuite) TestAccInvitedUserRemoveTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -339,7 +339,7 @@ func (s *AccSuite) TestAccRegisteredUserAddTeam() {
 		resource "rollbar_user" "test_user" {
 			# This email already has an account.  
 			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -355,7 +355,7 @@ func (s *AccSuite) TestAccRegisteredUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -404,7 +404,7 @@ func (s *AccSuite) TestAccRegisteredUserRemoveTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -429,7 +429,7 @@ func (s *AccSuite) TestAccRegisteredUserRemoveTeam() {
 		resource "rollbar_user" "test_user" {
 			# This email already has an account.  
 			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -583,8 +583,8 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 func (s *AccSuite) TestAccUserMoveBetweenTeams() {
 	team1Name := fmt.Sprintf("%s-team-1", s.randName)
 	team2Name := fmt.Sprintf("%s-team-2", s.randName)
-	user1Email := "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-	user2Email := fmt.Sprintf("jason.mcvetta+%s@gmail.com", s.randName)
+	user1Email := "terraform-provider-test@rollbar.com"
+	user2Email := fmt.Sprintf("terraform-provider-test+%s@rollbar.com", s.randName)
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team_1" {
