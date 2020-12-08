@@ -77,21 +77,18 @@ type Project struct {
 // ListProjects lists all Rollbar projects.
 func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 	u := apiUrl + pathProjectList
-	l := log.With().
-		Str("url", u).
-		Logger()
 
 	resp, err := c.Resty.R().
 		SetResult(projectListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
-		l.Err(err).Send()
+		log.Err(err).Send()
 		return nil, err
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
-		l.Err(err).Send()
+		log.Err(err).Send()
 		return nil, err
 	}
 
@@ -106,7 +103,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 			cleaned = append(cleaned, proj)
 		}
 	}
-	l.Debug().
+	log.Debug().
 		Int("raw_projects", len(lpr.Result)).
 		Int("cleaned_projects", len(cleaned)).
 		Msg("Successfully listed projects")
@@ -118,7 +115,6 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 	u := apiUrl + pathProjectCreate
 	l := log.With().
 		Str("name", name).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Creating new project")
 
@@ -149,7 +145,6 @@ func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
 
 	l := log.With().
 		Int("projectID", projectID).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Reading project from API")
 
@@ -187,7 +182,6 @@ func (c *RollbarApiClient) DeleteProject(projectID int) error {
 	u := apiUrl + pathProjectDelete
 	l := log.With().
 		Int("projectID", projectID).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Deleting project")
 
