@@ -40,7 +40,7 @@ type User struct {
 // ListUsers lists all Rollbar users.
 func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 	log.Debug().Msg("Listing users")
-	u := apiUrl + pathUsers
+	u := c.BaseURL + pathUsers
 	resp, err := c.Resty.R().
 		SetResult(userListResponse{}).
 		SetError(ErrorResult{}).
@@ -66,7 +66,7 @@ func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Reading user from API")
-	u := apiUrl + pathUser
+	u := c.BaseURL + pathUser
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{"userID": strconv.Itoa(id)}).
 		SetResult(userReadResponse{}).
@@ -112,7 +112,7 @@ func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 func (c *RollbarApiClient) ListUserTeams(userID int) (teams []Team, err error) {
 	l := log.With().Int("userID", userID).Logger()
 	l.Debug().Msg("Reading teams for Rollbar user")
-	u := apiUrl + pathUserTeams
+	u := c.BaseURL + pathUserTeams
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{"userID": strconv.Itoa(userID)}).
 		SetResult(userTeamListResponse{}).

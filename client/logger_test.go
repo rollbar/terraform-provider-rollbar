@@ -35,7 +35,7 @@ func (s *Suite) TestRestyZeroLogger() {
 
 	s.client.Resty.EnableTrace()
 
-	u := apiUrl + pathProjectList
+	u := s.client.BaseURL + pathProjectList
 
 	// Debug log
 	s.client.Resty.SetDebug(true)

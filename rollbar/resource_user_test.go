@@ -871,7 +871,7 @@ func vcrFilterHeaders(i *cassette.Interaction) error {
 func sweepResourceUser(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar users from acceptance test runs.")
 
-	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 	users, err := c.ListUsers()
 	if err != nil {
 		log.Err(err).Send()

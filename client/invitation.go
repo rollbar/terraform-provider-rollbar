@@ -52,7 +52,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 		}).
 		SetResult(invitationListResponse{}).
 		SetError(ErrorResult{}).
-		Get(apiUrl + pathInvitations)
+		Get(c.BaseURL + pathInvitations)
 	if err != nil {
 		l.Err(err).Msg("Error listing invitations")
 		return
@@ -123,7 +123,7 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 		Logger()
 	l.Debug().Msg("Creating new invitation")
 
-	u := apiUrl + pathInvitations
+	u := c.BaseURL + pathInvitations
 	var inv Invitation
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
@@ -156,7 +156,7 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 		Int("inviteID", inviteID).
 		Logger()
 	l.Debug().Msg("Reading invitation from Rollbar API")
-	u := apiUrl + pathInvitation
+	u := c.BaseURL + pathInvitation
 	u = strings.ReplaceAll(u, "{inviteID}", strconv.Itoa(inviteID))
 	resp, err := c.Resty.R().
 		SetResult(invitationResponse{}).
@@ -188,7 +188,7 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Canceling invitation")
 
-	u := apiUrl + pathInvitation
+	u := c.BaseURL + pathInvitation
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
 			"inviteID": strconv.Itoa(id),
