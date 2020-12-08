@@ -282,7 +282,7 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 func sweepResourceProject(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar projects from acceptance test runs.")
 
-	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 	projects, err := c.ListProjects()
 	if err != nil {
 		log.Err(err).Send()

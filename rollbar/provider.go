@@ -38,17 +38,21 @@ import (
 )
 
 const schemaKeyToken = "api_key"
+const schemaKeyBaseURL = "base_url"
 
 // Provider is a Terraform provider for Rollbar.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			schemaKeyToken: {
-				Type:     schema.TypeString,
-				Optional: true,
-				// FIXME: Should the environment variable be ROLLBAR_API_KEY to
-				//  match the name of this field?
+				Type:        schema.TypeString,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_KEY", nil),
+			},
+			schemaKeyBaseURL: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_URL", client.DefaultBaseURL),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -71,7 +75,8 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	token := d.Get(schemaKeyToken).(string)
-	c := client.NewClient(token)
+	baseURL := d.Get(schemaKeyBaseURL).(string)
+	c := client.NewClient(baseURL, token)
 	return c, diags
 }
 

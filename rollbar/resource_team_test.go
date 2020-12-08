@@ -214,7 +214,7 @@ func (s *AccSuite) DontTestAccTeamDeleteOnAPIBeforeApply() {
 			// Before running Terraform, delete the team on Rollbar but not in local state
 			{
 				PreConfig: func() {
-					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+					c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 					teams, err := c.ListCustomTeams()
 					s.Nil(err)
 					for _, t := range teams {
@@ -258,7 +258,7 @@ func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestChec
 func sweepResourceTeam(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar teams from acceptance test runs.")
 
-	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 	teams, err := c.ListCustomTeams()
 	if err != nil {
 		log.Err(err).Send()
