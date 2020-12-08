@@ -25,6 +25,8 @@ package client
 import (
 	"bytes"
 	"github.com/rs/zerolog/log"
+	"io"
+	"os"
 )
 
 // TestClientNoToken checks that a warning message is logged when a
@@ -37,4 +39,17 @@ func (s *Suite) TestClientNoToken() {
 	s.NotZero(bs)
 	s.Contains(bs, "warn")
 	s.Contains(bs, "Rollbar API token not set")
+}
+
+// TestClientNoBaseURL checks that an error is logged when a RollbarApiClient is
+// initialized without an API base URL.
+func (s *Suite) TestClientNoBaseURL() {
+	var buf bytes.Buffer
+	multiWriter := io.MultiWriter(os.Stderr, &buf)
+	log.Logger = log.Logger.Output(multiWriter)
+	NewClient("", "placeholder") // Invalid base URL
+	bs := buf.String()
+	s.NotZero(bs)
+	s.Contains(bs, "error")
+	s.Contains(bs, "Rollbar API base URL not set")
 }

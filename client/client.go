@@ -59,7 +59,7 @@ func NewClient(baseURL, token string) *RollbarApiClient {
 
 	// Authentication
 	if baseURL == "" {
-		log.Fatal().Msg("Rollbar API base URL not set")
+		log.Error().Msg("Rollbar API base URL not set")
 	}
 
 	// Configure Resty to use Zerolog for logging
