@@ -121,8 +121,7 @@ func (s *Suite) TestReadProject() {
 		return err
 	})
 
-	// Deleted project API bug
-	// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/23
+	// Try to read a deleted project
 	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadProject(expected.ID)
