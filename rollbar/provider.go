@@ -81,15 +81,17 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 }
 
 // handleErrNotFound handles an ErrNotFound when reading a resource, by removing
-// the resource from state and returning a Diagnostics object.
-func handleErrNotFound(d *schema.ResourceData, resourceName string) diag.Diagnostics {
+// the resource from state and returning a Diagnostics object. Argument
+// `detailResourceType` is the human readable name for this resource type that
+// was not found, used when constructing diagnostic messages.
+func handleErrNotFound(d *schema.ResourceData, detailResourceType string) diag.Diagnostics {
 	id := d.Id()
 	d.SetId("")
 	tmpl := `Removing %s %s from state because it was not found on Rollbar`
-	detail := fmt.Sprintf(tmpl, resourceName, id)
+	detail := fmt.Sprintf(tmpl, detailResourceType, id)
 	log.Warn().Msg(detail)
 	tmpl = "%s not found, removed from state"
-	summary := fmt.Sprintf(tmpl, strings.ToTitle(resourceName))
+	summary := fmt.Sprintf(tmpl, strings.ToTitle(detailResourceType))
 	return diag.Diagnostics{{
 		Severity: diag.Warning,
 		Summary:  summary,
