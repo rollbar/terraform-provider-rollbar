@@ -165,8 +165,8 @@ func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, 
 }
 
 // client returns the current Rollbar API client
-func (s *AccSuite) client() *client.RollbarApiClient {
-	return s.provider.Meta().(*client.RollbarApiClient)
+func (s *AccSuite) client() *client.RollbarAPIClient {
+	return s.provider.Meta().(*client.RollbarAPIClient)
 }
 
 // getResourceAttrIntSlice returns value of a named attribute of a Terraform

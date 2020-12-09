@@ -133,7 +133,7 @@ func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceDa
 		Logger()
 	l.Debug().Msg("Reading project access token data from Rollbar")
 
-	c := m.(*client.RollbarApiClient)
+	c := m.(*client.RollbarAPIClient)
 	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		return diag.FromErr(err)

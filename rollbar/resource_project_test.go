@@ -300,7 +300,7 @@ func (s *AccSuite) checkProjectExists(rn string, name string) resource.TestCheck
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)
-		c := s.provider.Meta().(*client.RollbarApiClient)
+		c := s.provider.Meta().(*client.RollbarAPIClient)
 		proj, err := c.ReadProject(id)
 		s.Nil(err)
 		s.Equal(name, proj.Name, "project name from API does not match project name in Terraform config")
@@ -314,7 +314,7 @@ func (s *AccSuite) checkProjectInProjectList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)
-		c := s.provider.Meta().(*client.RollbarApiClient)
+		c := s.provider.Meta().(*client.RollbarAPIClient)
 		projList, err := c.ListProjects()
 		s.Nil(err)
 		found := false

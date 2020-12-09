@@ -75,7 +75,7 @@ type Project struct {
 */
 
 // ListProjects lists all Rollbar projects.
-func (c *RollbarApiClient) ListProjects() ([]Project, error) {
+func (c *RollbarAPIClient) ListProjects() ([]Project, error) {
 	u := c.BaseURL + pathProjectList
 
 	resp, err := c.Resty.R().
@@ -111,7 +111,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 }
 
 // CreateProject creates a new Rollbar project.
-func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
+func (c *RollbarAPIClient) CreateProject(name string) (*Project, error) {
 	u := c.BaseURL + pathProjectCreate
 	l := log.With().
 		Str("name", name).
@@ -140,7 +140,7 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 // ReadProject a Rollbar project from the API. If no matching project is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
+func (c *RollbarAPIClient) ReadProject(projectID int) (*Project, error) {
 	u := c.BaseURL + pathProjectRead
 
 	l := log.With().
@@ -178,7 +178,7 @@ func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
 
 // DeleteProject deletes a Rollbar project. If no matching project is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) DeleteProject(projectID int) error {
+func (c *RollbarAPIClient) DeleteProject(projectID int) error {
 	u := c.BaseURL + pathProjectDelete
 	l := log.With().
 		Int("projectID", projectID).
@@ -207,7 +207,7 @@ func (c *RollbarApiClient) DeleteProject(projectID int) error {
 // FindProjectTeamIDs finds IDs of all teams assigned to the project. Caution:
 // this is a potentially slow operation that makes multiple calls to the API.
 // https://github.com/rollbar/terraform-provider-rollbar/issues/104
-func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
+func (c *RollbarAPIClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 	l := log.With().Int("project_id", projectID).Logger()
 	l.Debug().Msg("Finding teams assigned to project")
 	var projectTeamIDs []int
@@ -241,7 +241,7 @@ func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 // and removing teams as necessary. Caution: this is a potentially slow
 // operation that makes multiple calls to the API.
 // https://github.com/rollbar/terraform-provider-rollbar/issues/104
-func (c *RollbarApiClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
+func (c *RollbarAPIClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
 	l := log.With().
 		Int("project_id", projectID).
 		Ints("team_ids", teamIDs).

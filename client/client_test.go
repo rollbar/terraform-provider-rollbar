@@ -30,7 +30,7 @@ import (
 )
 
 // TestClientNoToken checks that a warning message is logged when a
-// RollbarApiClient is initialized without an API token.
+// RollbarAPIClient is initialized without an API token.
 func (s *Suite) TestClientNoToken() {
 	var buf bytes.Buffer
 	log.Logger = log.Logger.Output(&buf)
@@ -41,7 +41,7 @@ func (s *Suite) TestClientNoToken() {
 	s.Contains(bs, "Rollbar API token not set")
 }
 
-// TestClientNoBaseURL checks that an error is logged when a RollbarApiClient is
+// TestClientNoBaseURL checks that an error is logged when a RollbarAPIClient is
 // initialized without an API base URL.
 func (s *Suite) TestClientNoBaseURL() {
 	var buf bytes.Buffer
