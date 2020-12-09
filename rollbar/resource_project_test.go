@@ -230,6 +230,9 @@ func (s *AccSuite) TestAccProjectRemoveTeam() {
 	})
 }
 
+// TestAccProjectDeleteOnAPIBeforeApply tests creating a Rollbar project with
+// Terraform; then deleting the project via API before re-applying Terraform
+// configuration.
 func (s *AccSuite) TestAccProjectDeleteOnAPIBeforeApply() {
 	rn := "rollbar_project.test"
 	// language=hcl
@@ -255,13 +258,13 @@ func (s *AccSuite) TestAccProjectDeleteOnAPIBeforeApply() {
 					c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 					projects, err := c.ListProjects()
 					s.Nil(err)
-					for _, t := range projects {
-						if t.Name == s.randName {
-							err = c.DeleteProject(t.ID)
+					for _, p := range projects {
+						if p.Name == s.randName {
+							err = c.DeleteProject(p.ID)
 							s.Nil(err)
 							log.Info().
 								Str("project_name", s.randName).
-								Int("project_id", t.ID).
+								Int("project_id", p.ID).
 								Msg("Deleted project from API before re-applying Terraform config")
 						}
 					}

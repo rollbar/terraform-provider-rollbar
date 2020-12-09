@@ -368,7 +368,10 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 	})
 }
 
-func (s *AccSuite) TestAccTokaneDeleteOnAPIBeforeApply() {
+// TestAccTokenDeleteOnAPIBeforeApply tests creating a Rollbar project access
+// token with Terraform; then deleting it via API, before re-applying Terraform
+// configuration.
+func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 	projectResourceName := "rollbar_project.test"
 	tokenResourceName := "rollbar_project_access_token.test"
 	// language=hcl
