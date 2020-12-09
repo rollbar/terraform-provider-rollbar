@@ -230,6 +230,57 @@ func (s *AccSuite) TestAccProjectRemoveTeam() {
 	})
 }
 
+// TestAccProjectDeleteOnAPIBeforeApply tests creating a Rollbar project with
+// Terraform; then deleting the project via API before re-applying Terraform
+// configuration.
+func (s *AccSuite) TestAccProjectDeleteOnAPIBeforeApply() {
+	rn := "rollbar_project.test"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+			name = "%s"
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config,
+			},
+			// Before running Terraform, delete the project on Rollbar but not in local state
+			{
+				PreConfig: func() {
+					c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
+					projects, err := c.ListProjects()
+					s.Nil(err)
+					for _, p := range projects {
+						if p.Name == s.randName {
+							err = c.DeleteProject(p.ID)
+							s.Nil(err)
+							log.Info().
+								Str("project_name", s.randName).
+								Int("project_id", p.ID).
+								Msg("Deleted project from API before re-applying Terraform config")
+						}
+					}
+				},
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkProjectExists(rn, s.randName),
+					s.checkProjectInProjectList(rn),
+					resource.TestCheckResourceAttr(rn, "name", s.randName),
+				),
+			},
+		},
+	})
+}
+
 /*
  * Convenience functions
  */

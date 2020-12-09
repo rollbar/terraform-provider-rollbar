@@ -29,6 +29,7 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"regexp"
 	"strconv"
 )
@@ -362,6 +363,78 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 			{
 				ExpectError: regexp.MustCompile("not found"),
 				Config:      config,
+			},
+		},
+	})
+}
+
+// TestAccTokenDeleteOnAPIBeforeApply tests creating a Rollbar project access
+// token with Terraform; then deleting it via API, before re-applying Terraform
+// configuration.
+func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
+	projectResourceName := "rollbar_project.test"
+	tokenResourceName := "rollbar_project_access_token.test"
+	// FIXME: Why does adding this suffix to s.randName make this test pass,
+	//  while using bare s.randName causes failure?  Could it be a Testify
+	//  issue, where s.randName is not actually unique for each test in the
+	//  suite?
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/160
+	projectName := s.randName + "-0"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config := fmt.Sprintf(tmpl, projectName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config,
+			},
+			// Before running Terraform, delete the token on Rollbar but not in local state
+			{
+				PreConfig: func() {
+					c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
+					var projectID int
+					projects, err := c.ListProjects()
+					s.Nil(err)
+					for _, p := range projects {
+						if p.Name == projectName {
+							projectID = p.ID
+						}
+					}
+					s.NotZero(projectID)
+					tokens, err := c.ListProjectAccessTokens(projectID)
+					s.Nil(err)
+					for _, t := range tokens {
+						if t.Name == "test-token" {
+							err = c.DeleteProjectAccessToken(projectID, t.AccessToken)
+							s.Nil(err)
+							log.Info().
+								Str("token", t.AccessToken).
+								Msg("Deleted token from API before re-applying Terraform config")
+						}
+					}
+				},
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(projectResourceName),
+					s.checkResourceStateSanity(tokenResourceName),
+					s.checkProjectAccessToken(tokenResourceName),
+					s.checkProjectAccessTokenInTokenList(tokenResourceName),
+				),
 			},
 		},
 	})

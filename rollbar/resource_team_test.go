@@ -191,7 +191,7 @@ func (s *AccSuite) TestAccTeamImport() {
 // config.
 // FIXME: This code used to pass reliably, but no longer does.   Why?
 //  https://github.com/rollbar/terraform-provider-rollbar/issues/154
-func (s *AccSuite) DontTestAccTeamDeleteOnAPIBeforeApply() {
+func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
 	rn := "rollbar_team.test"
 	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
 	// language=hcl
@@ -219,20 +219,20 @@ func (s *AccSuite) DontTestAccTeamDeleteOnAPIBeforeApply() {
 					s.Nil(err)
 					for _, t := range teams {
 						if t.Name == teamName1 {
+							err = c.DeleteTeam(t.ID)
+							s.Nil(err)
 							log.Info().
 								Str("team_name", teamName1).
 								Int("team_id", t.ID).
-								Msg("Deleting team from API before re-applying Terraform config")
-							err = c.DeleteTeam(t.ID)
-							s.Nil(err)
+								Msg("Deleted team from API before re-applying Terraform config")
 						}
 					}
 				},
 				Config: config1,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName1),
 					s.checkTeam(rn, teamName1, "standard"),
+					resource.TestCheckResourceAttr(rn, "name", teamName1),
 				),
 			},
 		},

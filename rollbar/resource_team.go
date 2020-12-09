@@ -95,8 +95,9 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 	c := m.(*client.RollbarApiClient)
 	t, err := c.ReadTeam(id)
 	if err == client.ErrNotFound {
-		l.Err(err).Send()
-		return handleErrNotFound(d, "team")
+		d.SetId("")
+		l.Err(err).Msg("Team not found - removed from state")
+		return nil
 	}
 	if err != nil {
 		l.Err(err).Msg("error reading rollbar_team resource")

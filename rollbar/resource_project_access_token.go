@@ -170,7 +170,9 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	c := m.(*client.RollbarApiClient)
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 	if err == client.ErrNotFound {
-		return handleErrNotFound(d, "project access token")
+		d.SetId("")
+		l.Debug().Msg("Token not found on Rollbar - removed from state")
+		return nil
 	}
 	if err != nil {
 		return diag.FromErr(err)
