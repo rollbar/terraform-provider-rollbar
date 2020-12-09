@@ -191,7 +191,7 @@ func (s *AccSuite) TestAccTeamImport() {
 // config.
 // FIXME: This code used to pass reliably, but no longer does.   Why?
 //  https://github.com/rollbar/terraform-provider-rollbar/issues/154
-func (s *AccSuite) DontTestAccTeamDeleteOnAPIBeforeApply() {
+func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
 	rn := "rollbar_team.test"
 	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
 	// language=hcl
