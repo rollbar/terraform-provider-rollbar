@@ -57,7 +57,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 		l.Err(err).Msg("Error listing invitations")
 		return
 	}
-	err = teamNotFoundErrFromResponse(resp)
+	err = errorFromResponse(resp)
 	if err != nil {
 		l.Err(err).
 			Str("status", resp.Status()).
@@ -139,7 +139,7 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 		l.Err(err).Msg("Error creating invitation")
 		return inv, err
 	}
-	err = teamNotFoundErrFromResponse(resp)
+	err = errorFromResponse(resp)
 	if err != nil {
 		l.Err(err).Send()
 		return inv, err
