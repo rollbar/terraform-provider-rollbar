@@ -29,6 +29,7 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"regexp"
 	"strconv"
 )
@@ -362,6 +363,69 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 			{
 				ExpectError: regexp.MustCompile("not found"),
 				Config:      config,
+			},
+		},
+	})
+}
+
+func (s *AccSuite) TestAccTokaneDeleteOnAPIBeforeApply() {
+	projectResourceName := "rollbar_project.test"
+	tokenResourceName := "rollbar_project_access_token.test"
+	// language=hcl
+	tmpl := `
+		resource "rollbar_project" "test" {
+		  name         = "%s"
+		}
+
+		resource "rollbar_project_access_token" "test" {
+			project_id = rollbar_project.test.id
+			name = "test-token"
+			scopes = ["read"]
+			status = "enabled"
+		}
+	`
+	config := fmt.Sprintf(tmpl, s.randName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config,
+			},
+			// Before running Terraform, delete the token on Rollbar but not in local state
+			{
+				PreConfig: func() {
+					c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
+					var projectID int
+					projects, err := c.ListProjects()
+					s.Nil(err)
+					for _, p := range projects {
+						if p.Name == s.randName {
+							projectID = p.ID
+						}
+					}
+					s.NotNil(projectID)
+					tokens, err := c.ListProjectAccessTokens(projectID)
+					s.Nil(err)
+					for _, t := range tokens {
+						if t.Name == "test-token" {
+							err = c.DeleteProjectAccessToken(projectID, t.AccessToken)
+							s.Nil(err)
+							log.Info().
+								Str("token", t.AccessToken).
+								Msg("Deleted token from API before re-applying Terraform config")
+						}
+					}
+				},
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(projectResourceName),
+					s.checkResourceStateSanity(tokenResourceName),
+					s.checkProjectAccessToken(tokenResourceName),
+					s.checkProjectAccessTokenInTokenList(tokenResourceName),
+				),
 			},
 		},
 	})
