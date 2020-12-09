@@ -374,6 +374,12 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 	projectResourceName := "rollbar_project.test"
 	tokenResourceName := "rollbar_project_access_token.test"
+	// FIXME: Why does adding this suffix to s.randName make this test pass,
+	//  while using bare s.randName causes failure?  Could it be a Testify
+	//  issue, where s.randName is not actually unique for each test in the
+	//  suite?
+	//  https://github.com/rollbar/terraform-provider-rollbar/issues/160
+	projectName := s.randName + "-0"
 	// language=hcl
 	tmpl := `
 		resource "rollbar_project" "test" {
@@ -387,7 +393,7 @@ func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 			status = "enabled"
 		}
 	`
-	config := fmt.Sprintf(tmpl, s.randName)
+	config := fmt.Sprintf(tmpl, projectName)
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
@@ -405,11 +411,11 @@ func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 					projects, err := c.ListProjects()
 					s.Nil(err)
 					for _, p := range projects {
-						if p.Name == s.randName {
+						if p.Name == projectName {
 							projectID = p.ID
 						}
 					}
-					s.NotNil(projectID)
+					s.NotZero(projectID)
 					tokens, err := c.ListProjectAccessTokens(projectID)
 					s.Nil(err)
 					for _, t := range tokens {
