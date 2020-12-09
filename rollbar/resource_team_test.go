@@ -219,20 +219,20 @@ func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
 					s.Nil(err)
 					for _, t := range teams {
 						if t.Name == teamName1 {
+							err = c.DeleteTeam(t.ID)
+							s.Nil(err)
 							log.Info().
 								Str("team_name", teamName1).
 								Int("team_id", t.ID).
-								Msg("Deleting team from API before re-applying Terraform config")
-							err = c.DeleteTeam(t.ID)
-							s.Nil(err)
+								Msg("Deleted team from API before re-applying Terraform config")
 						}
 					}
 				},
 				Config: config1,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName1),
 					s.checkTeam(rn, teamName1, "standard"),
+					resource.TestCheckResourceAttr(rn, "name", teamName1),
 				),
 			},
 		},
