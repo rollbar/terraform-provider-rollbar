@@ -163,7 +163,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	c := m.(*client.RollbarApiClient)
 	proj, err := c.ReadProject(projectID)
 	if err == client.ErrNotFound {
-		return handleErrNotFound(d, "project")
+		l.Debug().Msg("Project not found on Rollbar - removing from state")
+		d.SetId("")
+		return nil
 	}
 	if err != nil {
 		l.Err(err).Send()
