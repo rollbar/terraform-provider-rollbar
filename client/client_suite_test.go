@@ -72,7 +72,7 @@ func responderFromFixture(fixturePath string, status int) httpmock.Responder {
 // Suite is a Testify test suite for the Rollbar API client
 type Suite struct {
 	suite.Suite
-	client *RollbarApiClient
+	client *RollbarAPIClient
 }
 
 func (s *Suite) SetupSuite() {
@@ -86,7 +86,7 @@ func (s *Suite) SetupSuite() {
 	// Seed gofakeit random generator
 	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
 
-	// Setup RollbarApiClient and enable mocking
+	// Setup RollbarAPIClient and enable mocking
 	c := NewClient(DefaultBaseURL, "fakeTokenString")
 	httpmock.ActivateNonDefault(c.Resty.GetClient())
 	s.client = c

@@ -41,7 +41,7 @@ type Invitation struct {
 }
 
 // ListInvitations lists all invitations for a Rollbar team.
-func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err error) {
+func (c *RollbarAPIClient) ListInvitations(teamID int) (invs []Invitation, err error) {
 	l := log.With().
 		Int("teamID", teamID).
 		Logger()
@@ -73,7 +73,7 @@ func (c *RollbarApiClient) ListInvitations(teamID int) (invs []Invitation, err e
 }
 
 // ListPendingInvitations lists a Rollbar team's pending invitations.
-func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, error) {
+func (c *RollbarAPIClient) ListPendingInvitations(teamID int) ([]Invitation, error) {
 	l := log.With().Int("teamID", teamID).Logger()
 	l.Debug().Msg("Listing pending invitations")
 	var pending []Invitation
@@ -95,7 +95,7 @@ func (c *RollbarApiClient) ListPendingInvitations(teamID int) ([]Invitation, err
 
 // FindPendingInvitations finds pending Rollbar team invitations for the given
 // email.
-func (c *RollbarApiClient) FindPendingInvitations(email string) ([]Invitation, error) {
+func (c *RollbarAPIClient) FindPendingInvitations(email string) ([]Invitation, error) {
 	l := log.With().Str("email", email).Logger()
 	l.Debug().Msg("Finding pending invitations")
 	var pending []Invitation
@@ -116,7 +116,7 @@ func (c *RollbarApiClient) FindPendingInvitations(email string) ([]Invitation, e
 }
 
 // CreateInvitation sends a Rollbar team invitation to a user.
-func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitation, error) {
+func (c *RollbarAPIClient) CreateInvitation(teamID int, email string) (Invitation, error) {
 	l := log.With().
 		Int("teamID", teamID).
 		Str("email", email).
@@ -151,7 +151,7 @@ func (c *RollbarApiClient) CreateInvitation(teamID int, email string) (Invitatio
 }
 
 // ReadInvitation reads a Rollbar team invitation from the API.
-func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err error) {
+func (c *RollbarAPIClient) ReadInvitation(inviteID int) (inv Invitation, err error) {
 	l := log.With().
 		Int("inviteID", inviteID).
 		Logger()
@@ -179,12 +179,12 @@ func (c *RollbarApiClient) ReadInvitation(inviteID int) (inv Invitation, err err
 }
 
 // DeleteInvitation is an alias for CancelInvitation.
-func (c *RollbarApiClient) DeleteInvitation(id int) (err error) {
+func (c *RollbarAPIClient) DeleteInvitation(id int) (err error) {
 	return c.CancelInvitation(id)
 }
 
 // CancelInvitation cancels a Rollbar team invitation.
-func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
+func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Canceling invitation")
 
@@ -224,7 +224,7 @@ func (c *RollbarApiClient) CancelInvitation(id int) (err error) {
 // FindInvitations finds all Rollbar team invitations for a given email. Note
 // this method is quite inefficient, as it must read all invitations for all
 // teams.
-func (c *RollbarApiClient) FindInvitations(email string) (invs []Invitation, err error) {
+func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err error) {
 	// API converts all invited emails to lowercase.
 	// https://github.com/rollbar/terraform-provider-rollbar/issues/139
 	email = strings.ToLower(email)

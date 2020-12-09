@@ -165,7 +165,7 @@ func (args *ProjectAccessTokenUpdateArgs) sanityCheck() error {
 
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
 // specified Rollbar project.
-func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
+func (c *RollbarAPIClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
 	l := log.With().
 		Int("projectID", projectID).
 		Logger()
@@ -195,7 +195,7 @@ func (c *RollbarApiClient) ListProjectAccessTokens(projectID int) ([]ProjectAcce
 // ReadProjectAccessToken reads a Rollbar project access token from the API.  It
 // returns the first token that matches `name`. If no matching token is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, token string) (ProjectAccessToken, error) {
+func (c *RollbarAPIClient) ReadProjectAccessToken(projectID int, token string) (ProjectAccessToken, error) {
 	l := log.With().
 		Int("projectID", projectID).
 		Str("token", token).
@@ -226,7 +226,7 @@ func (c *RollbarApiClient) ReadProjectAccessToken(projectID int, token string) (
 // ReadProjectAccessTokenByName reads a Rollbar project access token from the
 // API.  It returns the first token that matches `name`. If no matching token is
 // found, returns error ErrNotFound.
-func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
+func (c *RollbarAPIClient) ReadProjectAccessTokenByName(projectID int, name string) (ProjectAccessToken, error) {
 	l := log.With().
 		Int("projectID", projectID).
 		Str("name", name).
@@ -252,7 +252,7 @@ func (c *RollbarApiClient) ReadProjectAccessTokenByName(projectID int, name stri
 	return pat, ErrNotFound
 }
 
-func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string) error {
+func (c *RollbarAPIClient) DeleteProjectAccessToken(projectID int, token string) error {
 	l := log.With().
 		Int("projectID", projectID).
 		Str("token", token).
@@ -280,7 +280,7 @@ func (c *RollbarApiClient) DeleteProjectAccessToken(projectID int, token string)
 }
 
 // CreateProjectAccessToken creates a Rollbar project access token.
-func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreateArgs) (ProjectAccessToken, error) {
+func (c *RollbarAPIClient) CreateProjectAccessToken(args ProjectAccessTokenCreateArgs) (ProjectAccessToken, error) {
 	l := log.With().
 		Interface("args", args).
 		Logger()
@@ -320,7 +320,7 @@ func (c *RollbarApiClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 }
 
 // UpdateProjectAccessToken updates a Rollbar project access token.
-func (c *RollbarApiClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdateArgs) error {
+func (c *RollbarAPIClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdateArgs) error {
 	l := log.With().
 		Interface("args", args).
 		Logger()

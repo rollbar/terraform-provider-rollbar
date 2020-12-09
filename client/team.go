@@ -39,7 +39,7 @@ type Team struct {
 }
 
 // CreateTeam creates a new Rollbar team.
-func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
+func (c *RollbarAPIClient) CreateTeam(name string, level string) (Team, error) {
 	var t Team
 	l := log.With().
 		Str("name", name).
@@ -80,7 +80,7 @@ func (c *RollbarApiClient) CreateTeam(name string, level string) (Team, error) {
 }
 
 // ListTeams lists all Rollbar teams.
-func (c *RollbarApiClient) ListTeams() ([]Team, error) {
+func (c *RollbarAPIClient) ListTeams() ([]Team, error) {
 	log.Debug().Msg("Listing all teams")
 	var teams []Team
 	u := c.BaseURL + pathTeamList
@@ -107,7 +107,7 @@ func (c *RollbarApiClient) ListTeams() ([]Team, error) {
 // ListCustomTeams lists all custom defined teams, excluding system teams
 // "Everyone" and "Owners".
 // FIXME: This function needs a better name.
-func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
+func (c *RollbarAPIClient) ListCustomTeams() ([]Team, error) {
 	log.Debug().Msg("Listing custom teams")
 	var customTeams []Team
 	allTeams, err := c.ListTeams()
@@ -123,7 +123,7 @@ func (c *RollbarApiClient) ListCustomTeams() ([]Team, error) {
 
 // ReadTeam reads a Rollbar team from the API. If no matching team is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
+func (c *RollbarAPIClient) ReadTeam(id int) (Team, error) {
 	var t Team
 	l := log.With().
 		Int("id", id).
@@ -161,7 +161,7 @@ func (c *RollbarApiClient) ReadTeam(id int) (Team, error) {
 
 // DeleteTeam deletes a Rollbar team. If no matching team is found, returns
 // error ErrNotFound.
-func (c *RollbarApiClient) DeleteTeam(id int) error {
+func (c *RollbarAPIClient) DeleteTeam(id int) error {
 	l := log.With().
 		Int("id", id).
 		Logger()
@@ -191,7 +191,7 @@ func (c *RollbarApiClient) DeleteTeam(id int) error {
 }
 
 // AssignUserToTeam assigns a user to a Rollbar team.
-func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
+func (c *RollbarAPIClient) AssignUserToTeam(teamID, userID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
 	l.Debug().Msg("Assigning user to team")
 	resp, err := c.Resty.R().
@@ -221,7 +221,7 @@ func (c *RollbarApiClient) AssignUserToTeam(teamID, userID int) error {
 }
 
 // RemoveUserFromTeam removes a user from a Rollbar team.
-func (c *RollbarApiClient) RemoveUserFromTeam(userID, teamID int) error {
+func (c *RollbarAPIClient) RemoveUserFromTeam(userID, teamID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
 	l.Debug().Msg("Removing user from team")
 	resp, err := c.Resty.R().
@@ -253,7 +253,7 @@ func (c *RollbarApiClient) RemoveUserFromTeam(userID, teamID int) error {
 }
 
 // FindTeamID finds the ID for a team.
-func (c *RollbarApiClient) FindTeamID(name string) (int, error) {
+func (c *RollbarAPIClient) FindTeamID(name string) (int, error) {
 	l := log.With().
 		Str("team_name", name).
 		Logger()
@@ -275,7 +275,7 @@ func (c *RollbarApiClient) FindTeamID(name string) (int, error) {
 
 // ListTeamProjectIDs lists IDs of all Rollbar projects to which a given team is
 // assigned.
-func (c *RollbarApiClient) ListTeamProjectIDs(teamID int) ([]int, error) {
+func (c *RollbarAPIClient) ListTeamProjectIDs(teamID int) ([]int, error) {
 	l := log.With().Int("teamID", teamID).Logger()
 	l.Debug().Msg("Listing projects for team")
 	resp, err := c.Resty.R().
@@ -304,7 +304,7 @@ func (c *RollbarApiClient) ListTeamProjectIDs(teamID int) ([]int, error) {
 }
 
 // AssignTeamToProject assigns a Rollbar team to a project.
-func (c *RollbarApiClient) AssignTeamToProject(teamID, projectID int) error {
+func (c *RollbarAPIClient) AssignTeamToProject(teamID, projectID int) error {
 	l := log.With().
 		Int("teamID", teamID).
 		Int("projectID", projectID).
@@ -331,7 +331,7 @@ func (c *RollbarApiClient) AssignTeamToProject(teamID, projectID int) error {
 }
 
 // RemoveTeamFromProject removes a Rollbar team from a project.
-func (c *RollbarApiClient) RemoveTeamFromProject(teamID, projectID int) error {
+func (c *RollbarAPIClient) RemoveTeamFromProject(teamID, projectID int) error {
 	l := log.With().
 		Int("teamID", teamID).
 		Int("projectID", projectID).

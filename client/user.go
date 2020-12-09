@@ -38,7 +38,7 @@ type User struct {
 }
 
 // ListUsers lists all Rollbar users.
-func (c *RollbarApiClient) ListUsers() (users []User, err error) {
+func (c *RollbarAPIClient) ListUsers() (users []User, err error) {
 	log.Debug().Msg("Listing users")
 	u := c.BaseURL + pathUsers
 	resp, err := c.Resty.R().
@@ -63,7 +63,7 @@ func (c *RollbarApiClient) ListUsers() (users []User, err error) {
 }
 
 // ReadUser reads a Rollbar user from the API.
-func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
+func (c *RollbarAPIClient) ReadUser(id int) (user User, err error) {
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Reading user from API")
 	u := c.BaseURL + pathUser
@@ -90,7 +90,7 @@ func (c *RollbarApiClient) ReadUser(id int) (user User, err error) {
 
 // FindUserID finds the user ID for a given email.  WARNING: this is a
 // potentially slow call.  Don't repeat it unnecessarily.
-func (c *RollbarApiClient) FindUserID(email string) (int, error) {
+func (c *RollbarAPIClient) FindUserID(email string) (int, error) {
 	l := log.With().Str("email", email).Logger()
 	l.Debug().Msg("Getting user ID from email")
 	users, err := c.ListUsers()
@@ -109,7 +109,7 @@ func (c *RollbarApiClient) FindUserID(email string) (int, error) {
 }
 
 // ListUserTeams lists a Rollbar user's teams.
-func (c *RollbarApiClient) ListUserTeams(userID int) (teams []Team, err error) {
+func (c *RollbarAPIClient) ListUserTeams(userID int) (teams []Team, err error) {
 	l := log.With().Int("userID", userID).Logger()
 	l.Debug().Msg("Reading teams for Rollbar user")
 	u := c.BaseURL + pathUserTeams
@@ -136,7 +136,7 @@ func (c *RollbarApiClient) ListUserTeams(userID int) (teams []Team, err error) {
 
 // ListUserCustomTeams lists a Rollbar user's custom defined teams, excluding
 // system teams "Everyone" and "Owners".
-func (c *RollbarApiClient) ListUserCustomTeams(userID int) (teams []Team, err error) {
+func (c *RollbarAPIClient) ListUserCustomTeams(userID int) (teams []Team, err error) {
 	teams, err = c.ListUserTeams(userID)
 	teams = filterSystemTeams(teams)
 	return
