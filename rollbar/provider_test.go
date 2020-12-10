@@ -117,6 +117,14 @@ func (s *AccSuite) SetupTest() {
 		s.providers = map[string]*schema.Provider{
 			"rollbar": s.provider,
 		}
+		switch r.Mode() {
+		case recorder.ModeRecording:
+			log.Debug().Msg("VCR recording mode")
+		case recorder.ModeReplaying:
+			log.Debug().Msg("VCR replay mode")
+		case recorder.ModeDisabled:
+			log.Debug().Msg("VCR disabled")
+		}
 	}
 	s.randName = fmt.Sprintf("tf-acc-test-%s", randString)
 }
