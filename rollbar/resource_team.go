@@ -73,7 +73,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	level := d.Get("access_level").(string)
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
 	l.Info().Msg("Creating rollbar_team resource")
-	c := m.(*client.RollbarApiClient)
+	c := m.(*client.RollbarAPIClient)
 	t, err := c.CreateTeam(name, level)
 	if err != nil {
 		l.Err(err).Send()
@@ -92,11 +92,12 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_team resource")
-	c := m.(*client.RollbarApiClient)
+	c := m.(*client.RollbarAPIClient)
 	t, err := c.ReadTeam(id)
 	if err == client.ErrNotFound {
-		l.Err(err).Send()
-		return handleErrNotFound(d, "team")
+		d.SetId("")
+		l.Err(err).Msg("Team not found - removed from state")
+		return nil
 	}
 	if err != nil {
 		l.Err(err).Msg("error reading rollbar_team resource")
@@ -114,7 +115,7 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_team resource")
-	c := m.(*client.RollbarApiClient)
+	c := m.(*client.RollbarAPIClient)
 	err := c.DeleteTeam(id)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_team resource")

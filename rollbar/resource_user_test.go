@@ -8,8 +8,17 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"os"
 	"regexp"
+	"strings"
 )
+
+func init() {
+	resource.AddTestSweepers("rollbar_user", &resource.Sweeper{
+		Name: "rollbar_user",
+		F:    sweepResourceUser,
+	})
+}
 
 // TestAccUserCreateInvite tests creating a new rollbar_user resource with an
 // invitation to email is not registered as a Rollbar user.
@@ -22,7 +31,7 @@ func (s *AccSuite) TestAccUserCreateInvite() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -60,7 +69,7 @@ func (s *AccSuite) TestAccUserCreateInviteMixedCase() {
 
 		resource "rollbar_user" "test_user" {
 			# Note capital "X" in the email address below
-			email = "jason.mcvetta+X-%s@gmail.com"
+			email = "terraform-provider-test+X-%s@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -95,7 +104,7 @@ func (s *AccSuite) TestAccUserCreateAssign() {
 		resource "rollbar_user" "test_user" {
 			# This email already has an account.  
 			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -127,7 +136,7 @@ func (s *AccSuite) TestAccUserImportInvited() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -160,7 +169,7 @@ func (s *AccSuite) TestAccUserImportRegistered() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team.id]
 		}
 	`
@@ -197,7 +206,7 @@ func (s *AccSuite) TestAccInvitedUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -213,7 +222,7 @@ func (s *AccSuite) TestAccInvitedUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -262,7 +271,7 @@ func (s *AccSuite) TestAccInvitedUserRemoveTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -285,7 +294,7 @@ func (s *AccSuite) TestAccInvitedUserRemoveTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+rollbar-tf-acc-test-%s@gmail.com"
+			email = "terraform-provider-test+%s@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -329,7 +338,7 @@ func (s *AccSuite) TestAccRegisteredUserAddTeam() {
 		resource "rollbar_user" "test_user" {
 			# This email already has an account.  
 			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -345,7 +354,7 @@ func (s *AccSuite) TestAccRegisteredUserAddTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -394,7 +403,7 @@ func (s *AccSuite) TestAccRegisteredUserRemoveTeam() {
 		}
 
 		resource "rollbar_user" "test_user" {
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [
 				rollbar_team.test_team_1.id,
 				rollbar_team.test_team_2.id,
@@ -419,7 +428,7 @@ func (s *AccSuite) TestAccRegisteredUserRemoveTeam() {
 		resource "rollbar_user" "test_user" {
 			# This email already has an account.  
 			# https://github.com/rollbar/terraform-provider-rollbar/issues/91
-			email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+			email = "terraform-provider-test@rollbar.com"
 			team_ids = [rollbar_team.test_team_1.id]
 		}
 	`
@@ -573,8 +582,8 @@ func (s *AccSuite) checkUserTeams(resourceName string) resource.TestCheckFunc {
 func (s *AccSuite) TestAccUserMoveBetweenTeams() {
 	team1Name := fmt.Sprintf("%s-team-1", s.randName)
 	team2Name := fmt.Sprintf("%s-team-2", s.randName)
-	user1Email := "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-	user2Email := fmt.Sprintf("jason.mcvetta+%s@gmail.com", s.randName)
+	user1Email := "terraform-provider-test@rollbar.com"
+	user2Email := fmt.Sprintf("terraform-provider-test+%s@rollbar.com", s.randName)
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team_1" {
@@ -832,4 +841,50 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	err := r.Stop() // Stop the last recorder
 	s.Nil(err)
 	http.DefaultTransport = origTransport
+}
+
+// sweepResourceUser cleans up orphaned Rollbar users.
+func sweepResourceUser(_ string) error {
+	log.Info().Msg("Cleaning up Rollbar users from acceptance test runs.")
+
+	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
+	users, err := c.ListUsers()
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+
+	// Find the ID for this account's "Everyone" team
+	var everyoneTeamID int
+	teams, err := c.ListTeams()
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+	for _, t := range teams {
+		if t.Name == "Everyone" {
+			everyoneTeamID = t.ID
+		}
+	}
+	log.Debug().Int("everyone_team_id", everyoneTeamID).Send()
+
+	// Remove users from Everyone team, thereby removing them from the account.
+	for _, u := range users {
+		// Used for registered user acceptance tests.
+		if u.Username == "tf-acc-test-rollbar-provider" {
+			continue
+		}
+
+		// Disposable users
+		if strings.HasPrefix(u.Username, "tf-acc-test-") {
+			err = c.RemoveUserFromTeam(u.ID, everyoneTeamID)
+		}
+		if err != nil {
+			log.Err(err).Send()
+			return err
+		}
+	}
+
+	log.Info().Msg("Users cleanup complete")
+	return nil
 }

@@ -9,7 +9,6 @@ jobs:
     env:
       ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
 
-
     steps:
 
       # Install Go and Terraform
@@ -50,7 +49,19 @@ jobs:
         env:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
-      # Acceptance
+      #
+      # Acceptance Tests
+      #
+
+      # Wait for up to five minutes for previous run to complete, abort if not
+      # done by then
+      - name: Block Concurrent Executions
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+          same-branch-only: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Acceptance tests
         run: make testacc
         env:

@@ -31,7 +31,7 @@ import (
 
 // TestListUsers tests listing all Rollbar users.
 func (s *Suite) TestListUsers() {
-	u := apiUrl + pathUsers
+	u := s.client.BaseURL + pathUsers
 
 	// Success
 	r := responderFromFixture("user/list.json", http.StatusOK)
@@ -62,7 +62,7 @@ func (s *Suite) TestListUsers() {
 // TestReadUser tests reading a Rollbar user from the API.
 func (s *Suite) TestReadUser() {
 	userID := 238101
-	u := apiUrl + pathUser
+	u := s.client.BaseURL + pathUser
 	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 
 	// Success
@@ -90,7 +90,7 @@ func (s *Suite) TestUserIDFromEmail() {
 	email := "jason.mcvetta@gmail.com"
 	expected := 238101
 
-	u := apiUrl + pathUsers
+	u := s.client.BaseURL + pathUsers
 	r := responderFromFixture("user/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -110,7 +110,7 @@ func (s *Suite) TestUserIDFromEmail() {
 // TestListUserTeams tests listing all teams for a Rollbar user.
 func (s *Suite) TestListUserTeams() {
 	userID := 238101
-	u := apiUrl + pathUserTeams
+	u := s.client.BaseURL + pathUserTeams
 	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 
 	// Success
@@ -150,7 +150,7 @@ func (s *Suite) TestListUserTeams() {
 // TestListUserTeams tests listing custom defined teams for a Rollbar user.
 func (s *Suite) TestListUserCustomTeams() {
 	userID := 238101
-	u := apiUrl + pathUserTeams
+	u := s.client.BaseURL + pathUserTeams
 	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 
 	// Success

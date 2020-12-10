@@ -22,77 +22,161 @@ func init() {
 	})
 }
 
-// TestAccTeam tests CRUD operations for a Rollbar team.
-func (s *AccSuite) TestAccTeam() {
-	rn := "rollbar_team.test"
-	teamName0 := fmt.Sprintf("%s-team-0", s.randName)
-	teamName1 := fmt.Sprintf("%s-team-0", s.randName)
-
-	s.parallelTestVCR(s.T(), resource.TestCase{
-		PreCheck: func() { s.preCheck() },
-		//ProviderFactories: testAccProviderFactories(),
+// TestAccTeamInvalidName tests failure when team name is an empty string.
+func (s *AccSuite) TestAccTeamInvalidName() {
+	// language=hcl
+	config := `
+		resource "rollbar_team" "test" {
+			name = ""
+		}
+	`
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			// Invalid name - failure expected
 			{
-				Config:      s.configResourceTeamInvalidname(),
+				Config:      config,
 				ExpectError: regexp.MustCompile("name cannot be blank"),
 			},
+		},
+	})
+}
 
+// TestAccTeamCreate tests creating a Rollbar team.
+func (s *AccSuite) TestAccTeamCreate() {
+	rn := "rollbar_team.test"
+	teamName := fmt.Sprintf("%s-team-0", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config := fmt.Sprintf(tmpl, teamName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					resource.TestCheckResourceAttr(rn, "name", teamName),
+					s.checkTeam(rn, teamName, "standard"),
+				),
+			},
+		},
+	})
+}
+
+// TestAccTeamUpdateAccessLevel tests updating the access level on a Rollbar
+// team.
+func (s *AccSuite) TestAccTeamUpdateAccessLevel() {
+	rn := "rollbar_team.test"
+	teamName := fmt.Sprintf("%s-team-0", s.randName)
+	// language=hcl
+	tmpl1 := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl1, teamName)
+	// language=hcl
+	tmpl2 := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+			access_level = "light"
+		}
+	`
+	config2 := fmt.Sprintf(tmpl2, teamName)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
 			// Initial create
 			{
-				Config: s.configResourceTeam(teamName0),
+				Config: config1,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName0),
-					s.checkTeam(rn, teamName0, "standard"),
+					resource.TestCheckResourceAttr(rn, "name", teamName),
+					s.checkTeam(rn, teamName, "standard"),
 				),
 			},
-
 			// Update team access level
 			{
-				Config: s.configResourceTeamUpdateAccessLevel(teamName0),
+				Config: config2,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName0),
-					s.checkTeam(rn, teamName0, "light"),
+					resource.TestCheckResourceAttr(rn, "name", teamName),
+					s.checkTeam(rn, teamName, "light"),
 				),
 			},
+		},
+	})
+}
 
+// TestAccTeamUpdateName tests updating the name of a Rollbar team.
+func (s *AccSuite) TestAccTeamUpdateName() {
+	rn := "rollbar_team.test"
+	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
+	teamName2 := fmt.Sprintf("%s-team-2", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl, teamName1)
+	config2 := fmt.Sprintf(tmpl, teamName2)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config1,
+			},
 			// Update team name
 			{
-				Config: s.configResourceTeamUpdateTeamName(teamName1),
+				Config: config2,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName1),
-					s.checkTeam(rn, teamName1, "light"),
+					resource.TestCheckResourceAttr(rn, "name", teamName2),
 				),
 			},
+		},
+	})
+}
 
-			// Before running Terraform, delete the team on Rollbar but not in local state
+// TestAccTeamImport tests importing a Rollbar team into Terraform.
+func (s *AccSuite) TestAccTeamImport() {
+	rn := "rollbar_team.test"
+	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
+	// language=hcl
+	tmpl := `
+		resource "rollbar_team" "test" {
+			name = "%s"
+		}
+	`
+	config1 := fmt.Sprintf(tmpl, teamName1)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
 			{
-				PreConfig: func() {
-					c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
-					teams, err := c.ListCustomTeams()
-					s.Nil(err)
-					for _, t := range teams {
-						if t.Name == teamName1 {
-							err = c.DeleteTeam(t.ID)
-							s.Nil(err)
-						}
-					}
-
-				},
-				Config: s.configResourceTeamUpdateTeamName(teamName1),
-				Check: resource.ComposeTestCheckFunc(
-					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttr(rn, "name", teamName1),
-					s.checkTeam(rn, teamName1, "light"),
-				),
+				Config: config1,
 			},
-
-			// Import a team
+			// Import the team
 			{
 				ResourceName:      rn,
 				ImportState:       true,
@@ -102,46 +186,57 @@ func (s *AccSuite) TestAccTeam() {
 	})
 }
 
-func (s *AccSuite) configResourceTeamInvalidname() string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = ""
-		}
-	`
-	return tmpl
-}
-
-func (s *AccSuite) configResourceTeam(teamName string) string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = "%s"
-		}
-	`
-	return fmt.Sprintf(tmpl, teamName)
-}
-
-func (s *AccSuite) configResourceTeamUpdateAccessLevel(teamName string) string {
+// TestAccTeamDeleteOnAPIBeforeApply tests creating a Rollbar team with
+// Terraform, then deleting the team via API, before again applying Terraform
+// config.
+// FIXME: This code used to pass reliably, but no longer does.   Why?
+//  https://github.com/rollbar/terraform-provider-rollbar/issues/154
+func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
+	rn := "rollbar_team.test"
+	teamName1 := fmt.Sprintf("%s-team-1", s.randName)
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test" {
 			name = "%s"
-			access_level = "light"
 		}
 	`
-	return fmt.Sprintf(tmpl, teamName)
-}
-
-func (s *AccSuite) configResourceTeamUpdateTeamName(teamName string) string {
-	// language=hcl
-	tmpl := `
-		resource "rollbar_team" "test" {
-			name = "%s"
-			access_level = "light"
-		}
-	`
-	return fmt.Sprintf(tmpl, teamName)
+	config1 := fmt.Sprintf(tmpl, teamName1)
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck: func() { s.preCheck() },
+		//ProviderFactories: testAccProviderFactories(),
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			// Initial create
+			{
+				Config: config1,
+			},
+			// Before running Terraform, delete the team on Rollbar but not in local state
+			{
+				PreConfig: func() {
+					c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
+					teams, err := c.ListCustomTeams()
+					s.Nil(err)
+					for _, t := range teams {
+						if t.Name == teamName1 {
+							err = c.DeleteTeam(t.ID)
+							s.Nil(err)
+							log.Info().
+								Str("team_name", teamName1).
+								Int("team_id", t.ID).
+								Msg("Deleted team from API before re-applying Terraform config")
+						}
+					}
+				},
+				Config: config1,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(rn),
+					s.checkTeam(rn, teamName1, "standard"),
+					resource.TestCheckResourceAttr(rn, "name", teamName1),
+				),
+			},
+		},
+	})
 }
 
 // checkTeam checks that the newly created team exists and has correct
@@ -150,7 +245,7 @@ func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestChec
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)
-		c := s.provider.Meta().(*client.RollbarApiClient)
+		c := s.provider.Meta().(*client.RollbarAPIClient)
 		t, err := c.ReadTeam(id)
 		s.Nil(err)
 		s.Equal(teamName, t.Name, "team name from API does not match team name in Terraform config")
@@ -163,7 +258,7 @@ func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestChec
 func sweepResourceTeam(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar teams from acceptance test runs.")
 
-	c := client.NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 	teams, err := c.ListCustomTeams()
 	if err != nil {
 		log.Err(err).Send()
@@ -189,13 +284,13 @@ func sweepResourceTeam(_ string) error {
 	return nil
 }
 
-// TestAccUserRemoveTeamWithUsers tests deleting a Rollbar team that has a
+// TestAccTeamDeleteTeamWithUsers tests deleting a Rollbar team that has a
 // non-zero count of users.
-func (s *AccSuite) TestAccDeleteTeamWithUsers() {
+func (s *AccSuite) TestAccTeamDeleteTeamWithUsers() {
 	team1Name := fmt.Sprintf("%s-team-1", s.randName)
 	team2Name := fmt.Sprintf("%s-team-2", s.randName)
-	user1Email := "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-	user2Email := fmt.Sprintf("jason.mcvetta+%s@gmail.com", s.randName)
+	user1Email := "terraform-provider-test@rollbar.com"
+	user2Email := fmt.Sprintf("terraform-provider-test+%s@rollbar.com", s.randName)
 	// language=hcl
 	tmpl := `
 		resource "rollbar_team" "test_team_1" {

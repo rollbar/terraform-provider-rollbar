@@ -37,7 +37,7 @@ import (
 )
 
 func (s *Suite) TestListProjects() {
-	u := apiUrl + pathProjectList
+	u := s.client.BaseURL + pathProjectList
 
 	// Success
 	r := responderFromFixture("project/list.json", http.StatusOK)
@@ -72,7 +72,7 @@ func (s *Suite) TestListProjects() {
 }
 
 func (s *Suite) TestCreateProject() {
-	u := apiUrl + pathProjectCreate
+	u := s.client.BaseURL + pathProjectCreate
 	name := "baz"
 
 	// Success
@@ -106,7 +106,7 @@ func (s *Suite) TestReadProject() {
 		Name:         "baz",
 		Status:       "enabled",
 	}
-	u := apiUrl + pathProjectRead
+	u := s.client.BaseURL + pathProjectRead
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(expected.ID))
 
 	// Success
@@ -121,8 +121,7 @@ func (s *Suite) TestReadProject() {
 		return err
 	})
 
-	// Deleted project API bug
-	// FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/23
+	// Try to read a deleted project
 	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	_, err = s.client.ReadProject(expected.ID)
@@ -131,7 +130,7 @@ func (s *Suite) TestReadProject() {
 
 func (s *Suite) TestDeleteProject() {
 	delID := gofakeit.Number(0, 1000000)
-	urlDel := apiUrl + pathProjectDelete
+	urlDel := s.client.BaseURL + pathProjectDelete
 	urlDel = strings.ReplaceAll(urlDel, "{projectID}", strconv.Itoa(delID))
 
 	// Success
@@ -152,17 +151,17 @@ func (s *Suite) TestFindProjectTeamIDs() {
 	expected := []int{teamID}
 
 	// Mock list team projects
-	u = apiUrl + pathTeamProjects
+	u = s.client.BaseURL + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	u = apiUrl + pathTeamProjects
+	u = s.client.BaseURL + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamID}", "689493")
 	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
 	// Mock list teams
-	u = apiUrl + pathTeamList
+	u = s.client.BaseURL + pathTeamList
 	r = responderFromFixture("team/list_2.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -203,7 +202,7 @@ func TestUpdateProjectTeams(t *testing.T) {
 		return nil
 	})
 
-	c := NewClient(os.Getenv("ROLLBAR_API_KEY"))
+	c := NewClient(DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
 	c.Resty.GetClient().Transport = r
 
 	prefix := "tf-acc-test-updateprojectteams"

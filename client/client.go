@@ -29,17 +29,20 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"strings"
 )
 
-const apiUrl = "https://api.rollbar.com"
+// DefaultBaseURL is the default base URL for the Rollbar API.
+const DefaultBaseURL = "https://api.rollbar.com"
 
-// RollbarApiClient is a client for the Rollbar API.
-type RollbarApiClient struct {
-	Resty *resty.Client
+// RollbarAPIClient is a client for the Rollbar API.
+type RollbarAPIClient struct {
+	BaseURL string // Base URL for Rollbar API
+	Resty   *resty.Client
 }
 
 // NewClient sets up a new Rollbar API client.
-func NewClient(token string) *RollbarApiClient {
+func NewClient(baseURL, token string) *RollbarAPIClient {
 	log.Debug().Msg("Initializing Rollbar client")
 
 	// New Resty HTTP client
@@ -55,11 +58,19 @@ func NewClient(token string) *RollbarApiClient {
 		log.Warn().Msg("Rollbar API token not set")
 	}
 
+	// Authentication
+	if baseURL == "" {
+		log.Error().Msg("Rollbar API base URL not set")
+	}
+
 	// Configure Resty to use Zerolog for logging
 	r.SetLogger(restyZeroLogger{log.Logger})
 
 	// Rollbar client
-	c := RollbarApiClient{Resty: r}
+	c := RollbarAPIClient{
+		Resty:   r,
+		BaseURL: baseURL,
+	}
 	return &c
 }
 
@@ -78,6 +89,20 @@ func errorFromResponse(resp *resty.Response) error {
 	switch resp.StatusCode() {
 	case http.StatusOK, http.StatusCreated:
 		return nil
+	case http.StatusForbidden:
+		// Workaround for known API bug:
+		// https://github.com/rollbar/terraform-provider-rollbar/issues/79
+		er := resp.Error().(*ErrorResult)
+		if strings.Contains(er.Message, "not found in this account") {
+			log.Debug().
+				Str("status", resp.Status()).
+				Int("status_code", resp.StatusCode()).
+				Str("error_message", er.Message).
+				Int("error_code", er.Err).
+				Msg("Workaround entity not found API bug")
+			return ErrNotFound
+		}
+		fallthrough
 	case http.StatusUnauthorized:
 		return ErrUnauthorized
 	case http.StatusNotFound:

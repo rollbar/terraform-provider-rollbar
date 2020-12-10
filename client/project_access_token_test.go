@@ -34,7 +34,7 @@ import (
 // TestListProjectAccessTokens tests listing Rollbar project access tokens.
 func (s *Suite) TestListProjectAccessTokens() {
 	projectID := 12116
-	u := apiUrl + pathProjectTokens
+	u := s.client.BaseURL + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
@@ -118,7 +118,7 @@ func (s *Suite) TestListProjectAccessTokens() {
 // the API.
 func (s *Suite) TestReadProjectAccessToken() {
 	projectID := 411334
-	u := apiUrl + pathProjectTokens
+	u := s.client.BaseURL + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
@@ -159,7 +159,7 @@ func (s *Suite) TestReadProjectAccessToken() {
 // from the API.
 func (s *Suite) TestReadProjectAccessTokenByName() {
 	projectID := 411334
-	u := apiUrl + pathProjectTokens
+	u := s.client.BaseURL + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 
 	r := responderFromFixture("project_access_token/list.json", http.StatusOK)
@@ -200,7 +200,7 @@ func (s *Suite) TestReadProjectAccessTokenByName() {
 func (s *Suite) TestDeleteProjectAccessToken() {
 	projectID := 428325
 	token := "bccf06c897d74020a80cb72407abb4ee"
-	u := apiUrl + pathProjectToken
+	u := s.client.BaseURL + pathProjectToken
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 	u = strings.ReplaceAll(u, "{accessToken}", token)
 
@@ -225,7 +225,7 @@ func (s *Suite) TestCreateProjectAccessToken() {
 		Scopes:    []Scope{ScopeRead, ScopeWrite},
 		Status:    StatusEnabled,
 	}
-	u := apiUrl + pathProjectTokens
+	u := s.client.BaseURL + pathProjectTokens
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
 	rs := responseFromFixture("project_access_token/create.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
@@ -310,7 +310,7 @@ func (s *Suite) TestUpdateProjectAccessToken() {
 		RateLimitWindowSize:  1000,
 		RateLimitWindowCount: 2500,
 	}
-	u := apiUrl + pathProjectToken
+	u := s.client.BaseURL + pathProjectToken
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
 	u = strings.ReplaceAll(u, "{accessToken}", accessToken)
 	rs := responseFromFixture("project_access_token/update.json", http.StatusOK)

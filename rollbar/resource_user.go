@@ -95,7 +95,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // inviting user to specified groups, and removing user from groups no longer
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*client.RollbarApiClient)
+	c := meta.(*client.RollbarAPIClient)
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
 	l := log.With().
@@ -164,7 +164,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 // resourceUserAddRemoveTeamsArgs encapsulates the arguments to
 // resourceUserAddTeams and resourceUserRemoveTeams.
 type resourceUserAddRemoveTeamsArgs struct {
-	client        *client.RollbarApiClient
+	client        *client.RollbarAPIClient
 	userID        int
 	email         string
 	teamsExpected map[int]bool
@@ -274,7 +274,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 }
 
 // resourceUserCurrentTeams returns user's current team memberships.
-func resourceUserCurrentTeams(c *client.RollbarApiClient, email string, userID int) (currentTeams map[int]bool, err error) {
+func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID int) (currentTeams map[int]bool, err error) {
 	l := log.With().
 		Str("email", email).
 		Int("user_id", userID).
@@ -319,7 +319,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Int("userID", userID).
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
-	c := meta.(*client.RollbarApiClient)
+	c := meta.(*client.RollbarAPIClient)
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -379,7 +379,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		Str("email", email).
 		Logger()
 	l.Info().Msg("Deleting rollbar_user resource")
-	c := meta.(*client.RollbarApiClient)
+	c := meta.(*client.RollbarAPIClient)
 
 	// Try to get user ID
 	userID := d.Get("user_id").(int)
@@ -432,7 +432,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	l.Info().Msg("Importing rollbar_user resource")
 
 	var teamIDs []int
-	c := meta.(*client.RollbarApiClient)
+	c := meta.(*client.RollbarAPIClient)
 
 	invitations, err := c.FindInvitations(email)
 	if err != nil && err != client.ErrNotFound {
