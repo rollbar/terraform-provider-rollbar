@@ -788,7 +788,7 @@ func (s *AccSuite) TestAccUserInvitedToRegistered() {
 	config := fmt.Sprintf(tmpl, randString, randString)
 	var r *recorder.Recorder
 	origTransport := http.DefaultTransport
-	resource.Test(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

@@ -394,7 +394,7 @@ func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, projectName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,

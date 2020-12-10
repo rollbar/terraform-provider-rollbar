@@ -30,7 +30,7 @@ func (s *AccSuite) TestAccTeamInvalidName() {
 			name = ""
 		}
 	`
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -55,7 +55,7 @@ func (s *AccSuite) TestAccTeamCreate() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, teamName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
 		CheckDestroy: nil,
@@ -92,7 +92,7 @@ func (s *AccSuite) TestAccTeamUpdateAccessLevel() {
 		}
 	`
 	config2 := fmt.Sprintf(tmpl2, teamName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
@@ -133,7 +133,7 @@ func (s *AccSuite) TestAccTeamUpdateName() {
 	`
 	config1 := fmt.Sprintf(tmpl, teamName1)
 	config2 := fmt.Sprintf(tmpl, teamName2)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
@@ -166,7 +166,7 @@ func (s *AccSuite) TestAccTeamImport() {
 		}
 	`
 	config1 := fmt.Sprintf(tmpl, teamName1)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
@@ -201,7 +201,7 @@ func (s *AccSuite) TestAccTeamDeleteOnAPIBeforeApply() {
 		}
 	`
 	config1 := fmt.Sprintf(tmpl, teamName1)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,

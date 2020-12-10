@@ -242,7 +242,7 @@ func (s *AccSuite) TestAccProjectDeleteOnAPIBeforeApply() {
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
-	resource.ParallelTest(s.T(), resource.TestCase{
+	s.parallelTestVCR(s.T(), resource.TestCase{
 		PreCheck: func() { s.preCheck() },
 		//ProviderFactories: testAccProviderFactories(),
 		Providers:    s.providers,
