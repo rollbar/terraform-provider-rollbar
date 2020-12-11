@@ -35,7 +35,7 @@ jobs:
 
       # Test provider with real Terraform
       - name: Install
-        run: make install
+        run: make install012
       - name: Initialize Terraform
         run: terraform init
         working-directory: ./example
