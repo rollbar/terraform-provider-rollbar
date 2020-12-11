@@ -23,8 +23,11 @@ Argument Reference
 
 The following arguments are supported:
 
-* `api_key` - (Required) This is the Rollbar authentication token. The value can
-  be sourced from the ROLLBAR_TOKEN environment variable.
+* `api_key` - (Required) Rollbar API authentication token. Value will be
+  sourced from environment variable `ROLLBAR_API_KEY` if set.
+* `api_url` - (Optional) Base URL for the Rollbar API.  Defaults to
+  https://api.rollbar.com.  Value will be sourced from environment variable
+  `ROLLBAR_API_URL` if set.
 
 
 Data Sources

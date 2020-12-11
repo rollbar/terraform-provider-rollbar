@@ -27,28 +27,29 @@ package rollbar
 
 import (
 	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"github.com/rs/zerolog/log"
 	"strconv"
-	"strings"
 )
 
 const schemaKeyToken = "api_key"
+const schemaKeyBaseURL = "api_url"
 
 // Provider is a Terraform provider for Rollbar.
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			schemaKeyToken: {
-				Type:     schema.TypeString,
-				Optional: true,
-				// FIXME: Should the environment variable be ROLLBAR_API_KEY to
-				//  match the name of this field?
+				Type:        schema.TypeString,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_KEY", nil),
+			},
+			schemaKeyBaseURL: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_URL", client.DefaultBaseURL),
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -71,25 +72,9 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	token := d.Get(schemaKeyToken).(string)
-	c := client.NewClient(token)
+	baseURL := d.Get(schemaKeyBaseURL).(string)
+	c := client.NewClient(baseURL, token)
 	return c, diags
-}
-
-// handleErrNotFound handles an ErrNotFound when reading a resource, by removing
-// the resource from state and returning a Diagnostics object.
-func handleErrNotFound(d *schema.ResourceData, resourceName string) diag.Diagnostics {
-	id := d.Id()
-	d.SetId("")
-	tmpl := `Removing %s %s from state because it was not found on Rollbar`
-	detail := fmt.Sprintf(tmpl, resourceName, id)
-	log.Warn().Msg(detail)
-	tmpl = "%s not found, removed from state"
-	summary := fmt.Sprintf(tmpl, strings.ToTitle(resourceName))
-	return diag.Diagnostics{{
-		Severity: diag.Warning,
-		Summary:  summary,
-		Detail:   detail,
-	}}
 }
 
 /*

@@ -34,7 +34,7 @@ func (s *Suite) TestCreateTeam() {
 	// Setup API mock
 	teamName := "foobar"
 	accessLevel := "standard"
-	u := apiUrl + pathTeamCreate
+	u := s.client.BaseURL + pathTeamCreate
 	expected := Team{
 		ID:          676974,
 		AccountID:   317418,
@@ -72,7 +72,7 @@ func (s *Suite) TestCreateTeam() {
 
 func (s *Suite) TestListTeams() {
 	// Setup API mock
-	u := apiUrl + pathTeamList
+	u := s.client.BaseURL + pathTeamList
 	expected := []Team{
 		{
 			AccessLevel: "everyone",
@@ -110,7 +110,7 @@ func (s *Suite) TestListTeams() {
 func (s *Suite) TestReadTeam() {
 	// Setup API mock
 	teamID := 676974
-	u := apiUrl + pathTeamRead
+	u := s.client.BaseURL + pathTeamRead
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	expected := Team{
 		ID:          676974,
@@ -147,7 +147,7 @@ func (s *Suite) TestReadTeam() {
 func (s *Suite) TestDeleteTeam() {
 	// Setup API mock
 	teamID := 676974
-	u := apiUrl + pathTeamDelete
+	u := s.client.BaseURL + pathTeamDelete
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r := responderFromFixture("team/delete.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
@@ -171,7 +171,7 @@ func (s *Suite) TestAssignUserToTeam() {
 	userID := 238101
 
 	// Successful assignment
-	u := apiUrl + pathTeamUser
+	u := s.client.BaseURL + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 	r := responderFromFixture("team/assign_user.json", http.StatusOK)
@@ -185,7 +185,7 @@ func (s *Suite) TestAssignUserToTeam() {
 	})
 
 	// API returns status 403 when the team or user is not found.
-	u = apiUrl + pathTeamUser
+	u = s.client.BaseURL + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userID}", "0")
 	r = responderFromFixture("team/assign_user_not_found.json", http.StatusForbidden)
@@ -200,7 +200,7 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	userID := 238101
 
 	// Successful assignment
-	u := apiUrl + pathTeamUser
+	u := s.client.BaseURL + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userID}", strconv.Itoa(userID))
 	r := responderFromFixture("team/remove_user.json", http.StatusOK)
@@ -214,7 +214,7 @@ func (s *Suite) TestRemoveUserFromTeam() {
 	})
 
 	// API returns status 422 when the team or user is not found.
-	u = apiUrl + pathTeamUser
+	u = s.client.BaseURL + pathTeamUser
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{userID}", "0")
 	r = responderFromFixture("team/remove_user_not_found.json", http.StatusUnprocessableEntity)
@@ -225,7 +225,7 @@ func (s *Suite) TestRemoveUserFromTeam() {
 
 // TestListCustomTeams tests listing custom defined teams.
 func (s *Suite) TestListCustomTeams() {
-	u := apiUrl + pathTeamList
+	u := s.client.BaseURL + pathTeamList
 	expected := []Team{
 		{
 			ID:          676971,
@@ -249,7 +249,7 @@ func (s *Suite) TestListCustomTeams() {
 
 func (s *Suite) TestFindTeamID() {
 	expected := 676971
-	u := apiUrl + pathTeamList
+	u := s.client.BaseURL + pathTeamList
 	r := responderFromFixture("team/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -270,7 +270,7 @@ func (s *Suite) TestFindTeamID() {
 func (s *Suite) TestListTeamProjects() {
 	teamID := 689492
 	expected := []int{423092}
-	u := apiUrl + pathTeamProjects
+	u := s.client.BaseURL + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r := responderFromFixture("team/list_projects_689492.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
@@ -289,7 +289,7 @@ func (s *Suite) TestListTeamProjects() {
 func (s *Suite) TestAssignTeamToProject() {
 	teamID := 689492
 	projectID := 423092
-	u := apiUrl + pathTeamProject
+	u := s.client.BaseURL + pathTeamProject
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 	r := responderFromFixture("team/assign_project.json", http.StatusOK)
@@ -308,7 +308,7 @@ func (s *Suite) TestAssignTeamToProject() {
 func (s *Suite) TestRemoveTeamFromProject() {
 	teamID := 689492
 	projectID := 423092
-	u := apiUrl + pathTeamProject
+	u := s.client.BaseURL + pathTeamProject
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projectID))
 	r := responderFromFixture("team/remove_project.json", http.StatusOK)

@@ -34,7 +34,7 @@ import (
 // TestListInvitations tests listing Rollbar team invitations.
 func (s *Suite) TestListInvitations() {
 	teamID := 572097
-	u := apiUrl + pathInvitations
+	u := s.client.BaseURL + pathInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -73,7 +73,7 @@ func (s *Suite) TestListInvitations() {
 // TestListPendingInvitations tests listing pending Rollbar team invitations.
 func (s *Suite) TestListPendingInvitations() {
 	teamID := 662037
-	u := apiUrl + pathInvitations
+	u := s.client.BaseURL + pathInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -104,7 +104,7 @@ func (s *Suite) TestListPendingInvitations() {
 func (s *Suite) TestCreateInvitation() {
 	teamID := 572097
 	email := "test@rollbar.com"
-	u := apiUrl + pathInvitations
+	u := s.client.BaseURL + pathInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -133,7 +133,7 @@ func (s *Suite) TestCreateInvitation() {
 // TestReadInvitation tests reading a Rollbar team invitation from the API.
 func (s *Suite) TestReadInvitation() {
 	id := 153650
-	u := apiUrl + pathInvitation
+	u := s.client.BaseURL + pathInvitation
 	u = strings.ReplaceAll(u, "{inviteID}", strconv.Itoa(id))
 
 	// Success
@@ -160,7 +160,7 @@ func (s *Suite) TestReadInvitation() {
 
 func (s *Suite) TestCancelInvitation() {
 	invitationID := 153650
-	u := apiUrl + pathInvitation
+	u := s.client.BaseURL + pathInvitation
 	u = strings.ReplaceAll(u, "{inviteID}", strconv.Itoa(invitationID))
 
 	r := responderFromFixture("invitation/cancel.json", http.StatusOK)
@@ -190,7 +190,7 @@ func (s *Suite) TestFindInvitations() {
 	email := "jason.mcvetta+test10@gmail.com"
 
 	// Mock list all teams
-	u := apiUrl + pathTeamList
+	u := s.client.BaseURL + pathTeamList
 	r := responderFromFixture("team/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -198,7 +198,7 @@ func (s *Suite) TestFindInvitations() {
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
 		r = responderFromFixture(fixturePath, http.StatusOK)
-		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamID}", teamID)
+		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
 		httpmock.RegisterResponder("GET", u, r)
 	}
 
@@ -233,7 +233,7 @@ func (s *Suite) TestFindPendingInvitations() {
 	email := "jason.mcvetta+test10@gmail.com"
 
 	// Mock list all teams
-	u := apiUrl + pathTeamList
+	u := s.client.BaseURL + pathTeamList
 	r := responderFromFixture("team/list.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 
@@ -241,7 +241,7 @@ func (s *Suite) TestFindPendingInvitations() {
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
 		r = responderFromFixture(fixturePath, http.StatusOK)
-		u = strings.ReplaceAll(apiUrl+pathInvitations, "{teamID}", teamID)
+		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
 		httpmock.RegisterResponder("GET", u, r)
 	}
 

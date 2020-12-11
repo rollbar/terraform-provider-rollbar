@@ -75,23 +75,20 @@ type Project struct {
 */
 
 // ListProjects lists all Rollbar projects.
-func (c *RollbarApiClient) ListProjects() ([]Project, error) {
-	u := apiUrl + pathProjectList
-	l := log.With().
-		Str("url", u).
-		Logger()
+func (c *RollbarAPIClient) ListProjects() ([]Project, error) {
+	u := c.BaseURL + pathProjectList
 
 	resp, err := c.Resty.R().
 		SetResult(projectListResponse{}).
 		SetError(ErrorResult{}).
 		Get(u)
 	if err != nil {
-		l.Err(err).Send()
+		log.Err(err).Send()
 		return nil, err
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
-		l.Err(err).Send()
+		log.Err(err).Send()
 		return nil, err
 	}
 
@@ -106,7 +103,7 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 			cleaned = append(cleaned, proj)
 		}
 	}
-	l.Debug().
+	log.Debug().
 		Int("raw_projects", len(lpr.Result)).
 		Int("cleaned_projects", len(cleaned)).
 		Msg("Successfully listed projects")
@@ -114,11 +111,10 @@ func (c *RollbarApiClient) ListProjects() ([]Project, error) {
 }
 
 // CreateProject creates a new Rollbar project.
-func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
-	u := apiUrl + pathProjectCreate
+func (c *RollbarAPIClient) CreateProject(name string) (*Project, error) {
+	u := c.BaseURL + pathProjectCreate
 	l := log.With().
 		Str("name", name).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Creating new project")
 
@@ -144,12 +140,11 @@ func (c *RollbarApiClient) CreateProject(name string) (*Project, error) {
 
 // ReadProject a Rollbar project from the API. If no matching project is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
-	u := apiUrl + pathProjectRead
+func (c *RollbarAPIClient) ReadProject(projectID int) (*Project, error) {
+	u := c.BaseURL + pathProjectRead
 
 	l := log.With().
 		Int("projectID", projectID).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Reading project from API")
 
@@ -183,11 +178,10 @@ func (c *RollbarApiClient) ReadProject(projectID int) (*Project, error) {
 
 // DeleteProject deletes a Rollbar project. If no matching project is found,
 // returns error ErrNotFound.
-func (c *RollbarApiClient) DeleteProject(projectID int) error {
-	u := apiUrl + pathProjectDelete
+func (c *RollbarAPIClient) DeleteProject(projectID int) error {
+	u := c.BaseURL + pathProjectDelete
 	l := log.With().
 		Int("projectID", projectID).
-		Str("url", u).
 		Logger()
 	l.Debug().Msg("Deleting project")
 
@@ -213,7 +207,7 @@ func (c *RollbarApiClient) DeleteProject(projectID int) error {
 // FindProjectTeamIDs finds IDs of all teams assigned to the project. Caution:
 // this is a potentially slow operation that makes multiple calls to the API.
 // https://github.com/rollbar/terraform-provider-rollbar/issues/104
-func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
+func (c *RollbarAPIClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 	l := log.With().Int("project_id", projectID).Logger()
 	l.Debug().Msg("Finding teams assigned to project")
 	var projectTeamIDs []int
@@ -247,7 +241,7 @@ func (c *RollbarApiClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 // and removing teams as necessary. Caution: this is a potentially slow
 // operation that makes multiple calls to the API.
 // https://github.com/rollbar/terraform-provider-rollbar/issues/104
-func (c *RollbarApiClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
+func (c *RollbarAPIClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
 	l := log.With().
 		Int("project_id", projectID).
 		Ints("team_ids", teamIDs).
