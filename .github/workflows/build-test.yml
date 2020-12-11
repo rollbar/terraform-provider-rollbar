@@ -42,6 +42,7 @@ jobs:
         with:
           poll-interval-seconds: 10
           same-branch-only: false
+          abort-after-seconds: 600
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
