@@ -1,9 +1,8 @@
-name: Build & Test
+name: Acceptance Tests
 on: [push]
 
 jobs:
   build:
-    name: Build & Test
     runs-on: ubuntu-latest
 
     env:
