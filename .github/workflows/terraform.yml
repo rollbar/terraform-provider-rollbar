@@ -1,4 +1,4 @@
-name: Terraform Latest
+name: Terraform
 on: [push]
 
 jobs:
