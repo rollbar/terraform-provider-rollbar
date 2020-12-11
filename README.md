@@ -63,7 +63,14 @@ Running `make plan`, `make apply`, or `make destroy` will:
 * Display the logs on completion.
 
 
-### 
+### Terraform Verions
+
+Several Makefile targets build the provider inside a Docker container, then
+test it against different versions of Terraform.
+
+* `make terraform012` - Terraform 0.12.x
+* `make terraform013` - Terraform 0.13.x
+* `make terraform014` - Terraform 0.14.x
 
 
 License
