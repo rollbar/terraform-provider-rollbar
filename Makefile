@@ -85,9 +85,13 @@ _terraform_destroy:
 	(cd example && TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 terraform destroy)
 
 docker12:
-	docker build . --build-arg version=0.12.5 -t terraform-0.12-provider-rollbar 
+	docker build . --build-arg version=0.12.29 -t terraform-0.12-provider-rollbar
 	docker run terraform-0.12-provider-rollbar plan -var rollbar_token=$$ROLLBAR_API_KEY
 
 docker13:
-	docker build . --build-arg version=0.13.5 -t terraform-0.13-provider-rollbar 
+	docker build . --build-arg version=0.13.5 -t terraform-0.13-provider-rollbar
 	docker run terraform-0.13-provider-rollbar plan -var rollbar_token=$$ROLLBAR_API_KEY
+
+docker14:
+	docker build . --build-arg version=0.14.2 -t terraform-0.14-provider-rollbar
+	docker run terraform-0.14-provider-rollbar plan -var rollbar_token=$$ROLLBAR_API_KEY
