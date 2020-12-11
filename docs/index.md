@@ -49,3 +49,4 @@ Resources
 * [`rollbar_project_access_token`](resources/project_access_token.md) - A
   Rollbar project access token
 * [`rollbar_user`](resources/user.md) - A Rollbar user
+* [`rollbar_team`](resources/team.md) - A Rollbar team
