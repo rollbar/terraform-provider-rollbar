@@ -1,9 +1,9 @@
-name: Terraform Latest
+name: Terraform 0.12.x
 on: [push]
 
 jobs:
   build:
-    name: Terraform Latest
+    name: Terraform 0.12.x
     runs-on: ubuntu-latest
 
     env:
