@@ -31,7 +31,7 @@ Requirements
 Usage
 -----
 
-[See the docs for usage information.](docs/README.md)
+[See the docs for usage information.](docs/index.md)
 
 
 Debugging
