@@ -1,9 +1,9 @@
-name: Terraform
+name: Terraform Latest
 on: [push]
 
 jobs:
   build:
-    name: Terraform latest
+    name: Terraform Latest
     runs-on: ubuntu-latest
 
     env:
