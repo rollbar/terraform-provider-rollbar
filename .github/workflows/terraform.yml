@@ -1,4 +1,4 @@
-name: Terraform
+name: Terraform Compatibility
 on: [push]
 
 jobs:
