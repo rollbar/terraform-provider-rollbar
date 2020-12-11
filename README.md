@@ -66,7 +66,8 @@ Running `make plan`, `make apply`, or `make destroy` will:
 ### Terraform Verions
 
 Several Makefile targets build the provider inside a Docker container, then
-test it against different versions of Terraform.
+test it against different versions of Terraform. Environment variable
+`ROLLBAR_API_KEY` must be set.
 
 * `make terraform012` - Terraform 0.12.x
 * `make terraform013` - Terraform 0.13.x
