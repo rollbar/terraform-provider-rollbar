@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   build:
-    name: Terraform Latest
+    name: Verify Terraform Latest
     runs-on: ubuntu-latest
 
     env:
