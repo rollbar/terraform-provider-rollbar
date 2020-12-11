@@ -24,7 +24,8 @@ Status
 Requirements
 ------------
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x or 0.13.x
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x, 0.13.x, or
+  0.14.x
 - [Go](https://golang.org/doc/install) 1.14.x
 
 
@@ -60,6 +61,9 @@ Running `make plan`, `make apply`, or `make destroy` will:
 * Run `terraform <plan|apply|destroy>` in the `examples` folder with debug
   logging enabled.
 * Display the logs on completion.
+
+
+### 
 
 
 License
