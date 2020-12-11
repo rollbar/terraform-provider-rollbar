@@ -1,4 +1,4 @@
-name: Analayze
+name: Code Quality Analysis
 
 on:
   push:
