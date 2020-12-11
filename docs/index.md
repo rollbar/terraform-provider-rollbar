@@ -33,19 +33,20 @@ The following arguments are supported:
 Data Sources
 ------------
 
-* [`rollbar_project`](data_source/rollbar_project.md) - A Rollbar project
-* [`rollbar_projects`](data_source/rollbar_projects.md) - List all Rollbar
+* [`rollbar_project`](data-sources/project.md) - A Rollbar project
+* [`rollbar_projects`](data-sources/projects.md) - List all Rollbar
   projects
-* [`rollbar_project_access_token`](data_source/rollbar_project_access_token.md)
+* [`rollbar_project_access_token`](data-sources/project_access_token.md)
   - An access token belonging to a Rollbar project
-* [`rollbar_project_access_tokens`](data_source/rollbar_project_access_tokens.md)
+* [`rollbar_project_access_tokens`](data-sources/project_access_tokens.md)
   - List all access tokens belonging to a Rollbar project
 
 
 Resources
 ---------
 
-* [`rollbar_project`](resource/rollbar_project.md) - A Rollbar project
-* [`rollbar_project_access_token`](resource/rollbar_project_access_token.md) - A
+* [`rollbar_project`](resources/project.md) - A Rollbar project
+* [`rollbar_project_access_token`](resources/project_access_token.md) - A
   Rollbar project access token
-* [`rollbar_user`](resource/rollbar_user.md) - A Rollbar user
+* [`rollbar_user`](resources/user.md) - A Rollbar user
+* [`rollbar_team`](resources/team.md) - A Rollbar team

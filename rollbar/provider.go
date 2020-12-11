@@ -45,11 +45,13 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_KEY", nil),
+				Description: "Rollbar API authentication token. Value will be sourced from environment variable `ROLLBAR_API_KEY` if set.",
 			},
 			schemaKeyBaseURL: {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_URL", client.DefaultBaseURL),
+				Description: "Base URL for the Rollbar API.  Defaults to https://api.rollbar.com.  Value will be sourced from environment variable `ROLLBAR_API_URL` if set.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
