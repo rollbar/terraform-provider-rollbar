@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
   latest:
-    name: Verify Terraform Latest
+    name: Latest
     runs-on: ubuntu-latest
 
     env:
@@ -45,7 +45,7 @@ jobs:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
   terraform012:
-    name: Verify Terraform 0.12.x
+    name: 0.12.x
     runs-on: ubuntu-latest
 
     env:
@@ -88,7 +88,7 @@ jobs:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
 
   terraform013:
-    name: Verify Terraform 0.13.x
+    name: 0.13.x
     runs-on: ubuntu-latest
 
     env:
