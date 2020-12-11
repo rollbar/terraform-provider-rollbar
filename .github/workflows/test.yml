@@ -1,4 +1,4 @@
-name: Build & Test
+name: Acceptance Tests
 on: [push]
 
 jobs:
@@ -12,9 +12,6 @@ jobs:
     steps:
 
       # Install Go and Terraform
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
       - uses: actions/setup-go@v2
 
       # Checkout
@@ -37,21 +34,6 @@ jobs:
       - name: Unit tests
         run: make test
 
-      # Test provider with real Terraform
-      - name: Install
-        run: make install
-      - name: Initialize Terraform
-        run: terraform init
-        working-directory: ./example
-      - name: Terraform plan
-        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
-        working-directory: ./example
-        env:
-          ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
-
-      #
-      # Acceptance Tests
-      #
 
       # Wait for up to five minutes for previous run to complete, abort if not
       # done by then
@@ -60,8 +42,11 @@ jobs:
         with:
           poll-interval-seconds: 10
           same-branch-only: false
+          abort-after-seconds: 600
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Acceptance Tests
       - name: Acceptance tests
         run: make testacc
         env:
@@ -80,7 +65,5 @@ jobs:
         with:
           coverageLocations: |
             ${{github.workspace}}/*lcov*:lcov
-
-
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

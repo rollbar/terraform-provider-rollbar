@@ -21,6 +21,15 @@
  */
 
 
+terraform {
+  required_providers {
+    rollbar = {
+      source  = "github.com/rollbar/rollbar"
+      version = "~> 0.2"
+    }
+  }
+}
+
 
 variable "rollbar_token" {
   type = string
