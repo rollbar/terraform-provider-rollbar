@@ -84,6 +84,6 @@ History
 -------
 
 Derived from
-[jmcvetta/terraform-provider-rollbar-jmcvetta](https://github.com/jmcvetta/terraform-provider-rollbar-jmcvetta)
-and
 [babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
+and
+[jmcvetta/terraform-provider-rollbar](https://github.com/jmcvetta/terraform-provider-rollbar)
