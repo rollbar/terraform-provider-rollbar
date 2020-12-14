@@ -40,10 +40,10 @@ jobs:
 
       # Install Provider
       - name: Install
-        if: ${{ !startsWith(matrix.terraform, "0.12") }}
+        if: ${{ !startsWith(matrix.terraform, '0.12') }}
         run: make install
       - name: Install for Terraform 0.12
-        if: ${{ startsWith(matrix.terraform, "0.12") }}
+        if: ${{ startsWith(matrix.terraform, '0.12') }}
         run: make install012
 
       # Verify Terraform plan does not error
