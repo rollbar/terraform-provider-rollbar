@@ -23,5 +23,9 @@
   "bugs": {
     "url": "https://github.com/rollbar/terraform-provider-rollbar/issues"
   },
-  "homepage": "https://github.com/rollbar/terraform-provider-rollbar#readme"
+  "homepage": "https://github.com/rollbar/terraform-provider-rollbar#readme",
+  "devDependencies": {
+    "commitizen": "^4.2.2",
+    "cz-conventional-changelog": "^3.3.0"
+  }
 }
