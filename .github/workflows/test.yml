@@ -95,8 +95,11 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
 
 
+  #
+  # Verify Terraform compatibility
+  #
   terraform:
-    name: Terraform Compatibility
+    name: Terraform
     runs-on: ubuntu-latest
     strategy:
       matrix:
