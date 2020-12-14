@@ -1,0 +1,62 @@
+name: Acceptance Tests
+on: [push]
+
+jobs:
+
+  acceptance_tests:
+    name: Acceptance
+    runs-on: ubuntu-latest
+
+    env:
+      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: actions/setup-go@v2
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Wait for up to ten minutes for previous run to complete; abort if not
+      # done by then.
+      - name: Block Concurrent Executions
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+          same-branch-only: false
+          abort-after-seconds: 600
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run acceptance tests
+      - name: Acceptance tests
+        run: make testacc
+        env:
+          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
+          GOMAXPROCS: 8
+
+      # Report code coverage
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
+      - uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
+      - name: Upload coverage data to CodeClimate
+        uses: paambaati/codeclimate-action@v2.7.4
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/*lcov*:lcov
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}

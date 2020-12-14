@@ -1,10 +1,60 @@
-name: Acceptance Tests
-on: [push]
+name: Quick Tests
+on:
+  push:
+  # Scheduled runs ensure we are alerted to incompatibilities in new releases of
+  # Go and Terraform.
+  schedule:
+    - cron: '0 10 * * 3'
 
 jobs:
-  build:
-    name: Build & Test
+
+  #
+  # Run unit tests
+  #
+  unit_tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+          - ""  # Latest
+          - "1.15"
+          - "1.14"
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '${{ matrix.go }}'
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-v${{ matrix.go }}-${{ hashFiles('**/go.sum') }}
+
+      # Run unit tests
+      - name: Unit tests
+        run: make test
+
+
+  #
+  # Verify Terraform compatibility
+  #
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        terraform:
+          - "" # Latest
+          - "0.14"
+          - "0.13"
+          - "0.12"
 
     env:
       ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
@@ -12,6 +62,10 @@ jobs:
     steps:
 
       # Install Go and Terraform
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+          terraform_version: "${{ matrix.terraform }}"
       - uses: actions/setup-go@v2
 
       # Checkout
@@ -25,45 +79,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      # Build
-      - name: Download dependencies
-        run: go get
-      - name: Build the application
-        run: go build -o app
+      # Install Provider
+      - name: Install
+        if: ${{ !startsWith(matrix.terraform, '0.12') }}
+        run: make install
+      - name: Install for Terraform 0.12
+        if: ${{ startsWith(matrix.terraform, '0.12') }}
+        run: make install012
 
-      - name: Unit tests
-        run: make test
-
-
-      # Wait for up to five minutes for previous run to complete, abort if not
-      # done by then
-      - name: Block Concurrent Executions
-        uses: softprops/turnstyle@v1
-        with:
-          poll-interval-seconds: 10
-          same-branch-only: false
-          abort-after-seconds: 600
+      # Verify Terraform plan does not error
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./example
+      - name: Terraform plan
+        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        working-directory: ./example
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Acceptance Tests
-      - name: Acceptance tests
-        run: make testacc
-        env:
-          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
-          GOMAXPROCS: 8
-      - name: Convert Go coverage file to lcov format
-        run: |
-          go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
-      - uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
-      - name: Upload coverage data to CodeClimate
-        uses: paambaati/codeclimate-action@v2.7.4
-        with:
-          coverageLocations: |
-            ${{github.workspace}}/*lcov*:lcov
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
