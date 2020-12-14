@@ -26,6 +26,7 @@
   "homepage": "https://github.com/rollbar/terraform-provider-rollbar#readme",
   "devDependencies": {
     "commitizen": "^4.2.2",
-    "cz-conventional-changelog": "^3.3.0"
+    "cz-conventional-changelog": "^3.3.0",
+    "semantic-release": "^17.3.0"
   }
 }
