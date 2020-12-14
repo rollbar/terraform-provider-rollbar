@@ -93,3 +93,56 @@ jobs:
             ${{github.workspace}}/*lcov*:lcov
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+
+  terraform:
+    name: Terraform Compatibility
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        terraform:
+          - "" # Latest
+          - "0.14"
+          - "0.13"
+          - "0.12"
+
+    env:
+      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+          terraform_version: "${{ matrix.terraform }}"
+      - uses: actions/setup-go@v2
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Install Provider
+      - name: Install
+        if: ${{ !startsWith(matrix.terraform, '0.12') }}
+        run: make install
+      - name: Install for Terraform 0.12
+        if: ${{ startsWith(matrix.terraform, '0.12') }}
+        run: make install012
+
+      # Verify Terraform plan does not error
+      - name: Initialize Terraform
+        run: terraform init
+        working-directory: ./example
+      - name: Terraform plan
+        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        working-directory: ./example
+        env:
+          ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
