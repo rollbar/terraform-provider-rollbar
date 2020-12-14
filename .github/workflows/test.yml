@@ -2,8 +2,34 @@ name: Acceptance Tests
 on: [push]
 
 jobs:
-  build:
-    name: Build & Test
+
+  unit_tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    env:
+      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: actions/setup-go@v2
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Unit tests
+        run: make test
+
+  acceptance_tests:
+    name: Acceptance Tests
     runs-on: ubuntu-latest
 
     env:
@@ -25,18 +51,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      # Build
-      - name: Download dependencies
-        run: go get
-      - name: Build the application
-        run: go build -o app
-
-      - name: Unit tests
-        run: make test
-
-
-      # Wait for up to five minutes for previous run to complete, abort if not
-      # done by then
+      # Wait for up to ten minutes for previous run to complete; abort if not
+      # done by then.
       - name: Block Concurrent Executions
         uses: softprops/turnstyle@v1
         with:
