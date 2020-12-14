@@ -38,13 +38,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      # Build
-      - name: Download dependencies
-        run: go get
-
-      # Test provider with real Terraform
+      # Install Provider
       - name: Install
+        if: !startsWith(matrix.terraform, "0.12")
         run: make install
+      - name: Install for Terraform 0.12
+        if: startsWith(matrix.terraform, "0.12")
+        run: make install012
+
+      # Verify Terraform plan does not error
       - name: Initialize Terraform
         run: terraform init
         working-directory: ./example
