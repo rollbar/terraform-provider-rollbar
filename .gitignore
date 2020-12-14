@@ -36,3 +36,6 @@ reports/
 
 # NodeJS modules
 node_modules/
+
+# Build artifacts
+bin/
