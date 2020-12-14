@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "postinstall": "husky install",
+    "postinstall": "npx husky install",
     "test": "make test"
   },
   "repository": {
@@ -27,6 +27,7 @@
   "devDependencies": {
     "commitizen": "^4.2.2",
     "cz-conventional-changelog": "^3.3.0",
+    "husky": "^4.3.6",
     "semantic-release": "^17.3.0"
   }
 }
