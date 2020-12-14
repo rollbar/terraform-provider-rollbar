@@ -1,4 +1,4 @@
-name: Acceptance Tests
+name: Tests
 on: [push]
 
 jobs:
@@ -6,14 +6,20 @@ jobs:
   unit_tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-
-    env:
-      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+    strategy:
+      matrix:
+        go:
+          - ""  # Latest
+          - "1.14"
+          - "1.13"
+          - "1.12"
 
     steps:
 
       # Install Go and Terraform
       - uses: actions/setup-go@v2
+        with:
+          go-version: '${{ matrix.go }}'
 
       # Checkout
       - uses: actions/checkout@v2
