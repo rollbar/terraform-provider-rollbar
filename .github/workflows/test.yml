@@ -30,8 +30,11 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+
+      # Run unit tests
       - name: Unit tests
         run: make test
+
 
   acceptance_tests:
     name: Acceptance Tests
@@ -67,12 +70,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Acceptance Tests
+      # Run acceptance tests
       - name: Acceptance tests
         run: make testacc
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
+
+      # Report code coverage
       - name: Convert Go coverage file to lcov format
         run: |
           go install github.com/jandelgado/gcov2lcov
