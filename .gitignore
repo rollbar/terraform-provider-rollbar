@@ -33,3 +33,6 @@ reports/
 
 # Debug logs
 *.log
+
+# NodeJS modules
+node_modules/
