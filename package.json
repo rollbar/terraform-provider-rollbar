@@ -28,6 +28,7 @@
   "devDependencies": {
     "@semantic-release/git": "^9.0.0",
     "commitizen": "^4.2.2",
+    "conventional-changelog-conventionalcommits": "^4.5.0",
     "cz-conventional-changelog": "^3.3.0",
     "husky": "^4.3.6",
     "semantic-release": "^17.3.0"
