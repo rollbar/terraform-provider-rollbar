@@ -26,10 +26,12 @@ jobs:
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          install-only: true
       - name: Install dependencies
         run: npm ci
-      - name: Install goreleaser
-        run: go get -v github.com/goreleaser/goreleaser
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
