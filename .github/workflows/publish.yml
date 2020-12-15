@@ -14,6 +14,12 @@ on:
   push:
     tags:
       - 'v*'
+  release:
+    types:
+      - created
+      - published
+      - prereleased
+      - released
 jobs:
   goreleaser:
     name: Release Terraform Provider
