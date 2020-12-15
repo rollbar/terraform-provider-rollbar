@@ -1,9 +1,5 @@
 name: Acceptance Tests
-on:
-  push:
-    branches-ignore:
-      - next
-      - semantic-release
+on: [push]
 
 jobs:
 
