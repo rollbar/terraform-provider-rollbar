@@ -12,11 +12,12 @@
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
-    ["@semantic-release/github", 
-        {
-            "path": "bin/**"
-        }
+    ["@semantic-release/exec",
+      {
+        "prepareCmd": "goreleaser build --rm-dist"
+      }
     ],
+    "@semantic-release/github",
     "@semantic-release/git"
   ],
   "preset": "conventionalcommits"
