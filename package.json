@@ -7,7 +7,6 @@
     "example": "example"
   },
   "scripts": {
-    "postinstall": "npx husky install",
     "test": "make test",
     "get-version": "echo $npm_package_version"
   },
@@ -31,7 +30,6 @@
     "commitizen": "^4.2.2",
     "conventional-changelog-conventionalcommits": "^4.5.0",
     "cz-conventional-changelog": "^3.3.0",
-    "husky": "^4.3.6",
     "semantic-release": "^17.3.0"
   }
 }
