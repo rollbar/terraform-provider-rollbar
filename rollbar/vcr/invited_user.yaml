@@ -180,7 +180,7 @@ interactions:
         "result": [
           {
             "id": 158403,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704998,
             "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
             "status": "pending",
@@ -210,7 +210,7 @@ interactions:
         "result": [
           {
             "id": 158376,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704936,
             "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
             "status": "pending",
@@ -261,7 +261,7 @@ interactions:
         "err": 0,
         "result": {
           "id": 158417,
-          "from_user_id": 5325,
+          "from_user_id": null,
           "team_id": 705099,
           "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
           "status": "pending",
@@ -341,7 +341,7 @@ interactions:
         "result": [
           {
             "id": 158403,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704998,
             "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
             "status": "pending",
@@ -371,7 +371,7 @@ interactions:
         "result": [
           {
             "id": 158376,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704936,
             "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
             "status": "pending",
@@ -401,7 +401,7 @@ interactions:
         "result": [
           {
             "id": 158417,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 705099,
             "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
             "status": "pending",
@@ -545,7 +545,7 @@ interactions:
         "result": [
           {
             "id": 158403,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704998,
             "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
             "status": "pending",
@@ -575,7 +575,7 @@ interactions:
         "result": [
           {
             "id": 158376,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704936,
             "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
             "status": "pending",
@@ -605,7 +605,7 @@ interactions:
         "result": [
           {
             "id": 158417,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 705099,
             "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
             "status": "pending",
@@ -774,7 +774,7 @@ interactions:
         "result": [
           {
             "id": 158403,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704998,
             "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
             "status": "pending",
@@ -804,7 +804,7 @@ interactions:
         "result": [
           {
             "id": 158376,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 704936,
             "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
             "status": "pending",
@@ -834,7 +834,7 @@ interactions:
         "result": [
           {
             "id": 158417,
-            "from_user_id": 5325,
+            "from_user_id": null,
             "team_id": 705099,
             "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
             "status": "pending",

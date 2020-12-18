@@ -3,7 +3,7 @@
   "result": [
     {
       "id": 153556,
-      "from_user_id": 5325,
+      "from_user_id": null,
       "team_id": 662037,
       "to_email": "jason.mcvetta+test0@gmail.com",
       "status": "canceled",
@@ -12,7 +12,7 @@
     },
     {
       "id": 153644,
-      "from_user_id": 5325,
+      "from_user_id": null,
       "team_id": 662037,
       "to_email": "jason.mcvetta+test0@gmail.com",
       "status": "canceled",
@@ -21,7 +21,7 @@
     },
     {
       "id": 153646,
-      "from_user_id": 5325,
+      "from_user_id": null,
       "team_id": 662037,
       "to_email": "jason.mcvetta+test0@gmail.com",
       "status": "canceled",
@@ -30,7 +30,7 @@
     },
     {
       "id": 153648,
-      "from_user_id": 5325,
+      "from_user_id": null,
       "team_id": 662037,
       "to_email": "jason.mcvetta+test0@gmail.com",
       "status": "pending",

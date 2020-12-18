@@ -53,7 +53,7 @@ func (s *Suite) TestListInvitations() {
 		{
 			DateCreated:  1603192477,
 			DateRedeemed: 0,
-			FromUserID:   5325,
+			FromUserID:   0,
 			ID:           153650,
 			Status:       "pending",
 			TeamID:       676971,
@@ -82,7 +82,7 @@ func (s *Suite) TestListPendingInvitations() {
 	expected := []Invitation{
 		{
 			ID:           153648,
-			FromUserID:   5325,
+			FromUserID:   0,
 			TeamID:       662037,
 			ToEmail:      "jason.mcvetta+test0@gmail.com",
 			Status:       "pending",
@@ -144,7 +144,7 @@ func (s *Suite) TestReadInvitation() {
 	expected := Invitation{
 		DateCreated:  1603192477,
 		DateRedeemed: 0,
-		FromUserID:   5325,
+		FromUserID:   0,
 		ID:           153650,
 		Status:       "pending",
 		TeamID:       676971,
