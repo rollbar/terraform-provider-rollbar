@@ -28,6 +28,8 @@ provider at
 Refer to _[Requiring Providers](requiring-providers)_ for documentation on
 including the provider in your Terraform project.
 
+Publication of this provider to the Terraform Registry is [planned soon](pub-to-registry).
+
 
 Requirements
 ------------
@@ -121,3 +123,4 @@ and
 [latest-release]: https://github.com/rollbar/terraform-provider-rollbar/releases/latest
 [requiring-providers]: https://www.terraform.io/docs/configuration/provider-requirements.html#requiring-providers
 [semantic-release]: https://github.com/semantic-release/semantic-release
+[pub-to-registry]: https://github.com/rollbar/terraform-provider-rollbar/issues/153
