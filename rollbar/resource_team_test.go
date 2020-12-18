@@ -265,6 +265,7 @@ func sweepResourceTeam(_ string) error {
 		return err
 	}
 
+	count := 0
 	for _, t := range teams {
 		l := log.With().
 			Str("name", t.Name).
@@ -276,11 +277,12 @@ func sweepResourceTeam(_ string) error {
 				l.Err(err).Send()
 				return err
 			}
-			l.Info().Msg("Deleted team")
+			count++
+			l.Debug().Msg("Deleted team")
 		}
 	}
 
-	log.Info().Msg("Teams cleanup complete")
+	log.Info().Int("count", count).Msg("Teams cleanup complete")
 	return nil
 }
 
