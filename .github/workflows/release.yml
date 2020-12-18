@@ -27,10 +27,7 @@ jobs:
           path: |
             ~/go/pkg/mod
             ~/.cache/go-build
-          # In test.yml we do matrixed version testing.  Included in the version
-          # matrix is the blank string, indicating to test against the latest
-          # version of Go.  Since we are using the latest version of Go here
-          # too, we will use the cache key for Go with a blank version number.
+          # Blank version number means latest version of Go.
           key: ${{ runner.os }}-go-v-${{ hashFiles('**/go.sum') }}
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v2
