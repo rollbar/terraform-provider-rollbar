@@ -8,7 +8,6 @@ teams easily. It needs to be configured with the proper credentials before it
 can be used.
 
 
-
 Status
 ------
 
@@ -19,6 +18,17 @@ Status
 [![Maintainability](https://api.codeclimate.com/v1/badges/c5097d1a11f6f2310089/maintainability)](https://codeclimate.com/github/rollbar/terraform-provider-rollbar/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c5097d1a11f6f2310089/test_coverage)](https://codeclimate.com/github/rollbar/terraform-provider-rollbar/test_coverage)
 
+
+Installation
+------------
+
+Download the [latest release](latest-release) of the provider.  Install the
+provider at
+`~/.terraform.d/plugins/github.com/rollbar/rollbar/<PROVIDER_VERSION>/linux_amd64/terraform-provider-rollbar`.
+Refer to _[Requiring Providers](requiring-providers)_ for documentation on
+including the provider in your Terraform project.
+
+Publication of this provider to the Terraform Registry is [planned soon](pub-to-registry).
 
 
 Requirements
@@ -70,12 +80,12 @@ Running `make plan`, `make apply`, or `make destroy` will:
 
 ### Continuous Delivery
 
-We use [semantic-release](https://github.com/semantic-release/semantic-release)
-for continuous delivery. When a PR is merged into `master` the [`Semantic
-Release` workflow](.github/workflows/release.yml) is triggered.  If relevant
+We use [semantic-release](semantic-release) for continuous delivery. When a PR
+is merged into `master` the [`Semantic Release`
+workflow](.github/workflows/release.yml) is triggered.  If relevant
 [Conventional Commits](https://www.conventionalcommits.org/) annotations are
 found in the Git log, semantic-release creates a new release and calls
-[GoReleaser](https://goreleaser.com/) to build the binaries.  
+[GoReleaser](https://goreleaser.com/) to build the binaries.
 
 > This way no human is directly involved in the release process and the releases
 are guaranteed to be [unromantic and
@@ -84,7 +94,7 @@ unsentimental](http://sentimentalversioning.org/).
 > _-- from the semantic-release docs_
 
 
-### Terraform Verions
+### Terraform Versions
 
 Several Makefile targets build the provider inside a Docker container, then
 test it against different versions of Terraform. Environment variable
@@ -108,3 +118,9 @@ Derived from
 [babbel/terraform-provider-rollbar](https://github.com/babbel/terraform-provider-rollbar)
 and
 [jmcvetta/terraform-provider-rollbar](https://github.com/jmcvetta/terraform-provider-rollbar)
+
+
+[latest-release]: https://github.com/rollbar/terraform-provider-rollbar/releases/latest
+[requiring-providers]: https://www.terraform.io/docs/configuration/provider-requirements.html#requiring-providers
+[semantic-release]: https://github.com/semantic-release/semantic-release
+[pub-to-registry]: https://github.com/rollbar/terraform-provider-rollbar/issues/153
