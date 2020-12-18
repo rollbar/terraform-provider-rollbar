@@ -21,10 +21,14 @@ jobs:
       # Restore cache
       - uses: actions/cache@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          # In test.yml we do matrixed version testing.  Included in the version
+          # matrix is the blank string, indicating to test against the latest
+          # version of Go.  Since we are using the latest version of Go here
+          # too, we will use the cache key for Go with a blank version number.
+          key: ${{ runner.os }}-go-v-${{ hashFiles('**/go.sum') }}
 
       # Wait for up to ten minutes for previous run to complete; abort if not
       # done by then.
