@@ -340,6 +340,7 @@ func sweepResourceProject(_ string) error {
 		return err
 	}
 
+	counter := 0
 	for _, p := range projects {
 		l := log.With().
 			Str("name", p.Name).
@@ -351,11 +352,12 @@ func sweepResourceProject(_ string) error {
 				l.Err(err).Send()
 				return err
 			}
-			l.Info().Msg("Deleted project")
+			counter++
+			l.Debug().Msg("Deleted project")
 		}
 	}
 
-	log.Info().Msg("Projects cleanup complete")
+	log.Info().Int("count", counter).Msg("Projects cleanup complete")
 	return nil
 }
 

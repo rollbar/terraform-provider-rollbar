@@ -890,25 +890,32 @@ func sweepResourceUser(_ string) error {
 			everyoneTeamID = t.ID
 		}
 	}
-	log.Debug().Int("everyone_team_id", everyoneTeamID).Send()
 
-	// Remove users from Everyone team, thereby removing them from the account.
+	count := 0
 	for _, u := range users {
-		// Used for registered user acceptance tests.
+		// We're only interested in test users
+		if !strings.HasPrefix(u.Username, "tf-acc-test-") {
+			continue
+		}
+		// Ignore this user, because it is required for acceptance tests that
+		// involve a registered user.
 		if u.Username == "tf-acc-test-rollbar-provider" {
 			continue
 		}
 
-		// Disposable users
-		if strings.HasPrefix(u.Username, "tf-acc-test-") {
-			err = c.RemoveUserFromTeam(u.ID, everyoneTeamID)
-		}
+		// Remove the user from Everyone team, thereby removing it from the account.
+		err = c.RemoveUserFromTeam(u.ID, everyoneTeamID)
 		if err != nil {
 			log.Err(err).Send()
 			return err
 		}
+		count++
+		log.Debug().
+			Int("user_id", u.ID).
+			Str("username", u.Username).
+			Msg("Removed user")
 	}
 
-	log.Info().Msg("Users cleanup complete")
+	log.Info().Int("count", count).Msg("Users cleanup complete")
 	return nil
 }
