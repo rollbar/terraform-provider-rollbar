@@ -36,6 +36,7 @@ import (
 	"testing"
 )
 
+// TestListProjects tests listing Rollbar projects.
 func (s *Suite) TestListProjects() {
 	u := s.client.BaseURL + pathProjectList
 
@@ -71,6 +72,7 @@ func (s *Suite) TestListProjects() {
 	})
 }
 
+// TestCreateProject tests creating a Rollbar project.
 func (s *Suite) TestCreateProject() {
 	u := s.client.BaseURL + pathProjectCreate
 	name := "baz"
@@ -97,6 +99,7 @@ func (s *Suite) TestCreateProject() {
 	})
 }
 
+// TestReadProject tests reading a Rollbar project.
 func (s *Suite) TestReadProject() {
 	expected := Project{
 		AccountID:    317418,
@@ -128,6 +131,7 @@ func (s *Suite) TestReadProject() {
 	s.Equal(ErrNotFound, err)
 }
 
+// TestDeleteProject tests deleting a Rollbar project.
 func (s *Suite) TestDeleteProject() {
 	delID := gofakeit.Number(0, 1000000)
 	urlDel := s.client.BaseURL + pathProjectDelete
@@ -143,6 +147,8 @@ func (s *Suite) TestDeleteProject() {
 		return s.client.DeleteProject(delID)
 	})
 }
+
+// TestFindProjectTeamIDs tests finding the team IDs for a Rollbar project.
 func (s *Suite) TestFindProjectTeamIDs() {
 	var u string // URL
 	var r httpmock.Responder
@@ -186,6 +192,8 @@ func (s *Suite) TestFindProjectTeamIDs() {
 	})
 }
 
+// TestUpdateProjectTeams tests updating the set of teams attached to a Rollbar
+// project.
 func TestUpdateProjectTeams(t *testing.T) {
 	// Setup go-vcr
 	httpmock.Deactivate()
