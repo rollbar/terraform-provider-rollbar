@@ -12,7 +12,7 @@
     },
     {
       "id": 153650,
-      "from_user_id": 5325,
+      "from_user_id": null,
       "team_id": 676971,
       "to_email": "jason.mcvetta+test4@gmail.com",
       "status": "canceled",

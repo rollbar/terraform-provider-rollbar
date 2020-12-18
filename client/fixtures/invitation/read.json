@@ -3,7 +3,7 @@
     "result": {
         "date_created": 1603192477,
         "date_redeemed": null,
-        "from_user_id": 5325,
+        "from_user_id": null,
         "id": 153650,
         "status": "pending",
         "team_id": 676971,
