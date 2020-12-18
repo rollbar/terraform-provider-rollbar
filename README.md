@@ -84,7 +84,7 @@ unsentimental](http://sentimentalversioning.org/).
 > _-- from the semantic-release docs_
 
 
-### Terraform Verions
+### Terraform Versions
 
 Several Makefile targets build the provider inside a Docker container, then
 test it against different versions of Terraform. Environment variable
