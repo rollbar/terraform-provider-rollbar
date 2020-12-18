@@ -76,10 +76,12 @@ jobs:
       # Restore cache
       - uses: actions/cache@v2
         with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          # Blank version number means latest version of Go.
+          key: ${{ runner.os }}-go-v-${{ hashFiles('**/go.sum') }}
+
 
       # Install Provider
       - name: Install
