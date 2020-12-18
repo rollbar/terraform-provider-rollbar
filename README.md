@@ -53,6 +53,8 @@ Terraform via gRPC.  Anything that child process writes to stdout/stderr is
 lost.  So if we want debug logging we must write to a file.
 
 
+# Development
+
 ### Dev Scripts
 
 Running `make plan`, `make apply`, or `make destroy` will:
@@ -61,6 +63,22 @@ Running `make plan`, `make apply`, or `make destroy` will:
 * Run `terraform <plan|apply|destroy>` in the `examples` folder with debug
   logging enabled.
 * Display the logs on completion.
+
+
+### Continuous Delivery
+
+We use [semantic-release](https://github.com/semantic-release/semantic-release)
+for continuous delivery. When a PR is merged into `master` the [`Semantic
+Release` workflow](.github/workflows/release.yml) is triggered.  If relevant
+[Conventional Commits](https://www.conventionalcommits.org/) annotations are
+found in the Git log, semantic-release creates a new release and calls
+[GoReleaser](https://goreleaser.com/) to build the binaries.  
+
+> This way no human is directly involved in the release process and the releases
+are guaranteed to be [unromantic and
+unsentimental](http://sentimentalversioning.org/).
+>
+> _-- from the semantic-release docs_
 
 
 ### Terraform Verions
