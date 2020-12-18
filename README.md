@@ -28,6 +28,8 @@ Requirements
   0.14.x
 - [Go](https://golang.org/doc/install) 1.14.x, 1.15.x
 
+See [`Quick Tests` workflow](.github/workflows/test.yml) for details of version compatibility testing.
+
 
 Usage
 -----
