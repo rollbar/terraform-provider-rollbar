@@ -25,7 +25,7 @@ Installation
 Download the [latest release](latest-release) of the provider.  Install the
 provider at
 `~/.terraform.d/plugins/github.com/rollbar/rollbar/<PROVIDER_VERSION>/linux_amd64/terraform-provider-rollbar`.
-Refer to _[Requiring Providers](requiring-providers) for documentation on
+Refer to _[Requiring Providers](requiring-providers)_ for documentation on
 including the provider in your Terraform project.
 
 
