@@ -75,6 +75,15 @@ jobs:
     #    Example: mvn compile, or npm install or pip install goes here
     # 3. Invoke Scan with the github token. Leave the workspace empty to use relative url
 
+    # Restore cache
+    - uses: actions/cache@v2
+      with:
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+        # Blank version number means latest version of Go.
+        key: ${{ runner.os }}-go-v-${{ hashFiles('**/go.sum') }}
+
     - name: Perform Scan
       uses: ShiftLeftSecurity/scan-action@master
       env:
