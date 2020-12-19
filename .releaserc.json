@@ -1,4 +1,5 @@
 {
+  "branches": ["master", "goreleaser-build-more-platforms"],
   "plugins": [
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
