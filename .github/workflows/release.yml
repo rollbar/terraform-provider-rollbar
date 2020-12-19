@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - master
+      # FIXME: remove after development!
+      - goreleaser-build-more-platforms
+
 jobs:
   release:
     name: Semantic Release
