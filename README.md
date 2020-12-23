@@ -93,6 +93,9 @@ unsentimental](http://sentimentalversioning.org/).
 >
 > _-- from the semantic-release docs_
 
+After a new release has been created by semantic-release, it may take up to 10
+minutes for the provider binaries to be built and attached by GoReleaser.
+
 
 ### Terraform Versions
 
