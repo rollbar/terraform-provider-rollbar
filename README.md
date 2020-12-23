@@ -4,8 +4,9 @@ Terraform provider for Rollbar
 The Rollbar provider allows Terraform to control resources on
 [Rollbar.com](https://rollbar.com), the Continuous Code Improvement Platform.
 
-The provider allows you to manage your Rollbar projects, users, and teams with
-ease. It must be configured with the proper credentials before it can be used.
+The provider allows you to manage your Rollbar projects, tokens, users, and
+teams with ease. It must be configured with the proper credentials before it can
+be used.
 
 
 Status
