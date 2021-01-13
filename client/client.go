@@ -29,7 +29,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
 	"net/http"
-	"strings"
 )
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
