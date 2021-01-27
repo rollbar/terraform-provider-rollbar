@@ -1,8 +1,8 @@
 name: Semantic Release
 on:
   push:
-    branches:
-      - master
+#    branches:
+#      - master
 jobs:
   release:
     name: Semantic Release
