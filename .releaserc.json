@@ -13,7 +13,6 @@
   ],
   "preset": "conventionalcommits",
   "branches": [
-      "master",
-      "build-before-release"
+      "master"
   ]
 }
