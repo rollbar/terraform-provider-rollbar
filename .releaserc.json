@@ -10,5 +10,9 @@
       }
     ]
   ],
-  "preset": "conventionalcommits"
+  "preset": "conventionalcommits",
+  "branches": [
+      "master",
+      "build-before-release"
+  ]
 }
