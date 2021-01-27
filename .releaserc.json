@@ -6,7 +6,7 @@
     "@semantic-release/git",
     ["@semantic-release/exec",
       {
-        "publishCmd": "goreleaser release --rm-dist"
+        "publishCmd": "goreleaser build --rm-dist && goreleaser release --rm-dist"
       }
     ]
   ],
