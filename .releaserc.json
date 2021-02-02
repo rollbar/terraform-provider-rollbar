@@ -9,6 +9,11 @@
         "prepareCmd": "goreleaser build --rm-dist --snapshot; rm -rv dist",
         "publishCmd": "goreleaser release --rm-dist"
       }
+    ],
+    ["@semantic-release/npm",
+      {
+        "npmPublish": false
+      }
     ]
   ],
   "preset": "conventionalcommits",
