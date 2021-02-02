@@ -18,6 +18,10 @@
   ],
   "preset": "conventionalcommits",
   "branches": [
-      "master"
+      "master",
+      {
+        "name":  "semantic-release-updates-package.json-version-number",
+        "channel": "experiment"
+      }
   ]
 }
