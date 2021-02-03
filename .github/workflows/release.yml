@@ -56,6 +56,11 @@ jobs:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
         run: npx semantic-release
 
+      - uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+          terraform_version: "${{ matrix.terraform }}"
+
       - name: Sleep for 30 seconds
         uses: jakejarvis/wait-action@master
         with:
