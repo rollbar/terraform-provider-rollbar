@@ -27,6 +27,7 @@
 terraform.tfstate*
 *.tfvars
 .terraform/
+.terraform.lock.hcl
 
 # ShiftLeft Scan reports
 reports/
