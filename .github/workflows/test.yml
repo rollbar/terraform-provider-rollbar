@@ -91,6 +91,11 @@ jobs:
         if: ${{ startsWith(matrix.terraform, '0.12') }}
         run: make install012
 
+      # Setup Terraform configuration for local testing
+      - name: Overwrite configuration to use locally built provider
+        run: cp provider.tf.local provider.tf
+        working-directory: ./example
+
       # Verify Terraform plan does not error
       - name: Initialize Terraform
         run: terraform init
