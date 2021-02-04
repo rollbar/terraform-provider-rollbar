@@ -70,6 +70,7 @@ _terraform_cleanup:
 	rm -vrf example/.terraform /tmp/terraform-provider-rollbar.log
 _terraform_init:
 	# Initialize terraform
+	(cd example && cp -v provider.tf.local provider.tf)
 	(cd example && terraform init)
 _terraform_log:
 	# Print the debug log
