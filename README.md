@@ -55,16 +55,6 @@ resource "rollbar_project" "frontend" {
 See [the docs](docs/index.md) for detailed usage information.
 
 
-Development Requirements
-------------------------
-
-- [Terraform](https://www.terraform.io/downloads.html) 0.12.x, 0.13.x, or
-  0.14.x
-- [Go](https://golang.org/doc/install) 1.14.x, 1.15.x
-
-See [`Quick Tests` workflow](.github/workflows/test.yml) for details of version compatibility testing.
-
-
 Debugging
 ---------
 
@@ -86,11 +76,32 @@ lost.  So if we want debug logging we must write to a file.
 Development
 -----------
 
-### Dev Scripts
+### Requirements
+
+- [Terraform](https://www.terraform.io/downloads.html) 0.12.x, 0.13.x, or
+  0.14.x
+- [Go](https://golang.org/doc/install) 1.14.x, 1.15.x
+
+See [`Quick Tests` workflow](.github/workflows/test.yml) for details of version compatibility testing.
+
+
+
+### Building locally
+
+Run `make build` to build the provider from source.
+
+Run `make install` to build from source then install the provider locally for
+usage by Terraform.
+
+Folder [`./example`](./example) contains example Terraform configuration. To
+use this config with a locally built provider, copy file `provider.tf.local` to
+overwrite file `provider.tf`. Then run `terraform init` to initialize Terraform
+with the provider.
 
 Running `make plan`, `make apply`, or `make destroy` will:
 * Build the provider from your working directory, and install for local
   Terraform.
+* Setup Terraform configuration to use the freshly built provider
 * Run `terraform <plan|apply|destroy>` in the `examples` folder with debug
   logging enabled.
 * Display the logs on completion.
