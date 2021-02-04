@@ -29,7 +29,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
 	"net/http"
-	"strings"
 )
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
@@ -89,20 +88,6 @@ func errorFromResponse(resp *resty.Response) error {
 	switch resp.StatusCode() {
 	case http.StatusOK, http.StatusCreated:
 		return nil
-	case http.StatusForbidden:
-		// Workaround for known API bug:
-		// https://github.com/rollbar/terraform-provider-rollbar/issues/79
-		er := resp.Error().(*ErrorResult)
-		if strings.Contains(er.Message, "not found in this account") {
-			log.Debug().
-				Str("status", resp.Status()).
-				Int("status_code", resp.StatusCode()).
-				Str("error_message", er.Message).
-				Int("error_code", er.Err).
-				Msg("Workaround entity not found API bug")
-			return ErrNotFound
-		}
-		fallthrough
 	case http.StatusUnauthorized:
 		return ErrUnauthorized
 	case http.StatusNotFound:
