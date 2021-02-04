@@ -20,32 +20,49 @@ Status
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c5097d1a11f6f2310089/test_coverage)](https://codeclimate.com/github/rollbar/terraform-provider-rollbar/test_coverage)
 
 
-Installation
-------------
+Usage
+-----
 
-Download the [latest release](latest-release) of the provider.  Install the
-provider at
-`~/.terraform.d/plugins/github.com/rollbar/rollbar/<PROVIDER_VERSION>/linux_amd64/terraform-provider-rollbar`.
-Refer to _[Requiring Providers](requiring-providers)_ for documentation on
-including the provider in your Terraform project.
+Example usage:
 
-Publication of this provider to the Terraform Registry is [planned soon](pub-to-registry).
+```hcl
+# Install Rollbar provider from Terraform Registry
+terraform {
+  required_providers {
+    rollbar = {
+      source  = "rollbar/rollbar"
+    }
+  }
+}
+
+# Configure the Rollbar provider
+provider "rollbar" {
+  api_key = "YOUR_API_KEY"
+}
+
+# Create a team
+resource "rollbar_team" "frontend" {
+  name = "frontend-team"
+}
+
+# Create a project and assign the team
+resource "rollbar_project" "frontend" {
+  name         = "react-frontend"
+  team_ids = [rollbar_team.frontend.id]
+}
+```
+
+See [the docs](docs/index.md) for detailed usage information.
 
 
-Requirements
-------------
+Development Requirements
+------------------------
 
 - [Terraform](https://www.terraform.io/downloads.html) 0.12.x, 0.13.x, or
   0.14.x
 - [Go](https://golang.org/doc/install) 1.14.x, 1.15.x
 
 See [`Quick Tests` workflow](.github/workflows/test.yml) for details of version compatibility testing.
-
-
-Usage
------
-
-[See the docs for usage information.](docs/index.md)
 
 
 Debugging
