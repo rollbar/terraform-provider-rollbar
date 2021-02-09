@@ -54,7 +54,7 @@ const (
 	ScopePostClientItem = Scope("post_client_item")
 )
 
-// ProjectAccessTokenUpdateArgs encapsulates arguments for creating a Rollbar
+// ProjectAccessTokenCreateArgs encapsulates arguments for creating a Rollbar
 // project access token.
 type ProjectAccessTokenCreateArgs struct {
 	ProjectID            int     `json:"-"`
@@ -252,6 +252,7 @@ func (c *RollbarAPIClient) ReadProjectAccessTokenByName(projectID int, name stri
 	return pat, ErrNotFound
 }
 
+// DeleteProjectAccessToken deletes a Rollbar project access token.
 func (c *RollbarAPIClient) DeleteProjectAccessToken(projectID int, token string) error {
 	l := log.With().
 		Int("projectID", projectID).

@@ -35,7 +35,7 @@ func dataSourceProject() *schema.Resource {
 		Read: dataSourceProjectRead,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Description: "Human readable name for the project",
 				Type:        schema.TypeString,
 				Required:    true,

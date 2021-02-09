@@ -87,7 +87,7 @@ func (s *AccSuite) checkProjectInProjectDataSource(rn string) resource.TestCheck
 			// Does our project appear as expected in the data source output?
 			//
 			// FIXME: This relies on the API always returning projects in ascending
-			//  order of ID.  This API behavior is not documented or guarnateed.
+			//  order of ID.  This API behavior is not documented or guaranteed.
 			//
 			// Construct the name of the TF resource that should represent the
 			// newly-created Rollbar project. Indexes begin at 0, so we must
