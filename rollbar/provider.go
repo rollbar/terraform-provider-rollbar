@@ -20,9 +20,7 @@
  * SOFTWARE.
  */
 
-/*
- * Package rollbar implements a Terraform provider for the Rollbar API.
- */
+// Package rollbar implements a Terraform provider for the Rollbar API.
 package rollbar
 
 import (
