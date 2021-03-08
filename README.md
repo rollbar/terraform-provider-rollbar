@@ -97,7 +97,8 @@ usage by Terraform.
 Folder [`./example`](./example) contains example Terraform configuration. To
 use this config with a locally built provider, copy file `provider.tf.local` to
 overwrite file `provider.tf`. Then run `terraform init` to initialize Terraform
-with the provider.
+with the provider. See [example configuration README](./example/README.md) for
+more detail.
 
 Running `make plan`, `make apply`, or `make destroy` will:
 * Build the provider from your working directory, and install for local
@@ -106,6 +107,31 @@ Running `make plan`, `make apply`, or `make destroy` will:
 * Run `terraform <plan|apply|destroy>` in the `examples` folder with debug
   logging enabled.
 * Display the logs on completion.
+
+
+### Testing
+
+This provider includes both unit tests, and acceptance tests that run with a
+live Rollbar account.
+
+To enable debug output when running tests:
+
+```shell
+$ export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1
+```
+
+To run the unit tests:
+
+```shell
+$ make test
+```
+
+To run the acceptance tests:
+
+```shell
+$ export ROLLBAR_API_KEY=<your API key>
+$ make testacc
+```
 
 
 ### Continuous Delivery
