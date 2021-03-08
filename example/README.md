@@ -5,21 +5,35 @@ This folder contains example Terraform configuration, demonstrating the usage
 and capabilities of `terraform-provider-rollbar`.
 
 
+Usage Instructions
+------------------
+
+The following are step-by-step instructions for demonstrating
+`terraform-provider-rollbar` using the example Terraform configuration files.
+
 -----
 
-Clone entire sales-engineering repo
+1. First, change directories to the repo checkout:
 
-cd TerraForm dir
+```shell
+cd terraform-provider-rollbar
+```
 
-in your account under 'Account Access Tokens' create a new token and grant it 'write access' you don't have to do this but i did in this example
+1. In your Rollbar account, under _Account Access Tokens_, create a new token and
+grant it _write access_.
 
-Then run
+
+3. Install terraform. On Mac, Brew is the easiest way (assuming you have Brew
+installed).  See [terraform installation
+docs](https://learn.hashicorp.com/tutorials/terraform/install-cli) for
+instructions on all supported platforms.
+
+```shell
+brew install terraform
+```
+
 
 cd demo
-
-install terraform (using brew is the easiest way assuming you have brew installed)
-
-brew install terraform
 
 export ROLLBAR_API_KEY=<yourNewToken>
 
