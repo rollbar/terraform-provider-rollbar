@@ -97,7 +97,8 @@ usage by Terraform.
 Folder [`./example`](./example) contains example Terraform configuration. To
 use this config with a locally built provider, copy file `provider.tf.local` to
 overwrite file `provider.tf`. Then run `terraform init` to initialize Terraform
-with the provider.
+with the provider. See [example configuration README](./example/README.md) for
+more detail.
 
 Running `make plan`, `make apply`, or `make destroy` will:
 * Build the provider from your working directory, and install for local
