@@ -14,6 +14,7 @@ The following are step-by-step instructions for demonstrating
 -----
 
 1. First, change directories to the repo checkout:
+   
    ```shell
    cd terraform-provider-rollbar
    ```
@@ -25,26 +26,49 @@ The following are step-by-step instructions for demonstrating
    installed).  See [terraform installation
    docs](https://learn.hashicorp.com/tutorials/terraform/install-cli) for
    instructions on all supported platforms.
+   
    ```shell
    brew install terraform
    ```
    
 1. Change directories into example folder.
+   
    ```shell
    cd example
    ```
 
+1. Make your Rollbar API key available as an environment variable.
 
-export ROLLBAR_API_KEY=<yourNewToken>
+   ```shell
+   export ROLLBAR_API_KEY=<yourNewToken>
+   ```
 
-terraform init
+1. Initialize Terraform - the Rollbar provider will be automatically downloaded and installed.
 
-terraform plan
+   ```shell
+   terraform init
+   ```
 
-terraform apply (enter yes if you like the plan)
+1. Examine Terraform's plan to create resources on Rollbar:
 
-See in RB UI
+   ```shell
+   terraform plan
+   ```
 
-To delete
+1. Apply the plan - meaning Terraform will create the resources it described in the plan.
 
-terraform destroy (enter yes to confirm)
+   ```shell
+   terraform apply  # enter yes if you like the plan
+   ```
+
+1. Check changes in Rollbar web UI.
+
+
+-----
+
+To delete the resources created by Terraform, run:
+
+```shell
+terraform destroy  # enter yes to confirm
+
+```
