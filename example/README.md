@@ -19,7 +19,7 @@ The following are step-by-step instructions for demonstrating
 cd terraform-provider-rollbar
 ```
 
-1. In your Rollbar account, under _Account Access Tokens_, create a new token and
+2. In your Rollbar account, under _Account Access Tokens_, create a new token and
 grant it _write access_.
 
 
