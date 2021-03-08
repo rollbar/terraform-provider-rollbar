@@ -29,8 +29,11 @@ instructions on all supported platforms.
 brew install terraform
 ```
 
+1. Change directories into example folder.
+```shell
+cd example
+```
 
-cd demo
 
 export ROLLBAR_API_KEY=<yourNewToken>
 
