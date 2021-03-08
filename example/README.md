@@ -17,8 +17,10 @@ The following are step-by-step instructions for demonstrating
    ```shell
    cd terraform-provider-rollbar
    ```
+   
 1. In your Rollbar account, under _Account Access Tokens_, create a new token and
    grant it _write access_.
+   
 1. Install terraform. On Mac, Brew is the easiest way (assuming you have Brew
    installed).  See [terraform installation
    docs](https://learn.hashicorp.com/tutorials/terraform/install-cli) for
@@ -26,6 +28,7 @@ The following are step-by-step instructions for demonstrating
    ```shell
    brew install terraform
    ```
+   
 1. Change directories into example folder.
    ```shell
    cd example
