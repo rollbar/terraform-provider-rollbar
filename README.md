@@ -128,6 +128,7 @@ $ make test
 To run the acceptance tests:
 
 ```shell
+$ export ROLLBAR_API_KEY=<your API key>
 $ make testacc
 ```
 
