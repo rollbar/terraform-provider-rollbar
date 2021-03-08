@@ -113,6 +113,12 @@ Running `make plan`, `make apply`, or `make destroy` will:
 This provider includes both unit tests, and acceptance tests that run with a
 live Rollbar account.
 
+To enable debug output when running tests:
+
+```shell
+$ export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1  # Enable debug output
+```
+
 To run the unit tests:
 
 ```shell
@@ -122,7 +128,6 @@ $ make test
 To run the acceptance tests:
 
 ```shell
-$ export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1  # Enable debug output
 $ make testacc
 ```
 
