@@ -116,7 +116,7 @@ live Rollbar account.
 To enable debug output when running tests:
 
 ```shell
-$ export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1  # Enable debug output
+$ export TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1
 ```
 
 To run the unit tests:
