@@ -24,6 +24,7 @@ package rollbar
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -284,7 +285,7 @@ func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID i
 	// Registered user team memberships
 	if userID != 0 {
 		var teams []client.Team
-		teams, err = c.ListUserCustomTeams(userID)
+		teams, err = c.ListUserTeams(userID)
 		if err != nil && err != client.ErrNotFound {
 			l.Err(err).Send()
 			return
