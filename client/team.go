@@ -373,12 +373,12 @@ func (c *RollbarAPIClient) RemoveTeamFromProject(teamID, projectID int) error {
  * Convenience functions
  */
 
-// filterSystemTeams filters out the system team "Everyone" from a
+// filterSystemTeams filters out the system teams "Everyone" and "Owners" from a
 // list of Rollbar teams.
 func filterSystemTeams(teams []Team) []Team {
 	var customTeams []Team
 	for _, t := range teams {
-		if t.Name == "Everyone" {
+		if t.Name == "Everyone" || t.Name == "Owners" {
 			continue
 		}
 		customTeams = append(customTeams, t)

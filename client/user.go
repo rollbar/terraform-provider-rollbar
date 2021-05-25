@@ -23,8 +23,9 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 // User represents a Rollbar user.
@@ -135,11 +136,18 @@ func (c *RollbarAPIClient) ListUserTeams(userID int) (teams []Team, err error) {
 }
 
 // ListUserCustomTeams lists a Rollbar user's custom defined teams, excluding
-// system teams "Everyone" and "Owners".
+// system team "Everyone".
 func (c *RollbarAPIClient) ListUserCustomTeams(userID int) (teams []Team, err error) {
+	var customTeams []Team
 	teams, err = c.ListUserTeams(userID)
-	teams = filterSystemTeams(teams)
-	return
+
+	for _, t := range teams {
+		if t.Name == "Everyone" {
+			continue
+		}
+		customTeams = append(customTeams, t)
+	}
+	return customTeams, err
 }
 
 /*
