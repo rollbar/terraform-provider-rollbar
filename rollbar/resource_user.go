@@ -24,6 +24,7 @@ package rollbar
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -126,7 +127,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected[id] = true
 	}
 
-	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID)
+	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID, true)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -240,7 +241,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 	// Leave teams
 	if args.userID != 0 {
 		l.Debug().Msg("Removing registered user from teams")
-		currentTeams, _ := args.client.ListUserCustomTeams(args.userID)
+		currentTeams, _ := args.client.ListUserTeams(args.userID)
 		for _, t := range currentTeams {
 			if teamsToLeave[t.ID] {
 				err := args.client.RemoveUserFromTeam(args.userID, t.ID)
@@ -274,7 +275,7 @@ func resourceUserRemoveTeams(args resourceUserAddRemoveTeamsArgs) error {
 }
 
 // resourceUserCurrentTeams returns user's current team memberships.
-func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID int) (currentTeams map[int]bool, err error) {
+func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID int, filterSysTeams bool) (currentTeams map[int]bool, err error) {
 	l := log.With().
 		Str("email", email).
 		Int("user_id", userID).
@@ -284,7 +285,11 @@ func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID i
 	// Registered user team memberships
 	if userID != 0 {
 		var teams []client.Team
-		teams, err = c.ListUserCustomTeams(userID)
+		if filterSysTeams {
+			teams, err = c.ListUserCustomTeams(userID)
+		} else {
+			teams, err = c.ListUserTeams(userID)
+		}
 		if err != nil && err != client.ErrNotFound {
 			l.Err(err).Send()
 			return
@@ -347,7 +352,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		mustSet(d, "status", "registered")
 	}
 
-	currentTeams, err := resourceUserCurrentTeams(c, email, userID)
+	currentTeams, err := resourceUserCurrentTeams(c, email, userID, true)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -387,7 +392,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		userID, _ = c.FindUserID(email)
 	}
 
-	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID)
+	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID, false)
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
