@@ -245,7 +245,7 @@ func (s *AccSuite) checkTeam(rn, teamName, accessLevel string) resource.TestChec
 	return func(ts *terraform.State) error {
 		id, err := s.getResourceIDInt(ts, rn)
 		s.Nil(err)
-		c := s.provider.Meta().(*client.RollbarAPIClient)
+		c := s.provider.Meta().([]*client.RollbarAPIClient)[0]
 		t, err := c.ReadTeam(id)
 		s.Nil(err)
 		s.Equal(teamName, t.Name, "team name from API does not match team name in Terraform config")

@@ -139,7 +139,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		Logger()
 	l.Debug().Msg("Creating new project access token")
 
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
 		ProjectID:            projectID,
@@ -167,7 +167,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 		Logger()
 	l.Debug().Msg("Reading resource project access token")
 
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -200,7 +200,7 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	}
 	l := log.With().Interface("args", args).Logger()
 	l.Debug().Msg("Updating resource project access token")
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	err := c.UpdateProjectAccessToken(args)
 	if err != nil {
 		log.Err(err).Send()
@@ -220,7 +220,7 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 		Logger()
 	l.Debug().Msg("Deleting resource project access token")
 
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
 	if err != nil {
 		return diag.FromErr(err)

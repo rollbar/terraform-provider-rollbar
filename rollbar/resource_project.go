@@ -92,7 +92,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	l := log.With().Str("name", name).Logger()
 	l.Info().Msg("Creating new Rollbar project resource")
 
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	p, err := c.CreateProject(name)
 	if err != nil {
 		l.Err(err).Send()
@@ -160,7 +160,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		Logger()
 	l.Info().Msg("Reading Rollbar project resource")
 
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	proj, err := c.ReadProject(projectID)
 	if err == client.ErrNotFound {
 		l.Debug().Msg("Project not found on Rollbar - removing from state")
@@ -202,7 +202,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		Ints("team_ids", teamIDs).
 		Logger()
 	l.Debug().Msg("Updating rollbar_project resource")
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	err := c.UpdateProjectTeams(projectID, teamIDs)
 	if err != nil {
 		l.Err(err).Msg("Error updating rollbar_project resource")
@@ -219,7 +219,7 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 		Int("projectID", projectID).
 		Logger()
 	l.Info().Msg("Deleting rollbar_project resource")
-	c := m.(*client.RollbarAPIClient)
+	c := m.([]*client.RollbarAPIClient)[0]
 	err := c.DeleteProject(projectID)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_project resource")
