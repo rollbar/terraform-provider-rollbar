@@ -50,7 +50,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_PROJECT_API_KEY", nil),
-				Description: "Rollbar API authentication token. Value will be sourced from environment variable `ROLLBAR_PROJECT_API_KEY` if set.",
+				Description: "Rollbar API authentication token (project level). Value will be sourced from environment variable `ROLLBAR_PROJECT_API_KEY` if set.",
 			},
 			schemaKeyBaseURL: {
 				Type:        schema.TypeString,

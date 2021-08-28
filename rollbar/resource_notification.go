@@ -24,6 +24,7 @@ package rollbar
 
 import (
 	"context"
+	"errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -31,11 +32,15 @@ import (
 	"strconv"
 )
 
+var configMap = map[string][]string{"email": {"users", "teams"},
+	"slack":     {"message_template", "channel", "show_message_buttons"},
+	"pagerduty": {"service_key"}}
+
 // resourceTeam constructs a resource representing a Rollbar team.
 func resourceNotification() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceNotificationCreateOrUpdate,
-		UpdateContext: resourceNotificationCreateOrUpdate,
+		CreateContext: resourceNotificationCreate,
+		UpdateContext: resourceNotificationUpdate,
 		ReadContext:   resourceNotificationRead,
 		DeleteContext: resourceNotificationDelete,
 
@@ -96,20 +101,49 @@ func resourceNotification() *schema.Resource {
 						"users": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Users",
+							Description: "Users (email)",
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
 						"teams": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Teams",
+							Description: "Teams (email)",
 							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+						"message_template": {
+							Description: "Message template (slack)",
+							Type:        schema.TypeString,
+							Optional:    true,
+						},
+						"channel": {
+							Description: "Channel (slack)",
+							Type:        schema.TypeString,
+							Optional:    true,
+						},
+						"show_message_buttons": {
+							Description: "Show message buttons (slack)",
+							Type:        schema.TypeString,
+							Optional:    true,
+						},
+						"service_key": {
+							Description: "Service key (pagerduty)",
+							Type:        schema.TypeString,
+							Optional:    true,
 						},
 					},
 				},
 			},
 		},
 	}
+}
+
+func find(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }
 
 func parseSet(setName string, d *schema.ResourceData) map[string]interface{} {
@@ -125,7 +159,7 @@ func parseSet(setName string, d *schema.ResourceData) map[string]interface{} {
 			}
 		}
 	}
-	return nil
+	return map[string]interface{}{}
 }
 
 func parseRule(d *schema.ResourceData) (string, interface{}) {
@@ -143,65 +177,106 @@ func parseRule(d *schema.ResourceData) (string, interface{}) {
 	return trigger, filters
 }
 
-func resourceNotificationCreateOrUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func cleanConfig(channel string, config map[string]interface{}) map[string]interface{} {
+	returnSetMap := map[string]interface{}{}
+	for key, v := range config {
+		if find(configMap[channel], key) {
+			returnSetMap[key] = v
+		}
+	}
+	return returnSetMap
+}
+
+func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	trigger, filters := parseRule(d)
 	channel := d.Get("channel").(string)
 	config := parseSet("config", d)
+	config = cleanConfig(channel, config)
 	l := log.With().Str("channel", channel).Logger()
 
-	l.Info().Msg("Creating or updating rollbar_notification resource")
+	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.([]*client.RollbarAPIClient)[1]
-	p, err := c.CreateOrUpdateNotification(channel, filters, trigger, config)
+	n, err := c.CreateNotification(channel, filters, trigger, config)
 	if err != nil {
 		l.Err(err).Send()
 		d.SetId("") // removing from the state
 		return diag.FromErr(err)
 	}
-	l = l.With().Int("id", p.ID).Logger()
+	l = l.With().Int("id", n.ID).Logger()
 
-	d.SetId(strconv.Itoa(p.ID))
-	l.Debug().Msg("Successfully created or updated Rollbar notification resource")
+	d.SetId(strconv.Itoa(n.ID))
+	l.Debug().Msg("Successfully created rollbar_notification resource")
 
+	return nil
+}
+
+func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+
+	id := mustGetID(d)
+	trigger, filters := parseRule(d)
+	channel := d.Get("channel").(string)
+	config := parseSet("config", d)
+	config = cleanConfig(channel, config)
+	l := log.With().Str("channel", channel).Logger()
+
+	l.Info().Msg("Creating rollbar_notification resource")
+	l.Print(config)
+
+	c := m.([]*client.RollbarAPIClient)[1]
+	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
+
+	if err != nil {
+		l.Err(err).Send()
+		d.SetId("") // removing from the state
+		return diag.FromErr(err)
+	}
+	if n.ID != id {
+		err = errors.New("IDs are not equal")
+		l.Err(err).Send()
+		d.SetId("") // removing from the state
+		return diag.FromErr(err)
+	}
+	l = l.With().Int("id", n.ID).Logger()
+
+	l.Debug().Msg("Successfully updated Rollbar notification resource")
 	return nil
 }
 
 func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := mustGetID(d)
+	channel := d.Get("channel").(string)
 	l := log.With().
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
-	//c := m.([]*client.RollbarAPIClient)[0])
-	//t, err := c.ReadTeam(id)
-	//if err == client.ErrNotFound {
-	//d.SetId("")
-	//l.Info().Msg("Team not found - removed from state")
-	//return nil
-	//}
-	//if err != nil {
-	//	l.Err(err).Msg("error reading rollbar_team resource")
-	//	return diag.FromErr(err)
-	//}
-	//mustSet(d, "name", t.Name)
-	//mustSet(d, "account_id", t.AccountID)
-	//mustSet(d, "access_level", t.AccessLevel)
-	//l.Debug().Msg("Successfully read rollbar_team resource")
+	c := m.([]*client.RollbarAPIClient)[1]
+	err := c.ReadNotification(id, channel)
+	if err == client.ErrNotFound {
+		d.SetId("")
+		l.Info().Msg("Notification not found - removed from state")
+		return nil
+	}
+	if err != nil {
+		l.Err(err).Msg("error reading rollbar_notification resource")
+		return diag.FromErr(err)
+	}
+	l.Debug().Msg("Successfully read rollbar_notification resource")
 	return nil
 }
 
 func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := mustGetID(d)
-
+	channel := d.Get("channel").(string)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
-	//c := m.([]*client.RollbarAPIClient)[0])
-	//err := c.DeleteTeam(id)
-	//if err != nil {
-	//	l.Err(err).Msg("Error deleting rollbar_team resource")
-	//	return diag.FromErr(err)
-	//}
-	//l.Debug().Msg("Successfully deleted rollbar_team resource")
+	c := m.([]*client.RollbarAPIClient)[1]
+	err := c.DeleteNotification(id, channel)
+	if err != nil {
+		l.Err(err).Msg("Error deleting rollbar_notification resource")
+		return diag.FromErr(err)
+	}
+	l.Debug().Msg("Successfully deleted rollbar_notification resource")
 	return nil
 }

@@ -1,0 +1,21 @@
+{
+  "result": {
+    "action": "send_email",
+    "trigger": "new_item",
+    "config": {},
+    "id": 5127954,
+    "filters": [
+      {
+        "operation": "neq",
+        "type": "environment",
+        "value": "production"
+      },
+      {
+        "operation": "eq",
+        "type": "level",
+        "value": "error"
+      }
+    ]
+  },
+  "err": 0
+}
