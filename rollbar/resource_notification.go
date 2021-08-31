@@ -36,7 +36,7 @@ var configMap = map[string][]string{"email": {"users", "teams"},
 	"slack":     {"message_template", "channel", "show_message_buttons"},
 	"pagerduty": {"service_key"}}
 
-// resourceTeam constructs a resource representing a Rollbar team.
+// resourceNotification constructs a resource representing a Rollbar notification.
 func resourceNotification() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNotificationCreate,
@@ -197,7 +197,7 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	l.Info().Msg("Creating rollbar_notification resource")
 
-	c := m.([]*client.RollbarAPIClient)[1]
+	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	n, err := c.CreateNotification(channel, filters, trigger, config)
 	if err != nil {
 		l.Err(err).Send()
@@ -224,7 +224,7 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 	l.Print(config)
 
-	c := m.([]*client.RollbarAPIClient)[1]
+	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
 
 	if err != nil {
@@ -251,7 +251,7 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
-	c := m.([]*client.RollbarAPIClient)[1]
+	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	err := c.ReadNotification(id, channel)
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -271,7 +271,7 @@ func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m i
 	channel := d.Get("channel").(string)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
-	c := m.([]*client.RollbarAPIClient)[1]
+	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	err := c.DeleteNotification(id, channel)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_notification resource")

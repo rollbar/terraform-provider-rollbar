@@ -70,7 +70,7 @@ func (s *AccSuite) configDataSourceProjects() string {
 func (s *AccSuite) checkProjectInProjectDataSource(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
 		// How many projects should we expect in the project list?
-		c := s.provider.Meta().([]*client.RollbarAPIClient)[0]
+		c := s.provider.Meta().(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 		pl, err := c.ListProjects()
 		s.Nil(err)
 		expectedCount := strconv.Itoa(len(pl))

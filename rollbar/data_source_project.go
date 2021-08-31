@@ -74,7 +74,7 @@ func dataSourceProject() *schema.Resource {
 func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
-	c := meta.([]*client.RollbarAPIClient)[0]
+	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	pl, err := c.ListProjects()
 	if err != nil {
 		return err

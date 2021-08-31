@@ -84,7 +84,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	baseURL := d.Get(schemaKeyBaseURL).(string)
 	c := client.NewClient(baseURL, token)
 	pc := client.NewClient(baseURL, projectToken)
-	return []*client.RollbarAPIClient{c, pc}, diags
+	return map[string]*client.RollbarAPIClient{schemaKeyToken: c, projectKeyToken: pc}, diags
 }
 
 /*
