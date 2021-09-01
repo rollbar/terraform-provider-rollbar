@@ -4,8 +4,8 @@ Terraform provider for Rollbar
 The Rollbar provider allows Terraform to control resources on
 [Rollbar.com](https://rollbar.com), the Continuous Code Improvement Platform.
 
-The provider allows you to manage your Rollbar projects, tokens, users, and
-teams with ease. It must be configured with the proper credentials before it can
+The provider allows you to manage your Rollbar projects, tokens, users,
+teams and notifications with ease. It must be configured with the proper credentials before it can
 be used.
 
 
@@ -39,6 +39,7 @@ terraform {
 # Configure the Rollbar provider
 provider "rollbar" {
   api_key = "YOUR_API_KEY"
+  project_api_key = "YOUR_PROJECT_API_KEY" # needed for notifications
 }
 
 # Create a team

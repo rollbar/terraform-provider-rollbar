@@ -95,7 +95,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // inviting user to specified groups, and removing user from groups no longer
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*client.RollbarAPIClient)
+	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
 	l := log.With().
@@ -319,7 +319,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Int("userID", userID).
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
-	c := meta.(*client.RollbarAPIClient)
+	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -379,7 +379,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		Str("email", email).
 		Logger()
 	l.Info().Msg("Deleting rollbar_user resource")
-	c := meta.(*client.RollbarAPIClient)
+	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
 	// Try to get user ID
 	userID := d.Get("user_id").(int)
@@ -432,7 +432,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	l.Info().Msg("Importing rollbar_user resource")
 
 	var teamIDs []int
-	c := meta.(*client.RollbarAPIClient)
+	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
 	invitations, err := c.FindInvitations(email)
 	if err != nil && err != client.ErrNotFound {

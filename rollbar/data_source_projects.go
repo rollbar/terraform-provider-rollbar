@@ -83,7 +83,7 @@ func dataSourceProjects() *schema.Resource {
 func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	log.Debug().Msg("Reading project list from API")
 	var diags diag.Diagnostics
-	c := m.(*client.RollbarAPIClient)
+	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
 	projects, err := c.ListProjects()
 	if err != nil {

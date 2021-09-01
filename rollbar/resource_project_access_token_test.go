@@ -457,7 +457,7 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 		if err != nil {
 			return err
 		}
-		c := s.provider.Meta().(*client.RollbarAPIClient)
+		c := s.provider.Meta().(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 		pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 		if err != nil {
 			return err
@@ -508,7 +508,7 @@ func (s *AccSuite) checkProjectAccessTokenInTokenList(rn string) resource.TestCh
 		s.Nil(err)
 		projectID, err := s.getResourceAttrInt(ts, rn, "project_id")
 		s.Nil(err)
-		c := s.provider.Meta().(*client.RollbarAPIClient)
+		c := s.provider.Meta().(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 		pats, err := c.ListProjectAccessTokens(projectID)
 		s.Nil(err)
 		found := false
@@ -550,7 +550,7 @@ func (s *AccSuite) checkNoUnexpectedTokens(projectResourceName string, expectedT
 		if err != nil {
 			return err
 		}
-		c := s.provider.Meta().(*client.RollbarAPIClient)
+		c := s.provider.Meta().(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 		tokens, err := c.ListProjectAccessTokens(projectID)
 		s.Nil(err)
 		for _, t := range tokens {

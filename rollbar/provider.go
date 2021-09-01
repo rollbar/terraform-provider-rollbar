@@ -33,6 +33,7 @@ import (
 )
 
 const schemaKeyToken = "api_key"
+const projectKeyToken = "project_api_key"
 const schemaKeyBaseURL = "api_url"
 
 // Provider is a Terraform provider for Rollbar.
@@ -44,6 +45,12 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_API_KEY", nil),
 				Description: "Rollbar API authentication token. Value will be sourced from environment variable `ROLLBAR_API_KEY` if set.",
+			},
+			projectKeyToken: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ROLLBAR_PROJECT_API_KEY", nil),
+				Description: "Rollbar API authentication token (project level). Value will be sourced from environment variable `ROLLBAR_PROJECT_API_KEY` if set.",
 			},
 			schemaKeyBaseURL: {
 				Type:        schema.TypeString,
@@ -57,6 +64,7 @@ func Provider() *schema.Provider {
 			"rollbar_project_access_token": resourceProjectAccessToken(),
 			"rollbar_team":                 resourceTeam(),
 			"rollbar_user":                 resourceUser(),
+			"rollbar_notification":         resourceNotification(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_project":               dataSourceProject(),
@@ -72,9 +80,11 @@ func Provider() *schema.Provider {
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	token := d.Get(schemaKeyToken).(string)
+	projectToken := d.Get(projectKeyToken).(string)
 	baseURL := d.Get(schemaKeyBaseURL).(string)
 	c := client.NewClient(baseURL, token)
-	return c, diags
+	pc := client.NewClient(baseURL, projectToken)
+	return map[string]*client.RollbarAPIClient{schemaKeyToken: c, projectKeyToken: pc}, diags
 }
 
 /*

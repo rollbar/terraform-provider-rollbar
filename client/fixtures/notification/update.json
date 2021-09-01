@@ -1,0 +1,30 @@
+{
+  "result": {
+    "action": "send_email",
+    "trigger": "new_item",
+    "config": {
+      "teams": [
+        "Owners"
+      ]
+    },
+    "id": 5127954,
+    "filters": [
+      {
+        "operation": "eq",
+        "type": "environment",
+        "value": "development"
+      },
+      {
+        "operation": "eq",
+        "type": "framework",
+        "value": "14"
+      },
+      {
+        "operation": "gte",
+        "type": "level",
+        "value": "error"
+      }
+    ]
+  },
+  "err": 0
+}

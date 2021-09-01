@@ -50,7 +50,9 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 
 	// Authentication
 	if token != "" {
-		r = r.SetHeader("X-Rollbar-Access-Token", token)
+		r = r.SetHeaders(map[string]string{
+			"X-Rollbar-Access-Token": token,
+			"X-Rollbar-Terraform":    "true"})
 	} else {
 		log.Warn().Msg("Rollbar API token not set")
 	}
