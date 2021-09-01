@@ -148,7 +148,7 @@ func find(slice []string, val string) bool {
 
 func parseSet(setName string, d *schema.ResourceData) map[string]interface{} {
 	setMap, ok := d.GetOk(setName)
-	properSetMap := map[string]interface{}{}
+	var properSetMap map[string]interface{}
 
 	if ok {
 		set := setMap.(*schema.Set).List()
