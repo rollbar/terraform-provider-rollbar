@@ -38,8 +38,8 @@ terraform {
 
 # Configure the Rollbar provider
 provider "rollbar" {
-  api_key = "YOUR_API_KEY"
-  project_api_key = "YOUR_PROJECT_API_KEY" # needed for notifications
+  api_key = "YOUR_API_KEY" # read/write permissions needed
+  project_api_key = "YOUR_PROJECT_API_KEY" # needed for notifications (read/write)
 }
 
 # Create a team
@@ -51,6 +51,28 @@ resource "rollbar_team" "frontend" {
 resource "rollbar_project" "frontend" {
   name         = "react-frontend"
   team_ids = [rollbar_team.frontend.id]
+}
+
+# Create a new email notification rule for the "New Item" trigger
+resource "rollbar_notification" "foo" {
+  rule  {
+    filters {
+        type =  "environment"
+        operation =  "neq"
+        value = "production"
+    }
+    filters {
+       type = "level"
+       operation = "eq"
+       value = "error"
+    }
+    trigger = "new_item"
+  }
+  channel = "email"
+  config  {
+    users = ["pawel.szczodruch@rollbar.com"]
+    teams = ["Owners"]
+  }
 }
 ```
 
