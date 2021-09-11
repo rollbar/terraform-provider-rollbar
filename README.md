@@ -74,6 +74,45 @@ resource "rollbar_notification" "foo" {
     teams = ["Owners"]
   }
 }
+
+# Create a new PagerDuty notification rule for >10 items in 60 minutes
+resource "rollbar_notification" "bar" {
+  rule  {
+    filters {
+        type = "rate"
+        period = 60
+        count = 10
+    }
+    trigger = occurrence_rate
+  }
+  channel = "pagerduty"
+  config  {
+   service_key = "TOKEN"
+  }
+}
+
+# Create a new Slack notification rule for the "New Item" trigger
+resource "rollbar_notification" "baz" {
+  rule  {
+    filters {
+        type =  "environment"
+        operation =  "eq"
+        value = "production"
+    }
+    filters {
+       type = "framework"
+       operation = "eq"
+       value = "python"
+    }
+    trigger = "new_item"
+  }
+  channel = "slack"
+  config  {
+     message_template: optional
+     show_message_buttons: true
+     channel: "#demo-david"
+  }
+}
 ```
 
 See [the docs](docs/index.md) for detailed usage information.
