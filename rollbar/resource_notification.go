@@ -87,6 +87,16 @@ func resourceNotification() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 									},
+									"period": {
+										Description: "Period",
+										Type:        schema.TypeInt,
+										Optional:    true,
+									},
+									"count": {
+										Description: "Count",
+										Type:        schema.TypeInt,
+										Optional:    true,
+									},
 								},
 							},
 						},
@@ -122,7 +132,7 @@ func resourceNotification() *schema.Resource {
 						},
 						"show_message_buttons": {
 							Description: "Show message buttons (slack)",
-							Type:        schema.TypeString,
+							Type:        schema.TypeBool,
 							Optional:    true,
 						},
 						"service_key": {
