@@ -1,6 +1,6 @@
 {
   "name": "terraform-provider-rollbar",
-  "version": "0.2.0",
+  "version": "1.2.1",
   "description": "Terraform provider for Rollbar.com",
   "directories": {
     "doc": "docs",
