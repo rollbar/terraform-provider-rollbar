@@ -102,7 +102,7 @@ resource "rollbar_notification" "baz" {
     filters {
        type = "framework"
        operation = "eq"
-       value = "python"
+       value = "13"
     }
     trigger = "new_item"
   }
