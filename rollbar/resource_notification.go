@@ -301,7 +301,6 @@ func flattenRule(filters []interface{}, trigger string) *schema.Set {
 		case float64:
 			filterConv["value"] = strconv.FormatFloat(v, 'f', -1, 64)
 		}
-		filter = filterConv
 	}
 	m["filters"] = filters
 	out = append(out, m)
