@@ -108,9 +108,9 @@ resource "rollbar_notification" "baz" {
   }
   channel = "slack"
   config  {
-     message_template: optional
-     show_message_buttons: true
-     channel: "#demo-david"
+     # message_template = optional
+     show_message_buttons = true
+     channel = "#demo-david"
   }
 }
 ```
