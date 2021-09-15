@@ -282,6 +282,26 @@ func flattenConfig(config map[string]interface{}) *schema.Set {
 func flattenRule(filters []interface{}, trigger string) *schema.Set {
 	var out = make([]interface{}, 0)
 	m := make(map[string]interface{})
+	for _, filter := range filters {
+		filterConv := filter.(map[string]interface{})
+		filterValue := filterConv["value"]
+		switch v := filterValue.(type) {
+		case int:
+			filterConv["value"] = strconv.Itoa(v)
+		case int8:
+			filterConv["value"] = strconv.FormatInt(int64(v), 10)
+		case int16:
+			filterConv["value"] = strconv.FormatInt(int64(v), 10)
+		case int32:
+			filterConv["value"] = strconv.FormatInt(int64(v), 10)
+		case int64:
+			filterConv["value"] = strconv.FormatInt(v, 10)
+		case float32:
+			filterConv["value"] = strconv.FormatFloat(float64(v), 'f', -1, 32)
+		case float64:
+			filterConv["value"] = strconv.FormatFloat(v, 'f', -1, 64)
+		}
+	}
 	m["filters"] = filters
 	out = append(out, m)
 	m["trigger"] = trigger
