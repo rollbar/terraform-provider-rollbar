@@ -115,6 +115,47 @@ resource "rollbar_notification" "baz" {
 }
 ```
 
+**Note about framework filtering**
+
+When using the framework filter in notification rules, the correct value is a number (passed in as a string). The list of framework values is shown below (last updated 9/15/2021):
+```
+{
+    'unknown': 0,
+    'rails': 1,
+    'django': 2,
+    'pyramid': 3,
+    'node-js': 4,
+    'pylons': 5,
+    'php': 6,
+    'browser-js': 7,
+    'rollbar-system': 8,  # system messages, like "over rate limit"
+    'android': 9,
+    'ios': 10,
+    'mailgun': 11,
+    'logentries': 12,
+    'python': 13,
+    'ruby': 14,
+    'sidekiq': 15,
+    'flask': 16,
+    'celery': 17,
+    'rq': 18,
+    'java': 19,
+    'dotnet': 20,
+    'go': 21,
+    'react-native': 22,
+    'macos': 23,
+    'apex': 24,
+    'spring': 25,
+    'bottle': 26,
+    'twisted': 27,
+    'asgi': 28,
+    'starlette': 29,
+    'fastapi': 30,
+    'karafka': 31,
+    'flutter': 32,
+}
+```
+
 See [the docs](docs/index.md) for detailed usage information.
 
 
