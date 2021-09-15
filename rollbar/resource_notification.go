@@ -29,8 +29,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"os"
 	"strconv"
+	"strings"
 )
 
 var configMap = map[string][]string{"email": {"users", "teams"},
@@ -38,8 +38,11 @@ var configMap = map[string][]string{"email": {"users", "teams"},
 	"pagerduty": {"service_key"}}
 
 func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	channel := os.Getenv("NOTIFICATION_CHANNEL")
-	mustSet(d, "channel", channel)
+	splitID := strings.Split(d.Id(), ",")
+	if len(splitID) > 1 {
+		mustSet(d, "channel", splitID[0])
+		d.SetId(splitID[1])
+	}
 	return []*schema.ResourceData{d}, nil
 }
 
