@@ -29,12 +29,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
+	"os"
 	"strconv"
 )
 
 var configMap = map[string][]string{"email": {"users", "teams"},
 	"slack":     {"message_template", "channel", "show_message_buttons"},
 	"pagerduty": {"service_key"}}
+
+func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+	channel := os.Getenv("NOTIFICATION_CHANNEL")
+	d.Set("channel", channel)
+	return []*schema.ResourceData{d}, nil
+}
 
 // resourceNotification constructs a resource representing a Rollbar notification.
 func resourceNotification() *schema.Resource {
@@ -45,7 +52,7 @@ func resourceNotification() *schema.Resource {
 		DeleteContext: resourceNotificationDelete,
 
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: CustomNotificationImport,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -89,12 +96,12 @@ func resourceNotification() *schema.Resource {
 									},
 									"period": {
 										Description: "Period",
-										Type:        schema.TypeInt,
+										Type:        schema.TypeFloat,
 										Optional:    true,
 									},
 									"count": {
 										Description: "Count",
-										Type:        schema.TypeInt,
+										Type:        schema.TypeFloat,
 										Optional:    true,
 									},
 								},
@@ -254,6 +261,30 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	return nil
 }
 
+func flattenConfig(config map[string]interface{}) *schema.Set {
+	var out = make([]interface{}, 0)
+	m := make(map[string]interface{})
+	for key, value := range config {
+		m[key] = value
+		out = append(out, m)
+	}
+	specResource := resourceNotification().Schema["config"].Elem.(*schema.Resource)
+	f := schema.HashResource(specResource)
+	return schema.NewSet(f, out)
+}
+
+func flattenRule(filters []interface{}, trigger string) *schema.Set {
+	var out = make([]interface{}, 0)
+	m := make(map[string]interface{})
+	m["filters"] = filters
+	out = append(out, m)
+	m["trigger"] = trigger
+	out = append(out, m)
+	specResource := resourceNotification().Schema["rule"].Elem.(*schema.Resource)
+	f := schema.HashResource(specResource)
+	return schema.NewSet(f, out)
+}
+
 func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := mustGetID(d)
 	channel := d.Get("channel").(string)
@@ -262,7 +293,7 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	err := c.ReadNotification(id, channel)
+	n, err := c.ReadNotification(id, channel)
 	if err == client.ErrNotFound {
 		d.SetId("")
 		l.Info().Msg("Notification not found - removed from state")
@@ -272,6 +303,9 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		l.Err(err).Msg("error reading rollbar_notification resource")
 		return diag.FromErr(err)
 	}
+
+	mustSet(d, "config", flattenConfig(n.Config))
+	mustSet(d, "rule", flattenRule(n.Filters, n.Trigger))
 	l.Debug().Msg("Successfully read rollbar_notification resource")
 	return nil
 }
