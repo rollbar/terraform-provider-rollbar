@@ -70,7 +70,7 @@ resource "rollbar_notification" "foo" {
   }
   channel = "email"
   config  {
-    users = ["pawel.szczodruch@rollbar.com"]
+    users = ["user@rollbar.com"]
     teams = ["Owners"]
   }
 }
