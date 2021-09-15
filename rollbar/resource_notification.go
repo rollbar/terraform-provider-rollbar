@@ -39,7 +39,7 @@ var configMap = map[string][]string{"email": {"users", "teams"},
 
 func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	channel := os.Getenv("NOTIFICATION_CHANNEL")
-	d.Set("channel", channel)
+	mustSet(d, "channel", channel)
 	return []*schema.ResourceData{d}, nil
 }
 
