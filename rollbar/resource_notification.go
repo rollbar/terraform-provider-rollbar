@@ -98,11 +98,13 @@ func resourceNotification() *schema.Resource {
 										Description: "Period",
 										Type:        schema.TypeFloat,
 										Optional:    true,
+										Default:     0,
 									},
 									"count": {
 										Description: "Count",
 										Type:        schema.TypeFloat,
 										Optional:    true,
+										Default:     0,
 									},
 								},
 							},
@@ -141,6 +143,7 @@ func resourceNotification() *schema.Resource {
 							Description: "Show message buttons (slack)",
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Default:     false,
 						},
 						"service_key": {
 							Description: "Service key (pagerduty)",
