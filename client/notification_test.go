@@ -112,19 +112,21 @@ func (s *Suite) TestReadNotification() {
 	// Success
 	r := responderFromFixture("notification/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	err := s.client.ReadNotification(id, channel)
+	n, err := s.client.ReadNotification(id, channel)
 	s.Nil(err)
+	s.Equal("new_item", n.Trigger)
 
 	s.checkServerErrors("GET", u, func() error {
-		err := s.client.ReadNotification(id, channel)
+		_, err := s.client.ReadNotification(id, channel)
 		return err
 	})
 
 	// Try to read a deleted notification
 	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	err = s.client.ReadNotification(id, channel)
+	n, err = s.client.ReadNotification(id, channel)
 	s.Equal(ErrNotFound, err)
+	s.Nil(n)
 }
 
 // TestDeleteNotification tests deleting a Rollbar notification.

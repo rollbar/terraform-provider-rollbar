@@ -29,9 +29,12 @@ import (
 )
 
 type Notification struct {
-	ID      int    `model:"id" mapstructure:"id"`
-	Action  string `model:"action" mapstructure:"action"`
-	Trigger string `model:"trigger" mapstructure:"trigger"`
+	ID      int                    `model:"id" mapstructure:"id"`
+	Action  string                 `model:"action" mapstructure:"action"`
+	Trigger string                 `model:"trigger" mapstructure:"trigger"`
+	Channel string                 `model:"channel" mapstructure:"channel"`
+	Filters []interface{}          `model:"filters" mapstructure:"filters"`
+	Config  map[string]interface{} `model:"config" mapstructure:"config"`
 }
 
 // CreateNotification creates a new Rollbar notification.
@@ -97,7 +100,7 @@ func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string
 
 // ReadNotification reads a Rollbar notification from the API. If no matching notification is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) error {
+func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) (*Notification, error) {
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
 
 	l := log.With().
@@ -116,20 +119,20 @@ func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) 
 
 	if err != nil {
 		l.Err(err).Msg(resp.Status())
-		return err
+		return nil, err
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
 		l.Err(err).Send()
-		return err
+		return nil, err
 	}
 	nr := resp.Result().(*notificationResponse)
 	if nr.Err != 0 {
 		l.Warn().Msg("Notification not found")
-		return ErrNotFound
+		return nil, ErrNotFound
 	}
 	l.Debug().Msg("Notification successfully read")
-	return nil
+	return &nr.Result, nil
 
 }
 
