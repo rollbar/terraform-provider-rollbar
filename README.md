@@ -38,8 +38,8 @@ terraform {
 
 # Configure the Rollbar provider
 provider "rollbar" {
-  api_key = "YOUR_API_KEY"
-  project_api_key = "YOUR_PROJECT_API_KEY" # needed for notifications
+  api_key = "YOUR_API_KEY" # read/write permissions needed
+  project_api_key = "YOUR_PROJECT_API_KEY" # needed for notifications (read/write)
 }
 
 # Create a team
@@ -51,6 +51,108 @@ resource "rollbar_team" "frontend" {
 resource "rollbar_project" "frontend" {
   name         = "react-frontend"
   team_ids = [rollbar_team.frontend.id]
+}
+
+# Create a new email notification rule for the "New Item" trigger
+resource "rollbar_notification" "foo" {
+  rule  {
+    filters {
+        type =  "environment"
+        operation =  "neq"
+        value = "production"
+    }
+    filters {
+       type = "level"
+       operation = "eq"
+       value = "error"
+    }
+    trigger = "new_item"
+  }
+  channel = "email"
+  config  {
+    users = ["user@rollbar.com"]
+    teams = ["Owners"]
+  }
+}
+
+# Create a new PagerDuty notification rule for >10 items in 60 minutes
+resource "rollbar_notification" "bar" {
+  rule  {
+    filters {
+        type = "rate"
+        period = 60
+        count = 10
+    }
+    trigger = occurrence_rate
+  }
+  channel = "pagerduty"
+  config  {
+   service_key = "TOKEN"
+  }
+}
+
+# Create a new Slack notification rule for the "New Item" trigger
+resource "rollbar_notification" "baz" {
+  rule  {
+    filters {
+        type =  "environment"
+        operation =  "eq"
+        value = "production"
+    }
+    filters {
+       type = "framework"
+       operation = "eq"
+       value = "13"
+    }
+    trigger = "new_item"
+  }
+  channel = "slack"
+  config  {
+     # message_template = optional
+     show_message_buttons = true
+     channel = "#demo-david"
+  }
+}
+```
+
+**Note about framework filtering**
+
+When using the framework filter in notification rules, the correct value is a number (passed in as a string). The list of framework values is shown below (last updated 9/15/2021):
+```
+{
+    'unknown': 0,
+    'rails': 1,
+    'django': 2,
+    'pyramid': 3,
+    'node-js': 4,
+    'pylons': 5,
+    'php': 6,
+    'browser-js': 7,
+    'rollbar-system': 8,  # system messages, like "over rate limit"
+    'android': 9,
+    'ios': 10,
+    'mailgun': 11,
+    'logentries': 12,
+    'python': 13,
+    'ruby': 14,
+    'sidekiq': 15,
+    'flask': 16,
+    'celery': 17,
+    'rq': 18,
+    'java': 19,
+    'dotnet': 20,
+    'go': 21,
+    'react-native': 22,
+    'macos': 23,
+    'apex': 24,
+    'spring': 25,
+    'bottle': 26,
+    'twisted': 27,
+    'asgi': 28,
+    'starlette': 29,
+    'fastapi': 30,
+    'karafka': 31,
+    'flutter': 32,
 }
 ```
 
