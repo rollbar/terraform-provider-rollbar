@@ -117,7 +117,11 @@ resource "rollbar_notification" "baz" {
 
 **Note about framework filtering**
 
-When using the framework filter in notification rules, the correct value is a number (passed in as a string). The list of framework values is shown below (last updated 9/15/2021):
+When using the framework filter in notification rules, the correct value is a number (passed in as a string).
+The current list of framework values is available at <https://docs.rollbar.com/docs/rql#framework-ids>.
+
+A copy of the list is shown below (last updated 9/15/2021):
+
 ```
 {
     'unknown': 0,
