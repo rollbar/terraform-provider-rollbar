@@ -13,9 +13,9 @@
 
 ## Related issues
 
-> ClubHouse stories and GitHub issues (delete irrelevant)
+> Shortcut stories and GitHub issues (delete irrelevant)
 
-- Fix [ch]
+- Fix [SC-]
 - Fix #1
 
 ## Checklists
