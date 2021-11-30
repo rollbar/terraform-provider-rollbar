@@ -220,6 +220,37 @@ func (c *RollbarAPIClient) AssignUserToTeam(teamID, userID int) error {
 	return nil
 }
 
+// IsUserAssignedToTeam checks if a user is assigned to a Rollbar team.
+func (c *RollbarAPIClient) IsUserAssignedToTeam(teamID, userID int) (bool, error) {
+	l := log.With().
+		Int("userID", userID).
+		Int("teamID", teamID).
+		Logger()
+	l.Debug().Msg("Checking if user is assigned to team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamID": strconv.Itoa(teamID),
+			"userID": strconv.Itoa(userID),
+		}).
+		SetError(ErrorResult{}).
+		Get(c.BaseURL + pathTeamUser)
+	if err != nil {
+		l.Err(err).Msg("Error checking if user is assigned to team")
+		return false, err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		if resp.StatusCode() == http.StatusNotFound {
+			l.Err(err).Msg("User is not assigned to the team")
+			return false, nil
+		}
+		l.Err(err).Msg("Unknown error")
+		return false, err
+	}
+	l.Debug().Msg("User is assigned to the team")
+	return true, nil
+}
+
 // RemoveUserFromTeam removes a user from a Rollbar team.
 func (c *RollbarAPIClient) RemoveUserFromTeam(userID, teamID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
