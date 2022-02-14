@@ -51,3 +51,4 @@ Resources
   Rollbar project access token
 * [`rollbar_user`](resources/user.md) - A Rollbar user
 * [`rollbar_team`](resources/team.md) - A Rollbar team
+* [`rollbar_team_user`](resources/team_user.md) - A single Rollbar team assignment
