@@ -40,7 +40,7 @@ type Team struct {
 }
 
 // CreateTeam creates a new Rollbar team.
-func (c *RollbarAPIClient) CreateTeam(name string, level string) (Team, error) {
+func (c *RollbarAPIClient) CreateTeam(name, level string) (Team, error) {
 	var t Team
 	l := log.With().
 		Str("name", name).
@@ -308,11 +308,10 @@ func (c *RollbarAPIClient) FindTeamID(name string) (int, error) {
 // ListTeamProjectIDs lists IDs of all Rollbar projects to which a given team is
 // assigned.
 func (c *RollbarAPIClient) ListTeamProjectIDs(teamID int) ([]int, error) {
-	var (
-		projectIDs  []int
-		hasNextPage bool = true
-		page        int  = 1
-	)
+
+	projectIDs := []int{}
+	hasNextPage := true
+	page := 1
 
 	l := log.With().Int("teamID", teamID).Logger()
 
@@ -407,7 +406,7 @@ func (c *RollbarAPIClient) RemoveTeamFromProject(teamID, projectID int) error {
 // filterSystemTeams filters out the system teams "Everyone" and "Owners" from a
 // list of Rollbar teams.
 func filterSystemTeams(teams []Team) []Team {
-	var customTeams []Team
+	customTeams := []Team{}
 	for _, t := range teams {
 		if t.Name == "Everyone" || t.Name == "Owners" {
 			continue

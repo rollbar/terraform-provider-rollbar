@@ -44,10 +44,9 @@ type Invitation struct {
 
 // ListInvitations lists all invitations for a Rollbar team.
 func (c *RollbarAPIClient) ListInvitations(teamID int) (invs []Invitation, err error) {
-	var (
-		hasNextPage bool = true
-		page        int  = 1
-	)
+
+	hasNextPage := true
+	page := 1
 
 	l := log.With().
 		Int("teamID", teamID).
@@ -209,16 +208,16 @@ func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
 		Delete(u)
 	if err != nil {
 		l.Err(err).Msg("Error canceling invitation")
-		return
+		return err
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
 		// If the invite has already been canceled, API returns HTTP status '422
 		// Unprocessable Entity'.  This is considered success.
 		statusUnprocessable := resp.StatusCode() == http.StatusUnprocessableEntity
-		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already cancelled")
+		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already canceled")
 		if statusUnprocessable && alreadyCanceledMsg {
-			l.Debug().Msg("invite already cancelled")
+			l.Debug().Msg("invite already canceled")
 			return nil
 		}
 		l.Err(err).
@@ -226,11 +225,11 @@ func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
 			Str("status", resp.Status()).
 			Int("status_code", resp.StatusCode()).
 			Msg("Error canceling invitation")
-		return
+		return err
 	}
 	l.Debug().
 		Msg("Successfully canceled invitation")
-	return
+	return nil
 }
 
 // FindInvitations finds all Rollbar team invitations for a given email. Note
@@ -248,7 +247,7 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 	teams, err := c.ListTeams()
 	if err != nil {
 		l.Err(err).Send()
-		return
+		return invs, err
 	}
 	var allInvs []Invitation
 	for _, t := range teams {
@@ -276,7 +275,7 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 	l.Debug().
 		Int("invitation_count", len(invs)).
 		Msg("Successfully found invitations")
-	return
+	return invs, nil
 }
 
 /*

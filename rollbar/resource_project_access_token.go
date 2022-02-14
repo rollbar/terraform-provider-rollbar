@@ -121,7 +121,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	projectID := d.Get("project_id").(int)
 	name := d.Get("name").(string)
 	scopesInterface := d.Get("scopes").([]interface{})
-	var scopes []client.Scope
+	scopes := []client.Scope{}
 	for _, v := range scopesInterface {
 		s := v.(string)
 		scopes = append(scopes, client.Scope(s))

@@ -37,7 +37,7 @@ func resourceTeamUser() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceTeamUserCreate,
 		ReadContext:   resourceTeamUserRead,
-		UpdateContext: nil, //resourceTeamUserUpdate,
+		UpdateContext: nil, // resourceTeamUserUpdate,
 		DeleteContext: resourceTeamUserDelete,
 
 		Importer: &schema.ResourceImporter{
@@ -83,9 +83,10 @@ func teamUserID(teamID int, email string) string {
 	return fmt.Sprintf("%d/%s", teamID, email)
 }
 
-func teamUserFromID(id string) (int, string, error) {
-	if strings.Index(id, "/") < 0 {
-		return 0, "", fmt.Errorf("resource ID missing delimiter (/)")
+func teamUserFromID(id string) (teamID int, s string, err error) {
+
+	if !strings.Contains(id, "/") {
+		return 0, s, fmt.Errorf("resource ID missing delimiter (/)")
 	}
 	l := log.With().
 		Str("id", id).
@@ -93,7 +94,7 @@ func teamUserFromID(id string) (int, string, error) {
 	values := strings.SplitN(id, "/", 2)
 	l = l.With().Strs("values", values).Logger()
 	l.Debug().Msg("Converting userID to int")
-	teamID, err := strconv.Atoi(values[0])
+	teamID, err = strconv.Atoi(values[0])
 	if err != nil {
 		return 0, "", fmt.Errorf("unable to parse team ID")
 	}
@@ -118,20 +119,20 @@ func resourceTeamUserCreate(ctx context.Context, d *schema.ResourceData, meta in
 		l.Debug().Msg("Found existing user")
 		mustSet(d, "user_id", userID)
 		mustSet(d, "status", "registered")
-		err := c.AssignUserToTeam(teamID, userID)
-		if err != nil {
-			l.Err(err).Msg("error assigning user to team")
-			return diag.FromErr(err)
+		er := c.AssignUserToTeam(teamID, userID)
+		if er != nil {
+			l.Err(er).Msg("error assigning user to team")
+			return diag.FromErr(er)
 		}
 		mustSet(d, "invite_id", 0)
 		l.Debug().Msg("Assigned user to team")
 	case client.ErrNotFound: // User not found, send an invitation
 		l.Debug().Msg("Existing user not found")
 		mustSet(d, "status", "invited")
-		inv, err := c.CreateInvitation(teamID, email)
-		if err != nil {
-			l.Err(err).Msg("error assigning user to team")
-			return diag.FromErr(err)
+		inv, er := c.CreateInvitation(teamID, email)
+		if er != nil {
+			l.Err(er).Msg("error assigning user to team")
+			return diag.FromErr(er)
 		}
 		l.Debug().
 			Int("inviteID", inv.ID).

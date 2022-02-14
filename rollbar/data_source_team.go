@@ -24,7 +24,6 @@ package rollbar
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -117,5 +116,5 @@ func findTeamByName(teams []client.Team, name string) (client.Team, error) {
 			return team, nil
 		}
 	}
-	return client.Team{}, errors.New(fmt.Sprintf("Team not found by name: %s", name))
+	return client.Team{}, fmt.Errorf("team not found by name: %s", name)
 }

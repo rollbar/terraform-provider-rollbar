@@ -357,7 +357,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	var teamIDs []int
+	teamIDs := []int{}
 	for teamID := range currentTeams {
 		teamIDs = append(teamIDs, teamID)
 	}
@@ -436,7 +436,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 		Logger()
 	l.Info().Msg("Importing rollbar_user resource")
 
-	var teamIDs []int
+	teamIDs := []int{}
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
 	invitations, err := c.FindInvitations(email)
