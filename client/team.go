@@ -24,10 +24,11 @@ package client
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Team represents a Rollbar team.
@@ -220,6 +221,37 @@ func (c *RollbarAPIClient) AssignUserToTeam(teamID, userID int) error {
 	return nil
 }
 
+// IsUserAssignedToTeam checks if a user is assigned to a Rollbar team.
+func (c *RollbarAPIClient) IsUserAssignedToTeam(teamID, userID int) (bool, error) {
+	l := log.With().
+		Int("userID", userID).
+		Int("teamID", teamID).
+		Logger()
+	l.Debug().Msg("Checking if user is assigned to team")
+	resp, err := c.Resty.R().
+		SetPathParams(map[string]string{
+			"teamID": strconv.Itoa(teamID),
+			"userID": strconv.Itoa(userID),
+		}).
+		SetError(ErrorResult{}).
+		Get(c.BaseURL + pathTeamUser)
+	if err != nil {
+		l.Err(err).Msg("Error checking if user is assigned to team")
+		return false, err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		if resp.StatusCode() == http.StatusNotFound {
+			l.Err(err).Msg("User is not assigned to the team")
+			return false, nil
+		}
+		l.Err(err).Msg("Unknown error")
+		return false, err
+	}
+	l.Debug().Msg("User is assigned to the team")
+	return true, nil
+}
+
 // RemoveUserFromTeam removes a user from a Rollbar team.
 func (c *RollbarAPIClient) RemoveUserFromTeam(userID, teamID int) error {
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
@@ -276,28 +308,39 @@ func (c *RollbarAPIClient) FindTeamID(name string) (int, error) {
 // ListTeamProjectIDs lists IDs of all Rollbar projects to which a given team is
 // assigned.
 func (c *RollbarAPIClient) ListTeamProjectIDs(teamID int) ([]int, error) {
+	var (
+		projectIDs  []int
+		hasNextPage bool = true
+		page        int  = 1
+	)
+
 	l := log.With().Int("teamID", teamID).Logger()
-	l.Debug().Msg("Listing projects for team")
-	resp, err := c.Resty.R().
-		SetPathParams(map[string]string{
-			"teamID": strconv.Itoa(teamID),
-		}).
-		SetResult(teamProjectListResponse{}).
-		SetError(ErrorResult{}).
-		Get(c.BaseURL + pathTeamProjects)
-	if err != nil {
-		l.Err(err).Msg("Error listing projects for team")
-		return nil, err
-	}
-	err = errorFromResponse(resp)
-	if err != nil {
-		l.Err(err).Msg("Error listing projects for team")
-		return nil, err
-	}
-	result := resp.Result().(*teamProjectListResponse).Result
-	var projectIDs []int
-	for _, item := range result {
-		projectIDs = append(projectIDs, item.ProjectID)
+
+	for hasNextPage {
+		l.Debug().Msg(fmt.Sprintf("Listing projects for team (page: %d)", page))
+		resp, err := c.Resty.R().
+			SetPathParams(map[string]string{
+				"teamID": strconv.Itoa(teamID),
+			}).
+			SetResult(teamProjectListResponse{}).
+			SetError(ErrorResult{}).
+			Get(c.BaseURL + pathTeamProjects + fmt.Sprintf("?page=%d", page))
+		if err != nil {
+			l.Err(err).Msg("Error listing projects for team")
+			return nil, err
+		}
+		err = errorFromResponse(resp)
+		if err != nil {
+			l.Err(err).Msg("Error listing projects for team")
+			return nil, err
+		}
+		result := resp.Result().(*teamProjectListResponse).Result
+		l.Debug().Msg(fmt.Sprintf("%+v\n", result))
+		hasNextPage = len(result) > 0
+		for _, item := range result {
+			projectIDs = append(projectIDs, item.ProjectID)
+		}
+		page++
 	}
 	l.Debug().Msg("Successfully listed projects for team")
 	return projectIDs, nil
