@@ -23,10 +23,12 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Invitation represents an invitation for a user to join a Rollbar team.
@@ -42,34 +44,44 @@ type Invitation struct {
 
 // ListInvitations lists all invitations for a Rollbar team.
 func (c *RollbarAPIClient) ListInvitations(teamID int) (invs []Invitation, err error) {
+	var (
+		hasNextPage bool = true
+		page        int  = 1
+	)
+
 	l := log.With().
 		Int("teamID", teamID).
 		Logger()
 	l.Debug().Msg("Listing invitations")
-	resp, err := c.Resty.R().
-		SetPathParams(map[string]string{
-			"teamID": strconv.Itoa(teamID),
-		}).
-		SetResult(invitationListResponse{}).
-		SetError(ErrorResult{}).
-		Get(c.BaseURL + pathInvitations)
-	if err != nil {
-		l.Err(err).Msg("Error listing invitations")
-		return
+
+	for hasNextPage {
+		resp, err := c.Resty.R().
+			SetPathParams(map[string]string{
+				"teamID": strconv.Itoa(teamID),
+			}).
+			SetResult(invitationListResponse{}).
+			SetError(ErrorResult{}).
+			Get(c.BaseURL + pathInvitations + fmt.Sprintf("?page=%d", page))
+		if err != nil {
+			l.Err(err).Msg("Error listing invitations")
+			return nil, err
+		}
+		err = errorFromResponse(resp)
+		if err != nil {
+			l.Err(err).
+				Str("status", resp.Status()).
+				Msg("Error listing invitations")
+			return nil, err
+		}
+		r := resp.Result().(*invitationListResponse)
+		hasNextPage = len(r.Result) > 0
+		page++
+		invs = append(invs, r.Result...)
 	}
-	err = errorFromResponse(resp)
-	if err != nil {
-		l.Err(err).
-			Str("status", resp.Status()).
-			Msg("Error listing invitations")
-		return
-	}
-	r := resp.Result().(*invitationListResponse)
-	invs = r.Result
 	l.Debug().
 		Int("invitation_count", len(invs)).
 		Msg("Successfully listed invitations")
-	return
+	return invs, nil
 }
 
 // ListPendingInvitations lists a Rollbar team's pending invitations.
@@ -233,7 +245,7 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 		Logger()
 
 	l.Debug().Msg("Finding invitations")
-	teams, err := c.ListCustomTeams()
+	teams, err := c.ListTeams()
 	if err != nil {
 		l.Err(err).Send()
 		return
