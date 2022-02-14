@@ -40,6 +40,7 @@ Data Sources
   - An access token belonging to a Rollbar project
 * [`rollbar_project_access_tokens`](data-sources/project_access_tokens.md)
   - List all access tokens belonging to a Rollbar project
+* [`rollbar_team`](data-sources/team.md) - A Rollbar team
 
 
 Resources
