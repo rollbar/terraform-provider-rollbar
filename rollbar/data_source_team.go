@@ -74,7 +74,7 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 		l = log.With().
 			Int("id", teamID.(int)).
 			Logger()
-		l.Debug().Msg("Reading team from Rollbar by ID")
+		l.Debug().Msg("Reading Team from Rollbar by ID")
 		respTeam, err := c.ReadTeam(teamID.(int))
 		if err != nil {
 			return diag.Errorf("Team not found by ID: %v", err)
@@ -116,5 +116,5 @@ func findTeamByName(teams []client.Team, name string) (client.Team, error) {
 			return team, nil
 		}
 	}
-	return client.Team{}, fmt.Errorf("team not found by name: %s", name)
+	return client.Team{}, fmt.Errorf("Team not found by name: %s", name)
 }
