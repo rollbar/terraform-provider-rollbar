@@ -44,5 +44,5 @@ data "rollbar_team" "test_team_0" {
 }
 
 data "rollbar_team" "test_team_1" {
-  name = "test-team-example"
+  name = rollbar_team.test_team_0.name
 }
