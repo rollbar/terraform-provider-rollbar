@@ -44,5 +44,6 @@ data "rollbar_team" "test_team_0" {
 }
 
 data "rollbar_team" "test_team_1" {
-  name = rollbar_team.test_team_1.name
+  name = "test-team-example_1"
+  depends_on = [rollbar_team.test_team_1]
 }
