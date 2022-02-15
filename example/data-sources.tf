@@ -44,5 +44,5 @@ data "rollbar_team" "test_team_0" {
 }
 
 data "rollbar_team" "test_team_1" {
-  name = rollbar_team.test_team_0.name
+  name = rollbar_team.test_team_1.name
 }
