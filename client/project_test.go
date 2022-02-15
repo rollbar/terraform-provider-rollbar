@@ -155,16 +155,21 @@ func (s *Suite) TestFindProjectTeamIDs() {
 	projectID := 423092
 	teamID := 689492
 	expected := []int{teamID}
-
+	// https://api.rollbar.com/api/1/team/689493/projects?page=1
 	// Mock list team projects
 	u = s.client.BaseURL + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	httpmock.RegisterResponderWithQuery("GET", u, "page=1", r)
+	u = s.client.BaseURL + pathTeamProjects
+	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
+	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
+
 	u = s.client.BaseURL + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamID}", "689493")
 	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	httpmock.RegisterResponderWithQuery("GET", u, "page=1", r)
 
 	// Mock list teams
 	u = s.client.BaseURL + pathTeamList
@@ -177,9 +182,10 @@ func (s *Suite) TestFindProjectTeamIDs() {
 
 	expectedCallCount :=
 		map[string]int{
-			"GET https://api.rollbar.com/api/1/team/689492/projects": 1,
-			"GET https://api.rollbar.com/api/1/team/689493/projects": 1,
-			"GET https://api.rollbar.com/api/1/teams":                1,
+			"GET https://api.rollbar.com/api/1/team/689492/projects?page=1": 1,
+			"GET https://api.rollbar.com/api/1/team/689492/projects?page=2": 1,
+			"GET https://api.rollbar.com/api/1/team/689493/projects?page=1": 1,
+			"GET https://api.rollbar.com/api/1/teams":                       1,
 		}
 	actualCallCount := httpmock.GetCallCountInfo()
 	for call, count := range expectedCallCount {
