@@ -43,7 +43,7 @@ resource "rollbar_project_access_token" "test_2" {
   depends_on = [rollbar_project.test]
 }
 
-resource "rollbar_team" "test_team_0" {
+resource "rollbar_team" "test_team_1" {
   name = "test-team-example"
 }
 
