@@ -44,12 +44,16 @@ resource "rollbar_project_access_token" "test_2" {
 }
 
 resource "rollbar_team" "test_team_1" {
+  name = "test-team-example_1"
+}
+
+resource "rollbar_team" "test_team_0" {
   name = "test-team-example"
 }
 
 resource "rollbar_user" "test_user_0" {
   email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-  team_ids = [rollbar_team.test_team_0.id]
+  team_ids = [rollbar_team.test_team_1.id]
 }
 
 resource "rollbar_team_user" "test_team_user" {
