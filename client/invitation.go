@@ -249,7 +249,7 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 		l.Err(err).Send()
 		return invs, err
 	}
-	var allInvs []Invitation
+	allInvs := []Invitation{}
 	for _, t := range teams {
 		teamInvs, err := c.ListInvitations(t.ID)
 		// Team may have been deleted by another process after we listed all
