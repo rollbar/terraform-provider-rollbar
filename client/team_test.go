@@ -206,10 +206,11 @@ func (s *Suite) TestIsUserAssignedToTeam() {
 	s.Equal(true, result)
 	s.Nil(err)
 
-	s.checkServerErrors("GET", u, func() error {
-		_, err = s.client.IsUserAssignedToTeam(teamID, userID) // non-existent user
-		return err
-	})
+	// Cannot really check it because we have a custom logic for Not found
+	//s.checkServerErrors("GET", u, func() error {
+	//	_, err = s.client.IsUserAssignedToTeam(teamID, userID)
+	//	return err
+	//})
 
 	// API returns status 404 when the user is not found on the team.
 	u = s.client.BaseURL + pathTeamUser
@@ -217,7 +218,7 @@ func (s *Suite) TestIsUserAssignedToTeam() {
 	u = strings.ReplaceAll(u, "{userID}", "0")
 	r = responderFromFixture("team/check_user_not_found.json", http.StatusNotFound)
 	httpmock.RegisterResponder("GET", u, r)
-	result, err = s.client.IsUserAssignedToTeam(0, teamID) // non-existent user
+	result, err = s.client.IsUserAssignedToTeam(teamID, 0) // non-existent user
 	s.Equal(false, result)
 	s.Nil(err)
 }
@@ -301,13 +302,15 @@ func (s *Suite) TestListTeamProjects() {
 	u := s.client.BaseURL + pathTeamProjects
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	r := responderFromFixture("team/list_projects_689492.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	httpmock.RegisterResponder("GET", u+"?page=1", r)
+	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u+"?page=2", r)
 
 	actual, err := s.client.ListTeamProjectIDs(teamID)
 	s.Nil(err)
 	s.Equal(expected, actual)
 
-	s.checkServerErrors("GET", u, func() error {
+	s.checkServerErrors("GET", u+"?page=1", func() error {
 		_, err := s.client.ListTeamProjectIDs(teamID)
 		return err
 	})

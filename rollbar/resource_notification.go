@@ -185,11 +185,8 @@ func parseSet(setName string, d *schema.ResourceData) map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func parseRule(d *schema.ResourceData) (string, interface{}) {
+func parseRule(d *schema.ResourceData) (trigger string, filters interface{}) {
 	rule := parseSet("rule", d)
-
-	var trigger string
-	var filters interface{}
 	for key, value := range rule {
 		if key == "trigger" {
 			trigger = value.(string)

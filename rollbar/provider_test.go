@@ -63,7 +63,7 @@ type AccSuite struct {
 
 	// The following variables are populated before each test by SetupTest():
 	randName string // Name of a Rollbar project
-	randID int // ID of a Rollbar resource
+	randID   int    // ID of a Rollbar resource
 }
 
 func (s *AccSuite) SetupSuite() {
@@ -136,7 +136,12 @@ func (s *AccSuite) checkResourceStateSanity(rn string) resource.TestCheckFunc {
 // getResourceAttrString returns the string value of a named attribute of a
 // Terraform state resource.
 func (s *AccSuite) getResourceAttrString(ts *terraform.State, resourceName string, attribute string) (string, error) {
-	rs, ok := ts.RootModule().Resources[resourceName]
+	rootModule := ts.RootModule()
+	var rs *terraform.ResourceState
+	var ok bool
+	if rootModule != nil {
+		rs, ok = rootModule.Resources[resourceName]
+	}
 	if !ok {
 		err := fmt.Errorf("can't find resource: %s", resourceName)
 		log.Err(err).Send()
@@ -158,10 +163,10 @@ func (s *AccSuite) getResourceAttrInt(ts *terraform.State, resourceName string, 
 	if err != nil {
 		return 0, err
 	}
-	i, err := strconv.Atoi(value)
-	if err != nil {
-		log.Err(err).Send()
-		return 0, err
+	i, err1 := strconv.Atoi(value)
+	if err1 != nil {
+		log.Err(err1).Send()
+		return 0, err1
 	}
 	return i, nil
 }

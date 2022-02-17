@@ -39,7 +39,11 @@ func (s *Suite) TestListInvitations() {
 
 	// Success
 	r := responderFromFixture("invitation/list.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	httpmock.RegisterResponder("GET", u+"?page=1", r)
+
+	r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u+"?page=2", r)
+
 	expected := []Invitation{
 		{
 			DateCreated:  1603192170,
@@ -64,7 +68,7 @@ func (s *Suite) TestListInvitations() {
 	s.Nil(err)
 	s.ElementsMatch(expected, actual)
 
-	s.checkServerErrors("GET", u, func() error {
+	s.checkServerErrors("GET", u+"?page=1", func() error {
 		_, err := s.client.ListInvitations(teamID)
 		return err
 	})
@@ -72,13 +76,19 @@ func (s *Suite) TestListInvitations() {
 
 // TestListPendingInvitations tests listing pending Rollbar team invitations.
 func (s *Suite) TestListPendingInvitations() {
+
 	teamID := 662037
+
 	u := s.client.BaseURL + pathInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
-
+	expectedQuery := map[string]string{"page": "1"}
 	// Success
 	r := responderFromFixture("invitation/list_662037.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
+
+	// Success
+	r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
 	expected := []Invitation{
 		{
 			ID:           153648,
@@ -93,8 +103,7 @@ func (s *Suite) TestListPendingInvitations() {
 	actual, err := s.client.ListPendingInvitations(teamID)
 	s.Nil(err)
 	s.ElementsMatch(expected, actual)
-
-	s.checkServerErrors("GET", u, func() error {
+	s.checkServerErrors("GET", u+"?page=1", func() error {
 		_, err := s.client.ListPendingInvitations(teamID)
 		return err
 	})
@@ -177,7 +186,7 @@ func (s *Suite) TestCancelInvitation() {
 		ErrorResult{Err: 1, Message: "Invite already cancelled"})
 	httpmock.RegisterResponder("DELETE", u, r)
 	err = s.client.CancelInvitation(invitationID)
-	s.Nil(err)
+	s.NotNil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
 		err := s.client.CancelInvitation(invitationID)
@@ -196,10 +205,20 @@ func (s *Suite) TestFindInvitations() {
 
 	// Mock list invitations for each team
 	for _, teamID := range []string{"662036", "662037", "676971"} {
-		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
-		r = responderFromFixture(fixturePath, http.StatusOK)
+
 		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
-		httpmock.RegisterResponder("GET", u, r)
+
+		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
+
+		expectedQuery := map[string]string{"page": "1"}
+		// Success
+		r = responderFromFixture(fixturePath, http.StatusOK)
+		httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
+
+		// Success
+		r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+		httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
+
 	}
 
 	expected := []Invitation{
@@ -221,7 +240,7 @@ func (s *Suite) TestFindInvitations() {
 	_, err = s.client.FindInvitations("nonexistent@email.com")
 	s.Equal(ErrNotFound, err)
 
-	s.checkServerErrors("GET", u, func() error {
+	s.checkServerErrors("GET", u+"?page=1", func() error {
 		_, err := s.client.FindInvitations(email)
 		return err
 	})
@@ -240,9 +259,16 @@ func (s *Suite) TestFindPendingInvitations() {
 	// Mock list invitations for each team
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
-		r = responderFromFixture(fixturePath, http.StatusOK)
+
 		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
-		httpmock.RegisterResponder("GET", u, r)
+		expectedQuery := map[string]string{"page": "1"}
+		// Success
+		r = responderFromFixture(fixturePath, http.StatusOK)
+		httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
+
+		// Success
+		r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+		httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
 	}
 
 	expected := []Invitation{
@@ -260,7 +286,7 @@ func (s *Suite) TestFindPendingInvitations() {
 	s.Nil(err)
 	s.Equal(expected, actual)
 
-	s.checkServerErrors("GET", u, func() error {
+	s.checkServerErrors("GET", u+"?page=1", func() error {
 		_, err := s.client.FindPendingInvitations(email)
 		return err
 	})
