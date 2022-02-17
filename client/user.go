@@ -34,7 +34,7 @@ type User struct {
 	Email    string `json:"email"`
 
 	// https://github.com/rollbar/terraform-provider-rollbar/issues/65
-	//EmailEnabled bool   `json:"email_enabled"`
+	// EmailEnabled bool   `json:"email_enabled"`
 }
 
 // ListUsers lists all Rollbar users.
