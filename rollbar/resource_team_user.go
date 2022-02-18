@@ -80,18 +80,18 @@ func resourceTeamUser() *schema.Resource {
 }
 
 func teamUserID(teamID int, email string) string {
-	return fmt.Sprintf("%d/%s", teamID, email)
+	return fmt.Sprintf("%d%s%s", teamID, ComplexImportSeparator, email)
 }
 
 func teamUserFromID(id string) (teamID int, s string, err error) {
 
-	if !strings.Contains(id, "/") {
-		return 0, s, fmt.Errorf("resource ID missing delimiter (/)")
+	if !strings.Contains(id, ComplexImportSeparator) {
+		return 0, s, fmt.Errorf("resource ID missing delimiter (%s)", ComplexImportSeparator)
 	}
 	l := log.With().
 		Str("id", id).
 		Logger()
-	values := strings.SplitN(id, "/", 2)
+	values := strings.SplitN(id, ComplexImportSeparator, 2)
 	l = l.With().Strs("values", values).Logger()
 	l.Debug().Msg("Converting userID to int")
 	teamID, err = strconv.Atoi(values[0])
