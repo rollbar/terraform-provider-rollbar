@@ -53,8 +53,8 @@ In addition to all arguments above, the following attributes are exported:
 Import
 ------
 
-Resource can be imported using the team ID and email address separated by a `/` (forward slash) e.g.
+Resource can be imported using the team ID and email address separated by a comma e.g.
 
 ```
-$ terraform import rollbar_team_user.foo 689493/some_dev@company.com
+$ terraform import rollbar_team_user.foo 689493,some_dev@company.com
 ```
