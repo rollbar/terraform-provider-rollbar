@@ -38,3 +38,12 @@ data "rollbar_project_access_token" "test_token_1" {
   name       = "test-token-1"
   depends_on = [rollbar_project_access_token.test_1]
 }
+
+data "rollbar_team" "test_team_0" {
+  team_id = rollbar_team.test_team_0.id
+}
+
+data "rollbar_team" "test_team_1" {
+  name = "test-team-example_1"
+  depends_on = [rollbar_team.test_team_1]
+}

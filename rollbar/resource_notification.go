@@ -38,7 +38,7 @@ var configMap = map[string][]string{"email": {"users", "teams"},
 	"pagerduty": {"service_key"}}
 
 func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	splitID := strings.Split(d.Id(), ",")
+	splitID := strings.Split(d.Id(), ComplexImportSeparator)
 	if len(splitID) > 1 {
 		mustSet(d, "channel", splitID[0])
 		d.SetId(splitID[1])
@@ -185,11 +185,8 @@ func parseSet(setName string, d *schema.ResourceData) map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func parseRule(d *schema.ResourceData) (string, interface{}) {
+func parseRule(d *schema.ResourceData) (trigger string, filters interface{}) {
 	rule := parseSet("rule", d)
-
-	var trigger string
-	var filters interface{}
 	for key, value := range rule {
 		if key == "trigger" {
 			trigger = value.(string)

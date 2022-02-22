@@ -23,10 +23,12 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Invitation represents an invitation for a user to join a Rollbar team.
@@ -42,34 +44,43 @@ type Invitation struct {
 
 // ListInvitations lists all invitations for a Rollbar team.
 func (c *RollbarAPIClient) ListInvitations(teamID int) (invs []Invitation, err error) {
+
+	hasNextPage := true
+	page := 1
+
 	l := log.With().
 		Int("teamID", teamID).
 		Logger()
 	l.Debug().Msg("Listing invitations")
-	resp, err := c.Resty.R().
-		SetPathParams(map[string]string{
-			"teamID": strconv.Itoa(teamID),
-		}).
-		SetResult(invitationListResponse{}).
-		SetError(ErrorResult{}).
-		Get(c.BaseURL + pathInvitations)
-	if err != nil {
-		l.Err(err).Msg("Error listing invitations")
-		return
+
+	for hasNextPage {
+		resp, err := c.Resty.R().
+			SetPathParams(map[string]string{
+				"teamID": strconv.Itoa(teamID),
+			}).
+			SetResult(invitationListResponse{}).
+			SetError(ErrorResult{}).
+			Get(c.BaseURL + pathInvitations + fmt.Sprintf("?page=%d", page))
+		if err != nil {
+			l.Err(err).Msg("Error listing invitations")
+			return nil, err
+		}
+		err = errorFromResponse(resp)
+		if err != nil {
+			l.Err(err).
+				Str("status", resp.Status()).
+				Msg("Error listing invitations")
+			return nil, err
+		}
+		r := resp.Result().(*invitationListResponse)
+		hasNextPage = len(r.Result) > 0
+		page++
+		invs = append(invs, r.Result...)
 	}
-	err = errorFromResponse(resp)
-	if err != nil {
-		l.Err(err).
-			Str("status", resp.Status()).
-			Msg("Error listing invitations")
-		return
-	}
-	r := resp.Result().(*invitationListResponse)
-	invs = r.Result
 	l.Debug().
 		Int("invitation_count", len(invs)).
 		Msg("Successfully listed invitations")
-	return
+	return invs, nil
 }
 
 // ListPendingInvitations lists a Rollbar team's pending invitations.
@@ -197,16 +208,16 @@ func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
 		Delete(u)
 	if err != nil {
 		l.Err(err).Msg("Error canceling invitation")
-		return
+		return err
 	}
 	err = errorFromResponse(resp)
 	if err != nil {
 		// If the invite has already been canceled, API returns HTTP status '422
 		// Unprocessable Entity'.  This is considered success.
 		statusUnprocessable := resp.StatusCode() == http.StatusUnprocessableEntity
-		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already cancelled")
+		alreadyCanceledMsg := strings.Contains(err.Error(), "Invite already canceled")
 		if statusUnprocessable && alreadyCanceledMsg {
-			l.Debug().Msg("invite already cancelled")
+			l.Debug().Msg("invite already canceled")
 			return nil
 		}
 		l.Err(err).
@@ -214,11 +225,11 @@ func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
 			Str("status", resp.Status()).
 			Int("status_code", resp.StatusCode()).
 			Msg("Error canceling invitation")
-		return
+		return err
 	}
 	l.Debug().
 		Msg("Successfully canceled invitation")
-	return
+	return nil
 }
 
 // FindInvitations finds all Rollbar team invitations for a given email. Note
@@ -233,12 +244,12 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 		Logger()
 
 	l.Debug().Msg("Finding invitations")
-	teams, err := c.ListCustomTeams()
+	teams, err := c.ListTeams()
 	if err != nil {
 		l.Err(err).Send()
-		return
+		return invs, err
 	}
-	var allInvs []Invitation
+	allInvs := []Invitation{}
 	for _, t := range teams {
 		teamInvs, err := c.ListInvitations(t.ID)
 		// Team may have been deleted by another process after we listed all
@@ -264,7 +275,7 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 	l.Debug().
 		Int("invitation_count", len(invs)).
 		Msg("Successfully found invitations")
-	return
+	return invs, nil
 }
 
 /*

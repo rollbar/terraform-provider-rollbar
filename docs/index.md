@@ -25,6 +25,8 @@ The following arguments are supported:
 
 * `api_key` - (Required) Rollbar API authentication token. Value will be
   sourced from environment variable `ROLLBAR_API_KEY` if set.
+* `project_api_key` - (Optional) Rollbar API authentication token (project level).
+  Value will be sourced from environment variable `ROLLBAR_PROJECT_API_KEY` if set.
 * `api_url` - (Optional) Base URL for the Rollbar API.  Defaults to
   https://api.rollbar.com.  Value will be sourced from environment variable
   `ROLLBAR_API_URL` if set.
@@ -40,6 +42,7 @@ Data Sources
   - An access token belonging to a Rollbar project
 * [`rollbar_project_access_tokens`](data-sources/project_access_tokens.md)
   - List all access tokens belonging to a Rollbar project
+* [`rollbar_team`](data-sources/team.md) - A Rollbar team
 
 
 Resources
@@ -48,5 +51,7 @@ Resources
 * [`rollbar_project`](resources/project.md) - A Rollbar project
 * [`rollbar_project_access_token`](resources/project_access_token.md) - A
   Rollbar project access token
-* [`rollbar_user`](resources/user.md) - A Rollbar user
+* [`rollbar_notification`](resources/notification.md) - A Rollbar notification
+  channel rule
 * [`rollbar_team`](resources/team.md) - A Rollbar team
+* [`rollbar_user`](resources/user.md) - A Rollbar user

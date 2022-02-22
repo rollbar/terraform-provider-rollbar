@@ -23,7 +23,6 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
@@ -52,8 +51,6 @@ func main() {
 
 	// Serve the plugin
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: func() *schema.Provider {
-			return rollbar.Provider()
-		},
+		ProviderFunc: rollbar.Provider,
 	})
 }

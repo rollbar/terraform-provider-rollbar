@@ -134,18 +134,6 @@ interactions:
             "access_level": "standard"
           },
           {
-            "id": 662037,
-            "account_id": 317418,
-            "name": "Everyone",
-            "access_level": "everyone"
-          },
-          {
-            "id": 662036,
-            "account_id": 317418,
-            "name": "Owners",
-            "access_level": "owner"
-          },
-          {
             "id": 704936,
             "account_id": 317418,
             "name": "test-team-example",
@@ -171,7 +159,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
     method: GET
   response:
     body: |-
@@ -201,7 +189,70 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:49 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/662037/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:49 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/662036/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:49 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
     method: GET
   response:
     body: |-
@@ -231,7 +282,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:49 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
     method: GET
   response:
     body: |-
@@ -295,18 +367,6 @@ interactions:
             "access_level": "standard"
           },
           {
-            "id": 662037,
-            "account_id": 317418,
-            "name": "Everyone",
-            "access_level": "everyone"
-          },
-          {
-            "id": 662036,
-            "account_id": 317418,
-            "name": "Owners",
-            "access_level": "owner"
-          },
-          {
             "id": 704936,
             "account_id": 317418,
             "name": "test-team-example",
@@ -332,7 +392,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
     method: GET
   response:
     body: |-
@@ -362,7 +422,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:50 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
     method: GET
   response:
     body: |-
@@ -392,7 +473,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:51 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
     method: GET
   response:
     body: |-
@@ -415,6 +517,27 @@ interactions:
       - application/json; charset=utf-8
       Date:
       - Sun, 29 Nov 2020 08:42:51 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:51 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -536,7 +659,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
     method: GET
   response:
     body: |-
@@ -566,7 +689,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:52 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
     method: GET
   response:
     body: |-
@@ -596,7 +740,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:52 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
     method: GET
   response:
     body: |-
@@ -619,6 +784,27 @@ interactions:
       - application/json; charset=utf-8
       Date:
       - Sun, 29 Nov 2020 08:42:52 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:52 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -728,18 +914,6 @@ interactions:
             "access_level": "standard"
           },
           {
-            "id": 662037,
-            "account_id": 317418,
-            "name": "Everyone",
-            "access_level": "everyone"
-          },
-          {
-            "id": 662036,
-            "account_id": 317418,
-            "name": "Owners",
-            "access_level": "owner"
-          },
-          {
             "id": 704936,
             "account_id": 317418,
             "name": "test-team-example",
@@ -765,7 +939,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
     method: GET
   response:
     body: |-
@@ -795,7 +969,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:53 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
     method: GET
   response:
     body: |-
@@ -825,7 +1020,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:54 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
     method: GET
   response:
     body: |-
@@ -851,3 +1067,27 @@ interactions:
     status: 200 OK
     code: 200
     duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:42:54 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+
+
+

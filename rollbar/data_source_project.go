@@ -24,10 +24,8 @@ package rollbar
 
 import (
 	"fmt"
-	//"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	//"github.com/rs/zerolog/log"
 )
 
 func dataSourceProject() *schema.Resource {
