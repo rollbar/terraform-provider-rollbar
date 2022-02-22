@@ -8,7 +8,7 @@ Example Usage
 -------------
 
 ```hcl
-# Create a project
+# Create a team
 resource "rollbar_team" "foo" {
   name         = "Foo"
   access_level = "standard"

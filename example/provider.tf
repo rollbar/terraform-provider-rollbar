@@ -24,15 +24,10 @@
 terraform {
   required_providers {
     rollbar = {
-      source  = "rollbar/rollbar"
+      source = "rollbar/rollbar"
     }
   }
 }
 
-variable "rollbar_token" {
-  type = string
-}
-
 provider "rollbar" {
-  api_key = var.rollbar_token
 }
