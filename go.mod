@@ -32,13 +32,13 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.4
 	github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
-	github.com/jarcoal/httpmock v1.0.8
+	github.com/jarcoal/httpmock v1.1.0
 	github.com/jhump/protoreflect v1.8.2 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/klauspost/compress v1.11.12 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/mitchellh/mapstructure v1.4.1
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/nsf/jsondiff v0.0.0-20210303162244-6ea32392771e // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.20.0
