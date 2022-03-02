@@ -1,6 +1,6 @@
 module github.com/rollbar/terraform-provider-rollbar
 
-go 1.15
+go 1.16
 
 // Until https://github.com/rs/zerolog/pull/266 or https://github.com/rs/zerolog/pull/267
 // is included in the next release
