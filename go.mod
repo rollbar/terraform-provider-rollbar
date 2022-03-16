@@ -32,7 +32,7 @@ require (
 	github.com/nsf/jsondiff v0.0.0-20210303162244-6ea32392771e // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.20.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93 // indirect
