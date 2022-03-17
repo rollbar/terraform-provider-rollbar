@@ -60,3 +60,28 @@ resource "rollbar_team_user" "test_team_user" {
   email   = "example+tf-acc-test-rollbar-provider@gmail.com"
   team_id = rollbar_team.test_team_0.id
 }
+
+resource "rollbar_notification" "slack_notification" {
+  rule  {
+    filters {
+        type =  "environment"
+        operation =  "eq"
+        value = "production"
+    }
+    filters {
+       type = "framework"
+       operation = "eq"
+       value = 13
+    }
+   trigger = "new_item"
+  }
+  channel = "slack"
+  config  {
+     show_message_buttons = true
+     channel = "#demo-user"
+  }
+}
+resource "rollbar_service_link" "service_link" {
+  name = "some_name_some_name"
+  template = "sometemplate_new.{{ss}}"
+}

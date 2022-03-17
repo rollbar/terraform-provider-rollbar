@@ -43,6 +43,11 @@ variable "rollbar_token" {
   type = string
 }
 
+variable "rollbar_project_token" {
+  type = string
+}
+
 provider "rollbar" {
   api_key = var.rollbar_token
+  project_api_key = var.rollbar_project_token
 }
