@@ -242,7 +242,6 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	l := log.With().Str("channel", channel).Logger()
 
 	l.Info().Msg("Creating rollbar_notification resource")
-	l.Print(config)
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
@@ -260,7 +259,7 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	}
 	l = l.With().Int("id", n.ID).Logger()
 
-	l.Debug().Msg("Successfully updated Rollbar notification resource")
+	l.Debug().Msg("Successfully updated rollbar_notification resource")
 	return nil
 }
 
