@@ -1,0 +1,8 @@
+{
+  "result": {
+    "name": "some_name",
+    "template": "some_template.{{aaa}}",
+    "id": 5127954
+  },
+  "err": 0
+}
