@@ -93,7 +93,7 @@ func (c *RollbarAPIClient) UpdateServiceLink(id int, name, template string) (*Se
 
 }
 
-// ReadServiceLink reads a Rollbar service link from the API. If no matching notification is found,
+// ReadServiceLink reads a Rollbar service link from the API. If no matching service link is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
@@ -130,7 +130,7 @@ func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
 
 }
 
-// DeleteServiceLink deletes a Rollbar service_link. If no matching notification is found,
+// DeleteServiceLink deletes a Rollbar service_link. If no matching service link is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) DeleteServiceLink(id int) error {
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate

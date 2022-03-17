@@ -32,7 +32,7 @@ import (
 	"strconv"
 )
 
-// resourceNotification constructs a resource representing a Rollbar notification.
+// resourceServiceLink constructs a resource representing a Rollbar service_link.
 func resourceServiceLink() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceServiceLinkCreate,
@@ -120,11 +120,11 @@ func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m inte
 	sl, err := c.ReadServiceLink(id)
 	if err == client.ErrNotFound {
 		d.SetId("")
-		l.Info().Msg("Notification not found - removed from state")
+		l.Info().Msg("Service Link not found - removed from state")
 		return nil
 	}
 	if err != nil {
-		l.Err(err).Msg("error reading rollbar_notification resource")
+		l.Err(err).Msg("error reading rollbar_service_link resource")
 		return diag.FromErr(err)
 	}
 
