@@ -46,7 +46,7 @@ resource "rollbar_project_access_token" "test_2" {
 resource "rollbar_project_access_token" "test_3" {
   name       = "test-token-3"
   project_id = rollbar_project.test.id
-  scopes     = ["write"]
+  scopes     = ["read", "write"]
   depends_on = [rollbar_project.test]
 }
 
