@@ -2,7 +2,7 @@ Example Terraform Configuration
 ===============================
 
 This folder contains example Terraform configuration, demonstrating the usage
-and capabilities of `terraform-provider-rollbar`.
+and capabilities of `terraform-provider-rollbar` at the account level.
 
 
 Usage Instructions
@@ -14,25 +14,25 @@ The following are step-by-step instructions for demonstrating
 -----
 
 1. First, change directories to the repo checkout:
-   
+
    ```shell
    cd terraform-provider-rollbar
    ```
-   
+
 1. In your Rollbar account, under _Account Access Tokens_, create a new token and
    grant it _write access_.
-   
+
 1. Install terraform. On Mac, Brew is the easiest way (assuming you have Brew
    installed).  See [terraform installation
    docs](https://learn.hashicorp.com/tutorials/terraform/install-cli) for
    instructions on all supported platforms.
-   
+
    ```shell
    brew install terraform
    ```
-   
+
 1. Change directories into example folder.
-   
+
    ```shell
    cd example
    ```

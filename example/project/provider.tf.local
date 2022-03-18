@@ -21,29 +21,34 @@
  */
 
 
-data "rollbar_projects" "all" {}
+//////////////////////////////////////////////////////////////////////////////
+//
+// PROVIDER CONFIGURATION FOR LOCAL TESTING
+//
+// To test a locally built provider (installed with `make install`), copy this
+// file to overwrite `provider.tf`.
+//
+//////////////////////////////////////////////////////////////////////////////
 
-data "rollbar_project_access_tokens" "test" {
-  project_id = rollbar_project.test.id
-  prefix = "test-"
+
+terraform {
+  required_providers {
+    rollbar = {
+      source  = "github.com/rollbar/rollbar"
+      version = "1.6.0"
+    }
+  }
 }
 
-data "rollbar_project" "test" {
-  name = rollbar_project.test.name
-  depends_on = [rollbar_project.test]
+variable "rollbar_token" {
+  type = string
 }
 
-data "rollbar_project_access_token" "test_token_1" {
-  project_id = rollbar_project.test.id
-  name       = "test-token-1"
-  depends_on = [rollbar_project_access_token.test_1]
+variable "rollbar_project_token" {
+  type = string
 }
 
-data "rollbar_team" "test_team_0" {
-  team_id = rollbar_team.test_team_0.id
-}
-
-data "rollbar_team" "test_team_1" {
-  name = "test-team-example_1"
-  depends_on = [rollbar_team.test_team_1]
+provider "rollbar" {
+  api_key         = var.rollbar_token
+  project_api_key = var.rollbar_project_token
 }

@@ -22,37 +22,44 @@
 
 
 resource "rollbar_project" "test" {
-  name = "tf-acc-test-example"
-  team_ids = [rollbar_team.test_team_0.id]
+  name       = "tf-acc-test-example"
+  team_ids   = [rollbar_team.test_team_0.id]
   depends_on = [rollbar_team.test_team_0]
 }
 
 resource "rollbar_project_access_token" "test_1" {
-  name = "test-token-1"
-  project_id = rollbar_project.test.id
-  scopes = ["post_client_item"]
-  depends_on = [rollbar_project.test]
-  rate_limit_window_size = 60
+  name                    = "test-token-1"
+  project_id              = rollbar_project.test.id
+  scopes                  = ["post_client_item"]
+  depends_on              = [rollbar_project.test]
+  rate_limit_window_size  = 60
   rate_limit_window_count = 500
 }
 
 resource "rollbar_project_access_token" "test_2" {
-  name = "test-token-2"
+  name       = "test-token-2"
   project_id = rollbar_project.test.id
-  scopes = ["post_server_item"]
+  scopes     = ["post_server_item"]
+  depends_on = [rollbar_project.test]
+}
+
+resource "rollbar_project_access_token" "test_3" {
+  name       = "test-token-3"
+  project_id = rollbar_project.test.id
+  scopes     = ["write"]
   depends_on = [rollbar_project.test]
 }
 
 resource "rollbar_team" "test_team_1" {
-  name = "test-team-example_1"
+  name = "test-team-example_3"
 }
 
 resource "rollbar_team" "test_team_0" {
-  name = "test-team-example"
+  name = "test-team-example_4"
 }
 
 resource "rollbar_user" "test_user_0" {
-  email = "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+  email    = "haggishunk+tf-acc-test-rollbar-provider@gmail.com"
   team_ids = [rollbar_team.test_team_0.id]
 }
 
@@ -61,27 +68,6 @@ resource "rollbar_team_user" "test_team_user" {
   team_id = rollbar_team.test_team_0.id
 }
 
-resource "rollbar_notification" "slack_notification" {
-  rule  {
-    filters {
-        type =  "environment"
-        operation =  "eq"
-        value = "production"
-    }
-    filters {
-       type = "framework"
-       operation = "eq"
-       value = 13
-    }
-   trigger = "new_item"
-  }
-  channel = "slack"
-  config  {
-     show_message_buttons = true
-     channel = "#demo-user"
-  }
-}
-resource "rollbar_service_link" "service_link" {
-  name = "some_name_some_name"
-  template = "sometemplate_new.{{ss}}"
+output rollbar_project_access_token_write {
+  value = rollbar_project_access_token.test_3
 }
