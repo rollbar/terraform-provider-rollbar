@@ -43,7 +43,7 @@ resource "rollbar_project_access_token" "test_2" {
   depends_on = [rollbar_project.test]
 }
 
-resource "rollbar_project_access_token" "test_3" {
+resource "rollbar_project_access_token" "test_read_write" {
   name       = "test-token-3"
   project_id = rollbar_project.test.id
   scopes     = ["read", "write"]
@@ -68,6 +68,8 @@ resource "rollbar_team_user" "test_team_user" {
   team_id = rollbar_team.test_team_0.id
 }
 
-output rollbar_project_access_token_write {
-  value = rollbar_project_access_token.test_3
+# this value can be used to configure the rollbar provider
+# to manage project resources
+output rollbar_project_access_token_read_write {
+  value = rollbar_project_access_token.test_read_write.access_token
 }
