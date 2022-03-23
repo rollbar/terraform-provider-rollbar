@@ -44,4 +44,6 @@ const (
 	pathInvitations                      = "/api/1/team/{teamID}/invites"
 	pathNotificationCreate               = "/api/1/notifications/{channel}/rules"
 	pathNotificationReadOrDeleteOrUpdate = "/api/1/notifications/{channel}/rule/{notificationID}"
+	pathServiceLinkCreate                = "/api/1/service_links"
+	pathServiceLinkReadOrDeleteOrUpdate  = "/api/1/service_links/{id}"
 )

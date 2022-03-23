@@ -66,6 +66,7 @@ func Provider() *schema.Provider {
 			"rollbar_user":                 resourceUser(),
 			"rollbar_team_user":            resourceTeamUser(),
 			"rollbar_notification":         resourceNotification(),
+			"rollbar_service_link":         resourceServiceLink(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"rollbar_project":               dataSourceProject(),

@@ -60,6 +60,7 @@ jobs:
 
     env:
       ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+      ROLLBAR_PROJECT_API_KEY: ${{ secrets.ROLLBAR_PROJECT_API_KEY }}
 
     steps:
 
@@ -101,7 +102,7 @@ jobs:
         run: terraform init
         working-directory: ./example
       - name: Terraform plan
-        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}'
+        run: terraform plan -var 'rollbar_token=${{ secrets.ROLLBAR_TOKEN }}' -var 'rollbar_project_token=${{ secrets.ROLLBAR_TOKEN }}'
         working-directory: ./example
         env:
           ROLLBAR_TOKEN: ${{ secrets.ROLLBAR_TOKEN }}
