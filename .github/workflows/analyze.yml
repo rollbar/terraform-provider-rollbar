@@ -40,7 +40,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file. 
+        # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
@@ -76,13 +76,16 @@ jobs:
     # 3. Invoke Scan with the github token. Leave the workspace empty to use relative url
 
     - name: Perform Scan
-      uses: ShiftLeftSecurity/scan-action@master
+      # the `latest` tag of shift left is broken
+      # uses: ShiftLeftSecurity/scan-action@master
+      uses: ../actions/shiftleft-scan-action
       env:
         WORKSPACE: ""
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SCAN_AUTO_BUILD: true
       with:
         output: reports
+        docker_tag: v2.0.4  # only supported in the custom local action
         # Scan auto-detects the languages in your project. To override uncomment the below variable and set the type
         # type: credscan,java
         # type: python

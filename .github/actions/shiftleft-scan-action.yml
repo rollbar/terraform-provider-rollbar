@@ -1,0 +1,38 @@
+name: "Security and Licence Scan"
+description: "Security Scan is a free and open-source security audit tool for your DevOps team"
+inputs:
+  src:
+    description: "Source directory to scan. Defaults to /github/workspace"
+    required: false
+    default: "/github/workspace"
+  output:
+    description: "Output directory for the generated reports. Defaults to /github/workspace/reports"
+    required: false
+    default: "/github/workspace/reports"
+  type:
+    description: "Project type. Eg: credscan, java, python, nodejs, depscan etc. Comma separated values allowed."
+    required: false
+  docker_tag:
+    description: "The docker tag of the scan image"
+    required: false
+    default: "latest"
+runs:
+  using: "docker"
+  image: "docker://shiftleft/scan:${{ inputs.docker_tag }}"
+  env:
+    WORKSPACE: ""
+    SCAN_ANNOTATE_PR: true
+    SKIP_BOT_TRIGGERS: true
+    ENABLE_OSS_RISK: true
+  args:
+    - "scan"
+    - "--src"
+    - ${{ inputs.src }}
+    - "--out_dir"
+    - ${{ inputs.output }}
+    - "--type"
+    - ${{ inputs.type }}
+    - "--no-error"
+branding:
+  icon: "check"
+  color: "blue"
