@@ -78,7 +78,7 @@ jobs:
     - name: Perform Scan
       # the `latest` tag of shift left is broken
       # uses: ShiftLeftSecurity/scan-action@master
-      uses: ./.github/actions/shiftleft-scan-action
+      uses: ./.github/actions/shiftleft-scan-action.yml
       env:
         WORKSPACE: ""
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
