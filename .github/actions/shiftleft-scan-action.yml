@@ -12,13 +12,9 @@ inputs:
   type:
     description: "Project type. Eg: credscan, java, python, nodejs, depscan etc. Comma separated values allowed."
     required: false
-  docker_tag:
-    description: "The docker tag of the scan image"
-    required: false
-    default: "latest"
 runs:
   using: "docker"
-  image: "docker://shiftleft/scan:${{ inputs.docker_tag }}"
+  image: "docker://shiftleft/scan:v2.0.4"
   env:
     WORKSPACE: ""
     SCAN_ANNOTATE_PR: true
