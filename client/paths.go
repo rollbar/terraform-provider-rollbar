@@ -46,4 +46,5 @@ const (
 	pathNotificationReadOrDeleteOrUpdate = "/api/1/notifications/{channel}/rule/{notificationID}"
 	pathServiceLinkCreate                = "/api/1/service_links"
 	pathServiceLinkReadOrDeleteOrUpdate  = "/api/1/service_links/{id}"
+	pathIntegration                      = "/api/1/notifications/{integration}"
 )
