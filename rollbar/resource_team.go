@@ -3,12 +3,13 @@ package rollbar
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 // resourceTeam constructs a resource representing a Rollbar team.
@@ -57,7 +58,7 @@ func resourceTeamValidateAccessLevel(v interface{}, p cty.Path) diag.Diagnostics
 	case "standard", "light", "view":
 		return nil
 	default:
-		summary := fmt.Sprintf(`Invalid access_level: "%s"`, s)
+		summary := fmt.Sprintf(`Invalid access_level: %q`, s)
 		d := diag.Diagnostic{
 			Severity:      diag.Error,
 			AttributePath: p,
