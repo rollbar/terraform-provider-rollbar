@@ -16,6 +16,7 @@ build:
 
 release:
 	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
+	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_${VERSION}_darwin_arm64
 	GOOS=freebsd GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_freebsd_386
 	GOOS=freebsd GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_freebsd_amd64
 	GOOS=freebsd GOARCH=arm go build -o ./bin/${BINARY}_${VERSION}_freebsd_arm
@@ -36,12 +37,12 @@ install012: build
 	mkdir -p ~/.terraform.d/plugins/${OS_ARCH}/
 	mv ${BINARY} ~/.terraform.d/plugins/${OS_ARCH}/terraform-provider-${NAME}_v${VERSION}
 
-test: 
+test:
 	go test -covermode=atomic -coverprofile=coverage.out $(TEST) || exit 1
-	@#echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4                    
+	@#echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
-testacc: 
-	TF_ACC=1 TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 go test -covermode=atomic -coverprofile=coverage.out $(TEST) -v $(TESTARGS) -timeout 120m   
+testacc:
+	TF_ACC=1 TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 go test -covermode=atomic -coverprofile=coverage.out $(TEST) -v $(TESTARGS) -timeout 120m
 
 slscan:
 	./.slscan.sh
