@@ -10,13 +10,11 @@ require (
 	cloud.google.com/go v0.78.0 // indirect
 	cloud.google.com/go/storage v1.14.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.37.25 // indirect
 	github.com/brianvoe/gofakeit/v5 v5.11.2
 	github.com/dnaeon/go-vcr v1.1.0
 	github.com/fatih/color v1.10.0 // indirect
-	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-resty/resty/v2 v2.5.0
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -28,7 +26,7 @@ require (
 	github.com/jhump/protoreflect v1.8.2 // indirect
 	github.com/klauspost/compress v1.11.12 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
-	github.com/mitchellh/mapstructure v1.4.3
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nsf/jsondiff v0.0.0-20210303162244-6ea32392771e // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/rs/zerolog v1.20.0
