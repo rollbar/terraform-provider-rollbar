@@ -18,6 +18,8 @@ jobs:
       matrix:
         go:
           - ""  # Latest
+          - "1.17"
+          - "1.16"
           - "1.15"
           - "1.14"
 
@@ -54,9 +56,13 @@ jobs:
       matrix:
         terraform:
           - "" # Latest
-          - "0.14"
-          - "0.13"
-          - "0.12"
+          - "1.2.2"
+          - "1.1.9"
+          - "1.0.11"
+          - "0.15.5"
+          - "0.14.11"
+          - "0.13.7"
+          - "0.12.31"
 
     env:
       ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
