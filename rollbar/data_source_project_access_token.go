@@ -24,13 +24,15 @@ package rollbar
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"time"
 )
 
 // dataSourceProjectAccessToken is a data source returning a named access token
@@ -131,9 +133,9 @@ func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceDat
 
 	// Error if no token matches.
 	if found == nil {
-		msg := fmt.Sprintf(`could not find access token with name matching "%s"`, name)
+		msg := fmt.Sprintf(`could not find access token with name matching %q`, name)
 		l.Error().Msg(msg)
-		return diag.FromErr(fmt.Errorf(msg))
+		return diag.FromErr(errors.New(msg))
 	}
 
 	// Write the values from API to Terraform state

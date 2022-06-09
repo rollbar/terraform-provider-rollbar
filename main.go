@@ -23,18 +23,19 @@
 package main
 
 import (
+	"os"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"os"
 )
 
 func main() {
 	// Configure logging
 	if os.Getenv("TERRAFORM_PROVIDER_ROLLBAR_DEBUG") == "1" {
 		p := "/tmp/terraform-provider-rollbar.log"
-		f, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0600)
+		f, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o600)
 		if err != nil {
 			log.Fatal().
 				Err(err).
