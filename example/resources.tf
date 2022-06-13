@@ -85,3 +85,12 @@ resource "rollbar_service_link" "service_link" {
   name = "some_name_some_name"
   template = "sometemplate_new.{{ss}}"
 }
+
+resource "rollbar_integration" "slack_integration" {
+  slack {
+    enabled = false
+    channel =  "#demo"
+    service_account_id = "1234r45"
+    show_message_buttons = true
+  }
+}

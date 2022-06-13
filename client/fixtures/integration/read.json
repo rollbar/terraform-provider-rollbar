@@ -1,0 +1,12 @@
+{
+  "result": {
+    "project_id": 557954,
+    "settings": {
+      "service_account_id": "123456",
+      "enabled": false,
+      "show_message_buttons": false,
+      "channel": "#demo"
+    }
+  },
+  "err": 0
+}
