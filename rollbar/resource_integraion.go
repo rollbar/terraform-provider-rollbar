@@ -25,13 +25,14 @@ package rollbar
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"strings"
 )
 
 type Action string
@@ -40,7 +41,7 @@ var DELETE Action = "DELETE"
 var UPDATE Action = "UPDATE"
 var CREATE Action = "CREATE"
 
-// resourceServiceLink constructs a resource representing a Rollbar service_link.
+// resourceIntegraion constructs a resource representing a Rollbar integration.
 func resourceIntegraion() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceIntegrationCreate,
