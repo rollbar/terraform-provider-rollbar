@@ -3,7 +3,7 @@
 
 Rollbar projects can be configured with service links, dynamically constructed links that use templated fields from your Rollbar items to provide better context.
 
-This resource can manage service links.  See the following api documentation for more details about the arguments with respect to each channel:
+This resource can manage service links.  See the following api documentation for more details:
 
 * [Rollbar API Service Links](https://explorer.docs.rollbar.com/#tag/Service-Links)
 
