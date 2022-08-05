@@ -24,14 +24,15 @@ package rollbar
 
 import (
 	"fmt"
+	"os"
+	"regexp"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"regexp"
-	"strconv"
 )
 
 func (s *AccSuite) TestAccTokenImportInvalidID() {
@@ -347,7 +348,7 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 	// language=hcl
 	config := `
 		resource "rollbar_project_access_token" "test" {
-			project_id = 1234567890123457890
+			project_id = -1
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
