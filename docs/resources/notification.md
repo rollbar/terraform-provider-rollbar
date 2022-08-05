@@ -60,6 +60,7 @@ The following arguments are supported:
 * `filters` - (Required) One or more nested configuration blocks that define filter expressions.  Structure is [documented below](#nested_filters)
 
 <a name="nested_filters"></a>The `filters` block supports:
+* `path` - json path (body.field1.field2)
 * `type` - (Required) The type of filter expression.
 * `operation` - The comparator used in the expression evalution for the filter.
 * `value` - The value to compare the triggering metric against.
