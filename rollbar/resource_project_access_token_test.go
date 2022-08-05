@@ -348,7 +348,7 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 	// language=hcl
 	config := `
 		resource "rollbar_project_access_token" "test" {
-			project_id = -1
+			project_id = 1234567890123457890
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
