@@ -8,7 +8,7 @@ This resource can manage notification rules for different integration channels. 
 * [Rollbar API Slack Notification Rules](https://explorer.docs.rollbar.com/#tag/Slack-Notification-Rules)
 * [Rollbar API Pagerduty Notification Rules](https://explorer.docs.rollbar.com/#tag/PagerDuty-Notification-Rules)
 * [Rollbar API Email Notification Rules](https://explorer.docs.rollbar.com/#tag/Email-Notification-Rules)
-* [Rollbar API Webhook Notification Rules](https://explorer.docs.rollbar.com/#tag/Webohook-Notification-Rules)
+* [Rollbar API Webhook Notification Rules](https://explorer.docs.rollbar.com/#tag/Webhook-Notification-Rules)
 
 
 Example Usage
