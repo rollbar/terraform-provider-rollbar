@@ -25,12 +25,13 @@ package rollbar
 import (
 	"context"
 	"errors"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"strings"
 )
 
 var configMap = map[string][]string{"email": {"users", "teams"},
@@ -82,8 +83,13 @@ func resourceNotification() *schema.Resource {
 							Optional:    true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"path": {
+										Description: "Path",
+										Type:        schema.TypeString,
+										Optional:    true,
+									},
 									"type": {
-										Description: "Operation",
+										Description: "Type",
 										Type:        schema.TypeString,
 										Required:    true,
 									},
@@ -150,6 +156,16 @@ func resourceNotification() *schema.Resource {
 						},
 						"service_key": {
 							Description: "Service key (pagerduty)",
+							Type:        schema.TypeString,
+							Optional:    true,
+						},
+						"url": {
+							Description: "URL (webhook)",
+							Type:        schema.TypeString,
+							Optional:    true,
+						},
+						"format": {
+							Description: "Format (webhook)",
 							Type:        schema.TypeString,
 							Optional:    true,
 						},

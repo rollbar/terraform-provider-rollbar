@@ -8,6 +8,7 @@ This resource can manage notification rules for different integration channels. 
 * [Rollbar API Slack Notification Rules](https://explorer.docs.rollbar.com/#tag/Slack-Notification-Rules)
 * [Rollbar API Pagerduty Notification Rules](https://explorer.docs.rollbar.com/#tag/PagerDuty-Notification-Rules)
 * [Rollbar API Email Notification Rules](https://explorer.docs.rollbar.com/#tag/Email-Notification-Rules)
+* [Rollbar API Webhook Notification Rules](https://explorer.docs.rollbar.com/#tag/Webohook-Notification-Rules)
 
 
 Example Usage
@@ -50,7 +51,7 @@ Argument Reference
 
 The following arguments are supported:
 
-* `channel` - (Required) The notification channel (eg. `slack`, `pagerduty`, `email`) to configure a notification rule(s) for
+* `channel` - (Required) The notification channel (eg. `slack`, `pagerduty`, `email`, `webhook`) to configure a notification rule(s) for
 * `rule` - (Required) An array of expression configurations for notification rules.  Structure is [documented below](#nested_rule)
 * `config` - (Required) An array of configurations for notification rules.  Structure is [documented below](#nested_config)
 
@@ -74,6 +75,8 @@ The following arguments are supported:
 * `channel` - (Required only for Slack)  The Slack channel to post messages to.
 * `show_message_buttons` - (Required only for Slack)  Boolean value to toggle message buttons on/off in Slack.
 * `service_key` - (Required only for PagerDuty)  The Pagerduty service API key.
+* `url` - (Required only for Webhook)  The Webhook URL.
+* `format` - (Required only for Webhook)  The Webhook format (json or xml).
 
 Attribute Reference
 -------------------
