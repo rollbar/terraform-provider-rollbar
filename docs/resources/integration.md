@@ -5,7 +5,7 @@ Rollbar projects can be configured with different notification integrations (aka
 
 This resource can manage configuration for the Slack channel. See the following api documentation for more details about the arguments with respect to the Slack channel:
 
-* [Rollbar API Slack Integration](https://explorer.docs.rollbar.com/#tag/Notification-Channels)
+* [Rollbar API Slack Integration](https://docs.rollbar.com/reference/Notification-Channels)
 
 Example Usage
 -------------
