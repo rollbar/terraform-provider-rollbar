@@ -5,9 +5,9 @@ Rollbar projects can be configured with different notification integrations (aka
 
 This resource can manage notification rules for different integration channels.  See the following api documentation for more details about the arguments with respect to each channel:
 
-* [Rollbar API Slack Notification Rules](https://docs.rollbar.com/reference/Slack-Notification-Rules)
-* [Rollbar API Pagerduty Notification Rules](https://docs.rollbar.com/reference/PagerDuty-Notification-Rules)
-* [Rollbar API Email Notification Rules](https://docs.rollbar.com/reference/Email-Notification-Rules)
+* [Rollbar API Slack Notification Rules](https://docs.rollbar.com/reference/slack-notification-rules)
+* [Rollbar API Pagerduty Notification Rules](https://docs.rollbar.com/reference/pagerduty-notification-rules)
+* [Rollbar API Email Notification Rules](https://docs.rollbar.com/reference/email-notification-rules)
 
 
 Example Usage
