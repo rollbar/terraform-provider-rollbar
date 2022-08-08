@@ -5,7 +5,7 @@ Rollbar projects can be configured with service links, dynamically constructed l
 
 This resource can manage service links.  See the following api documentation for more details:
 
-* [Rollbar API Service Links](https://explorer.docs.rollbar.com/#tag/Service-Links)
+* [Rollbar API Service Links](https://docs.rollbar.com/reference/service-links)
 
 Example Usage
 -------------
