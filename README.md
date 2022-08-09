@@ -112,6 +112,27 @@ resource "rollbar_notification" "baz" {
      channel = "#demo-david"
   }
 }
+# Create a new Webhook notification rule for the "New Item" trigger
+resource "rollbar_notification" "baz" {
+  rule  {
+    filters {
+        type =  "environment"
+        operation =  "eq"
+        value = "production"
+    }
+    filters {
+       type = "framework"
+       operation = "eq"
+       value = "13"
+    }
+    trigger = "new_item"
+  }
+  channel = "webhook"
+  config  {
+     url = "http://www.rollbar.com"
+     format = "json"
+  }
+}
 ```
 
 **Note about framework filtering**

@@ -8,6 +8,7 @@ This resource can manage notification rules for different integration channels. 
 * [Rollbar API Slack Notification Rules](https://docs.rollbar.com/reference/slack-notification-rules)
 * [Rollbar API Pagerduty Notification Rules](https://docs.rollbar.com/reference/pagerduty-notification-rules)
 * [Rollbar API Email Notification Rules](https://docs.rollbar.com/reference/email-notification-rules)
+* [Rollbar API Webhook Notification Rules](https://docs.rollbar.com/reference/webhook-notification-rules)
 
 
 Example Usage
@@ -50,7 +51,7 @@ Argument Reference
 
 The following arguments are supported:
 
-* `channel` - (Required) The notification channel (eg. `slack`, `pagerduty`, `email`) to configure a notification rule(s) for
+* `channel` - (Required) The notification channel (eg. `slack`, `pagerduty`, `email`, `webhook`) to configure a notification rule(s) for
 * `rule` - (Required) An array of expression configurations for notification rules.  Structure is [documented below](#nested_rule)
 * `config` - (Required) An array of configurations for notification rules.  Structure is [documented below](#nested_config)
 
@@ -59,6 +60,7 @@ The following arguments are supported:
 * `filters` - (Required) One or more nested configuration blocks that define filter expressions.  Structure is [documented below](#nested_filters)
 
 <a name="nested_filters"></a>The `filters` block supports:
+* `path` - json path (body.field1.field2)
 * `type` - (Required) The type of filter expression.
 * `operation` - The comparator used in the expression evalution for the filter.
 * `value` - The value to compare the triggering metric against.
@@ -74,6 +76,8 @@ The following arguments are supported:
 * `channel` - (Required only for Slack)  The Slack channel to post messages to.
 * `show_message_buttons` - (Required only for Slack)  Boolean value to toggle message buttons on/off in Slack.
 * `service_key` - (Required only for PagerDuty)  The Pagerduty service API key.
+* `url` - (Required only for Webhook)  The Webhook URL.
+* `format` - (Required only for Webhook)  The Webhook format (json or xml).
 
 Attribute Reference
 -------------------
