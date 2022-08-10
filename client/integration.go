@@ -58,7 +58,6 @@ func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[str
 		Str("integration", integration).
 		Logger()
 	l.Debug().Msg("Update integration")
-	//l.Debug().Interface("body", bodyMap).Msg("some message")
 	resp, err := c.Resty.R().
 		SetBody(bodyMap).
 		SetResult(Integrations[integration]).
