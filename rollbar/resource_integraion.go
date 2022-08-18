@@ -103,20 +103,22 @@ func resourceIntegraion() *schema.Resource {
 		},
 	}
 }
-func resourcePreCheck(d *schema.ResourceData) error {
+func resourcePreCheck(d *schema.ResourceData) (string, error) {
 	var integrationCount int
+	var validIntegration string
 	for integration := range client.Integrations {
 		if _, ok := d.GetOk(integration); ok {
+			validIntegration = integration
 			integrationCount++
 		}
 	}
 	if integrationCount > 1 {
-		return errors.New("only one integration allowed per resource")
+		return "", errors.New("only one integration allowed per resource")
 	}
-	return nil
+	return validIntegration, nil
 }
 
-func setBodyMapFromMap(integration string, properIntgr map[string]interface{}) (bodyMap map[string]interface{}) {
+func setBodyMapFromMap(integration string, properIntgr map[string]interface{}, toDelete bool) (bodyMap map[string]interface{}) {
 	switch integration {
 	case client.SLACK:
 		enabled := properIntgr["enabled"].(bool)
@@ -131,10 +133,13 @@ func setBodyMapFromMap(integration string, properIntgr map[string]interface{}) (
 		url := properIntgr["url"].(string)
 		bodyMap = map[string]interface{}{"enabled": enabled, "url": url}
 	}
+	if toDelete {
+		bodyMap["enabled"] = false
+	}
 	return bodyMap
 }
 
-func setBodyMapFromInterface(integration string, intf interface{}) (bodyMap map[string]interface{}) {
+func setBodyMapFromInterface(integration string, intf interface{}, toDelete bool) (bodyMap map[string]interface{}) {
 	switch integration {
 	case client.SLACK:
 		slackIntegration := intf.(*client.SlackIntegration)
@@ -146,10 +151,12 @@ func setBodyMapFromInterface(integration string, intf interface{}) (bodyMap map[
 		bodyMap = map[string]interface{}{"enabled": webhookIntegration.Settings.Enabled,
 			"url": webhookIntegration.Settings.URL}
 	}
+	if toDelete {
+		bodyMap["enabled"] = false
+	}
 	return bodyMap
 }
-func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[string]interface{}, d *schema.ResourceData, m interface{}, action Action) (diag.Diagnostics, zerolog.Logger) {
-
+func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[string]interface{}, d *schema.ResourceData, m interface{}, action Action) (zerolog.Logger, diag.Diagnostics) {
 	l := log.With().Str("integration", integration).Logger()
 	switch action {
 	case CREATE:
@@ -165,6 +172,7 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		id = d.Id()
 		l = l.With().Str("id", id).Logger()
 	}
+	log.Print(bodyMap, action)
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	intf, err := c.UpdateIntegration(integration, bodyMap)
 	if err != nil {
@@ -172,7 +180,7 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		if action == CREATE || action == UPDATE {
 			d.SetId("") // removing from the state
 		}
-		return diag.FromErr(err), l
+		return l, diag.FromErr(err)
 	}
 	var projectID int64
 	switch integration {
@@ -190,77 +198,60 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 			err = errors.New("IDs are not equal")
 			l.Err(err).Send()
 			d.SetId("") // removing from the state
-			return diag.FromErr(err), l
+			return l, diag.FromErr(err)
 		}
 	}
 	if action == CREATE {
 		d.SetId(integrationID)
 	}
-
-	return nil, l
+	return l, nil
 }
 
 func resourceIntegrationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	if err := resourcePreCheck(d); err != nil {
+	var err error
+	var integration string
+	if integration, err = resourcePreCheck(d); err != nil {
 		return diag.FromErr(err)
 	}
-	for integration := range client.Integrations {
-		l := log.With().Str("integration", integration).Logger()
-
-		properIntgr := parseSet(integration, d)
-		if len(properIntgr) == 0 {
-			l.Debug().Msg("no rollbar_integration for " + integration)
-			continue
-		}
-		bodyMap := setBodyMapFromMap(integration, properIntgr)
-		err, l := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, CREATE)
-		if err != nil {
-			return err
-		}
-		l.Debug().Msg("Successfully created rollbar_integration resource")
-		return nil
+	properIntgr := parseSet(integration, d)
+	bodyMap := setBodyMapFromMap(integration, properIntgr, false)
+	l, e := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, CREATE)
+	if e != nil {
+		return e
 	}
+	l.Debug().Msg("Successfully created rollbar_integration resource")
 	return nil
 }
 
 func resourceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	if err := resourcePreCheck(d); err != nil {
+	var err error
+	var integration string
+	if integration, err = resourcePreCheck(d); err != nil {
 		return diag.FromErr(err)
 	}
-	for integration := range client.Integrations {
-		l := log.With().Str("integration", integration).Logger()
-		properIntgr := parseSet(integration, d)
-		if len(properIntgr) == 0 {
-			l.Debug().Msg("no rollbar_integration resource updates for " + integration)
-			continue
-		}
-		bodyMap := setBodyMapFromMap(integration, properIntgr)
-		err, l := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, UPDATE)
-		if err != nil {
-			return err
-		}
-		l.Debug().Msg("Successfully updated rollbar_integration resource")
-		return nil
+	properIntgr := parseSet(integration, d)
+	bodyMap := setBodyMapFromMap(integration, properIntgr, false)
+	l, e := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, UPDATE)
+	if e != nil {
+		return e
 	}
+	l.Debug().Msg("Successfully updated rollbar_integration resource")
 	return nil
 }
 
 func resourceIntegrationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	for integration := range client.Integrations {
-		l := log.With().Str("integration", integration).Logger()
-		properIntgr := parseSet(integration, d)
-		if len(properIntgr) == 0 {
-			l.Debug().Msg("no rollbar_integration resource deletes for " + integration)
-			continue
-		}
-		bodyMap := setBodyMapFromMap(integration, properIntgr)
-		err, l := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, DELETE)
-		if err != nil {
-			return err
-		}
-		l.Debug().Msg("Successfully deleted rollbar_integraion resource")
-		return nil
+	var err error
+	var integration string
+	if integration, err = resourcePreCheck(d); err != nil {
+		return diag.FromErr(err)
 	}
+	properIntgr := parseSet(integration, d)
+	bodyMap := setBodyMapFromMap(integration, properIntgr, true)
+	l, e := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, DELETE)
+	if e != nil {
+		return e
+	}
+	l.Debug().Msg("Successfully deleted rollbar_integraion resource")
 	return nil
 }
 
@@ -283,7 +274,7 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 		l.Err(err).Msg("error reading rollbar_integration resource")
 		return diag.FromErr(err)
 	}
-	bodyMap := setBodyMapFromInterface(integration, intf)
+	bodyMap := setBodyMapFromInterface(integration, intf, false)
 	mustSet(d, integration, flattenConfig(bodyMap))
 	l.Debug().Msg("Successfully read integration resource")
 	return nil
