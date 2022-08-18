@@ -172,7 +172,6 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		id = d.Id()
 		l = l.With().Str("id", id).Logger()
 	}
-	log.Print(bodyMap, action)
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	intf, err := c.UpdateIntegration(integration, bodyMap)
 	if err != nil {
