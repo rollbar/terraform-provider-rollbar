@@ -260,6 +260,7 @@ func resourceIntegrationDelete(ctx context.Context, d *schema.ResourceData, m in
 	if e != nil {
 		return e
 	}
+	d.SetId("") // removing from the state
 	l.Debug().Msg("Successfully deleted rollbar_integraion resource")
 	return nil
 }
