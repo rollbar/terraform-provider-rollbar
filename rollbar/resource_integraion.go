@@ -103,6 +103,16 @@ func resourceIntegraion() *schema.Resource {
 		},
 	}
 }
+
+func flattenIntegration(integration string, body map[string]interface{}) *schema.Set {
+	var out = make([]interface{}, 0)
+	out = append(out, body)
+
+	specResource := resourceIntegraion().Schema[integration].Elem.(*schema.Resource)
+	f := schema.HashResource(specResource)
+	return schema.NewSet(f, out)
+}
+
 func resourcePreCheck(d *schema.ResourceData) (string, error) {
 	var integrationCount int
 	var validIntegration string
@@ -274,7 +284,7 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 	bodyMap := setBodyMapFromInterface(integration, intf, false)
-	mustSet(d, integration, flattenConfig(bodyMap))
+	mustSet(d, integration, flattenIntegration(integration, bodyMap))
 	l.Debug().Msg("Successfully read integration resource")
 	return nil
 }
