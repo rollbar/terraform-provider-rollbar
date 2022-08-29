@@ -26,8 +26,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	SLACK   string = "slack"
+	WEBHOOK string = "webhook"
+)
+
+var Integrations = map[string]interface{}{SLACK: slackIntegrationResponse{}, WEBHOOK: webhookIntegrationResponse{}}
+
 type SlackIntegration struct {
-	ProjectID int `model:"project_id" mapstructure:"project_id" json:"project_id"`
+	ProjectID int64 `model:"project_id" mapstructure:"project_id" json:"project_id"`
 	Settings  struct {
 		Channel            string `model:"channel" mapstructure:"channel" json:"channel"`
 		Enabled            bool   `model:"enabled" mapstructure:"enabled" json:"enabled"`
@@ -36,17 +43,24 @@ type SlackIntegration struct {
 	} `model:"settings" mapstructure:"settings"`
 }
 
+type WebhookIntegration struct {
+	ProjectID int64 `model:"project_id" mapstructure:"project_id" json:"project_id"`
+	Settings  struct {
+		Enabled bool   `model:"enabled" mapstructure:"enabled" json:"enabled"`
+		URL     string `model:"url" mapstructure:"url" json:"url"`
+	} `model:"settings" mapstructure:"settings"`
+}
+
 // UpdateIntegration updates a new Rollbar integration.
-func (c *RollbarAPIClient) UpdateIntegration(integration, channel, serviceAccountID string, enabled, showMessageButtons bool) (interface{}, error) {
+func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[string]interface{}) (interface{}, error) {
 	u := c.BaseURL + pathIntegration
 	l := log.With().
 		Str("integration", integration).
 		Logger()
 	l.Debug().Msg("Update integration")
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"channel": channel, "service_account_id": serviceAccountID, "enabled": enabled,
-			"show_message_buttons": showMessageButtons}).
-		SetResult(slackIntegrationResponse{}).
+		SetBody(bodyMap).
+		SetResult(Integrations[integration]).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"integration": integration,
@@ -63,8 +77,13 @@ func (c *RollbarAPIClient) UpdateIntegration(integration, channel, serviceAccoun
 		return nil, err
 	}
 	l.Debug().Msg("integration successfully updated")
-	sir := resp.Result().(*slackIntegrationResponse)
-	return &sir.Result, nil
+	switch integration {
+	case SLACK:
+		return &(resp.Result().(*slackIntegrationResponse)).Result, nil
+	case WEBHOOK:
+		return &(resp.Result().(*webhookIntegrationResponse)).Result, nil
+	}
+	return nil, nil
 }
 
 // ReadIntegration reads a Rollbar integration from the API. If no matching integration is found,
@@ -78,7 +97,7 @@ func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, err
 	l.Debug().Msg("Reading Integration from API")
 
 	resp, err := c.Resty.R().
-		SetResult(slackIntegrationResponse{}).
+		SetResult(Integrations[integration]).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"integration": integration,
@@ -94,17 +113,36 @@ func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, err
 		l.Err(err).Send()
 		return nil, err
 	}
-	slr := resp.Result().(*slackIntegrationResponse)
-	if slr.Err != 0 {
+	var errInt int
+	switch integration {
+	case SLACK:
+		i := resp.Result().(*slackIntegrationResponse)
+		errInt = i.Err
+	case WEBHOOK:
+		i := resp.Result().(*webhookIntegrationResponse)
+		errInt = i.Err
+	}
+	if errInt != 0 {
 		l.Warn().Msg("Integration not found")
 		return nil, ErrNotFound
 	}
 	l.Debug().Msg("Integration successfully read")
-	return &slr.Result, nil
+	switch integration {
+	case SLACK:
+		return &(resp.Result().(*slackIntegrationResponse)).Result, nil
+	case WEBHOOK:
+		return &(resp.Result().(*webhookIntegrationResponse)).Result, nil
+	}
+	return nil, nil
 
 }
 
 type slackIntegrationResponse struct {
 	Err    int              `json:"err"`
 	Result SlackIntegration `json:"result"`
+}
+
+type webhookIntegrationResponse struct {
+	Err    int                `json:"err"`
+	Result WebhookIntegration `json:"result"`
 }

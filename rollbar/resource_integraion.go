@@ -37,9 +37,11 @@ import (
 
 type Action string
 
-var DELETE Action = "DELETE"
-var UPDATE Action = "UPDATE"
-var CREATE Action = "CREATE"
+var (
+	DELETE Action = "DELETE"
+	UPDATE Action = "UPDATE"
+	CREATE Action = "CREATE"
+)
 
 // resourceIntegraion constructs a resource representing a Rollbar integration.
 func resourceIntegraion() *schema.Resource {
@@ -50,7 +52,7 @@ func resourceIntegraion() *schema.Resource {
 		DeleteContext: resourceIntegrationDelete,
 
 		Schema: map[string]*schema.Schema{
-			"slack": {
+			client.SLACK: {
 				Description: "Slack integration",
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -79,110 +81,186 @@ func resourceIntegraion() *schema.Resource {
 					},
 				},
 			},
+			client.WEBHOOK: {
+				Description: "Webhook integration",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Description: "Enabled",
+							Type:        schema.TypeBool,
+							Required:    true,
+						},
+						"url": {
+							Description: "URL",
+							Type:        schema.TypeString,
+							Required:    true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
 
-func resourceIntegrationCreateUpdateDelete(integration, channel, serviceAccountID string, enabled, showMessageButtons bool, d *schema.ResourceData, m interface{}, action Action) (diag.Diagnostics, zerolog.Logger) {
+func flattenIntegration(integration string, body map[string]interface{}) *schema.Set {
+	var out = make([]interface{}, 0)
+	out = append(out, body)
 
+	specResource := resourceIntegraion().Schema[integration].Elem.(*schema.Resource)
+	f := schema.HashResource(specResource)
+	return schema.NewSet(f, out)
+}
+
+func resourcePreCheck(d *schema.ResourceData) (string, error) {
+	var integrationCount int
+	var validIntegration string
+	for integration := range client.Integrations {
+		if _, ok := d.GetOk(integration); ok {
+			validIntegration = integration
+			integrationCount++
+		}
+	}
+	if integrationCount > 1 {
+		return "", errors.New("only one integration allowed per resource")
+	}
+	return validIntegration, nil
+}
+
+func setBodyMapFromMap(integration string, properIntgr map[string]interface{}, toDelete bool) (bodyMap map[string]interface{}) {
+	switch integration {
+	case client.SLACK:
+		enabled := properIntgr["enabled"].(bool)
+		showMessageButtons := properIntgr["show_message_buttons"].(bool)
+		channel := properIntgr["channel"].(string)
+		serviceAccountID := properIntgr["service_account_id"].(string)
+		bodyMap = map[string]interface{}{"channel": channel, "service_account_id": serviceAccountID,
+			"enabled": enabled, "show_message_buttons": showMessageButtons}
+
+	case client.WEBHOOK:
+		enabled := properIntgr["enabled"].(bool)
+		url := properIntgr["url"].(string)
+		bodyMap = map[string]interface{}{"enabled": enabled, "url": url}
+	}
+	if toDelete {
+		bodyMap["enabled"] = false
+	}
+	return bodyMap
+}
+
+func setBodyMapFromInterface(integration string, intf interface{}, toDelete bool) (bodyMap map[string]interface{}) {
+	switch integration {
+	case client.SLACK:
+		slackIntegration := intf.(*client.SlackIntegration)
+		bodyMap = map[string]interface{}{"enabled": slackIntegration.Settings.Enabled, "channel": slackIntegration.Settings.Channel,
+			"service_account_id": slackIntegration.Settings.ServiceAccountID, "show_message_buttons": slackIntegration.Settings.ShowMessageButtons}
+
+	case client.WEBHOOK:
+		webhookIntegration := intf.(*client.WebhookIntegration)
+		bodyMap = map[string]interface{}{"enabled": webhookIntegration.Settings.Enabled,
+			"url": webhookIntegration.Settings.URL}
+	}
+	if toDelete {
+		bodyMap["enabled"] = false
+	}
+	return bodyMap
+}
+func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[string]interface{}, d *schema.ResourceData, m interface{}, action Action) (zerolog.Logger, diag.Diagnostics) {
 	l := log.With().Str("integration", integration).Logger()
 	switch action {
-	case "CREATE":
+	case CREATE:
 		l.Info().Msg("Creating rollbar_integration resource")
-	case "UPDATE":
+	case UPDATE:
 		l.Info().Msg("Updating rollbar_integration resource")
-	case "DELETE":
+	case DELETE:
 		l.Info().Msg("Deleting rollbar_integration resource")
 
 	}
 	var id string
-	if action == "UPDATE" || action == "DELETE" {
+	if action == UPDATE || action == DELETE {
 		id = d.Id()
 		l = l.With().Str("id", id).Logger()
 	}
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	intf, err := c.UpdateIntegration(integration, channel, serviceAccountID, enabled, showMessageButtons)
+	intf, err := c.UpdateIntegration(integration, bodyMap)
 	if err != nil {
 		l.Err(err).Send()
-		if action == "CREATE" || action == "UPDATE" {
+		if action == CREATE || action == UPDATE {
 			d.SetId("") // removing from the state
 		}
-		return diag.FromErr(err), l
+		return l, diag.FromErr(err)
 	}
+	var projectID int64
+	switch integration {
+	case client.SLACK:
+		i := intf.(*client.SlackIntegration)
+		projectID = i.ProjectID
+	case client.WEBHOOK:
+		i := intf.(*client.WebhookIntegration)
+		projectID = i.ProjectID
+	}
+	integrationID := strconv.FormatInt(projectID, 10) + ComplexImportSeparator + integration
 
-	slackIntegration := intf.(*client.SlackIntegration)
-	integrationID := strconv.Itoa(slackIntegration.ProjectID) + ComplexImportSeparator + integration
-
-	if action == "UPDATE" {
+	if action == UPDATE {
 		if integrationID != id {
 			err = errors.New("IDs are not equal")
 			l.Err(err).Send()
 			d.SetId("") // removing from the state
-			return diag.FromErr(err), l
+			return l, diag.FromErr(err)
 		}
 	}
-	if action == "CREATE" {
+	if action == CREATE {
 		d.SetId(integrationID)
 	}
-
-	return nil, l
+	return l, nil
 }
 
 func resourceIntegrationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	integration := "slack"
-	l := log.With().Str("integration", integration).Logger()
-	slack := parseSet(integration, d)
-	if len(slack) == 0 {
-		l.Debug().Msg(" rollbar_integration resource cannot be created")
-		return nil
+	var err error
+	var integration string
+	if integration, err = resourcePreCheck(d); err != nil {
+		return diag.FromErr(err)
 	}
-	enabled := slack["enabled"].(bool)
-	showMessageButtons := slack["show_message_buttons"].(bool)
-	channel := slack["channel"].(string)
-	serviceAccountID := slack["service_account_id"].(string)
-	err, l := resourceIntegrationCreateUpdateDelete(integration, channel, serviceAccountID, enabled, showMessageButtons, d, m, "CREATE")
-	if err != nil {
-		return err
+	properIntgr := parseSet(integration, d)
+	bodyMap := setBodyMapFromMap(integration, properIntgr, false)
+	l, e := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, CREATE)
+	if e != nil {
+		return e
 	}
 	l.Debug().Msg("Successfully created rollbar_integration resource")
 	return nil
 }
 
 func resourceIntegrationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	integration := "slack"
-	l := log.With().Str("integration", integration).Logger()
-	slack := parseSet(integration, d)
-	if len(slack) == 0 {
-		l.Debug().Msg("rollbar_integration resource cannot be updated")
-		return nil
+	var err error
+	var integration string
+	if integration, err = resourcePreCheck(d); err != nil {
+		return diag.FromErr(err)
 	}
-	enabled := slack["enabled"].(bool)
-	channel := slack["channel"].(string)
-	showMessageButtons := slack["show_message_buttons"].(bool)
-	serviceAccountID := slack["service_account_id"].(string)
-	err, l := resourceIntegrationCreateUpdateDelete(integration, channel, serviceAccountID, enabled, showMessageButtons, d, m, "UPDATE")
-	if err != nil {
-		return err
+	properIntgr := parseSet(integration, d)
+	bodyMap := setBodyMapFromMap(integration, properIntgr, false)
+	l, e := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, UPDATE)
+	if e != nil {
+		return e
 	}
-	l.Debug().Msg("Successfully updated rollbar_integraion resource")
+	l.Debug().Msg("Successfully updated rollbar_integration resource")
 	return nil
 }
 
 func resourceIntegrationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	integration := "slack"
-	l := log.With().Str("integration", integration).Logger()
-	slack := parseSet(integration, d)
-	if len(slack) == 0 {
-		l.Debug().Msg(" rollbar_integration resource cannot be deleted")
-		return nil
+	var err error
+	var integration string
+	if integration, err = resourcePreCheck(d); err != nil {
+		return diag.FromErr(err)
 	}
-	channel := slack["channel"].(string)
-	serviceAccountID := slack["service_account_id"].(string)
-	err, l := resourceIntegrationCreateUpdateDelete(integration, channel, serviceAccountID, false,
-		false, d, m, "DELETE")
-	if err != nil {
-		return err
+	properIntgr := parseSet(integration, d)
+	bodyMap := setBodyMapFromMap(integration, properIntgr, true)
+	l, e := resourceIntegrationCreateUpdateDelete(integration, bodyMap, d, m, DELETE)
+	if e != nil {
+		return e
 	}
+	d.SetId("") // removing from the state
 	l.Debug().Msg("Successfully deleted rollbar_integraion resource")
 	return nil
 }
@@ -202,15 +280,12 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 		l.Info().Msg("Integration not found - removed from state")
 		return nil
 	}
-	slackIntegration := intf.(*client.SlackIntegration)
 	if err != nil {
 		l.Err(err).Msg("error reading rollbar_integration resource")
 		return diag.FromErr(err)
 	}
-	slack := map[string]interface{}{"enabled": slackIntegration.Settings.Enabled, "channel": slackIntegration.Settings.Channel,
-		"service_account_id": slackIntegration.Settings.ServiceAccountID, "show_message_buttons": slackIntegration.Settings.ShowMessageButtons}
-
-	mustSet(d, "slack", flattenConfig(slack))
+	bodyMap := setBodyMapFromInterface(integration, intf, false)
+	mustSet(d, integration, flattenIntegration(integration, bodyMap))
 	l.Debug().Msg("Successfully read integration resource")
 	return nil
 }

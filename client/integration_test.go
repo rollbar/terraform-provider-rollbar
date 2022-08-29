@@ -24,22 +24,25 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
 )
 
 // TestUpdateIntegraion tests updating a Rollbar integration.
 func (s *Suite) TestUpdateIntegraion() {
 	integration := "slack"
-	id := 557954
+	id := int64(557954)
 	u := s.client.BaseURL + pathIntegration
 	u = strings.ReplaceAll(u, "{integration}", integration)
 	serviceAccountID := "123456"
 	enabled := false
 	showMessageButtons := false
 	channel := "#demo"
+	bodyMap := map[string]interface{}{"channel": channel, "service_account_id": serviceAccountID,
+		"enabled": enabled, "show_message_buttons": showMessageButtons}
 
 	rs := responseFromFixture("integration/update.json", http.StatusOK)
 	r := func(req *http.Request) (*http.Response, error) {
@@ -55,13 +58,13 @@ func (s *Suite) TestUpdateIntegraion() {
 	}
 
 	httpmock.RegisterResponder("PUT", u, r)
-	integ, err := s.client.UpdateIntegration(integration, channel, serviceAccountID, enabled, showMessageButtons)
+	integ, err := s.client.UpdateIntegration(integration, bodyMap)
 	slackIntegration := integ.(*SlackIntegration)
 	s.Nil(err)
 	s.Equal(id, slackIntegration.ProjectID)
 
 	s.checkServerErrors("PUT", u, func() error {
-		_, err = s.client.UpdateIntegration(integration, channel, serviceAccountID, enabled, showMessageButtons)
+		_, err = s.client.UpdateIntegration(integration, bodyMap)
 
 		return err
 	})
@@ -70,10 +73,10 @@ func (s *Suite) TestUpdateIntegraion() {
 // TestReadIntegration tests reading a Rollbar integration.
 func (s *Suite) TestReadIntegration() {
 
-	id := 557954
+	id := int64(557954)
 	integration := "slack"
 	u := s.client.BaseURL + pathIntegration
-	u = strings.ReplaceAll(u, "{id}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{id}", strconv.FormatInt(id, 10))
 	u = strings.ReplaceAll(u, "{integration}", integration)
 	serviceAccountID := "123456"
 	enabled := false
