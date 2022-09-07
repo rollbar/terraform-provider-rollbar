@@ -48,6 +48,7 @@ Slack:
 * `channel` - (Required) The default Slack channel name to send the messages. Requires a `#` as a prefix
 * `show_message_buttons` - Boolean that enables the Slack actionable buttons
 
+
 Attribute Reference
 -------------------
 
