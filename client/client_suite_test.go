@@ -87,7 +87,11 @@ func NewTestClient(baseURL, token string) *RollbarAPIClient {
 	// Use default transport - needed for VCR
 	r.SetTransport(http.DefaultTransport).
 		// set timeout on http client
-		SetTimeout(30 * time.Second)
+		SetTimeout(30 * time.Second).
+		// Set retry count to 3 (try 3 times before it fails)
+		SetRetryCount(2).
+		SetRetryWaitTime(1 * time.Second).
+		SetRetryMaxWaitTime(5 * time.Second)
 
 	// Authentication
 	if token != "" {
