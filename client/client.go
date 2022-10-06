@@ -24,9 +24,11 @@
 package client
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/go-resty/resty/v2"
 	"github.com/rs/zerolog/log"
-	"net/http"
 )
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
@@ -46,8 +48,13 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 	r := resty.New()
 
 	// Use default transport - needed for VCR
-	r.SetTransport(http.DefaultTransport)
-
+	r.SetTransport(http.DefaultTransport).
+		// set timeout on http client
+		SetTimeout(30 * time.Second).
+		// Set retry count to 4 (try 5 times before it fails)
+		SetRetryCount(4).
+		SetRetryWaitTime(8 * time.Second).
+		SetRetryMaxWaitTime(50 * time.Second)
 	// Authentication
 	if token != "" {
 		r = r.SetHeaders(map[string]string{
