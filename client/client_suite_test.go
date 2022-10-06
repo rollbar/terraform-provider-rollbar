@@ -23,15 +23,18 @@
 package client
 
 import (
-	"github.com/brianvoe/gofakeit/v5"
-	"github.com/jarcoal/httpmock"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/stretchr/testify/suite"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/brianvoe/gofakeit/v5"
+	"github.com/go-resty/resty/v2"
+	"github.com/jarcoal/httpmock"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/stretchr/testify/suite"
 )
 
 func loadFixture(fixturePath string) string {
@@ -75,6 +78,41 @@ type Suite struct {
 	client *RollbarAPIClient
 }
 
+func NewTestClient(baseURL, token string) *RollbarAPIClient {
+	log.Debug().Msg("Initializing Rollbar client")
+
+	// New Resty HTTP client
+	r := resty.New()
+
+	// Use default transport - needed for VCR
+	r.SetTransport(http.DefaultTransport).
+		// set timeout on http client
+		SetTimeout(30 * time.Second)
+
+	// Authentication
+	if token != "" {
+		r = r.SetHeaders(map[string]string{
+			"X-Rollbar-Access-Token": token,
+			"X-Rollbar-Terraform":    "true"})
+	} else {
+		log.Warn().Msg("Rollbar API token not set")
+	}
+
+	// Authentication
+	if baseURL == "" {
+		log.Error().Msg("Rollbar API base URL not set")
+	}
+
+	// Configure Resty to use Zerolog for logging
+	r.SetLogger(restyZeroLogger{log.Logger})
+
+	// Rollbar client
+	c := RollbarAPIClient{
+		Resty:   r,
+		BaseURL: baseURL,
+	}
+	return &c
+}
 func (s *Suite) SetupSuite() {
 	// Pretty logging
 	log.Logger = log.
@@ -87,7 +125,8 @@ func (s *Suite) SetupSuite() {
 	gofakeit.Seed(0) // Setting seed to 0 will use time.Now().UnixNano()
 
 	// Setup RollbarAPIClient and enable mocking
-	c := NewClient(DefaultBaseURL, "fakeTokenString")
+	c := NewTestClient(DefaultBaseURL, "fakeTokenString")
+
 	httpmock.ActivateNonDefault(c.Resty.GetClient())
 	s.client = c
 }
