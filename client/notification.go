@@ -23,9 +23,10 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Notification struct {
@@ -163,6 +164,39 @@ func (c *RollbarAPIClient) DeleteNotification(notificationID int, channel string
 	}
 	l.Debug().Msg("Notifications successfully deleted")
 	return nil
+}
+
+func (c *RollbarAPIClient) ListNotifications(channel string) ([]Notification, error) {
+	u := c.BaseURL + pathNotificationCreate
+
+	l := log.With().
+		Logger()
+	l.Debug().Msg("Reading notifications from API")
+
+	resp, err := c.Resty.R().
+		SetResult(notificationsResponse{}).
+		SetError(ErrorResult{}).
+		SetPathParams(map[string]string{
+			"channel": channel,
+		}).
+		Get(u)
+
+	if err != nil {
+		l.Err(err).Msg(resp.Status())
+		return nil, err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	nr := resp.Result().(*notificationsResponse)
+	if nr.Err != 0 {
+		l.Warn().Msg("Notification not found")
+		return nil, ErrNotFound
+	}
+	l.Debug().Msg("Notification successfully read")
+	return nr.Result, nil
 }
 
 type notificationResponse struct {

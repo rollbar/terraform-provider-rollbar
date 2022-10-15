@@ -36,7 +36,8 @@ import (
 
 var configMap = map[string][]string{"email": {"users", "teams"},
 	"slack":     {"message_template", "channel", "show_message_buttons"},
-	"pagerduty": {"service_key"}}
+	"pagerduty": {"service_key"},
+	"webhook":   {"url", "format"}}
 
 func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	splitID := strings.Split(d.Id(), ComplexImportSeparator)
@@ -281,14 +282,11 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 func flattenConfig(config map[string]interface{}) *schema.Set {
 	var out = make([]interface{}, 0)
-	m := make(map[string]interface{})
-	for key, value := range config {
-		m[key] = value
-		out = append(out, m)
-	}
+	out = append(out, config)
 	specResource := resourceNotification().Schema["config"].Elem.(*schema.Resource)
 	f := schema.HashResource(specResource)
-	return schema.NewSet(f, out)
+	g := schema.NewSet(f, out)
+	return g
 }
 
 func flattenRule(filters []interface{}, trigger string) *schema.Set {
@@ -317,10 +315,10 @@ func flattenRule(filters []interface{}, trigger string) *schema.Set {
 	m["filters"] = filters
 	out = append(out, m)
 	m["trigger"] = trigger
-	out = append(out, m)
 	specResource := resourceNotification().Schema["rule"].Elem.(*schema.Resource)
 	f := schema.HashResource(specResource)
-	return schema.NewSet(f, out)
+	g := schema.NewSet(f, out)
+	return g
 }
 
 func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
