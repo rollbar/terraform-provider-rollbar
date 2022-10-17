@@ -285,8 +285,8 @@ func flattenConfig(config map[string]interface{}) *schema.Set {
 	out = append(out, config)
 	specResource := resourceNotification().Schema["config"].Elem.(*schema.Resource)
 	f := schema.HashResource(specResource)
-	g := schema.NewSet(f, out)
-	return g
+	set := schema.NewSet(f, out)
+	return set
 }
 
 func flattenRule(filters []interface{}, trigger string) *schema.Set {
@@ -317,8 +317,8 @@ func flattenRule(filters []interface{}, trigger string) *schema.Set {
 	m["trigger"] = trigger
 	specResource := resourceNotification().Schema["rule"].Elem.(*schema.Resource)
 	f := schema.HashResource(specResource)
-	g := schema.NewSet(f, out)
-	return g
+	set := schema.NewSet(f, out)
+	return set
 }
 
 func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
