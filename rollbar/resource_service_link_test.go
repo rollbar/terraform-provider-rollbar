@@ -108,8 +108,6 @@ func (s *AccSuite) TestServiceLinkUpdate() {
 			},
 		},
 	})
-	c := s.provider.Meta().(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.ListSerivceLinks()
 }
 
 // sweepResourceServiceLink cleans up service links.
