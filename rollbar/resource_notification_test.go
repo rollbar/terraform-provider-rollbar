@@ -37,7 +37,7 @@ func init() {
 	})
 }
 
-// TestNotificationCreate tests creating a project access token.
+// TestNotificationCreate tests creating a notification
 func (s *AccSuite) TestNotificationCreate() {
 	notificationResourceName := "rollbar_notification.webhook_notification"
 	// language=hcl
@@ -84,7 +84,7 @@ func (s *AccSuite) TestNotificationCreate() {
 	})
 }
 
-// TestNotificationCreate tests creating a project access token.
+// TestNotificationUpdate tests updating a notification
 func (s *AccSuite) TestNotificationUpdate() {
 	notificationResourceName := "rollbar_notification.webhook_notification"
 	// language=hcl
@@ -165,9 +165,9 @@ func (s *AccSuite) TestNotificationUpdate() {
 	})
 }
 
-// sweepResourceUser cleans up orphaned Rollbar users.
+// sweepResourceNotification cleans up notifications
 func sweepResourceNotification(_ string) error {
-	log.Info().Msg("Cleaning up Rollbar users from acceptance test runs.")
+	log.Info().Msg("Cleaning up Rollbar notifications from acceptance test runs.")
 
 	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_PROJECT_API_KEY"))
 	notifications, err := c.ListNotifications("webhook")
@@ -176,7 +176,7 @@ func sweepResourceNotification(_ string) error {
 		return err
 	}
 	for _, n := range notifications {
-		err = c.DeleteProject(n.ID)
+		err = c.DeleteNotification(n.ID, "webhook")
 		if err != nil {
 			log.Err(err).Send()
 			return err
