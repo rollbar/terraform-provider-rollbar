@@ -23,8 +23,9 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 type ServiceLink struct {
@@ -158,7 +159,41 @@ func (c *RollbarAPIClient) DeleteServiceLink(id int) error {
 	return nil
 }
 
+func (c *RollbarAPIClient) ListSerivceLinks() ([]ServiceLink, error) {
+	u := c.BaseURL + pathServiceLinkCreate
+
+	l := log.With().
+		Logger()
+	l.Debug().Msg("Reading service links from API")
+
+	resp, err := c.Resty.R().
+		SetResult(serviceLinksResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
+
+	if err != nil {
+		l.Err(err).Msg(resp.Status())
+		return nil, err
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	sl := resp.Result().(*serviceLinksResponse)
+	if sl.Err != 0 {
+		l.Warn().Msg("Service link not found")
+		return nil, ErrNotFound
+	}
+	l.Debug().Msg("Service link successfully read")
+	return sl.Result, nil
+}
+
 type serviceLinkResponse struct {
 	Err    int         `json:"err"`
 	Result ServiceLink `json:"result"`
+}
+type serviceLinksResponse struct {
+	Err    int           `json:"err"`
+	Result []ServiceLink `json:"result"`
 }
