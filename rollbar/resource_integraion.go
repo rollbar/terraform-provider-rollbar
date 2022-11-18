@@ -52,6 +52,44 @@ func resourceIntegraion() *schema.Resource {
 		DeleteContext: resourceIntegrationDelete,
 
 		Schema: map[string]*schema.Schema{
+			client.EMAIL: {
+				Description: "Email integration",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Description: "Enabled",
+							Type:        schema.TypeBool,
+							Required:    true,
+						},
+						"include_request_params": {
+							Description: "Include request params",
+							Type:        schema.TypeBool,
+							Optional:    true,
+						},
+					},
+				},
+			},
+			client.PAGERDUTY: {
+				Description: "PagerDuty integration",
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Description: "Enabled",
+							Type:        schema.TypeBool,
+							Required:    true,
+						},
+						"service_key": {
+							Description: "Service key",
+							Type:        schema.TypeString,
+							Required:    true,
+						},
+					},
+				},
+			},
 			client.SLACK: {
 				Description: "Slack integration",
 				Type:        schema.TypeSet,
@@ -130,6 +168,16 @@ func resourcePreCheck(d *schema.ResourceData) (string, error) {
 
 func setBodyMapFromMap(integration string, properIntgr map[string]interface{}, toDelete bool) (bodyMap map[string]interface{}) {
 	switch integration {
+	case client.EMAIL:
+		enabled := properIntgr["enabled"].(bool)
+		includeRequestParams := properIntgr["include_request_params"].(bool)
+		bodyMap = map[string]interface{}{"enabled": enabled, "include_request_params": includeRequestParams}
+
+	case client.PAGERDUTY:
+		enabled := properIntgr["enabled"].(bool)
+		serviceKey := properIntgr["service_key"].(string)
+		bodyMap = map[string]interface{}{"enabled": enabled, "service_key": serviceKey}
+
 	case client.SLACK:
 		enabled := properIntgr["enabled"].(bool)
 		showMessageButtons := properIntgr["show_message_buttons"].(bool)
@@ -151,6 +199,16 @@ func setBodyMapFromMap(integration string, properIntgr map[string]interface{}, t
 
 func setBodyMapFromInterface(integration string, intf interface{}, toDelete bool) (bodyMap map[string]interface{}) {
 	switch integration {
+	case client.EMAIL:
+		emailIntegration := intf.(*client.EmailIntegration)
+		bodyMap = map[string]interface{}{"enabled": emailIntegration.Settings.Enabled,
+			"include_request_params": emailIntegration.Settings.IncludeRequestParams}
+
+	case client.PAGERDUTY:
+		pagerDutyIntegration := intf.(*client.PagerDutyIntegration)
+		bodyMap = map[string]interface{}{"enabled": pagerDutyIntegration.Settings.Enabled,
+			"service_key": pagerDutyIntegration.Settings.ServiceKey}
+
 	case client.SLACK:
 		slackIntegration := intf.(*client.SlackIntegration)
 		bodyMap = map[string]interface{}{"enabled": slackIntegration.Settings.Enabled, "channel": slackIntegration.Settings.Channel,
@@ -193,6 +251,12 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 	}
 	var projectID int64
 	switch integration {
+	case client.EMAIL:
+		i := intf.(*client.EmailIntegration)
+		projectID = i.ProjectID
+	case client.PAGERDUTY:
+		i := intf.(*client.PagerDutyIntegration)
+		projectID = i.ProjectID
 	case client.SLACK:
 		i := intf.(*client.SlackIntegration)
 		projectID = i.ProjectID
