@@ -40,8 +40,8 @@ const (
 )
 
 func setResourceHeader(header string, c *client.RollbarAPIClient) {
-	c.Resty.SetHeader("X-Rollbar-Resource", header)
+	c.Resty.SetHeader("X-Rollbar-Terraform-Resource", header)
 }
 func setDataSourceHeader(header string, c *client.RollbarAPIClient) {
-	c.Resty.SetHeader("X-Rollbar-DataSource", header)
+	c.Resty.SetHeader("X-Rollbar-Terraform-DataSource", header)
 }
