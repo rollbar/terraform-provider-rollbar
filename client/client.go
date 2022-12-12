@@ -54,7 +54,17 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 		// Set retry count to 4 (try 5 times before it fails)
 		SetRetryCount(4).
 		SetRetryWaitTime(8 * time.Second).
-		SetRetryMaxWaitTime(50 * time.Second)
+		SetRetryMaxWaitTime(50 * time.Second).
+		AddRetryCondition(
+			func(r *resty.Response, err error) bool {
+				if err != nil { // network error
+					return true
+				}
+				return r.StatusCode() == http.StatusNotFound ||
+					r.StatusCode() == http.StatusTooManyRequests ||
+					r.StatusCode() == http.StatusInternalServerError ||
+					r.StatusCode() == http.StatusBadGateway
+			})
 	// Authentication
 	if token != "" {
 		r = r.SetHeaders(map[string]string{
