@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +25,12 @@ package rollbar
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 func resourceProject() *schema.Resource {
@@ -93,6 +94,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	l.Info().Msg("Creating new Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProject, c)
 	p, err := c.CreateProject(name)
 	if err != nil {
 		l.Err(err).Send()
@@ -161,6 +163,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	l.Info().Msg("Reading Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProject, c)
 	proj, err := c.ReadProject(projectID)
 	if err == client.ErrNotFound {
 		l.Debug().Msg("Project not found on Rollbar - removing from state")
@@ -203,6 +206,7 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		Logger()
 	l.Debug().Msg("Updating rollbar_project resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProject, c)
 	err := c.UpdateProjectTeams(projectID, teamIDs)
 	if err != nil {
 		l.Err(err).Msg("Error updating rollbar_project resource")
@@ -220,6 +224,7 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 		Logger()
 	l.Info().Msg("Deleting rollbar_project resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProject, c)
 	err := c.DeleteProject(projectID)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_project resource")

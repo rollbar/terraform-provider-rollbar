@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,13 @@ package rollbar
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"strings"
 )
 
 func resourceTeamUser() *schema.Resource {
@@ -103,6 +104,7 @@ func teamUserFromID(id string) (teamID int, s string, err error) {
 
 func resourceTeamUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarTeamUser, c)
 	teamID := d.Get("team_id").(int)
 	email := d.Get("email").(string)
 	l := log.With().
@@ -161,6 +163,7 @@ func resourceTeamUserRead(_ context.Context, d *schema.ResourceData, meta interf
 		Logger()
 	l.Info().Msg("Reading rollbar_team_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarTeamUser, c)
 
 	// If user ID is not in state, try to query it from Rollbar
 	if userID == 0 {
@@ -228,6 +231,7 @@ func resourceTeamUserDelete(_ context.Context, d *schema.ResourceData, meta inte
 		Logger()
 	l.Info().Msg("Deleting rollbar_team_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarTeamUser, c)
 
 	userID := d.Get("user_id").(int)
 	if userID == 0 {

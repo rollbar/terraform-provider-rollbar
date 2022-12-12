@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2022 Rollbar, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package rollbar
 
 import (
@@ -75,6 +97,8 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
 	l.Info().Msg("Creating rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarTeam, c)
+
 	t, err := c.CreateTeam(name, level)
 	if err != nil {
 		l.Err(err).Send()
@@ -94,6 +118,7 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		Logger()
 	l.Info().Msg("Reading rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarTeam, c)
 	t, err := c.ReadTeam(id)
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -117,6 +142,7 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarTeam, c)
 	err := c.DeleteTeam(id)
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_team resource")
