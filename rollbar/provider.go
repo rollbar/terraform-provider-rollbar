@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,11 +25,12 @@ package rollbar
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"strconv"
 )
 
 const schemaKeyToken = "api_key"
@@ -60,21 +61,21 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"rollbar_project":              resourceProject(),
-			"rollbar_project_access_token": resourceProjectAccessToken(),
-			"rollbar_team":                 resourceTeam(),
-			"rollbar_user":                 resourceUser(),
-			"rollbar_team_user":            resourceTeamUser(),
-			"rollbar_notification":         resourceNotification(),
-			"rollbar_service_link":         resourceServiceLink(),
-			"rollbar_integration":          resourceIntegraion(),
+			rollbarProject:            resourceProject(),
+			rollbarProjectAccessToken: resourceProjectAccessToken(),
+			rollbarTeam:               resourceTeam(),
+			rollbarUser:               resourceUser(),
+			rollbarTeamUser:           resourceTeamUser(),
+			rollbarNotification:       resourceNotification(),
+			rollbarServiceLink:        resourceServiceLink(),
+			rollbarIntegration:        resourceIntegraion(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"rollbar_project":               dataSourceProject(),
-			"rollbar_projects":              dataSourceProjects(),
-			"rollbar_project_access_token":  dataSourceProjectAccessToken(),
-			"rollbar_project_access_tokens": dataSourceProjectAccessTokens(),
-			"rollbar_team":                  dataSourceTeam(),
+			rollbarProject:             dataSourceProject(),
+			rollbarProjects:            dataSourceProjects(),
+			rollbarProjectAccessToken:  dataSourceProjectAccessToken(),
+			rollbarProjectAccessTokens: dataSourceProjectAccessTokens(),
+			rollbarTeam:                dataSourceTeam(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}

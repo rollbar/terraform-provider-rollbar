@@ -1,3 +1,0 @@
-package rollbar
-
-const ComplexImportSeparator = ","

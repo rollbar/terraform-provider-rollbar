@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,14 @@ package rollbar
 
 import (
 	"context"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // dataSourceProjectAccessTokens is a data source for listing all project access
@@ -134,6 +135,7 @@ func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceDa
 	l.Debug().Msg("Reading project access token data from Rollbar")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setDataSourceHeader(rollbarProjectAccessTokens, c)
 	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		return diag.FromErr(err)

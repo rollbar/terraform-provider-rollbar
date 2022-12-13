@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +97,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarUser, c)
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
 	l := log.With().
@@ -325,6 +326,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarUser, c)
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -385,6 +387,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		Logger()
 	l.Info().Msg("Deleting rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarUser, c)
 
 	// Try to get user ID
 	userID := d.Get("user_id").(int)
@@ -438,6 +441,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	teamIDs := []int{}
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarUser, c)
 
 	invitations, err := c.FindInvitations(email)
 	if err != nil && err != client.ErrNotFound {
