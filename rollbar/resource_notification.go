@@ -34,10 +34,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var configMap = map[string][]string{"email": {"users", "teams"},
+var configMap = map[string][]string{
+	"email":     {"users", "teams"},
 	"slack":     {"message_template", "channel", "show_message_buttons"},
 	"pagerduty": {"service_key"},
-	"webhook":   {"url", "format"}}
+	"webhook":   {"url", "format"},
+}
+
+var emailDailySummaryConfigList = []string{"summary_time", "environments", "send_only_if_data", "min_item_level"}
 
 func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	splitID := strings.Split(d.Id(), ComplexImportSeparator)
@@ -139,6 +143,27 @@ func resourceNotification() *schema.Resource {
 							Description: "Teams (email)",
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
+						"summary_time": {
+							Type:        schema.TypeFloat,
+							Optional:    true,
+							Description: "Summary Time (email daily summary only)",
+						},
+						"send_only_if_data": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Send only if data (email daily summary only)",
+						},
+						"environments": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Environments (email daily summary only)",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+						"min_item_level": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Min item level (email daily summary only)",
+						},
 						"message_template": {
 							Description: "Message template (slack)",
 							Type:        schema.TypeString,
@@ -214,11 +239,25 @@ func parseRule(d *schema.ResourceData) (trigger string, filters interface{}) {
 	return trigger, filters
 }
 
-func cleanConfig(channel string, config map[string]interface{}) map[string]interface{} {
+func cleanConfig(channel, trigger string, config map[string]interface{}) map[string]interface{} {
 	returnSetMap := map[string]interface{}{}
 	for key, v := range config {
 		if find(configMap[channel], key) {
 			returnSetMap[key] = v
+		}
+	}
+	switch channel {
+	case "email":
+		if trigger == "daily_summary" {
+			for key, v := range config {
+				if find(emailDailySummaryConfigList, key) {
+					returnSetMap[key] = v
+				}
+			}
+		}
+	case "slack":
+		if trigger == "deploy" || trigger == "new_version" || trigger == "exp_repeat_item" {
+			delete(returnSetMap, "show_message_buttons")
 		}
 	}
 	return returnSetMap
@@ -229,7 +268,7 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 	trigger, filters := parseRule(d)
 	channel := d.Get("channel").(string)
 	config := parseSet("config", d)
-	config = cleanConfig(channel, config)
+	config = cleanConfig(channel, trigger, config)
 	l := log.With().Str("channel", channel).Logger()
 
 	l.Info().Msg("Creating rollbar_notification resource")
@@ -256,7 +295,7 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	trigger, filters := parseRule(d)
 	channel := d.Get("channel").(string)
 	config := parseSet("config", d)
-	config = cleanConfig(channel, config)
+	config = cleanConfig(channel, trigger, config)
 	l := log.With().Str("channel", channel).Logger()
 
 	l.Info().Msg("Creating rollbar_notification resource")

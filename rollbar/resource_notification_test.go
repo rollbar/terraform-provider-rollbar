@@ -165,6 +165,45 @@ func (s *AccSuite) TestNotificationUpdate() {
 	})
 }
 
+func (s *AccSuite) TestNotificationCreateSpecialEmail() {
+	notificationResourceName := "rollbar_notification.email_notification"
+	// language=hcl
+	config := `
+       resource "rollbar_notification" "email_notification" {
+          rule  {
+             trigger = "daily_summary"
+          }
+          channel = "email"
+          config  {
+	         summary_time = 2
+	         min_item_level = "critical"
+             send_only_if_data = true
+			 environments = ["production", "staging"]
+          }
+       }`
+
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(notificationResourceName),
+					resource.TestCheckResourceAttr(notificationResourceName, "channel", "email"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.trigger", "daily_summary"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.summary_time", "2"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.min_item_level", "critical"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.send_only_if_data", "true"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.environments.0", "production"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.environments.1", "staging"),
+				),
+			},
+		},
+	})
+}
+
 // sweepResourceNotification cleans up notifications
 func sweepResourceNotification(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar notifications from acceptance test runs.")
@@ -177,6 +216,19 @@ func sweepResourceNotification(_ string) error {
 	}
 	for _, n := range notifications {
 		err = c.DeleteNotification(n.ID, "webhook")
+		if err != nil {
+			log.Err(err).Send()
+			return err
+		}
+	}
+
+	notifications, err = c.ListNotifications("email")
+	if err != nil {
+		log.Err(err).Send()
+		return err
+	}
+	for _, n := range notifications {
+		err = c.DeleteNotification(n.ID, "email")
 		if err != nil {
 			log.Err(err).Send()
 			return err
