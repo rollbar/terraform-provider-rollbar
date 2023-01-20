@@ -169,18 +169,19 @@ func (s *AccSuite) TestNotificationCreateSpecialEmail() {
 	notificationResourceName := "rollbar_notification.email_notification"
 	// language=hcl
 	config := `
-		resource "rollbar_notification" "email_notification" {
-  rule  {
+       resource "rollbar_notification" "email_notification" {
+          rule  {
+             trigger = "daily_summary"
+          }
+          channel = "email"
+          config  {
+	         summary_time = 2
+	         min_item_level = "critical"
+             send_only_if_data = true
+			 environments = ["production", "staging"]
+          }
+       }`
 
-   trigger = "daily_summary"
-  }
-  channel = "email"
-  config  {
-	summary_time = 2
-	min_item_level = "critical"
-  }
-}
-	`
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
 		Providers:    s.providers,
@@ -194,6 +195,9 @@ func (s *AccSuite) TestNotificationCreateSpecialEmail() {
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.trigger", "daily_summary"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.summary_time", "2"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.min_item_level", "critical"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.send_only_if_data", "true"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.environments.0", "production"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.environments.1", "staging"),
 				),
 			},
 		},
