@@ -22,7 +22,11 @@
 
 package rollbar
 
-import "github.com/rollbar/terraform-provider-rollbar/client"
+import (
+	"sync"
+
+	"github.com/rollbar/terraform-provider-rollbar/client"
+)
 
 const ComplexImportSeparator = ","
 
@@ -39,9 +43,15 @@ const (
 	rollbarIntegration         = "rollbar_integration"
 )
 
+var lock sync.Mutex
+
 func setResourceHeader(header string, c *client.RollbarAPIClient) {
+	lock.Lock()
+	defer lock.Unlock()
 	c.Resty.SetHeader("X-Rollbar-Terraform-Resource", header)
 }
 func setDataSourceHeader(header string, c *client.RollbarAPIClient) {
+	lock.Lock()
+	defer lock.Unlock()
 	c.Resty.SetHeader("X-Rollbar-Terraform-DataSource", header)
 }
