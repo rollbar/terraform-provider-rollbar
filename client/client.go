@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ import (
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
 const DefaultBaseURL = "https://api.rollbar.com"
-const Version = "v1.9.0"
+const Version = "v1.10.0"
 
 // RollbarAPIClient is a client for the Rollbar API.
 type RollbarAPIClient struct {
