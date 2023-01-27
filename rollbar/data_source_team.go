@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,13 @@ package rollbar
 import (
 	"context"
 	"fmt"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"strconv"
 )
 
 func dataSourceTeam() *schema.Resource {
@@ -70,6 +71,8 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 	var l zerolog.Logger
 	teamID, ok := d.GetOk("team_id")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setDataSourceHeader(rollbarTeam, c)
+
 	if ok {
 		l = log.With().
 			Int("id", teamID.(int)).

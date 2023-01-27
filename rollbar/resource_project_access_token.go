@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,13 @@ package rollbar
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"strconv"
-	"strings"
 )
 
 func resourceProjectAccessToken() *schema.Resource {
@@ -140,6 +141,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Creating new project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProjectAccessToken, c)
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
 		ProjectID:            projectID,
@@ -168,6 +170,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProjectAccessToken, c)
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -201,6 +204,8 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	l := log.With().Interface("args", args).Logger()
 	l.Debug().Msg("Updating resource project access token")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProjectAccessToken, c)
+
 	err := c.UpdateProjectAccessToken(args)
 	if err != nil {
 		log.Err(err).Send()
@@ -221,6 +226,8 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setResourceHeader(rollbarProjectAccessToken, c)
+
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
 	if err != nil {
 		return diag.FromErr(err)

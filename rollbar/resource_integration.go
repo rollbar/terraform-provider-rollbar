@@ -241,6 +241,8 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		l = l.With().Str("id", id).Logger()
 	}
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	setResourceHeader(rollbarIntegration, c)
+
 	intf, err := c.UpdateIntegration(integration, bodyMap)
 	if err != nil {
 		l.Err(err).Send()
@@ -338,6 +340,8 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 	integration := spl[1]
 	l.Info().Msg("Reading rollbar_integration resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	setResourceHeader(rollbarIntegration, c)
+
 	intf, err := c.ReadIntegration(integration)
 	if err == client.ErrNotFound {
 		d.SetId("")

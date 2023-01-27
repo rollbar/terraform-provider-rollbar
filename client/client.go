@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,7 @@ import (
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
 const DefaultBaseURL = "https://api.rollbar.com"
+const Version = "v1.9.0"
 
 // RollbarAPIClient is a client for the Rollbar API.
 type RollbarAPIClient struct {
@@ -43,7 +44,7 @@ type RollbarAPIClient struct {
 // NewClient sets up a new Rollbar API client.
 func NewClient(baseURL, token string) *RollbarAPIClient {
 	log.Debug().Msg("Initializing Rollbar client")
-
+	now := time.Now().Format(time.RFC3339Nano)
 	// New Resty HTTP client
 	r := resty.New()
 
@@ -54,12 +55,24 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 		// Set retry count to 4 (try 5 times before it fails)
 		SetRetryCount(4).
 		SetRetryWaitTime(8 * time.Second).
-		SetRetryMaxWaitTime(50 * time.Second)
+		SetRetryMaxWaitTime(50 * time.Second).
+		AddRetryCondition(
+			func(r *resty.Response, err error) bool {
+				if err != nil { // network error
+					return true
+				}
+				return r.StatusCode() == http.StatusNotFound ||
+					r.StatusCode() == http.StatusTooManyRequests ||
+					r.StatusCode() == http.StatusInternalServerError ||
+					r.StatusCode() == http.StatusBadGateway
+			})
 	// Authentication
 	if token != "" {
 		r = r.SetHeaders(map[string]string{
-			"X-Rollbar-Access-Token": token,
-			"X-Rollbar-Terraform":    "true"})
+			"X-Rollbar-Access-Token":      token,
+			"X-Rollbar-Terraform-Version": Version,
+			"X-Rollbar-Terraform-Date":    now,
+		})
 	} else {
 		log.Warn().Msg("Rollbar API token not set")
 	}

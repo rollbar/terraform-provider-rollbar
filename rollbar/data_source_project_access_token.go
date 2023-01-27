@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -118,6 +118,7 @@ func dataSourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Reading project access token from Rollbar")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setDataSourceHeader(rollbarProjectAccessToken, c)
 	tokens, err := c.ListProjectAccessTokens(projectID)
 	if err != nil {
 		return diag.FromErr(err)

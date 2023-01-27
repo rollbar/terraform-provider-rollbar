@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2022 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package rollbar
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 )
@@ -73,6 +74,7 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	setDataSourceHeader(rollbarProject, c)
 	pl, err := c.ListProjects()
 	if err != nil {
 		return err
