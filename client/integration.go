@@ -27,11 +27,30 @@ import (
 )
 
 const (
-	SLACK   string = "slack"
-	WEBHOOK string = "webhook"
+	SLACK     string = "slack"
+	WEBHOOK   string = "webhook"
+	EMAIL     string = "email"
+	PAGERDUTY string = "pagerduty"
 )
 
-var Integrations = map[string]interface{}{SLACK: slackIntegrationResponse{}, WEBHOOK: webhookIntegrationResponse{}}
+var Integrations = map[string]interface{}{EMAIL: emailIntegrationResponse{}, PAGERDUTY: pagerDutyIntegrationResponse{},
+	SLACK: slackIntegrationResponse{}, WEBHOOK: webhookIntegrationResponse{}}
+
+type EmailIntegration struct {
+	ProjectID int64 `model:"project_id" mapstructure:"project_id" json:"project_id"`
+	Settings  struct {
+		Enabled     bool `model:"enabled" mapstructure:"enabled" json:"enabled"`
+		ScrubParams bool `model:"scrub_params" mapstructure:"scrub_params" json:"scrub_params"`
+	} `model:"settings" mapstructure:"settings"`
+}
+
+type PagerDutyIntegration struct {
+	ProjectID int64 `model:"project_id" mapstructure:"project_id" json:"project_id"`
+	Settings  struct {
+		Enabled    bool   `model:"enabled" mapstructure:"enabled" json:"enabled"`
+		ServiceKey string `model:"service_key" mapstructure:"service_key" json:"service_key"`
+	} `model:"settings" mapstructure:"settings"`
+}
 
 type SlackIntegration struct {
 	ProjectID int64 `model:"project_id" mapstructure:"project_id" json:"project_id"`
@@ -78,6 +97,10 @@ func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[str
 	}
 	l.Debug().Msg("integration successfully updated")
 	switch integration {
+	case EMAIL:
+		return &(resp.Result().(*emailIntegrationResponse)).Result, nil
+	case PAGERDUTY:
+		return &(resp.Result().(*pagerDutyIntegrationResponse)).Result, nil
 	case SLACK:
 		return &(resp.Result().(*slackIntegrationResponse)).Result, nil
 	case WEBHOOK:
@@ -115,6 +138,12 @@ func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, err
 	}
 	var errInt int
 	switch integration {
+	case EMAIL:
+		i := resp.Result().(*emailIntegrationResponse)
+		errInt = i.Err
+	case PAGERDUTY:
+		i := resp.Result().(*pagerDutyIntegrationResponse)
+		errInt = i.Err
 	case SLACK:
 		i := resp.Result().(*slackIntegrationResponse)
 		errInt = i.Err
@@ -128,6 +157,10 @@ func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, err
 	}
 	l.Debug().Msg("Integration successfully read")
 	switch integration {
+	case EMAIL:
+		return &(resp.Result().(*emailIntegrationResponse)).Result, nil
+	case PAGERDUTY:
+		return &(resp.Result().(*pagerDutyIntegrationResponse)).Result, nil
 	case SLACK:
 		return &(resp.Result().(*slackIntegrationResponse)).Result, nil
 	case WEBHOOK:
@@ -135,6 +168,16 @@ func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, err
 	}
 	return nil, nil
 
+}
+
+type emailIntegrationResponse struct {
+	Err    int              `json:"err"`
+	Result EmailIntegration `json:"result"`
+}
+
+type pagerDutyIntegrationResponse struct {
+	Err    int                  `json:"err"`
+	Result PagerDutyIntegration `json:"result"`
 }
 
 type slackIntegrationResponse struct {
