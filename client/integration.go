@@ -39,8 +39,8 @@ var Integrations = map[string]interface{}{EMAIL: emailIntegrationResponse{}, PAG
 type EmailIntegration struct {
 	ProjectID int64 `model:"project_id" mapstructure:"project_id" json:"project_id"`
 	Settings  struct {
-		Enabled              bool `model:"enabled" mapstructure:"enabled" json:"enabled"`
-		IncludeRequestParams bool `model:"include_request_params" mapstructure:"include_request_params" json:"include_request_params"`
+		Enabled     bool `model:"enabled" mapstructure:"enabled" json:"enabled"`
+		ScrubParams bool `model:"scrub_params" mapstructure:"scrub_params" json:"scrub_params"`
 	} `model:"settings" mapstructure:"settings"`
 }
 

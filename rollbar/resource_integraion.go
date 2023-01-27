@@ -63,8 +63,8 @@ func resourceIntegraion() *schema.Resource {
 							Type:        schema.TypeBool,
 							Required:    true,
 						},
-						"include_request_params": {
-							Description: "Include request params",
+						"scrub_params": {
+							Description: "Scrub params",
 							Type:        schema.TypeBool,
 							Optional:    true,
 						},
@@ -170,8 +170,8 @@ func setBodyMapFromMap(integration string, properIntgr map[string]interface{}, t
 	switch integration {
 	case client.EMAIL:
 		enabled := properIntgr["enabled"].(bool)
-		includeRequestParams := properIntgr["include_request_params"].(bool)
-		bodyMap = map[string]interface{}{"enabled": enabled, "include_request_params": includeRequestParams}
+		scrubParams := properIntgr["scrub_params"].(bool)
+		bodyMap = map[string]interface{}{"enabled": enabled, "scrub_params": scrubParams}
 
 	case client.PAGERDUTY:
 		enabled := properIntgr["enabled"].(bool)
@@ -202,7 +202,7 @@ func setBodyMapFromInterface(integration string, intf interface{}, toDelete bool
 	case client.EMAIL:
 		emailIntegration := intf.(*client.EmailIntegration)
 		bodyMap = map[string]interface{}{"enabled": emailIntegration.Settings.Enabled,
-			"include_request_params": emailIntegration.Settings.IncludeRequestParams}
+			"scrub_params": emailIntegration.Settings.ScrubParams}
 
 	case client.PAGERDUTY:
 		pagerDutyIntegration := intf.(*client.PagerDutyIntegration)
