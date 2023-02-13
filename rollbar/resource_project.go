@@ -119,7 +119,9 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		"post_client_item": true,
 		"post_server_item": true,
 	}
+	client.Mutex.Lock()
 	tokens, err := c.ListProjectAccessTokens(projectID)
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -133,7 +135,9 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 		// Deletion
+		client.Mutex.Lock()
 		err = c.DeleteProjectAccessToken(projectID, t.AccessToken)
+		client.Mutex.Unlock()
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
@@ -148,7 +152,9 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	for _, teamIDiface := range teamIDsSet.List() {
 		teamID := teamIDiface.(int)
 		l = l.With().Int("team_id", teamID).Logger()
+		client.Mutex.Lock()
 		err = c.AssignTeamToProject(teamID, projectID)
+		client.Mutex.Unlock()
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)
@@ -191,8 +197,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		}
 		mustSet(d, k, v)
 	}
-
+	client.Mutex.Lock()
 	teamIDs, err := c.FindProjectTeamIDs(projectID)
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
