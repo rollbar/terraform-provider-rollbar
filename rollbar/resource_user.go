@@ -97,6 +97,9 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
+	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
@@ -326,6 +329,8 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	client.Mutex.Lock()
+	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 	var err error
 
@@ -387,6 +392,8 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		Logger()
 	l.Info().Msg("Deleting rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	client.Mutex.Lock()
+	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 
 	// Try to get user ID
@@ -441,6 +448,8 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	teamIDs := []int{}
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	client.Mutex.Lock()
+	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 
 	invitations, err := c.FindInvitations(email)

@@ -25,6 +25,7 @@ package client
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -34,6 +35,8 @@ import (
 // DefaultBaseURL is the default base URL for the Rollbar API.
 const DefaultBaseURL = "https://api.rollbar.com"
 const Version = "v1.10.0"
+
+var Mutex sync.Mutex
 
 // RollbarAPIClient is a client for the Rollbar API.
 type RollbarAPIClient struct {
@@ -67,6 +70,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 					r.StatusCode() == http.StatusBadGateway
 			})
 	// Authentication
+	Mutex.Lock()
 	if token != "" {
 		r = r.SetHeaders(map[string]string{
 			"X-Rollbar-Access-Token":      token,
@@ -76,7 +80,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 	} else {
 		log.Warn().Msg("Rollbar API token not set")
 	}
-
+	Mutex.Unlock()
 	// Authentication
 	if baseURL == "" {
 		log.Error().Msg("Rollbar API base URL not set")

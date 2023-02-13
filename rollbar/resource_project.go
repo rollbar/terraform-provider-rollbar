@@ -94,8 +94,12 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	l.Info().Msg("Creating new Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
 	setResourceHeader(rollbarProject, c)
 	p, err := c.CreateProject(name)
+	client.Mutex.Unlock()
+
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -163,8 +167,12 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	l.Info().Msg("Reading Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
 	setResourceHeader(rollbarProject, c)
 	proj, err := c.ReadProject(projectID)
+	client.Mutex.Unlock()
+
 	if err == client.ErrNotFound {
 		l.Debug().Msg("Project not found on Rollbar - removing from state")
 		d.SetId("")
@@ -206,8 +214,12 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		Logger()
 	l.Debug().Msg("Updating rollbar_project resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
 	setResourceHeader(rollbarProject, c)
 	err := c.UpdateProjectTeams(projectID, teamIDs)
+	client.Mutex.Unlock()
+
 	if err != nil {
 		l.Err(err).Msg("Error updating rollbar_project resource")
 		return diag.FromErr(err)
@@ -224,8 +236,12 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 		Logger()
 	l.Info().Msg("Deleting rollbar_project resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
 	setResourceHeader(rollbarProject, c)
 	err := c.DeleteProject(projectID)
+	client.Mutex.Unlock()
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_project resource")
 		return diag.FromErr(err)
