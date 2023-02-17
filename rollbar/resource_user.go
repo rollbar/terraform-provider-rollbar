@@ -99,7 +99,6 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
 	client.Mutex.Lock()
-	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
@@ -111,6 +110,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	// Check if a Rollbar user exists for this email
 	userID, err := c.FindUserID(email)
+	client.Mutex.Unlock()
 	l = l.With().Int("user_id", userID).Logger()
 	switch err {
 	case nil:
@@ -131,12 +131,14 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected[id] = true
 	}
 
+	client.Mutex.Lock()
 	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID, true)
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-
+	client.Mutex.Lock()
 	err = resourceUserAddTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
 		userID:        userID,
@@ -144,11 +146,12 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected: teamsExpected,
 		teamsCurrent:  teamsCurrent,
 	})
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-
+	client.Mutex.Lock()
 	err = resourceUserRemoveTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
 		userID:        userID,
@@ -156,6 +159,7 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected: teamsExpected,
 		teamsCurrent:  teamsCurrent,
 	})
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -330,13 +334,15 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	client.Mutex.Lock()
-	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
+	client.Mutex.Unlock()
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
 	if userID == 0 {
+		client.Mutex.Lock()
 		userID, err = c.FindUserID(email)
+		client.Mutex.Unlock()
 		switch err {
 		case nil:
 			l = log.With().
@@ -358,8 +364,9 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	} else {
 		mustSet(d, "status", "registered")
 	}
-
+	client.Mutex.Lock()
 	currentTeams, err := resourceUserCurrentTeams(c, email, userID, true)
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -393,7 +400,6 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	l.Info().Msg("Deleting rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	client.Mutex.Lock()
-	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 
 	// Try to get user ID
@@ -403,11 +409,13 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID, false)
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	teamsExpected := make(map[int]bool) // Empty
+	client.Mutex.Lock()
 	err = resourceUserRemoveTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
 		email:         email,
@@ -415,6 +423,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		teamsCurrent:  teamsCurrent,
 		teamsExpected: teamsExpected,
 	})
+	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -449,10 +458,10 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	teamIDs := []int{}
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	client.Mutex.Lock()
-	defer client.Mutex.Unlock()
 	setResourceHeader(rollbarUser, c)
 
 	invitations, err := c.FindInvitations(email)
+	client.Mutex.Unlock()
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return nil, err
@@ -463,8 +472,9 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	for _, inv := range invitations {
 		teamIDs = append(teamIDs, inv.TeamID)
 	}
-
+	client.Mutex.Lock()
 	userID, err := c.FindUserID(email)
+	client.Mutex.Unlock()
 	if err == nil {
 		mustSet(d, "user_id", userID)
 		mustSet(d, "status", "registered")
