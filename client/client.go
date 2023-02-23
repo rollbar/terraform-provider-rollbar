@@ -34,7 +34,7 @@ import (
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
 const DefaultBaseURL = "https://api.rollbar.com"
-const Version = "v1.10.0"
+const Version = "v1.11.0"
 
 var Mutex sync.Mutex
 
