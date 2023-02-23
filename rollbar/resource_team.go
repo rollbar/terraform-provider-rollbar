@@ -97,9 +97,12 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
 	l.Info().Msg("Creating rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	setResourceHeader(rollbarTeam, c)
 
+	client.Mutex.Lock()
+	setResourceHeader(rollbarTeam, c)
 	t, err := c.CreateTeam(name, level)
+	client.Mutex.Unlock()
+
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -118,8 +121,12 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		Logger()
 	l.Info().Msg("Reading rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
 	setResourceHeader(rollbarTeam, c)
 	t, err := c.ReadTeam(id)
+	client.Mutex.Unlock()
+
 	if err == client.ErrNotFound {
 		d.SetId("")
 		l.Err(err).Msg("Team not found - removed from state")
@@ -142,8 +149,12 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+
+	client.Mutex.Lock()
 	setResourceHeader(rollbarTeam, c)
 	err := c.DeleteTeam(id)
+	client.Mutex.Unlock()
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_team resource")
 		return diag.FromErr(err)
