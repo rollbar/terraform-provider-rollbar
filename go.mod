@@ -10,13 +10,11 @@ require (
 	cloud.google.com/go v0.78.0 // indirect
 	cloud.google.com/go/storage v1.14.0 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
-	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be // indirect
 	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.37.25 // indirect
 	github.com/brianvoe/gofakeit/v5 v5.11.2
 	github.com/dnaeon/go-vcr v1.1.0
 	github.com/fatih/color v1.10.0 // indirect
-	github.com/gliderlabs/ssh v0.3.2 // indirect
 	github.com/go-resty/resty/v2 v2.5.0
 	github.com/go-test/deep v1.0.7 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -36,7 +34,7 @@ require (
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93 // indirect
-	golang.org/x/sys v0.0.0-20210902050250-f475640dd07b // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	google.golang.org/genproto v0.0.0-20210303154014-9728d6b83eeb // indirect
 	google.golang.org/grpc v1.36.0 // indirect
