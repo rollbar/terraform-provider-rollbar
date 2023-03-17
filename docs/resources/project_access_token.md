@@ -31,7 +31,7 @@ The following arguments are supported:
 * `name` - (Required) The human readable name for the token.
 * `project_Id` - (Required) ID of the Rollbar project to which this token
   belongs.
-* `scopes` - (Required) List of access [scopes](https://explorer.docs.rollbar.com/#section/Authentication/Project-access-tokens) 
+* `scopes` - (Required) List of access [scopes](https://docs.rollbar.com/#section/Authentication/Project-access-tokens) 
   granted to the token.  Possible values are `read`, `write`,
   `post_server_item`, and `post_client_server`.
 * `status` - (Optional) Status of the token.  Possible values are `enabled` 
