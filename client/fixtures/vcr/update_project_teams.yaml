@@ -430,17 +430,8 @@ interactions:
   response:
     body: |-
       {
-        "err": 0,
-        "result": [
-          {
-           "team_id": 693607,
-           "project_id": 423511
-          },
-          {
-           "team_id": 693608,
-           "project_id": 423511
-          }
-        ]
+        "err": 1,
+        "message": "Invalid or missing project id"
       }
     headers:
       Access-Control-Allow-Credentials:
