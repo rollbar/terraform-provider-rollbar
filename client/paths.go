@@ -37,7 +37,6 @@ const (
 	pathTeamDelete                       = "/api/1/team/{teamID}"
 	pathTeamUser                         = "/api/1/team/{teamID}/user/{userID}"
 	pathTeamProject                      = "/api/1/team/{teamID}/project/{projectID}"
-	pathTeamProjects                     = "/api/1/team/{teamID}/projects"
 	pathUser                             = "/api/1/user/{userID}"
 	pathUserTeams                        = "/api/1/user/{userID}/teams"
 	pathUsers                            = "/api/1/users"

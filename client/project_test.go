@@ -24,16 +24,17 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/brianvoe/gofakeit/v5"
-	"github.com/dnaeon/go-vcr/cassette"
-	"github.com/dnaeon/go-vcr/recorder"
-	"github.com/jarcoal/httpmock"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/brianvoe/gofakeit/v5"
+	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/dnaeon/go-vcr/recorder"
+	"github.com/jarcoal/httpmock"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestListProjects tests listing Rollbar projects.
@@ -145,56 +146,6 @@ func (s *Suite) TestDeleteProject() {
 
 	s.checkServerErrors("DELETE", urlDel, func() error {
 		return s.client.DeleteProject(delID)
-	})
-}
-
-// TestFindProjectTeamIDs tests finding the team IDs for a Rollbar project.
-func (s *Suite) TestFindProjectTeamIDs() {
-	var u string // URL
-	var r httpmock.Responder
-	projectID := 423092
-	teamID := 689492
-	expected := []int{teamID}
-	// https://api.rollbar.com/api/1/team/689493/projects?page=1
-	// Mock list team projects
-	u = s.client.BaseURL + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
-	r = responderFromFixture("team/list_projects_689492.json", http.StatusOK)
-	httpmock.RegisterResponderWithQuery("GET", u, "page=1", r)
-	u = s.client.BaseURL + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
-	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
-	httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
-
-	u = s.client.BaseURL + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamID}", "689493")
-	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
-	httpmock.RegisterResponderWithQuery("GET", u, "page=1", r)
-
-	// Mock list teams
-	u = s.client.BaseURL + pathTeamList
-	r = responderFromFixture("team/list_2.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
-
-	actual, err := s.client.FindProjectTeamIDs(projectID)
-	s.Nil(err)
-	s.Equal(expected, actual)
-
-	expectedCallCount :=
-		map[string]int{
-			"GET https://api.rollbar.com/api/1/team/689492/projects?page=1": 1,
-			"GET https://api.rollbar.com/api/1/team/689492/projects?page=2": 1,
-			"GET https://api.rollbar.com/api/1/team/689493/projects?page=1": 1,
-			"GET https://api.rollbar.com/api/1/teams":                       1,
-		}
-	actualCallCount := httpmock.GetCallCountInfo()
-	for call, count := range expectedCallCount {
-		s.Equal(count, actualCallCount[call])
-	}
-
-	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.FindProjectTeamIDs(projectID)
-		return err
 	})
 }
 

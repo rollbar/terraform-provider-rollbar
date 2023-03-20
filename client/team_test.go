@@ -297,26 +297,6 @@ func (s *Suite) TestFindTeamID() {
 	})
 }
 
-//func (s *Suite) TestListTeamProjects() {
-//	teamID := 689492
-//	expected := []int{423092}
-//	u := s.client.BaseURL + pathTeamProjects
-//	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
-//	r := responderFromFixture("team/list_projects_689492.json", http.StatusOK)
-//	httpmock.RegisterResponder("GET", u+"?page=1", r)
-//	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
-//	httpmock.RegisterResponder("GET", u+"?page=2", r)
-//
-//	actual, err := s.client.ListTeamProjectIDs(teamID)
-//	s.Nil(err)
-//	s.Equal(expected, actual)
-//
-//	s.checkServerErrors("GET", u+"?page=1", func() error {
-//		_, err := s.client.ListTeamProjectIDs(teamID)
-//		return err
-//	})
-//}
-
 // TestAssignTeamToProject tests assigning a Rollbar team to a project.
 func (s *Suite) TestAssignTeamToProject() {
 	teamID := 689492
