@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +23,9 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Project represents a Rollbar project.
@@ -212,22 +213,30 @@ func (c *RollbarAPIClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 	l.Debug().Msg("Finding teams assigned to project")
 	var projectTeamIDs []int
 
-	allTeams, err := c.ListCustomTeams()
+	u := c.BaseURL + pathProjectTeams
+	resp, err := c.Resty.R().
+		SetResult(teamProjectListResponse{}).
+		SetError(ErrorResult{}).
+		SetQueryParams(map[string]string{
+			"exclude_builtin_teams": "true"}).
+		SetPathParams(map[string]string{
+			"projectID": strconv.Itoa(projectID),
+		}).
+		Get(u)
 	if err != nil {
 		l.Err(err).Send()
 		return nil, err
 	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	allTeams := resp.Result().(*teamProjectListResponse).Result
+
 	for _, t := range allTeams {
-		teamID := t.ID
-		projectIDs, err := c.ListTeamProjectIDs(teamID)
-		if err != nil && err != ErrNotFound {
-			l.Err(err).Send()
-			return nil, err
-		}
-		for _, id := range projectIDs {
-			if id == projectID {
-				projectTeamIDs = append(projectTeamIDs, teamID)
-			}
+		if t.ProjectID == projectID {
+			projectTeamIDs = append(projectTeamIDs, t.TeamID)
 		}
 	}
 	count := len(projectTeamIDs)
