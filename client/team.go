@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -303,46 +303,6 @@ func (c *RollbarAPIClient) FindTeamID(name string) (int, error) {
 	}
 	l.Debug().Msg("Could not find team ID")
 	return 0, ErrNotFound
-}
-
-// ListTeamProjectIDs lists IDs of all Rollbar projects to which a given team is
-// assigned.
-func (c *RollbarAPIClient) ListTeamProjectIDs(teamID int) ([]int, error) {
-
-	projectIDs := []int{}
-	hasNextPage := true
-	page := 1
-
-	l := log.With().Int("teamID", teamID).Logger()
-
-	for hasNextPage {
-		l.Debug().Msg(fmt.Sprintf("Listing projects for team (page: %d)", page))
-		resp, err := c.Resty.R().
-			SetPathParams(map[string]string{
-				"teamID": strconv.Itoa(teamID),
-			}).
-			SetResult(teamProjectListResponse{}).
-			SetError(ErrorResult{}).
-			Get(c.BaseURL + pathTeamProjects + fmt.Sprintf("?page=%d", page))
-		if err != nil {
-			l.Err(err).Msg("Error listing projects for team")
-			return nil, err
-		}
-		err = errorFromResponse(resp)
-		if err != nil {
-			l.Err(err).Msg("Error listing projects for team")
-			return nil, err
-		}
-		result := resp.Result().(*teamProjectListResponse).Result
-		l.Debug().Msg(fmt.Sprintf("%+v\n", result))
-		hasNextPage = len(result) > 0
-		for _, item := range result {
-			projectIDs = append(projectIDs, item.ProjectID)
-		}
-		page++
-	}
-	l.Debug().Msg("Successfully listed projects for team")
-	return projectIDs, nil
 }
 
 // AssignTeamToProject assigns a Rollbar team to a project.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,13 +30,13 @@ const (
 	pathProjectRead                      = "/api/1/project/{projectID}"
 	pathProjectToken                     = "/api/1/project/{projectID}/access_token/{accessToken}"
 	pathProjectTokens                    = "/api/1/project/{projectID}/access_tokens"
+	pathProjectTeams                     = "/api/1/project/{projectID}/teams"
 	pathTeamCreate                       = "/api/1/teams"
 	pathTeamRead                         = "/api/1/team/{teamID}"
 	pathTeamList                         = "/api/1/teams"
 	pathTeamDelete                       = "/api/1/team/{teamID}"
 	pathTeamUser                         = "/api/1/team/{teamID}/user/{userID}"
 	pathTeamProject                      = "/api/1/team/{teamID}/project/{projectID}"
-	pathTeamProjects                     = "/api/1/team/{teamID}/projects"
 	pathUser                             = "/api/1/user/{userID}"
 	pathUserTeams                        = "/api/1/user/{userID}/teams"
 	pathUsers                            = "/api/1/users"

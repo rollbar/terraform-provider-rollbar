@@ -315,7 +315,7 @@ interactions:
     headers:
       User-Agent:
       - go-resty/2.3.0 (https://github.com/go-resty/resty)
-    url: https://api.rollbar.com/api/1/teams
+    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_builtin_teams=true
     method: GET
   response:
     body: |-
@@ -323,46 +323,12 @@ interactions:
         "err": 0,
         "result": [
           {
-            "id": 689493,
-            "account_id": 317418,
-            "name": "bar",
-            "access_level": "standard"
+           "team_id": 693607,
+           "project_id": 423511
           },
           {
-            "id": 662037,
-            "account_id": 317418,
-            "name": "Everyone",
-            "access_level": "everyone"
-          },
-          {
-            "id": 689492,
-            "account_id": 317418,
-            "name": "foo",
-            "access_level": "standard"
-          },
-          {
-            "id": 662036,
-            "account_id": 317418,
-            "name": "Owners",
-            "access_level": "owner"
-          },
-          {
-            "id": 693606,
-            "account_id": 317418,
-            "name": "tf-acc-test-updateprojectteams-0",
-            "access_level": "standard"
-          },
-          {
-            "id": 693607,
-            "account_id": 317418,
-            "name": "tf-acc-test-updateprojectteams-1",
-            "access_level": "standard"
-          },
-          {
-            "id": 693608,
-            "account_id": 317418,
-            "name": "tf-acc-test-updateprojectteams-2",
-            "access_level": "standard"
+           "team_id": 693608,
+           "project_id": 423511
           }
         ]
       }
@@ -395,6 +361,162 @@ interactions:
       - "1605086147"
       X-Response-Time:
       - 10ms
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      User-Agent:
+        - go-resty/2.3.0 (https://github.com/go-resty/resty)
+    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_builtin_teams=true
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+           "team_id": 693607,
+           "project_id": 423511
+          },
+          {
+           "team_id": 693608,
+           "project_id": 423511
+          }
+        ]
+      }
+    headers:
+      Access-Control-Allow-Credentials:
+        - "true"
+      Access-Control-Allow-Origin:
+        - '*'
+      Alt-Svc:
+        - clear
+      Content-Length:
+        - "929"
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Wed, 11 Nov 2020 09:14:52 GMT
+      Etag:
+        - '"-271558731"'
+      Server:
+        - nginx/1.17.9
+      Via:
+        - 1.1 google
+      X-Rate-Limit-Limit:
+        - "5000"
+      X-Rate-Limit-Remaining:
+        - "4993"
+      X-Rate-Limit-Remaining-Seconds:
+        - "55"
+      X-Rate-Limit-Reset:
+        - "1605086147"
+      X-Response-Time:
+        - 10ms
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      User-Agent:
+        - go-resty/2.3.0 (https://github.com/go-resty/resty)
+    url: https://api.rollbar.com/api/1/project/0/teams?exclude_builtin_teams=true
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 1,
+        "message": "Invalid or missing project id"
+      }
+    headers:
+      Access-Control-Allow-Credentials:
+        - "true"
+      Access-Control-Allow-Origin:
+        - '*'
+      Alt-Svc:
+        - clear
+      Content-Length:
+        - "929"
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Wed, 11 Nov 2020 09:14:52 GMT
+      Etag:
+        - '"-271558731"'
+      Server:
+        - nginx/1.17.9
+      Via:
+        - 1.1 google
+      X-Rate-Limit-Limit:
+        - "5000"
+      X-Rate-Limit-Remaining:
+        - "4993"
+      X-Rate-Limit-Remaining-Seconds:
+        - "55"
+      X-Rate-Limit-Reset:
+        - "1605086147"
+      X-Response-Time:
+        - 10ms
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      User-Agent:
+        - go-resty/2.3.0 (https://github.com/go-resty/resty)
+    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_builtin_teams=true
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+           "team_id": 693607,
+           "project_id": 423511
+          },
+          {
+           "team_id": 693608,
+           "project_id": 423511
+          }
+        ]
+      }
+    headers:
+      Access-Control-Allow-Credentials:
+        - "true"
+      Access-Control-Allow-Origin:
+        - '*'
+      Alt-Svc:
+        - clear
+      Content-Length:
+        - "929"
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Wed, 11 Nov 2020 09:14:52 GMT
+      Etag:
+        - '"-271558731"'
+      Server:
+        - nginx/1.17.9
+      Via:
+        - 1.1 google
+      X-Rate-Limit-Limit:
+        - "5000"
+      X-Rate-Limit-Remaining:
+        - "4993"
+      X-Rate-Limit-Remaining-Seconds:
+        - "55"
+      X-Rate-Limit-Reset:
+        - "1605086147"
+      X-Response-Time:
+        - 10ms
     status: 200 OK
     code: 200
     duration: ""

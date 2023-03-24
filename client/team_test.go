@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,11 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
 )
 
 func (s *Suite) TestCreateTeam() {
@@ -292,26 +293,6 @@ func (s *Suite) TestFindTeamID() {
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.FindTeamID("my-test-team")
-		return err
-	})
-}
-
-func (s *Suite) TestListTeamProjects() {
-	teamID := 689492
-	expected := []int{423092}
-	u := s.client.BaseURL + pathTeamProjects
-	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
-	r := responderFromFixture("team/list_projects_689492.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u+"?page=1", r)
-	r = responderFromFixture("team/list_projects_689493.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u+"?page=2", r)
-
-	actual, err := s.client.ListTeamProjectIDs(teamID)
-	s.Nil(err)
-	s.Equal(expected, actual)
-
-	s.checkServerErrors("GET", u+"?page=1", func() error {
-		_, err := s.client.ListTeamProjectIDs(teamID)
 		return err
 	})
 }
