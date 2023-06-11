@@ -23,8 +23,9 @@
 package client
 
 import (
-	"github.com/rs/zerolog/log"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 // User represents a Rollbar user.
@@ -38,12 +39,13 @@ type User struct {
 }
 
 // ListUsers lists all Rollbar users.
-func (c *RollbarAPIClient) ListUsers() (users []User, err error) {
-	log.Debug().Msg("Listing users")
+func (c *RollbarAPIClient) ListUsers(email string) (users []User, err error) {
+	log.Debug().Msg("Listing users with email: " + email)
 	u := c.BaseURL + pathUsers
 	resp, err := c.Resty.R().
 		SetResult(userListResponse{}).
 		SetError(ErrorResult{}).
+		SetQueryParam("email", email).
 		Get(u)
 	if err != nil {
 		log.Err(err).Msg("Error listing users")
@@ -88,20 +90,19 @@ func (c *RollbarAPIClient) ReadUser(id int) (user User, err error) {
 	return
 }
 
-// FindUserID finds the user ID for a given email.  WARNING: this is a
-// potentially slow call.  Don't repeat it unnecessarily.
+// FindUserID finds the user ID for a given email.
 func (c *RollbarAPIClient) FindUserID(email string) (int, error) {
 	l := log.With().Str("email", email).Logger()
 	l.Debug().Msg("Getting user ID from email")
-	users, err := c.ListUsers()
+	users, err := c.ListUsers(email)
 	if err != nil {
 		l.Err(err).Msg("Error getting user ID from email")
 		return 0, err
 	}
-	for _, u := range users {
-		if u.Email == email {
-			l.Debug().Int("user_id", u.ID).Msg("Found user")
-			return u.ID, nil
+	if len(users) > 0 {
+		if users[0].Email == email {
+			l.Debug().Int("user_id", users[0].ID).Msg("Found user")
+			return users[0].ID, nil
 		}
 	}
 	l.Debug().Msg("No user found")
