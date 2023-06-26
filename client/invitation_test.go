@@ -25,16 +25,17 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
 )
 
 // TestListInvitations tests listing Rollbar team invitations.
 func (s *Suite) TestListInvitations() {
 	teamID := 572097
-	u := s.client.BaseURL + pathInvitations
+	u := s.client.BaseURL + pathTeamInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -79,7 +80,7 @@ func (s *Suite) TestListPendingInvitations() {
 
 	teamID := 662037
 
-	u := s.client.BaseURL + pathInvitations
+	u := s.client.BaseURL + pathTeamInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	expectedQuery := map[string]string{"page": "1"}
 	// Success
@@ -113,7 +114,7 @@ func (s *Suite) TestListPendingInvitations() {
 func (s *Suite) TestCreateInvitation() {
 	teamID := 572097
 	email := "test@rollbar.com"
-	u := s.client.BaseURL + pathInvitations
+	u := s.client.BaseURL + pathTeamInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -206,7 +207,7 @@ func (s *Suite) TestFindInvitations() {
 	// Mock list invitations for each team
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 
-		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
+		u = strings.ReplaceAll(s.client.BaseURL+pathTeamInvitations, "{teamID}", teamID)
 
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
 
@@ -260,7 +261,7 @@ func (s *Suite) TestFindPendingInvitations() {
 	for _, teamID := range []string{"662036", "662037", "676971"} {
 		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
 
-		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
+		u = strings.ReplaceAll(s.client.BaseURL+pathTeamInvitations, "{teamID}", teamID)
 		expectedQuery := map[string]string{"page": "1"}
 		// Success
 		r = responderFromFixture(fixturePath, http.StatusOK)

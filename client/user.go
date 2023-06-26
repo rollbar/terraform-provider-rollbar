@@ -64,6 +64,31 @@ func (c *RollbarAPIClient) ListUsers(email string) (users []User, err error) {
 	return
 }
 
+// ListTestUsers is used only for testing purposes
+func (c *RollbarAPIClient) ListTestUsers() (users []User, err error) {
+	log.Debug().Msg("Listing users")
+	u := c.BaseURL + pathUsers
+	resp, err := c.Resty.R().
+		SetResult(userListResponse{}).
+		SetError(ErrorResult{}).
+		Get(u)
+	if err != nil {
+		log.Err(err).Msg("Error listing users")
+		return
+	}
+	err = errorFromResponse(resp)
+	if err != nil {
+		log.Err(err).Msg("Error listing users")
+		return
+	}
+	users = resp.Result().(*userListResponse).Result.Users
+	count := len(users)
+	log.Debug().
+		Int("count", count).
+		Msg("Successfully listed users")
+	return
+}
+
 // ReadUser reads a Rollbar user from the API.
 func (c *RollbarAPIClient) ReadUser(id int) (user User, err error) {
 	l := log.With().Int("id", id).Logger()
