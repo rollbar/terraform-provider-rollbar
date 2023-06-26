@@ -178,3 +178,33 @@ func (s *Suite) checkServerErrors(mockMethod, mockUrl string, testFunc func() er
 	err = testFunc()
 	s.NotNil(err)
 }
+
+// checkServerErrorsWithQuery check correct handling of various API error responses (with query)
+func (s *Suite) checkServerErrorsWithQuery(mockMethod, mockUrl string, expectedQuery map[string]string, testFunc func() error) {
+	// Not Found
+	r := httpmock.NewJsonResponderOrPanic(http.StatusNotFound,
+		ErrorResult{Err: 404, Message: "Not Found"})
+	httpmock.RegisterResponderWithQuery(mockMethod, mockUrl, expectedQuery, r)
+	err := testFunc()
+	s.Equal(ErrNotFound, err)
+
+	// Unauthorized
+	r = httpmock.NewJsonResponderOrPanic(http.StatusUnauthorized,
+		ErrorResult{Err: 401, Message: "Unauthorized"})
+	httpmock.RegisterResponderWithQuery(mockMethod, mockUrl, expectedQuery, r)
+	err = testFunc()
+	s.Equal(ErrUnauthorized, err)
+
+	// Internal server error
+	r = httpmock.NewJsonResponderOrPanic(http.StatusInternalServerError,
+		ErrorResult{Err: 500, Message: "Internal Server Error"})
+	httpmock.RegisterResponderWithQuery(mockMethod, mockUrl, expectedQuery, r)
+	err = testFunc()
+	s.NotNil(err)
+	s.NotEqual(ErrNotFound, err)
+
+	// Unreachable server
+	httpmock.Reset()
+	err = testFunc()
+	s.NotNil(err)
+}
