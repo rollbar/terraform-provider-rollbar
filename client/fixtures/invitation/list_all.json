@@ -1,0 +1,14 @@
+{
+  "err": 0,
+  "result": [
+    {
+      "id": 153783,
+      "from_user_id": 238101,
+      "team_id": 676971,
+      "to_email": "jason.mcvetta+test10@gmail.com",
+      "status": "pending",
+      "date_created": 1603294122,
+      "date_redeemed": null
+    }
+  ]
+}
