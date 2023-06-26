@@ -1,6 +1,9 @@
 name: Acceptance Tests
 on:
   push:
+    branches: [ master ]
+    tags: [ v* ]
+  pull_request:
   schedule:
     - cron: '0 10 * * 3'
 

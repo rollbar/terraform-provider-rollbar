@@ -1,8 +1,10 @@
 name: Quick Tests
+
 on:
   push:
-  # Scheduled runs ensure we are alerted to incompatibilities in new releases of
-  # Go and Terraform.
+    branches: [ master ]
+    tags: [ v* ]
+  pull_request:
   schedule:
     - cron: '0 10 * * 3'
 
