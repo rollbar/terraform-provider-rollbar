@@ -24,17 +24,17 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
 )
 
 // TestListInvitations tests listing Rollbar team invitations.
 func (s *Suite) TestListInvitations() {
 	teamID := 572097
-	u := s.client.BaseURL + pathInvitations
+	u := s.client.BaseURL + pathTeamInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -79,7 +79,7 @@ func (s *Suite) TestListPendingInvitations() {
 
 	teamID := 662037
 
-	u := s.client.BaseURL + pathInvitations
+	u := s.client.BaseURL + pathTeamInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 	expectedQuery := map[string]string{"page": "1"}
 	// Success
@@ -113,7 +113,7 @@ func (s *Suite) TestListPendingInvitations() {
 func (s *Suite) TestCreateInvitation() {
 	teamID := 572097
 	email := "test@rollbar.com"
-	u := s.client.BaseURL + pathInvitations
+	u := s.client.BaseURL + pathTeamInvitations
 	u = strings.ReplaceAll(u, "{teamID}", strconv.Itoa(teamID))
 
 	// Success
@@ -198,28 +198,22 @@ func (s *Suite) TestCancelInvitation() {
 func (s *Suite) TestFindInvitations() {
 	email := "jason.mcvetta+test10@gmail.com"
 
-	// Mock list all teams
-	u := s.client.BaseURL + pathTeamList
-	r := responderFromFixture("team/list.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	u := s.client.BaseURL + pathInvitations
+	expectedQuery := map[string]string{"page": "1", "email": email}
+	fixturePath := "invitation/list_all.json"
+	// Success
+	r := responderFromFixture(fixturePath, http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
 
-	// Mock list invitations for each team
-	for _, teamID := range []string{"662036", "662037", "676971"} {
+	// Success
+	expectedQuery["page"] = "2"
+	r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
 
-		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
-
-		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
-
-		expectedQuery := map[string]string{"page": "1"}
-		// Success
-		r = responderFromFixture(fixturePath, http.StatusOK)
-		httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
-
-		// Success
-		r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
-		httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
-
-	}
+	expectedQuery["page"] = "1"
+	expectedQuery["email"] = "nonexistent@email.com"
+	r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
 
 	expected := []Invitation{
 		{
@@ -240,8 +234,8 @@ func (s *Suite) TestFindInvitations() {
 	_, err = s.client.FindInvitations("nonexistent@email.com")
 	s.Equal(ErrNotFound, err)
 
-	s.checkServerErrors("GET", u+"?page=1", func() error {
-		_, err := s.client.FindInvitations(email)
+	s.checkServerErrorsWithQuery("GET", u, expectedQuery, func() error {
+		_, err := s.client.FindInvitations("nonexistent@email.com")
 		return err
 	})
 }
@@ -251,26 +245,20 @@ func (s *Suite) TestFindInvitations() {
 func (s *Suite) TestFindPendingInvitations() {
 	email := "jason.mcvetta+test10@gmail.com"
 
-	// Mock list all teams
-	u := s.client.BaseURL + pathTeamList
-	r := responderFromFixture("team/list.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
+	u := s.client.BaseURL + pathInvitations
+	expectedQuery := map[string]string{"page": "1", "email": email}
+	fixturePath := "invitation/list_all.json"
+	// Success
+	r := responderFromFixture(fixturePath, http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
 
-	// Mock list invitations for each team
-	for _, teamID := range []string{"662036", "662037", "676971"} {
-		fixturePath := fmt.Sprintf("invitation/list_%s.json", teamID)
+	// Success
+	expectedQuery["page"] = "2"
+	r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
+	httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
 
-		u = strings.ReplaceAll(s.client.BaseURL+pathInvitations, "{teamID}", teamID)
-		expectedQuery := map[string]string{"page": "1"}
-		// Success
-		r = responderFromFixture(fixturePath, http.StatusOK)
-		httpmock.RegisterResponderWithQuery("GET", u, expectedQuery, r)
-
-		// Success
-		r = responderFromFixture("invitation/list_662036.json", http.StatusOK)
-		httpmock.RegisterResponderWithQuery("GET", u, "page=2", r)
-	}
-
+	expectedQuery["page"] = "1"
+	expectedQuery["email"] = "nonexistent@email.com"
 	expected := []Invitation{
 		{
 			ID:           153783,
@@ -286,8 +274,8 @@ func (s *Suite) TestFindPendingInvitations() {
 	s.Nil(err)
 	s.Equal(expected, actual)
 
-	s.checkServerErrors("GET", u+"?page=1", func() error {
-		_, err := s.client.FindPendingInvitations(email)
+	s.checkServerErrorsWithQuery("GET", u, expectedQuery, func() error {
+		_, err := s.client.FindPendingInvitations("nonexistent@email.com")
 		return err
 	})
 }

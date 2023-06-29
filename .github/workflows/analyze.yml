@@ -2,7 +2,8 @@ name: Code Quality Analysis
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
+    tags: [ v* ]
   pull_request:
   schedule:
     - cron: '0 10 * * 3'

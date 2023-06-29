@@ -23,10 +23,11 @@
 package client
 
 import (
-	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
 )
 
 // TestListUsers tests listing all Rollbar users.
@@ -48,13 +49,13 @@ func (s *Suite) TestListUsers() {
 			Username: "coryvirok",
 		},
 	}
-	actual, err := s.client.ListUsers()
+	actual, err := s.client.ListTestUsers()
 	s.Nil(err)
 	s.Subset(actual, expected)
 	s.Len(actual, len(expected))
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ListUsers()
+		_, err := s.client.ListTestUsers()
 		return err
 	})
 }

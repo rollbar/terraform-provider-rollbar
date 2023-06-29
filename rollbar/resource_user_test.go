@@ -2,16 +2,17 @@ package rollbar
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"regexp"
+	"strings"
+
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/dnaeon/go-vcr/recorder"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"net/http"
-	"os"
-	"regexp"
-	"strings"
 )
 
 func init() {
@@ -872,7 +873,7 @@ func sweepResourceUser(_ string) error {
 	log.Info().Msg("Cleaning up Rollbar users from acceptance test runs.")
 
 	c := client.NewClient(client.DefaultBaseURL, os.Getenv("ROLLBAR_API_KEY"))
-	users, err := c.ListUsers()
+	users, err := c.ListTestUsers()
 	if err != nil {
 		log.Err(err).Send()
 		return err

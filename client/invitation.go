@@ -23,7 +23,6 @@
 package client
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -40,6 +39,48 @@ type Invitation struct {
 	Status       string `json:"status"`
 	DateCreated  int    `json:"date_created"`
 	DateRedeemed int    `json:"date_redeemed"`
+}
+
+// ListAllInvitationsPerEmail lists all invitations for all Rollbar teams.
+func (c *RollbarAPIClient) ListAllInvitationsPerEmail(email string) (invs []Invitation, err error) {
+
+	hasNextPage := true
+	page := 1
+
+	l := log.With().
+		Str("email", email).
+		Logger()
+	l.Debug().Msg("Listing invitations")
+
+	for hasNextPage {
+		resp, err := c.Resty.R().
+			SetResult(invitationListResponse{}).
+			SetError(ErrorResult{}).
+			SetQueryParams(map[string]string{
+				"page":  strconv.Itoa(page),
+				"email": email,
+			}).
+			Get(c.BaseURL + pathInvitations)
+		if err != nil {
+			l.Err(err).Msg("Error listing invitations")
+			return nil, err
+		}
+		err = errorFromResponse(resp)
+		if err != nil {
+			l.Err(err).
+				Str("status", resp.Status()).
+				Msg("Error listing invitations")
+			return nil, err
+		}
+		r := resp.Result().(*invitationListResponse)
+		hasNextPage = len(r.Result) > 0
+		page++
+		invs = append(invs, r.Result...)
+	}
+	l.Debug().
+		Int("invitation_count", len(invs)).
+		Msg("Successfully listed invitations")
+	return invs, nil
 }
 
 // ListInvitations lists all invitations for a Rollbar team.
@@ -60,7 +101,9 @@ func (c *RollbarAPIClient) ListInvitations(teamID int) (invs []Invitation, err e
 			}).
 			SetResult(invitationListResponse{}).
 			SetError(ErrorResult{}).
-			Get(c.BaseURL + pathInvitations + fmt.Sprintf("?page=%d", page))
+			SetQueryParams(map[string]string{
+				"page": strconv.Itoa(page)}).
+			Get(c.BaseURL + pathTeamInvitations)
 		if err != nil {
 			l.Err(err).Msg("Error listing invitations")
 			return nil, err
@@ -134,7 +177,7 @@ func (c *RollbarAPIClient) CreateInvitation(teamID int, email string) (Invitatio
 		Logger()
 	l.Debug().Msg("Creating new invitation")
 
-	u := c.BaseURL + pathInvitations
+	u := c.BaseURL + pathTeamInvitations
 	var inv Invitation
 	resp, err := c.Resty.R().
 		SetPathParams(map[string]string{
@@ -232,9 +275,7 @@ func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
 	return nil
 }
 
-// FindInvitations finds all Rollbar team invitations for a given email. Note
-// this method is quite inefficient, as it must read all invitations for all
-// teams.
+// FindInvitations finds all Rollbar team invitations for a given email.
 func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err error) {
 	// API converts all invited emails to lowercase.
 	// https://github.com/rollbar/terraform-provider-rollbar/issues/139
@@ -244,30 +285,11 @@ func (c *RollbarAPIClient) FindInvitations(email string) (invs []Invitation, err
 		Logger()
 
 	l.Debug().Msg("Finding invitations")
-	teams, err := c.ListTeams()
-	if err != nil {
-		l.Err(err).Send()
+	invs, err = c.ListAllInvitationsPerEmail(email)
+	if err != nil && err != ErrNotFound {
+		l.Err(err).
+			Msg("error finding invitations")
 		return invs, err
-	}
-	allInvs := []Invitation{}
-	for _, t := range teams {
-		teamInvs, err := c.ListInvitations(t.ID)
-		// Team may have been deleted by another process after we listed all
-		// teams, but before we queried the team for invitations.  Therefore we
-		// ignore ErrNotFound.
-		// https://github.com/rollbar/terraform-provider-rollbar/issues/88
-		if err != nil && err != ErrNotFound {
-			l.Err(err).
-				Str("team_name", t.Name).
-				Msg("error finding invitations")
-			return invs, err
-		}
-		allInvs = append(allInvs, teamInvs...)
-	}
-	for _, inv := range allInvs {
-		if inv.ToEmail == email {
-			invs = append(invs, inv)
-		}
 	}
 	if len(invs) == 0 {
 		return invs, ErrNotFound
