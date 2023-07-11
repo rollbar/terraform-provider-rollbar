@@ -22,10 +22,6 @@
 
 package rollbar
 
-import (
-	"github.com/rollbar/terraform-provider-rollbar/client"
-)
-
 const ComplexImportSeparator = ","
 
 const (
@@ -40,10 +36,3 @@ const (
 	rollbarServiceLink         = "rollbar_service_link"
 	rollbarIntegration         = "rollbar_integration"
 )
-
-func setResourceHeader(header string, c *client.RollbarAPIClient) {
-	c.Resty.SetHeader("X-Rollbar-Terraform-Resource", header)
-}
-func setDataSourceHeader(header string, c *client.RollbarAPIClient) {
-	c.Resty.SetHeader("X-Rollbar-Terraform-DataSource", header)
-}

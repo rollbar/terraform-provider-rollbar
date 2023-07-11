@@ -74,10 +74,7 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarProject, c)
 	pl, err := c.ListProjects()
-	client.Mutex.Unlock()
 	if err != nil {
 		return err
 	}

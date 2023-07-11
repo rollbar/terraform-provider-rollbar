@@ -242,10 +242,7 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 	}
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarIntegration, c)
 	intf, err := c.UpdateIntegration(integration, bodyMap)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -344,11 +341,7 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 	l.Info().Msg("Reading rollbar_integration resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarIntegration, c)
 	intf, err := c.ReadIntegration(integration)
-	client.Mutex.Unlock()
-	
 	if err == client.ErrNotFound {
 		d.SetId("")
 		l.Info().Msg("Integration not found - removed from state")

@@ -68,10 +68,7 @@ func resourceServiceLinkCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
 	sl, err := c.CreateServiceLink(name, template)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -98,10 +95,7 @@ func resourceServiceLinkUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
 	sl, err := c.UpdateServiceLink(id, name, template)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -128,10 +122,7 @@ func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m inte
 	l.Info().Msg("Reading rollbar_service_link resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
 	sl, err := c.ReadServiceLink(id)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -155,11 +146,7 @@ func resourceServiceLinkDelete(ctx context.Context, d *schema.ResourceData, m in
 	l.Info().Msg("Deleting rollbar_service_link resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
 	err := c.DeleteServiceLink(id)
-	client.Mutex.Unlock()
-	
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_service_link resource")
 		return diag.FromErr(err)

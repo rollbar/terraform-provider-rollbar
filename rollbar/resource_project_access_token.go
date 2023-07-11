@@ -142,8 +142,6 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
 		ProjectID:            projectID,
@@ -152,7 +150,6 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		RateLimitWindowSize:  size,
 		RateLimitWindowCount: count,
 	})
-	client.Mutex.Unlock()
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -175,10 +172,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -213,10 +207,7 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Updating resource project access token")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	err := c.UpdateProjectAccessToken(args)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		log.Err(err).Send()
@@ -238,11 +229,7 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
-	client.Mutex.Unlock()
-	
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -85,10 +85,7 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 	var diags diag.Diagnostics
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarProjects, c)
 	projects, err := c.ListProjects()
-	client.Mutex.Unlock()
 
 	if err != nil {
 		return diag.FromErr(err)
