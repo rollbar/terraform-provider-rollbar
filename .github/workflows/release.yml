@@ -1,21 +1,18 @@
 name: Semantic Release
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 jobs:
   release:
     name: Semantic Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-
-      - name: Checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
 
       - name: Pick Golang Version
         id: golang
@@ -27,17 +24,7 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - name: Restore Node cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-
-      - name: Setup Go
-        uses: actions/setup-go@v2
-
-      - name: Restore Go cache
-        uses: actions/cache@v2
+      - uses: actions/cache@v2
         with:
           path: |
             ~/go/pkg/mod
@@ -47,35 +34,14 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
-        uses: paultyng/ghaction-import-gpg@v2.1.0
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
-
-      - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@v4
+        uses: crazy-max/ghaction-import-gpg@v5.3.0
         with:
-          install-only: true
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: semantic-release
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-        run: npx semantic-release
-
-      - uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
-          terraform_version: "${{ matrix.terraform }}"
-
-      - name: Sleep for 30 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '30s'
-
-      - name: Confirm install from Registry
-        working-directory: ./example
-        run: terraform init
