@@ -17,6 +17,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v1
 
+      - name: Pick Golang Version
+        id: golang
+        run: echo "version=$(awk '$1 ~ /golang/{print $2}' .tool-versions)" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ steps.golang.outputs.version }}
+          go-version-file: 'go.mod'
+          cache: true
+
       - name: Restore Node cache
         uses: actions/cache@v2
         with:

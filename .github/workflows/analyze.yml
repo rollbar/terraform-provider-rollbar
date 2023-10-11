@@ -67,17 +67,22 @@ jobs:
   golangci:
     name: golangci-lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
+      - name: Pick Golang Version
+        id: golang
+        run: echo "version=$(awk '$1 ~ /golang/{print $2}' .tool-versions)" >> $GITHUB_OUTPUT
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.16'
+          go-version: ${{ steps.golang.outputs.version }}
           check-latest: false
       - uses: actions/checkout@v2
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.45.2
+          version: v${{ steps.golang.outputs.version }}
           # Optional: golangci-lint command line arguments.
           args: --timeout=5m --tests=false
           # Optional: working directory, useful for monorepos
