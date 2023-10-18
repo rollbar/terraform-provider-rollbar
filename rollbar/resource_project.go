@@ -50,7 +50,6 @@ func resourceProject() *schema.Resource {
 				Description: "The human readable name for the project",
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 			},
 
 			// Optional
@@ -84,12 +83,24 @@ func resourceProject() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
+			"timezone": {
+				Description: "Timezone for the project",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"time_format": {
+				Description: "Time format for the project",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
 		},
 	}
 }
 
 func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	name := d.Get("name").(string)
+	timezone := d.Get("timezone").(string)
+	timeFormat := d.Get("time_format").(string)
 	l := log.With().Str("name", name).Logger()
 	l.Info().Msg("Creating new Rollbar project resource")
 
@@ -97,7 +108,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarProject, c)
-	p, err := c.CreateProject(name)
+	p, err := c.CreateProject(name, timezone, timeFormat)
 	client.Mutex.Unlock()
 
 	if err != nil {

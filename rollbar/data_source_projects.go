@@ -73,6 +73,16 @@ func dataSourceProjects() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 						},
+						"timezone": {
+							Description: "Timezone for the project",
+							Type:        schema.TypeString,
+							Computed:    true,
+						},
+						"time_format": {
+							Description: "Time format for the project",
+							Type:        schema.TypeString,
+							Computed:    true,
+						},
 					},
 				},
 			},

@@ -36,6 +36,10 @@ type Project struct {
 	DateCreated  int    `json:"date_created" model:"date_created" mapstructure:"date_created"`
 	DateModified int    `json:"date_modified" model:"date_modified" mapstructure:"date_modified"`
 	Status       string `model:"status" mapstructure:"status"`
+	SettingsData struct {
+		TimeFormat string `json:"time_format" mapstructure:"time_format"`
+		Timezone   string `json:"timezone" mapstructure:"timezone"`
+	} `json:"settings_data" mapstructure:"settings_data"`
 }
 
 // FIXME: finish implementing the entire set of Project fields
@@ -112,15 +116,21 @@ func (c *RollbarAPIClient) ListProjects() ([]Project, error) {
 }
 
 // CreateProject creates a new Rollbar project.
-func (c *RollbarAPIClient) CreateProject(name string) (*Project, error) {
+func (c *RollbarAPIClient) CreateProject(name, timezone, timeFormat string) (*Project, error) {
 	u := c.BaseURL + pathProjectCreate
 	l := log.With().
 		Str("name", name).
 		Logger()
 	l.Debug().Msg("Creating new project")
-
+	body := map[string]interface{}{"name": name}
+	if timezone != "" {
+		body["timezone"] = timezone
+	}
+	if timeFormat != "" {
+		body["time_format"] = timeFormat
+	}
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"name": name}).
+		SetBody(body).
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
