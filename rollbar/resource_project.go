@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ package rollbar
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -101,6 +102,14 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	name := d.Get("name").(string)
 	timezone := d.Get("timezone").(string)
 	timeFormat := d.Get("time_format").(string)
+
+	if timezone == "" {
+		timezone = timeZoneDefault
+	}
+	if timeFormat == "" {
+		timeFormat = timeformatDefault
+	}
+
 	l := log.With().Str("name", name).Logger()
 	l.Info().Msg("Creating new Rollbar project resource")
 
@@ -206,13 +215,19 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		if k == "id" {
 			continue
 		}
-		if k == "settings_data" {
+		if k == settingsData {
 			continue
 		}
 		mustSet(d, k, v)
 	}
 
-	for k, v := range mProj["settings_data"].(map[string]interface{}) {
+	for k, v := range mProj[settingsData].(map[string]interface{}) {
+		if k == "timezone" && v == timeZoneDefault {
+			continue
+		}
+		if k == "time_format" && v == timeformatDefault {
+			continue
+		}
 		mustSet(d, k, v)
 	}
 
@@ -234,6 +249,16 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	teamIDs := getTeamIDs(d)
 	projectID := mustGetID(d)
+	name := d.Get("name").(string)
+
+	timezone := d.Get("timezone").(string)
+	timeFormat := d.Get("time_format").(string)
+	if timezone == "" {
+		timezone = timeZoneDefault
+	}
+	if timeFormat == "" {
+		timeFormat = timeformatDefault
+	}
 	l := log.With().
 		Int("project_id", projectID).
 		Ints("team_ids", teamIDs).
@@ -250,6 +275,24 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		l.Err(err).Msg("Error updating rollbar_project resource")
 		return diag.FromErr(err)
 	}
+
+	client.Mutex.Lock()
+	setResourceHeader(rollbarProject, c)
+	p, err := c.UpdateProject(projectID, name, timezone, timeFormat)
+	client.Mutex.Unlock()
+
+	if err != nil {
+		l.Err(err).Msg("Error updating rollbar_project resource")
+		return diag.FromErr(err)
+	}
+
+	if p.ID != projectID {
+		err = errors.New("IDs are not equal")
+		l.Err(err).Send()
+		d.SetId("") // removing from the state
+		return diag.FromErr(err)
+	}
+
 	l.Debug().Msg("Successfully updated rollbar_project resource")
 	return resourceProjectRead(ctx, d, m)
 }

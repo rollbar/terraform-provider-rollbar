@@ -122,15 +122,9 @@ func (c *RollbarAPIClient) CreateProject(name, timezone, timeFormat string) (*Pr
 		Str("name", name).
 		Logger()
 	l.Debug().Msg("Creating new project")
-	body := map[string]interface{}{"name": name}
-	if timezone != "" {
-		body["timezone"] = timezone
-	}
-	if timeFormat != "" {
-		body["time_format"] = timeFormat
-	}
+
 	resp, err := c.Resty.R().
-		SetBody(body).
+		SetBody(map[string]interface{}{"name": name, "timezone": timezone, "time_format": timeFormat}).
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
@@ -312,6 +306,33 @@ func (c *RollbarAPIClient) UpdateProjectTeams(projectID int, teamIDs []int) erro
 		}
 	}
 	return nil
+}
+
+func (c *RollbarAPIClient) UpdateProject(projectID int, name, timezone, timeFormat string) (*Project, error) {
+
+	u := c.BaseURL + pathProjectRead
+	l := log.With().
+		Int("project_id", projectID).
+		Str("name", name).
+		Logger()
+	l.Debug().Msg("Updating project")
+
+	resp, err := c.Resty.R().
+		SetBody(map[string]interface{}{"name": name, "timezone": timezone, "time_format": timeFormat}).
+		SetResult(projectResponse{}).
+		SetError(ErrorResult{}).
+		SetPathParams(map[string]string{
+			"projectID": strconv.Itoa(projectID),
+		}).
+		Patch(u)
+	err = errorFromResponse(resp)
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+	l.Debug().Msg("Project successfully created")
+	pr := resp.Result().(*projectResponse)
+	return &pr.Result, nil
 }
 
 /*

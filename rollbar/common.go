@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,3 +47,9 @@ func setResourceHeader(header string, c *client.RollbarAPIClient) {
 func setDataSourceHeader(header string, c *client.RollbarAPIClient) {
 	c.Resty.SetHeader("X-Rollbar-Terraform-DataSource", header)
 }
+
+const (
+	settingsData      = "settings_data"
+	timeZoneDefault   = "US/Pacific"
+	timeformatDefault = "12h"
+)
