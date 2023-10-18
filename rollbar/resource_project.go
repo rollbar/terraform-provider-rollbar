@@ -206,8 +206,16 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 		if k == "id" {
 			continue
 		}
+		if k == "settings_data" {
+			continue
+		}
 		mustSet(d, k, v)
 	}
+
+	for k, v := range mProj["settings_data"].(map[string]interface{}) {
+		mustSet(d, k, v)
+	}
+
 	client.Mutex.Lock()
 	teamIDs, err := c.FindProjectTeamIDs(projectID)
 	client.Mutex.Unlock()
