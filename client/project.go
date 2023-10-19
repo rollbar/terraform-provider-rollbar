@@ -48,6 +48,18 @@ type Project struct {
 	} `json:"settings_data" mapstructure:"settings_data"`
 }
 
+// FlattenedProject is needed for data source
+type FlattenedProject struct {
+	ID           int    `model:"id" mapstructure:"id"`
+	Name         string `model:"name" mapstructure:"name"`
+	AccountID    int    `json:"account_id" model:"account_id" mapstructure:"account_id"`
+	DateCreated  int    `json:"date_created" model:"date_created" mapstructure:"date_created"`
+	DateModified int    `json:"date_modified" model:"date_modified" mapstructure:"date_modified"`
+	Status       string `model:"status" mapstructure:"status"`
+	TimeFormat   string `json:"time_format" mapstructure:"time_format"`
+	Timezone     string `json:"timezone" mapstructure:"timezone"`
+}
+
 // FIXME: finish implementing the entire set of Project fields
 /*
 	SettingsData struct {

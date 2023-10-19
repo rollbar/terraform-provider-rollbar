@@ -103,7 +103,7 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	mustSet(d, "projects", projects)
+	mustSet(d, "projects", flattenProjects(projects))
 
 	// Set resource ID to current timestamp (every resource must have an ID or
 	// it will be destroyed).
@@ -111,4 +111,22 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 
 	log.Debug().Msg("Successfully read project list from API.")
 	return diags
+}
+
+func flattenProjects(projects []client.Project) []client.FlattenedProject {
+	var fps []client.FlattenedProject
+	for _, p := range projects {
+		fp := client.FlattenedProject{
+			ID:           p.ID,
+			Name:         p.Name,
+			AccountID:    p.AccountID,
+			DateCreated:  p.DateCreated,
+			DateModified: p.DateModified,
+			Status:       p.Status,
+			TimeFormat:   p.SettingsData.TimeFormat,
+			Timezone:     p.SettingsData.Timezone,
+		}
+		fps = append(fps, fp)
+	}
+	return fps
 }
