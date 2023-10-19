@@ -294,7 +294,7 @@ func (s *AccSuite) configResourceProject() string {
 		resource "rollbar_project" "foo" {
 		  name         = "%s"
 		  timezone     = "UTC"
-          time_format   = "24h"
+		  time_format   = "24h"
 		}
 	`
 	return fmt.Sprintf(tmpl, s.randName)

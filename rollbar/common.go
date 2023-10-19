@@ -50,6 +50,6 @@ func setDataSourceHeader(header string, c *client.RollbarAPIClient) {
 
 const (
 	settingsData      = "settings_data"
-	timeZoneDefault   = "US/Pacific"
-	timeformatDefault = "12h"
+	timezoneDefault   = "US/Pacific"
+	timeFormatDefault = "12h"
 )

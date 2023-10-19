@@ -110,10 +110,10 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	timeFormat := d.Get(projectTimeFormat).(string)
 
 	if timezone == "" {
-		timezone = timeZoneDefault
+		timezone = timezoneDefault
 	}
 	if timeFormat == "" {
-		timeFormat = timeformatDefault
+		timeFormat = timeFormatDefault
 	}
 
 	l := log.With().Str(projectName, name).Logger()
@@ -228,10 +228,10 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	for k, v := range mProj[settingsData].(map[string]interface{}) {
-		if k == projectTimezone && v == timeZoneDefault {
+		if k == projectTimezone && v == timezoneDefault {
 			continue
 		}
-		if k == projectTimeFormat && v == timeformatDefault {
+		if k == projectTimeFormat && v == timeFormatDefault {
 			continue
 		}
 		mustSet(d, k, v)
@@ -260,10 +260,10 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	timezone := d.Get(projectTimezone).(string)
 	timeFormat := d.Get(projectTimeFormat).(string)
 	if timezone == "" {
-		timezone = timeZoneDefault
+		timezone = timezoneDefault
 	}
 	if timeFormat == "" {
-		timeFormat = timeformatDefault
+		timeFormat = timeFormatDefault
 	}
 	l := log.With().
 		Int("project_id", projectID).

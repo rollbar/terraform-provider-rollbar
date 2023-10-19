@@ -336,7 +336,7 @@ func (c *RollbarAPIClient) UpdateProject(projectID int, name, timezone, timeForm
 		l.Err(err).Send()
 		return nil, err
 	}
-	l.Debug().Msg("Project successfully created")
+	l.Debug().Msg("Project successfully updated")
 	pr := resp.Result().(*projectResponse)
 	return &pr.Result, nil
 }
