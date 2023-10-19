@@ -218,20 +218,15 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	var mProj map[string]interface{}
 	mustDecodeMapStructure(proj, &mProj)
 	for k, v := range mProj {
-		if k == "id" {
-			continue
-		}
-		if k == settingsData {
+		if k == "id" || k == settingsData {
 			continue
 		}
 		mustSet(d, k, v)
 	}
 
 	for k, v := range mProj[settingsData].(map[string]interface{}) {
-		if k == projectTimezone && v == timezoneDefault {
-			continue
-		}
-		if k == projectTimeFormat && v == timeFormatDefault {
+		if (k == projectTimezone && v == timezoneDefault) ||
+			(k == projectTimeFormat && v == timeFormatDefault) {
 			continue
 		}
 		mustSet(d, k, v)
