@@ -155,21 +155,15 @@ func (s *Suite) TestUpdateProject() {
 
 	// Success
 	r := responderFromFixture("project/update.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
-	actual, err := s.client.ReadProject(expected.ID)
+	httpmock.RegisterResponder("PATCH", u, r)
+	actual, err := s.client.UpdateProject(expected.ID, "baz", "UTC", "24h")
 	s.Nil(err)
 	s.Equal(&expected, actual)
 
-	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ReadProject(expected.ID)
+	s.checkServerErrors("PATCH", u, func() error {
+		_, err := s.client.UpdateProject(expected.ID, "baz", "UTC", "24h")
 		return err
 	})
-
-	// Try to read a deleted project
-	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
-	httpmock.RegisterResponder("GET", u, r)
-	_, err = s.client.ReadProject(expected.ID)
-	s.Equal(ErrNotFound, err)
 }
 
 // TestDeleteProject tests deleting a Rollbar project.
