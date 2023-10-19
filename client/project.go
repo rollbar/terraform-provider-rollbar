@@ -28,6 +28,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	projectName       = "name"
+	projectTimezone   = "timezone"
+	projectTimeFormat = "time_format"
+)
+
 // Project represents a Rollbar project.
 type Project struct {
 	ID           int    `model:"id" mapstructure:"id"`
@@ -124,7 +130,7 @@ func (c *RollbarAPIClient) CreateProject(name, timezone, timeFormat string) (*Pr
 	l.Debug().Msg("Creating new project")
 
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"name": name, "timezone": timezone, "time_format": timeFormat}).
+		SetBody(map[string]interface{}{projectName: name, projectTimezone: timezone, projectTimeFormat: timeFormat}).
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
@@ -313,12 +319,12 @@ func (c *RollbarAPIClient) UpdateProject(projectID int, name, timezone, timeForm
 	u := c.BaseURL + pathProjectReadOrUpdate
 	l := log.With().
 		Int("project_id", projectID).
-		Str("name", name).
+		Str(projectName, name).
 		Logger()
 	l.Debug().Msg("Updating project")
 
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"name": name, "timezone": timezone, "time_format": timeFormat}).
+		SetBody(map[string]interface{}{projectName: name, projectTimezone: timezone, projectTimeFormat: timeFormat}).
 		SetResult(projectResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{

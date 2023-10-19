@@ -34,6 +34,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	projectName       = "name"
+	projectTimezone   = "timezone"
+	projectTimeFormat = "time_format"
+)
+
 func resourceProject() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceProjectCreate,
@@ -47,7 +53,7 @@ func resourceProject() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			// Required
-			"name": {
+			projectName: {
 				Description: "The human readable name for the project",
 				Type:        schema.TypeString,
 				Required:    true,
@@ -84,12 +90,12 @@ func resourceProject() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 			},
-			"timezone": {
+			projectTimezone: {
 				Description: "Timezone for the project",
 				Type:        schema.TypeString,
 				Optional:    true,
 			},
-			"time_format": {
+			projectTimeFormat: {
 				Description: "Time format for the project",
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -99,9 +105,9 @@ func resourceProject() *schema.Resource {
 }
 
 func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	name := d.Get("name").(string)
-	timezone := d.Get("timezone").(string)
-	timeFormat := d.Get("time_format").(string)
+	name := d.Get(projectName).(string)
+	timezone := d.Get(projectTimezone).(string)
+	timeFormat := d.Get(projectTimeFormat).(string)
 
 	if timezone == "" {
 		timezone = timeZoneDefault
@@ -110,7 +116,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 		timeFormat = timeformatDefault
 	}
 
-	l := log.With().Str("name", name).Logger()
+	l := log.With().Str(projectName, name).Logger()
 	l.Info().Msg("Creating new Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
@@ -163,7 +169,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 		l.Debug().
-			Str("name", t.Name).
+			Str(projectName, t.Name).
 			Msg("Successfully deleted a default access token")
 	}
 
@@ -222,10 +228,10 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	for k, v := range mProj[settingsData].(map[string]interface{}) {
-		if k == "timezone" && v == timeZoneDefault {
+		if k == projectTimezone && v == timeZoneDefault {
 			continue
 		}
-		if k == "time_format" && v == timeformatDefault {
+		if k == projectTimeFormat && v == timeformatDefault {
 			continue
 		}
 		mustSet(d, k, v)
@@ -249,10 +255,10 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	teamIDs := getTeamIDs(d)
 	projectID := mustGetID(d)
-	name := d.Get("name").(string)
+	name := d.Get(projectName).(string)
 
-	timezone := d.Get("timezone").(string)
-	timeFormat := d.Get("time_format").(string)
+	timezone := d.Get(projectTimezone).(string)
+	timeFormat := d.Get(projectTimeFormat).(string)
 	if timezone == "" {
 		timezone = timeZoneDefault
 	}
