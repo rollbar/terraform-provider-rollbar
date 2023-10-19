@@ -343,6 +343,12 @@ func (c *RollbarAPIClient) UpdateProject(projectID int, name, timezone, timeForm
 			"projectID": strconv.Itoa(projectID),
 		}).
 		Patch(u)
+
+	if err != nil {
+		l.Err(err).Send()
+		return nil, err
+	}
+
 	err = errorFromResponse(resp)
 	if err != nil {
 		l.Err(err).Send()
