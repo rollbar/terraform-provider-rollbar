@@ -24,12 +24,13 @@ package rollbar
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"os"
-	"strings"
 )
 
 func init() {
@@ -54,6 +55,8 @@ func (s *AccSuite) TestAccProject() {
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
 					resource.TestCheckResourceAttr(rn, "name", s.randName),
+					resource.TestCheckResourceAttr(rn, "timezone", "UTC"),
+					resource.TestCheckResourceAttr(rn, "time_format", "24h"),
 					s.checkProjectExists(rn, s.randName),
 					s.checkProjectInProjectList(rn),
 				),
@@ -290,6 +293,8 @@ func (s *AccSuite) configResourceProject() string {
 	tmpl := `
 		resource "rollbar_project" "foo" {
 		  name         = "%s"
+		  timezone     = "UTC"
+          time_format   = "24h"
 		}
 	`
 	return fmt.Sprintf(tmpl, s.randName)

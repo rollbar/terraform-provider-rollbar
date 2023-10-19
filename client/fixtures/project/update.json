@@ -1,0 +1,21 @@
+{
+  "err": 0,
+  "result": {
+    "account_id": 317418,
+    "date_created": 1602086539,
+    "date_modified": 1602086539,
+    "id": 411708,
+    "name": "baz",
+    "settings_data": {
+      "grouping": {
+        "auto_upgrade": true,
+        "recent_versions": [
+          "5.0.0"
+        ]
+      },
+      "timezone": "UTC",
+      "time_format": "24h"
+    },
+    "status": "enabled"
+  }
+}

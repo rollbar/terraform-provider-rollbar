@@ -27,7 +27,7 @@ const (
 	pathProjectCreate                    = "/api/1/projects"
 	pathProjectDelete                    = "/api/1/project/{projectID}"
 	pathProjectList                      = "/api/1/projects"
-	pathProjectRead                      = "/api/1/project/{projectID}"
+	pathProjectReadOrUpdate              = "/api/1/project/{projectID}"
 	pathProjectToken                     = "/api/1/project/{projectID}/access_token/{accessToken}"
 	pathProjectTokens                    = "/api/1/project/{projectID}/access_tokens"
 	pathProjectTeams                     = "/api/1/project/{projectID}/teams"

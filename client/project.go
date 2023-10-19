@@ -146,7 +146,7 @@ func (c *RollbarAPIClient) CreateProject(name, timezone, timeFormat string) (*Pr
 // ReadProject a Rollbar project from the API. If no matching project is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadProject(projectID int) (*Project, error) {
-	u := c.BaseURL + pathProjectRead
+	u := c.BaseURL + pathProjectReadOrUpdate
 
 	l := log.With().
 		Int("projectID", projectID).
@@ -310,7 +310,7 @@ func (c *RollbarAPIClient) UpdateProjectTeams(projectID int, teamIDs []int) erro
 
 func (c *RollbarAPIClient) UpdateProject(projectID int, name, timezone, timeFormat string) (*Project, error) {
 
-	u := c.BaseURL + pathProjectRead
+	u := c.BaseURL + pathProjectReadOrUpdate
 	l := log.With().
 		Int("project_id", projectID).
 		Str("name", name).

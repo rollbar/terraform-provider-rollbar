@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2023 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,6 +77,8 @@ func (s *Suite) TestListProjects() {
 func (s *Suite) TestCreateProject() {
 	u := s.client.BaseURL + pathProjectCreate
 	name := "baz"
+	timezone := "12h"
+	timeFormat := "UTC"
 
 	// Success
 	// FIXME: The actual Rollbar API sends http.StatusOK; but it
@@ -90,12 +92,12 @@ func (s *Suite) TestCreateProject() {
 		return rs, nil
 	}
 	httpmock.RegisterResponder("POST", u, r)
-	proj, err := s.client.CreateProject(name)
+	proj, err := s.client.CreateProject(name, timezone, timeFormat)
 	s.Nil(err)
 	s.Equal(name, proj.Name)
 
 	s.checkServerErrors("POST", u, func() error {
-		_, err = s.client.CreateProject(name)
+		_, err = s.client.CreateProject(name, timezone, timeFormat)
 		return err
 	})
 }
@@ -110,11 +112,49 @@ func (s *Suite) TestReadProject() {
 		Name:         "baz",
 		Status:       "enabled",
 	}
-	u := s.client.BaseURL + pathProjectRead
+	u := s.client.BaseURL + pathProjectReadOrUpdate
 	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(expected.ID))
 
 	// Success
 	r := responderFromFixture("project/read.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	actual, err := s.client.ReadProject(expected.ID)
+	s.Nil(err)
+	s.Equal(&expected, actual)
+
+	s.checkServerErrors("GET", u, func() error {
+		_, err := s.client.ReadProject(expected.ID)
+		return err
+	})
+
+	// Try to read a deleted project
+	r = responderFromFixture("project/read_deleted.json", http.StatusOK)
+	httpmock.RegisterResponder("GET", u, r)
+	_, err = s.client.ReadProject(expected.ID)
+	s.Equal(ErrNotFound, err)
+}
+
+// TestUpdateProject tests updating a Rollbar project.
+func (s *Suite) TestUpdateProject() {
+	expected := Project{
+		AccountID:    317418,
+		DateCreated:  1602086539,
+		DateModified: 1602086539,
+		ID:           411708,
+		Name:         "baz",
+		Status:       "enabled",
+		SettingsData: struct {
+			TimeFormat string `json:"time_format" mapstructure:"time_format"`
+			Timezone   string `json:"timezone" mapstructure:"timezone"`
+		}{
+			TimeFormat: "24h",
+			Timezone:   "UTC"},
+	}
+	u := s.client.BaseURL + pathProjectReadOrUpdate
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(expected.ID))
+
+	// Success
+	r := responderFromFixture("project/update.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
 	actual, err := s.client.ReadProject(expected.ID)
 	s.Nil(err)
@@ -176,7 +216,9 @@ func TestUpdateProjectTeams(t *testing.T) {
 	team1Name := prefix + "-1"
 	team2Name := prefix + "-2"
 
-	project, err := c.CreateProject(projectName)
+	timezone := "12h"
+	timeFormat := "UTC"
+	project, err := c.CreateProject(projectName, timezone, timeFormat)
 	assert.Nil(t, err)
 	team0, err := c.CreateTeam(team0Name, "standard")
 	assert.Nil(t, err)
