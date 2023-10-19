@@ -114,7 +114,8 @@ func dataSourceProjectsRead(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func flattenProjects(projects []client.Project) []client.FlattenedProject {
-	var fps []client.FlattenedProject
+	var fps = make([]client.FlattenedProject, 0)
+
 	for _, p := range projects {
 		fp := client.FlattenedProject{
 			ID:           p.ID,
