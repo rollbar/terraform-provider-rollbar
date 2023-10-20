@@ -225,6 +225,9 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	for k, v := range mProj[settingsData].(map[string]interface{}) {
+		// to preserve backward compatibility under assumption that the
+		// majority of users have default values. This will prevent from updating
+		// existing projects for timezone and time_format when these attributes are missing.
 		if (k == projectTimezone && v == timezoneDefault) ||
 			(k == projectTimeFormat && v == timeFormatDefault) {
 			continue
