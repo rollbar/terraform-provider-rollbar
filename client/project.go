@@ -60,43 +60,6 @@ type FlattenedProject struct {
 	Timezone     string `json:"timezone" mapstructure:"timezone"`
 }
 
-// FIXME: finish implementing the entire set of Project fields
-/*
-	SettingsData struct {
-		Grouping struct {
-			AutoUpgrade    bool     `json:"auto_upgrade"`
-			RecentVersions []string `json:"recent_versions"`
-		} `json:"grouping"`
-		Integrations struct {
-			Asana       interface{} `json:"asana"`
-			AzureDevops interface{} `json:"azuredevops"`
-			Bitbucket   interface{} `json:"bitbucket"`
-				//"campfire": {},
-				//"ciscospark": {},
-				//"clubhouse": {},
-				//"datadog": {},
-				//"email": {
-				//	"enabled": true
-				//},
-				//"flowdock": {},
-				//"github": {},
-				//"gitlab": {},
-				//"hipchat": {},
-				//"jira": {},
-				//"lightstep": {},
-				//"pagerduty": {},
-				//"pivotal": {},
-				//"slack": {},
-				//"sprintly": {},
-				//"trello": {},
-				//"victorops": {},
-				//"webhook": {}
-		} `json:"integrations"`
-		TimeFormat string `json:"time_format"`
-		Timezone   string `json:"timezone"`
-	} `json:"settings_data"`
-*/
-
 // ListProjects lists all Rollbar projects.
 func (c *RollbarAPIClient) ListProjects() ([]Project, error) {
 	u := c.BaseURL + pathProjectList
