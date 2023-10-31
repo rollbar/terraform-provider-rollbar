@@ -24,7 +24,7 @@
 terraform {
   required_providers {
     rollbar = {
-      source = "rollbar/rollbar"
+      source = "github.com/zenreach/rollbar"
     }
   }
 }

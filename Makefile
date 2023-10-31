@@ -2,11 +2,11 @@ TEST?=$$(go list ./... | grep -v vendor )
 SWEEP?=all
 SWEEP_DIR?=./rollbar
 HOSTNAME=github.com
-NAMESPACE=rollbar
+NAMESPACE=zenreach
 NAME=rollbar
 BINARY=terraform-provider-${NAME}
-#VERSION=0.2.0
-VERSION=$$(npm run get-version | tail -1)
+VERSION=1.13.1
+#VERSION=$$(npm run get-version | tail -1)
 OS_ARCH=linux_amd64
 
 default: install
@@ -28,6 +28,14 @@ release:
 	GOOS=solaris GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_solaris_amd64
 	GOOS=windows GOARCH=386 go build -o ./bin/${BINARY}_${VERSION}_windows_386
 	GOOS=windows GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_windows_amd64
+
+darwininstall: 
+	GOOS=darwin GOARCH=amd64 go build -o ./bin/${BINARY}_${VERSION}_darwin_amd64
+	GOOS=darwin GOARCH=arm64 go build -o ./bin/${BINARY}_${VERSION}_darwin_arm64
+	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/darwin_amd64
+	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/darwin_arm64
+	cp ./bin/${BINARY}_${VERSION}_darwin_amd64 ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/darwin_amd64
+	cp ./bin/${BINARY}_${VERSION}_darwin_arm64 ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/darwin_arm64
 
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
