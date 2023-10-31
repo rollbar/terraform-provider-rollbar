@@ -53,6 +53,12 @@ func resourceServiceLink() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
+			"project_api_key": {
+				Description: "Overrides the project_api_key defined in the provider",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+			},
 		},
 	}
 }
@@ -61,12 +67,16 @@ func resourceServiceLinkCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	name := d.Get("name").(string)
 	template := d.Get("template").(string)
+	project_api_key := d.Get("project_api_key").(string)
 
 	l := log.With().Str("name", name).Logger()
 
 	l.Info().Msg("Creating rollbar_service_link resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarServiceLink, c)
@@ -91,12 +101,16 @@ func resourceServiceLinkUpdate(ctx context.Context, d *schema.ResourceData, m in
 	id := mustGetID(d)
 	name := d.Get("name").(string)
 	template := d.Get("template").(string)
+	project_api_key := d.Get("project_api_key").(string)
 
 	l := log.With().Str("name", name).Logger()
 
 	l.Info().Msg("Creating rollbar_service_link resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarServiceLink, c)
@@ -121,12 +135,17 @@ func resourceServiceLinkUpdate(ctx context.Context, d *schema.ResourceData, m in
 }
 
 func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	project_api_key := d.Get("project_api_key").(string)
 	id := mustGetID(d)
 	l := log.With().
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_service_link resource")
+
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarServiceLink, c)
@@ -150,16 +169,21 @@ func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m inte
 }
 
 func resourceServiceLinkDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	project_api_key := d.Get("project_api_key").(string)
 	id := mustGetID(d)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_service_link resource")
+
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarServiceLink, c)
 	err := c.DeleteServiceLink(id)
 	client.Mutex.Unlock()
-	
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_service_link resource")
 		return diag.FromErr(err)

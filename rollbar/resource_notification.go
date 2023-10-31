@@ -71,6 +71,12 @@ func resourceNotification() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
+			"project_api_key": {
+				Description: "Overrides the project_api_key defined in the provider",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+			},
 			"rule": {
 				Description: "Human readable name for the rule",
 				Type:        schema.TypeSet,
@@ -267,6 +273,7 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	trigger, filters := parseRule(d)
 	channel := d.Get("channel").(string)
+	project_api_key := d.Get("project_api_key").(string)
 	config := parseSet("config", d)
 	config = cleanConfig(channel, trigger, config)
 	l := log.With().Str("channel", channel).Logger()
@@ -274,6 +281,9 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarNotification, c)
@@ -298,6 +308,7 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	id := mustGetID(d)
 	trigger, filters := parseRule(d)
 	channel := d.Get("channel").(string)
+	project_api_key := d.Get("project_api_key").(string)
 	config := parseSet("config", d)
 	config = cleanConfig(channel, trigger, config)
 	l := log.With().Str("channel", channel).Logger()
@@ -305,6 +316,10 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
+
 	client.Mutex.Lock()
 	setResourceHeader(rollbarNotification, c)
 	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
@@ -371,11 +386,16 @@ func flattenRule(filters []interface{}, trigger string) *schema.Set {
 func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := mustGetID(d)
 	channel := d.Get("channel").(string)
+	project_api_key := d.Get("project_api_key").(string)
 	l := log.With().
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
+
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarNotification, c)
@@ -401,15 +421,20 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	id := mustGetID(d)
 	channel := d.Get("channel").(string)
+	project_api_key := d.Get("project_api_key").(string)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
+
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarNotification, c)
 	err := c.DeleteNotification(id, channel)
 	client.Mutex.Unlock()
-	
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_notification resource")
 		return diag.FromErr(err)
