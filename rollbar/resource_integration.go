@@ -52,6 +52,12 @@ func resourceIntegraion() *schema.Resource {
 		DeleteContext: resourceIntegrationDelete,
 
 		Schema: map[string]*schema.Schema{
+			"project_api_key": {
+				Description: "Overrides the project_api_key defined in the provider",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+			},
 			client.EMAIL: {
 				Description: "Email integration",
 				Type:        schema.TypeSet,
@@ -226,6 +232,7 @@ func setBodyMapFromInterface(integration string, intf interface{}, toDelete bool
 }
 func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[string]interface{}, d *schema.ResourceData, m interface{}, action Action) (zerolog.Logger, diag.Diagnostics) {
 	l := log.With().Str("integration", integration).Logger()
+	project_api_key := d.Get("project_api_key").(string)
 	switch action {
 	case CREATE:
 		l.Info().Msg("Creating rollbar_integration resource")
@@ -241,6 +248,9 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		l = l.With().Str("id", id).Logger()
 	}
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarIntegration, c)
@@ -342,13 +352,18 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 	spl := strings.Split(id, ComplexImportSeparator)
 	integration := spl[1]
 	l.Info().Msg("Reading rollbar_integration resource")
+
+	project_api_key := d.Get("project_api_key").(string)
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	if len(project_api_key) > 0 {
+		c = client.NewClient(c.BaseURL, project_api_key)
+	}
 
 	client.Mutex.Lock()
 	setResourceHeader(rollbarIntegration, c)
 	intf, err := c.ReadIntegration(integration)
 	client.Mutex.Unlock()
-	
+
 	if err == client.ErrNotFound {
 		d.SetId("")
 		l.Info().Msg("Integration not found - removed from state")
