@@ -1,6 +1,6 @@
 Terraform provider for Rollbar
 ==============================
-
+ 
 The Rollbar provider allows Terraform to control resources on
 [Rollbar.com](https://rollbar.com), the Continuous Code Improvement Platform.
 
