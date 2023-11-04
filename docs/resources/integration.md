@@ -96,7 +96,6 @@ PagerDuty:
 * `enabled` - (Required) Boolean that enables the PagerDuty notifications globally
 * `service_key` - (Required) PagerDuty service key linked to PagerDuty account
 
-
 Attribute Reference
 -------------------
 
