@@ -5,10 +5,10 @@ Rollbar projects can be configured with different notification integrations (aka
 
 This resource can manage configuration for the Slack, Webhook, Email and PagerDuty channels. See the following api documentation for more details about the arguments with respect to these channels:
 
-* [Rollbar API Slack Integration](https://docs.rollbar.com/reference/put_api-1-notifications-slack)
-* [Rollbar API Webhook Integration](https://docs.rollbar.com/reference/put_api-1-notifications-webhook)
+* [Rollbar API Slack Integration](https://docs.rollbar.com/reference/put_api-1-notifications-slack), [Rollbar Slack Integration Documentation](https://docs.rollbar.com/docs/slack)
+* [Rollbar API Webhook Integration](https://docs.rollbar.com/reference/put_api-1-notifications-webhook), [Rollbar Webhook Integration Documentation](https://docs.rollbar.com/docs/webhook)
+* [Rollbar API PagerDuty Integration](https://docs.rollbar.com/reference/put_api-1-notifications-pagerduty), [Rollbar PagerDuty Integration Documentation](https://docs.rollbar.com/docs/pagerduty)
 * [Rollbar API Email Integration](https://docs.rollbar.com/reference/put_api-1-notifications-email)
-* [Rollbar API PagerDuty Integration](https://docs.rollbar.com/reference/put_api-1-notifications-pagerduty)
 
 Example Usage
 -------------
@@ -44,7 +44,7 @@ resource "rollbar_integration" "slack_integration" {
 resource "rollbar_integration" "webhook_integration" {
   webhook {
     enabled = true
-    url = "https://www.some-website.com"
+    url = "https://www.example.com"
   }
 }
 
