@@ -93,6 +93,7 @@ func resourceProjectAccessToken() *schema.Resource {
 				Description: "Access token for Rollbar API",
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 			},
 			"date_created": {
 				Description: "Date the project was created",
@@ -242,7 +243,7 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	setResourceHeader(rollbarProjectAccessToken, c)
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
 	client.Mutex.Unlock()
-	
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
