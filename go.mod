@@ -6,7 +6,7 @@ require (
 	github.com/brianvoe/gofakeit/v5 v5.11.2
 	github.com/dnaeon/go-vcr v1.2.0
 	github.com/go-resty/resty/v2 v2.11.0
-	github.com/hashicorp/go-cty v1.4.1-0.20200723130312-85980079f637
+	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.29.0
 	github.com/jarcoal/httpmock v1.3.1
 	github.com/mitchellh/mapstructure v1.5.0
