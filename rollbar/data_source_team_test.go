@@ -24,9 +24,10 @@ package rollbar
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/rs/zerolog/log"
-	"regexp"
 )
 
 func (s *AccSuite) TestAccTeamDataSource() {
@@ -105,7 +106,7 @@ func (s *AccSuite) configDataSourceTeamNotFoundById() string {
 	// language=hcl
 	tmpl := `
 		data "rollbar_team" "test" {
-			team_id = %d
+			team_id = "%d"
 		}
 	`
 	return fmt.Sprintf(tmpl, s.randID)

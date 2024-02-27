@@ -82,12 +82,14 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 		l.Debug().Msg("Reading Team from Rollbar by ID")
 		respTeam, err := c.ReadTeam(teamID.(int))
 		if err != nil {
+			client.Mutex.Unlock()
 			return diag.Errorf("Team not found by ID: %v", err)
 		}
 		team = respTeam
 	} else {
 		name, nameOk := d.GetOk("name")
 		if !nameOk {
+			client.Mutex.Unlock()
 			return diag.Errorf("Data Source requires either \"name\" or \"team_id\"")
 		}
 		l = log.With().
@@ -97,11 +99,13 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 
 		teams, err := c.ListTeams()
 		if err != nil {
+			client.Mutex.Unlock()
 			return diag.FromErr(err)
 		}
 
 		t, err := findTeamByName(teams, name.(string))
 		if err != nil {
+			client.Mutex.Unlock()
 			return diag.FromErr(err)
 		}
 		team = t
