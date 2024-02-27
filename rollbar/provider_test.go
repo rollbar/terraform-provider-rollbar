@@ -23,7 +23,14 @@
 package rollbar
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"runtime"
+	"strconv"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -32,10 +39,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
-	"os"
-	"runtime"
-	"strconv"
-	"testing"
 )
 
 func init() {
@@ -66,6 +69,16 @@ type AccSuite struct {
 	randID   int    // ID of a Rollbar resource
 }
 
+// providerConfigure sets up authentication in a Resty HTTP client.
+func providerConfigureTest(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	token := d.Get(schemaKeyToken).(string)
+	projectToken := d.Get(projectKeyToken).(string)
+	baseURL := d.Get(schemaKeyBaseURL).(string)
+	c := client.NewTestClient(baseURL, token)
+	pc := client.NewTestClient(baseURL, projectToken)
+	return map[string]*client.RollbarAPIClient{schemaKeyToken: c, projectKeyToken: pc}, diags
+}
 func (s *AccSuite) SetupSuite() {
 	maxprocs := runtime.GOMAXPROCS(0)
 	log.Debug().
@@ -74,6 +87,7 @@ func (s *AccSuite) SetupSuite() {
 
 	// Setup testing
 	s.provider = Provider()
+	s.provider.ConfigureContextFunc = providerConfigureTest
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
 	}

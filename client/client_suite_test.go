@@ -27,10 +27,8 @@ import (
 	"net/http"
 	"os"
 	"testing"
-	"time"
 
 	"github.com/brianvoe/gofakeit/v5"
-	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -78,45 +76,6 @@ type Suite struct {
 	client *RollbarAPIClient
 }
 
-func NewTestClient(baseURL, token string) *RollbarAPIClient {
-	log.Debug().Msg("Initializing Rollbar client")
-
-	// New Resty HTTP client
-	r := resty.New()
-
-	// Use default transport - needed for VCR
-	r.SetTransport(http.DefaultTransport).
-		// set timeout on http client
-		SetTimeout(30 * time.Second).
-		// Set retry count to 3 (try 3 times before it fails)
-		SetRetryCount(2).
-		SetRetryWaitTime(1 * time.Second).
-		SetRetryMaxWaitTime(5 * time.Second)
-
-	// Authentication
-	if token != "" {
-		r = r.SetHeaders(map[string]string{
-			"X-Rollbar-Access-Token": token,
-			"X-Rollbar-Terraform":    "true"})
-	} else {
-		log.Warn().Msg("Rollbar API token not set")
-	}
-
-	// Authentication
-	if baseURL == "" {
-		log.Error().Msg("Rollbar API base URL not set")
-	}
-
-	// Configure Resty to use Zerolog for logging
-	r.SetLogger(restyZeroLogger{log.Logger})
-
-	// Rollbar client
-	c := RollbarAPIClient{
-		Resty:   r,
-		BaseURL: baseURL,
-	}
-	return &c
-}
 func (s *Suite) SetupSuite() {
 	// Pretty logging
 	log.Logger = log.

@@ -44,6 +44,47 @@ type RollbarAPIClient struct {
 	Resty   *resty.Client
 }
 
+// NewTestClient sets up a new Rollbar API test client.
+func NewTestClient(baseURL, token string) *RollbarAPIClient {
+	log.Debug().Msg("Initializing Rollbar client")
+
+	// New Resty HTTP client
+	r := resty.New()
+
+	// Use default transport - needed for VCR
+	r.SetTransport(http.DefaultTransport).
+		// set timeout on http client
+		SetTimeout(30 * time.Second).
+		// Set retry count to 1 (try 2 times before it fails)
+		SetRetryCount(1).
+		SetRetryWaitTime(1 * time.Second).
+		SetRetryMaxWaitTime(5 * time.Second)
+
+	// Authentication
+	if token != "" {
+		r = r.SetHeaders(map[string]string{
+			"X-Rollbar-Access-Token": token,
+			"X-Rollbar-Terraform":    "true"})
+	} else {
+		log.Warn().Msg("Rollbar API token not set")
+	}
+
+	// Authentication
+	if baseURL == "" {
+		log.Error().Msg("Rollbar API base URL not set")
+	}
+
+	// Configure Resty to use Zerolog for logging
+	r.SetLogger(restyZeroLogger{log.Logger})
+
+	// Rollbar client
+	c := RollbarAPIClient{
+		Resty:   r,
+		BaseURL: baseURL,
+	}
+	return &c
+}
+
 // NewClient sets up a new Rollbar API client.
 func NewClient(baseURL, token string) *RollbarAPIClient {
 	log.Debug().Msg("Initializing Rollbar client")
@@ -56,7 +97,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 		// set timeout on http client
 		SetTimeout(30 * time.Second).
 		// Set retry count to 4 (try 5 times before it fails)
-		SetRetryCount(4).
+		SetRetryCount(0).
 		SetRetryWaitTime(8 * time.Second).
 		SetRetryMaxWaitTime(50 * time.Second).
 		AddRetryCondition(
