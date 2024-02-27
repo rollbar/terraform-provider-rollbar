@@ -97,7 +97,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 		// set timeout on http client
 		SetTimeout(30 * time.Second).
 		// Set retry count to 4 (try 5 times before it fails)
-		SetRetryCount(0).
+		SetRetryCount(4).
 		SetRetryWaitTime(8 * time.Second).
 		SetRetryMaxWaitTime(50 * time.Second).
 		AddRetryCondition(
