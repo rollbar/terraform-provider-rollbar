@@ -300,8 +300,6 @@ func (c *RollbarAPIClient) RemoveUserFromTeam(userID, teamID int) error {
 
 // FindTeamID finds the ID for a team.
 func (c *RollbarAPIClient) FindTeamID(name string) (int, error) {
-	c.m.Lock()
-	defer c.m.Unlock()
 	l := log.With().
 		Str("team_name", name).
 		Logger()
