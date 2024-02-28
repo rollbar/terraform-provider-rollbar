@@ -42,8 +42,8 @@ test:
 	@#echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
 testacc:
-	TF_ACC=1 TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 go test -covermode=atomic -coverprofile=coverage_client.out client -v $(TESTARGS) -timeout 10m
-	TF_ACC=1 TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 go test -covermode=atomic -coverprofile=coverage_project.out rollbar -v $(TESTARGS) -timeout 10m -testify.m ^TestAccProject
+	TF_ACC=1 TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 go test -covermode=atomic -coverprofile=coverage_client.out github.com/rollbar/terraform-provider-rollbar/client -v $(TESTARGS) -timeout 10m
+	TF_ACC=1 TERRAFORM_PROVIDER_ROLLBAR_DEBUG=1 go test -covermode=atomic -coverprofile=coverage_project.out github.com/rollbar/terraform-provider-rollbar/rollbar -v $(TESTARGS) -timeout 10m -testify.m ^TestAccProject
 	cat coverage_client.out coverage_project.out > coverage.out
 slscan:
 	./.slscan.sh
