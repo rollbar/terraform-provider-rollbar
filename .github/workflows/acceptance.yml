@@ -53,11 +53,11 @@ jobs:
         run: |
           go get github.com/jandelgado/gcov2lcov
           go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage_client.out -outfile lcov.info
+          ~/go/bin/gcov2lcov -infile coverage_client.out -outfile lcov_client.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
+          path-to-lcov: ./lcov_client.info
       - name: Upload coverage data to CodeClimate
         uses: paambaati/codeclimate-action@v2.7.4
         with:
@@ -113,11 +113,11 @@ jobs:
         run: |
           go get github.com/jandelgado/gcov2lcov
           go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage_test1.out -outfile lcov.info
+          ~/go/bin/gcov2lcov -infile coverage_test1.out -outfile lcov_test1.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
+          path-to-lcov: ./lcov_test1.info
       - name: Upload coverage data to CodeClimate
         uses: paambaati/codeclimate-action@v2.7.4
         with:
@@ -173,11 +173,11 @@ jobs:
         run: |
           go get github.com/jandelgado/gcov2lcov
           go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage_test2.out -outfile lcov.info
+          ~/go/bin/gcov2lcov -infile coverage_test2.out -outfile lcov_test2.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov.info
+          path-to-lcov: ./lcov_test2.info
       - name: Upload coverage data to CodeClimate
         uses: paambaati/codeclimate-action@v2.7.4
         with:
