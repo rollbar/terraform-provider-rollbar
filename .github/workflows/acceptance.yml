@@ -42,17 +42,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Run acceptance tests
-      - name: Acceptance tests
-        run: make testacc
+      - name: Acceptance tests client
+        run: make testacc_client
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
-
+      - name: Acceptance tests rollbar test1
+        run: make testacc_rollbar_test1
+        env:
+          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
+          GOMAXPROCS: 8
+      - name: Acceptance tests rollbar test2
+        run: make testacc_rollbar_test2
+        env:
+          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
+          GOMAXPROCS: 8
+          
       # Report code coverage
       - name: Convert Go coverage file to lcov format
         run: |
           go get github.com/jandelgado/gcov2lcov
           go install github.com/jandelgado/gcov2lcov
+          cat coverage_client.out coverage_test1.out coverage_test2.out > coverage.out
           ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
