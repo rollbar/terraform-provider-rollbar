@@ -1,0 +1,382 @@
+---
+version: 1
+interactions:
+- request:
+    body: '{"access_level":"standard","name":"tf-acc-test-7lppmg40pk"}'
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_team
+    url: https://api.rollbar.com/api/1/teams
+    method: POST
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "access_level": "standard",
+          "id": 1085525,
+          "name": "tf-acc-test-7lppmg40pk",
+          "account_id": 344829
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:26 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_team
+    url: https://api.rollbar.com/api/1/team/1085525
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "id": 1085525,
+          "account_id": 344829,
+          "name": "tf-acc-test-7lppmg40pk",
+          "access_level": "standard"
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:26 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/users?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "users": []
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:26 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/invites?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com&page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": []
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:27 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: '{"email":"jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"}'
+    form: {}
+    headers:
+      Content-Type:
+      - application/json
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/team/1085525/invites
+    method: POST
+  response:
+    body: |-
+      {
+        "err": 0,
+        "message": "The user with the given email address has been added to this team"
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:27 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/invites?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com&page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": []
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:27 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/users?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "users": [
+            {
+              "username": "tf-acc-test-7lppmg40pk",
+              "id": 249370,
+              "email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:27 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/user/249370/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "teams": [
+            {
+              "access_level": "everyone",
+              "id": 728836,
+              "name": "Everyone",
+              "account_id": 344829
+            },
+            {
+              "access_level": "standard",
+              "id": 1085525,
+              "name": "tf-acc-test-7lppmg40pk",
+              "account_id": 344829
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/invites?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com&page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": []
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_team
+    url: https://api.rollbar.com/api/1/team/1085525
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "id": 1085525,
+          "account_id": 344829,
+          "name": "tf-acc-test-7lppmg40pk",
+          "access_level": "standard"
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/users?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "users": [
+            {
+              "username": "tf-acc-test-7lppmg40pk",
+              "id": 249370,
+              "email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/user/249370/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "teams": [
+            {
+              "access_level": "everyone",
+              "id": 728836,
+              "name": "Everyone",
+              "account_id": 344829
+            },
+            {
+              "access_level": "standard",
+              "id": 1085525,
+              "name": "tf-acc-test-7lppmg40pk",
+              "account_id": 344829
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers:
+      X-Rollbar-Terraform:
+      - "true"
+      X-Rollbar-Terraform-Resource:
+      - rollbar_user
+    url: https://api.rollbar.com/api/1/invites?email=jason.mcvetta%2Btf-acc-test-7lppmg40pk%40gmail.com&page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": []
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Wed, 28 Feb 2024 17:58:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""

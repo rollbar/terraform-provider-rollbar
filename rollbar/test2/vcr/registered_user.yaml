@@ -2,13 +2,11 @@
 version: 1
 interactions:
 - request:
-    body: '{"access_level":"standard","name":"tf-acc-test-7lppmg40pk"}'
+    body: ""
     form: {}
-    headers:
-      Content-Type:
-      - application/json
-    url: https://api.rollbar.com/api/1/teams
-    method: POST
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099
+    method: GET
   response:
     body: |-
       {
@@ -24,7 +22,296 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:48 GMT
+      - Sun, 29 Nov 2020 08:43:27 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/users
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "users": [
+            {
+              "username": "jmcvetta",
+              "id": 238101,
+              "email": "jason.mcvetta@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-rollbar-provider",
+              "id": 246078,
+              "email": "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-axw6qup7g2",
+              "id": 249324,
+              "email": "jason.mcvetta+tf-acc-test-tf-acc-test-axw6qup7g2@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-cwneey7py6",
+              "id": 249325,
+              "email": "jason.mcvetta+tf-acc-test-tf-acc-test-cwneey7py6@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-t2ueouxmrx",
+              "id": 249326,
+              "email": "jason.mcvetta+tf-acc-test-tf-acc-test-t2ueouxmrx@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-xzdpje09gd",
+              "id": 249367,
+              "email": "jason.mcvetta+tf-acc-test-xzdpje09gd@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-np8hoytr6h",
+              "id": 249368,
+              "email": "jason.mcvetta+tf-acc-test-np8hoytr6h@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-isdpm39mb7",
+              "id": 249369,
+              "email": "jason.mcvetta+tf-acc-test-isdpm39mb7@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-7lppmg40pk",
+              "id": 249370,
+              "email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/user/249370/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "teams": [
+            {
+              "access_level": "standard",
+              "id": 705099,
+              "name": "tf-acc-test-7lppmg40pk",
+              "account_id": 317418
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 704998,
+            "account_id": 317418,
+            "name": "a4mi14cqy9",
+            "access_level": "standard"
+          },
+          {
+            "id": 704936,
+            "account_id": 317418,
+            "name": "test-team-example",
+            "access_level": "standard"
+          },
+          {
+            "id": 705099,
+            "account_id": 317418,
+            "name": "tf-acc-test-7lppmg40pk",
+            "access_level": "standard"
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:28 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 158403,
+            "from_user_id": null,
+            "team_id": 704998,
+            "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
+            "status": "pending",
+            "date_created": 1606562666,
+            "date_redeemed": null
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:29 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:43:29 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 158376,
+            "from_user_id": null,
+            "team_id": 704936,
+            "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
+            "status": "pending",
+            "date_created": 1606557362,
+            "date_redeemed": null
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:29 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:43:29 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 158417,
+            "from_user_id": null,
+            "team_id": 705099,
+            "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
+            "status": "accepted",
+            "date_created": 1606639370,
+            "date_redeemed": 1606639394
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:29 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:43:29 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -49,7 +336,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:48 GMT
+      - Sun, 29 Nov 2020 08:43:30 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -104,6 +391,11 @@ interactions:
               "username": "tf-acc-test-isdpm39mb7",
               "id": 249369,
               "email": "jason.mcvetta+tf-acc-test-isdpm39mb7@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-7lppmg40pk",
+              "id": 249370,
+              "email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"
             }
           ]
         }
@@ -112,7 +404,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:48 GMT
+      - Sun, 29 Nov 2020 08:43:30 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -120,232 +412,28 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://api.rollbar.com/api/1/teams
+    url: https://api.rollbar.com/api/1/user/249370/teams
     method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 704998,
-            "account_id": 317418,
-            "name": "a4mi14cqy9",
-            "access_level": "standard"
-          },
-          {
-            "id": 704936,
-            "account_id": 317418,
-            "name": "test-team-example",
-            "access_level": "standard"
-          },
-          {
-            "id": 705099,
-            "account_id": 317418,
-            "name": "tf-acc-test-7lppmg40pk",
-            "access_level": "standard"
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 158403,
-            "from_user_id": null,
-            "team_id": 704998,
-            "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
-            "status": "pending",
-            "date_created": 1606562666,
-            "date_redeemed": null
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/662037/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/662036/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 158376,
-            "from_user_id": null,
-            "team_id": 704936,
-            "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
-            "status": "pending",
-            "date_created": 1606557362,
-            "date_redeemed": null
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": []
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:49 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: '{"email":"jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"}'
-    form: {}
-    headers:
-      Content-Type:
-      - application/json
-    url: https://api.rollbar.com/api/1/team/705099/invites
-    method: POST
   response:
     body: |-
       {
         "err": 0,
         "result": {
-          "id": 158417,
-          "from_user_id": null,
-          "team_id": 705099,
-          "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
-          "status": "pending",
-          "date_created": 1606639370,
-          "date_redeemed": null
+          "teams": [
+            {
+              "access_level": "standard",
+              "id": 705099,
+              "name": "tf-acc-test-7lppmg40pk",
+              "account_id": 317418
+            }
+          ]
         }
       }
     headers:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:50 GMT
+      - Sun, 29 Nov 2020 08:43:30 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -384,7 +472,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:50 GMT
+      - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -414,7 +502,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:50 GMT
+      - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -435,7 +523,7 @@ interactions:
       Content-Type:
         - application/json; charset=utf-8
       Date:
-        - Sun, 29 Nov 2020 08:42:50 GMT
+        - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -465,7 +553,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:51 GMT
+      - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -486,7 +574,7 @@ interactions:
       Content-Type:
         - application/json; charset=utf-8
       Date:
-        - Sun, 29 Nov 2020 08:42:51 GMT
+        - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -506,9 +594,9 @@ interactions:
             "from_user_id": null,
             "team_id": 705099,
             "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
-            "status": "pending",
+            "status": "accepted",
             "date_created": 1606639370,
-            "date_redeemed": null
+            "date_redeemed": 1606639394
           }
         ]
       }
@@ -516,7 +604,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:51 GMT
+      - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -537,7 +625,7 @@ interactions:
       Content-Type:
         - application/json; charset=utf-8
       Date:
-        - Sun, 29 Nov 2020 08:42:51 GMT
+        - Sun, 29 Nov 2020 08:43:31 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -592,6 +680,11 @@ interactions:
               "username": "tf-acc-test-isdpm39mb7",
               "id": 249369,
               "email": "jason.mcvetta+tf-acc-test-isdpm39mb7@gmail.com"
+            },
+            {
+              "username": "tf-acc-test-7lppmg40pk",
+              "id": 249370,
+              "email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com"
             }
           ]
         }
@@ -600,7 +693,36 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:51 GMT
+      - Sun, 29 Nov 2020 08:43:32 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/user/249370/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "teams": [
+            {
+              "access_level": "standard",
+              "id": 705099,
+              "name": "tf-acc-test-7lppmg40pk",
+              "account_id": 317418
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:32 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -622,18 +744,6 @@ interactions:
             "access_level": "standard"
           },
           {
-            "id": 662037,
-            "account_id": 317418,
-            "name": "Everyone",
-            "access_level": "everyone"
-          },
-          {
-            "id": 662036,
-            "account_id": 317418,
-            "name": "Owners",
-            "access_level": "owner"
-          },
-          {
             "id": 704936,
             "account_id": 317418,
             "name": "test-team-example",
@@ -651,7 +761,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:51 GMT
+      - Sun, 29 Nov 2020 08:43:32 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -681,7 +791,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:52 GMT
+      - Sun, 29 Nov 2020 08:43:33 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -702,7 +812,7 @@ interactions:
       Content-Type:
         - application/json; charset=utf-8
       Date:
-        - Sun, 29 Nov 2020 08:42:52 GMT
+        - Sun, 29 Nov 2020 08:43:33 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -732,7 +842,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:52 GMT
+      - Sun, 29 Nov 2020 08:43:33 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -753,7 +863,7 @@ interactions:
       Content-Type:
         - application/json; charset=utf-8
       Date:
-        - Sun, 29 Nov 2020 08:42:52 GMT
+        - Sun, 29 Nov 2020 08:43:33 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -773,9 +883,9 @@ interactions:
             "from_user_id": null,
             "team_id": 705099,
             "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
-            "status": "pending",
+            "status": "accepted",
             "date_created": 1606639370,
-            "date_redeemed": null
+            "date_redeemed": 1606639394
           }
         ]
       }
@@ -783,7 +893,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:52 GMT
+      - Sun, 29 Nov 2020 08:43:33 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -804,7 +914,247 @@ interactions:
       Content-Type:
         - application/json; charset=utf-8
       Date:
-        - Sun, 29 Nov 2020 08:42:52 GMT
+        - Sun, 29 Nov 2020 08:43:33 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/user/249370/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": {
+          "teams": [
+            {
+              "access_level": "standard",
+              "id": 705099,
+              "name": "tf-acc-test-7lppmg40pk",
+              "account_id": 317418
+            }
+          ]
+        }
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:33 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/user/249370
+    method: DELETE
+  response:
+    body: |-
+      {
+        "err": 0
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:34 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/teams
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 704998,
+            "account_id": 317418,
+            "name": "a4mi14cqy9",
+            "access_level": "standard"
+          },
+          {
+            "id": 704936,
+            "account_id": 317418,
+            "name": "test-team-example",
+            "access_level": "standard"
+          },
+          {
+            "id": 705099,
+            "account_id": 317418,
+            "name": "tf-acc-test-7lppmg40pk",
+            "access_level": "standard"
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:34 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 158403,
+            "from_user_id": null,
+            "team_id": 704998,
+            "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
+            "status": "pending",
+            "date_created": 1606562666,
+            "date_redeemed": null
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:34 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:43:34 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 158376,
+            "from_user_id": null,
+            "team_id": 704936,
+            "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
+            "status": "pending",
+            "date_created": 1606557362,
+            "date_redeemed": null
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:34 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:43:34 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+          {
+            "id": 158417,
+            "from_user_id": null,
+            "team_id": 705099,
+            "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
+            "status": "accepted",
+            "date_created": 1606639370,
+            "date_redeemed": 1606639394
+          }
+        ]
+      }
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Date:
+      - Sun, 29 Nov 2020 08:43:35 GMT
+    status: 200 OK
+    code: 200
+    duration: ""
+- request:
+    body: ""
+    form: {}
+    headers: {}
+    url: https://api.rollbar.com/api/1/team/705099/invites?page=2
+    method: GET
+  response:
+    body: |-
+      {
+        "err": 0,
+        "result": [
+        ]
+      }
+    headers:
+      Content-Type:
+        - application/json; charset=utf-8
+      Date:
+        - Sun, 29 Nov 2020 08:43:35 GMT
     status: 200 OK
     code: 200
     duration: ""
@@ -813,281 +1163,17 @@ interactions:
     form: {}
     headers: {}
     url: https://api.rollbar.com/api/1/team/705099
-    method: GET
+    method: DELETE
   response:
     body: |-
       {
-        "err": 0,
-        "result": {
-          "id": 705099,
-          "account_id": 317418,
-          "name": "tf-acc-test-7lppmg40pk",
-          "access_level": "standard"
-        }
+        "err": 0
       }
     headers:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sun, 29 Nov 2020 08:42:53 GMT
+      - Sun, 29 Nov 2020 08:43:35 GMT
     status: 200 OK
     code: 200
     duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/users
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": {
-          "users": [
-            {
-              "username": "jmcvetta",
-              "id": 238101,
-              "email": "jason.mcvetta@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-rollbar-provider",
-              "id": 246078,
-              "email": "jason.mcvetta+tf-acc-test-rollbar-provider@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-axw6qup7g2",
-              "id": 249324,
-              "email": "jason.mcvetta+tf-acc-test-tf-acc-test-axw6qup7g2@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-cwneey7py6",
-              "id": 249325,
-              "email": "jason.mcvetta+tf-acc-test-tf-acc-test-cwneey7py6@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-t2ueouxmrx",
-              "id": 249326,
-              "email": "jason.mcvetta+tf-acc-test-tf-acc-test-t2ueouxmrx@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-xzdpje09gd",
-              "id": 249367,
-              "email": "jason.mcvetta+tf-acc-test-xzdpje09gd@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-np8hoytr6h",
-              "id": 249368,
-              "email": "jason.mcvetta+tf-acc-test-np8hoytr6h@gmail.com"
-            },
-            {
-              "username": "tf-acc-test-isdpm39mb7",
-              "id": 249369,
-              "email": "jason.mcvetta+tf-acc-test-isdpm39mb7@gmail.com"
-            }
-          ]
-        }
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:53 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/teams
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 704998,
-            "account_id": 317418,
-            "name": "a4mi14cqy9",
-            "access_level": "standard"
-          },
-          {
-            "id": 704936,
-            "account_id": 317418,
-            "name": "test-team-example",
-            "access_level": "standard"
-          },
-          {
-            "id": 705099,
-            "account_id": 317418,
-            "name": "tf-acc-test-7lppmg40pk",
-            "access_level": "standard"
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:53 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 158403,
-            "from_user_id": null,
-            "team_id": 704998,
-            "to_email": "jason.mcvetta+tf-acc-test-a4mi14cqy9@gmail.com",
-            "status": "pending",
-            "date_created": 1606562666,
-            "date_redeemed": null
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:53 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704998/invites?page=2
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:53 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 158376,
-            "from_user_id": null,
-            "team_id": 704936,
-            "to_email": "jason.mcvetta+tf-acc-test-eiw2mohch5@gmail.com",
-            "status": "pending",
-            "date_created": 1606557362,
-            "date_redeemed": null
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:54 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/704936/invites?page=2
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:54 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites?page=1
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-          {
-            "id": 158417,
-            "from_user_id": null,
-            "team_id": 705099,
-            "to_email": "jason.mcvetta+tf-acc-test-7lppmg40pk@gmail.com",
-            "status": "pending",
-            "date_created": 1606639370,
-            "date_redeemed": null
-          }
-        ]
-      }
-    headers:
-      Content-Type:
-      - application/json; charset=utf-8
-      Date:
-      - Sun, 29 Nov 2020 08:42:54 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-- request:
-    body: ""
-    form: {}
-    headers: {}
-    url: https://api.rollbar.com/api/1/team/705099/invites?page=2
-    method: GET
-  response:
-    body: |-
-      {
-        "err": 0,
-        "result": [
-        ]
-      }
-    headers:
-      Content-Type:
-        - application/json; charset=utf-8
-      Date:
-        - Sun, 29 Nov 2020 08:42:54 GMT
-    status: 200 OK
-    code: 200
-    duration: ""
-
-
-
