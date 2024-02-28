@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2024 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package rollbar
+package test2
 
 import (
 	"context"
@@ -36,10 +36,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
 )
+
+const schemaKeyToken = "api_key"
+const projectKeyToken = "project_api_key"
+const schemaKeyBaseURL = "api_url"
 
 func init() {
 	// Setup nice logging
@@ -86,7 +91,7 @@ func (s *AccSuite) SetupSuite() {
 		Send()
 
 	// Setup testing
-	s.provider = Provider()
+	s.provider = rollbar.Provider()
 	s.provider.ConfigureContextFunc = providerConfigureTest
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
