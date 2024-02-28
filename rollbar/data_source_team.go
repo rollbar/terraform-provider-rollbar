@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -71,9 +72,10 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 	var l zerolog.Logger
 	teamID, ok := d.GetOk("team_id")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarTeam, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setDataSourceHeader(rollbarTeam, c)
+		return nil
+	})
 
 	if ok {
 		l = log.With().
@@ -82,14 +84,12 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 		l.Debug().Msg("Reading Team from Rollbar by ID")
 		respTeam, err := c.ReadTeam(teamID.(int))
 		if err != nil {
-			client.Mutex.Unlock()
 			return diag.Errorf("Team not found by ID: %v", err)
 		}
 		team = respTeam
 	} else {
 		name, nameOk := d.GetOk("name")
 		if !nameOk {
-			client.Mutex.Unlock()
 			return diag.Errorf("Data Source requires either \"name\" or \"team_id\"")
 		}
 		l = log.With().
@@ -99,18 +99,15 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 
 		teams, err := c.ListTeams()
 		if err != nil {
-			client.Mutex.Unlock()
 			return diag.FromErr(err)
 		}
 
 		t, err := findTeamByName(teams, name.(string))
 		if err != nil {
-			client.Mutex.Unlock()
 			return diag.FromErr(err)
 		}
 		team = t
 	}
-	client.Mutex.Unlock()
 	d.SetId(strconv.FormatInt(int64(team.ID), 10))
 	_ = d.Set("team_id", team.ID)
 	_ = d.Set("name", team.Name)

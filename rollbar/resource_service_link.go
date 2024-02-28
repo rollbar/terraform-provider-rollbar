@@ -27,6 +27,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -67,11 +68,11 @@ func resourceServiceLinkCreate(ctx context.Context, d *schema.ResourceData, m in
 	l.Info().Msg("Creating rollbar_service_link resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarServiceLink, c)
+		return nil
+	})
 	sl, err := c.CreateServiceLink(name, template)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -97,11 +98,11 @@ func resourceServiceLinkUpdate(ctx context.Context, d *schema.ResourceData, m in
 	l.Info().Msg("Creating rollbar_service_link resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarServiceLink, c)
+		return nil
+	})
 	sl, err := c.UpdateServiceLink(id, name, template)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -127,11 +128,12 @@ func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m inte
 		Logger()
 	l.Info().Msg("Reading rollbar_service_link resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarServiceLink, c)
+		return nil
+	})
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
 	sl, err := c.ReadServiceLink(id)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -154,12 +156,12 @@ func resourceServiceLinkDelete(ctx context.Context, d *schema.ResourceData, m in
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_service_link resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarServiceLink, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarServiceLink, c)
+		return nil
+	})
 	err := c.DeleteServiceLink(id)
-	client.Mutex.Unlock()
-	
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_service_link resource")
 		return diag.FromErr(err)

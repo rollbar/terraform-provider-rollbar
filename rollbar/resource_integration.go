@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -241,11 +242,11 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		l = l.With().Str("id", id).Logger()
 	}
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarIntegration, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarIntegration, c)
+		return nil
+	})
 	intf, err := c.UpdateIntegration(integration, bodyMap)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -343,12 +344,12 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 	integration := spl[1]
 	l.Info().Msg("Reading rollbar_integration resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarIntegration, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarIntegration, c)
+		return nil
+	})
 	intf, err := c.ReadIntegration(integration)
-	client.Mutex.Unlock()
-	
+
 	if err == client.ErrNotFound {
 		d.SetId("")
 		l.Info().Msg("Integration not found - removed from state")

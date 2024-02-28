@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -274,11 +275,11 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarNotification, c)
+		return nil
+	})
 	n, err := c.CreateNotification(channel, filters, trigger, config)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -305,10 +306,11 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarNotification, c)
+		return nil
+	})
 	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -376,11 +378,11 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarNotification, c)
+		return nil
+	})
 	n, err := c.ReadNotification(id, channel)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -403,13 +405,13 @@ func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m i
 	channel := d.Get("channel").(string)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c := *m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarNotification, c)
+		return nil
+	})
 	err := c.DeleteNotification(id, channel)
-	client.Mutex.Unlock()
-	
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_notification resource")
 		return diag.FromErr(err)

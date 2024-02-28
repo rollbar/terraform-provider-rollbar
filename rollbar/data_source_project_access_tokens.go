@@ -28,6 +28,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -135,10 +136,11 @@ func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceDa
 	l.Debug().Msg("Reading project access token data from Rollbar")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarProjectAccessTokens, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setDataSourceHeader(rollbarProjectAccessTokens, c)
+		return nil
+	})
 	tokens, err := c.ListProjectAccessTokens(projectID)
-	client.Mutex.Unlock()
 	if err != nil {
 		return diag.FromErr(err)
 	}

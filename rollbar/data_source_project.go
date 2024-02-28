@@ -25,6 +25,7 @@ package rollbar
 import (
 	"fmt"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 )
@@ -74,10 +75,12 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	name := d.Get("name").(string)
 
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarProject, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setDataSourceHeader(rollbarProject, c)
+		return nil
+	})
+
 	pl, err := c.ListProjects()
-	client.Mutex.Unlock()
 	if err != nil {
 		return err
 	}

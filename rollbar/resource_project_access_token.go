@@ -28,6 +28,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -141,9 +142,10 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Creating new project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarProjectAccessToken, c)
+		return nil
+	})
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
 		ProjectID:            projectID,
@@ -152,7 +154,6 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		RateLimitWindowSize:  size,
 		RateLimitWindowCount: count,
 	})
-	client.Mutex.Unlock()
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -174,11 +175,11 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarProjectAccessToken, c)
+		return nil
+	})
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -212,12 +213,12 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	l := log.With().Interface("args", args).Logger()
 	l.Debug().Msg("Updating resource project access token")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarProjectAccessToken, c)
+		return nil
+	})
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	err := c.UpdateProjectAccessToken(args)
-	client.Mutex.Unlock()
-
 	if err != nil {
 		log.Err(err).Send()
 		return diag.FromErr(err)
@@ -237,12 +238,11 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarProjectAccessToken, c)
+		return nil
+	})
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
-	client.Mutex.Unlock()
-	
 	if err != nil {
 		return diag.FromErr(err)
 	}

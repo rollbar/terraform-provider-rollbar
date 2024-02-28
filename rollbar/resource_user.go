@@ -25,6 +25,7 @@ package rollbar
 import (
 	"context"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -97,9 +98,10 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarUser, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarUser, c)
+		return nil
+	})
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
 	l := log.With().
@@ -110,7 +112,6 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	// Check if a Rollbar user exists for this email
 	userID, err := c.FindUserID(email)
-	client.Mutex.Unlock()
 	l = l.With().Int("user_id", userID).Logger()
 	switch err {
 	case nil:
@@ -131,14 +132,11 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected[id] = true
 	}
 
-	client.Mutex.Lock()
 	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID, true)
-	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	client.Mutex.Lock()
 	err = resourceUserAddTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
 		userID:        userID,
@@ -146,12 +144,10 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected: teamsExpected,
 		teamsCurrent:  teamsCurrent,
 	})
-	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
-	client.Mutex.Lock()
 	err = resourceUserRemoveTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
 		userID:        userID,
@@ -159,7 +155,6 @@ func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, met
 		teamsExpected: teamsExpected,
 		teamsCurrent:  teamsCurrent,
 	})
-	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -333,16 +328,15 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setResourceHeader(rollbarUser, c)
-	client.Mutex.Unlock()
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarUser, c)
+		return nil
+	})
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
 	if userID == 0 {
-		client.Mutex.Lock()
 		userID, err = c.FindUserID(email)
-		client.Mutex.Unlock()
 		switch err {
 		case nil:
 			l = log.With().
@@ -364,9 +358,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 	} else {
 		mustSet(d, "status", "registered")
 	}
-	client.Mutex.Lock()
 	currentTeams, err := resourceUserCurrentTeams(c, email, userID, true)
-	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -399,8 +391,10 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		Logger()
 	l.Info().Msg("Deleting rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setResourceHeader(rollbarUser, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarUser, c)
+		return nil
+	})
 
 	// Try to get user ID
 	userID := d.Get("user_id").(int)
@@ -409,13 +403,11 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	teamsCurrent, err := resourceUserCurrentTeams(c, email, userID, false)
-	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
 	}
 	teamsExpected := make(map[int]bool) // Empty
-	client.Mutex.Lock()
 	err = resourceUserRemoveTeams(resourceUserAddRemoveTeamsArgs{
 		client:        c,
 		email:         email,
@@ -423,7 +415,6 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		teamsCurrent:  teamsCurrent,
 		teamsExpected: teamsExpected,
 	})
-	client.Mutex.Unlock()
 	if err != nil {
 		l.Err(err).Send()
 		return diag.FromErr(err)
@@ -457,11 +448,12 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	teamIDs := []int{}
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setResourceHeader(rollbarUser, c)
+	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
+		setResourceHeader(rollbarUser, c)
+		return nil
+	})
 
 	invitations, err := c.FindInvitations(email)
-	client.Mutex.Unlock()
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
 		return nil, err
@@ -472,9 +464,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 	for _, inv := range invitations {
 		teamIDs = append(teamIDs, inv.TeamID)
 	}
-	client.Mutex.Lock()
 	userID, err := c.FindUserID(email)
-	client.Mutex.Unlock()
 	if err == nil {
 		mustSet(d, "user_id", userID)
 		mustSet(d, "status", "registered")
