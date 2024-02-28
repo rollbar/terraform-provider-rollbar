@@ -6,8 +6,8 @@ on:
 
 jobs:
 
-  acceptance_tests:
-    name: Acceptance
+  acceptance_tests_client:
+    name: Acceptance Client
     runs-on: ubuntu-latest
 
     env:
@@ -47,6 +47,61 @@ jobs:
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
+          
+      # Report code coverage
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go get github.com/jandelgado/gcov2lcov
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage_client.out -outfile lcov.info
+      - uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
+      - name: Upload coverage data to CodeClimate
+        uses: paambaati/codeclimate-action@v2.7.4
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/*lcov*:lcov
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  
+  acceptance_tests_rollbar_test1:
+    name: Acceptance Rollbar Test1
+    runs-on: ubuntu-latest
+
+    env:
+      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: actions/setup-go@v2
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          # Blank version number means latest version of Go.
+          key: ${{ runner.os }}-go-v-${{ hashFiles('**/go.sum') }}
+
+      # Wait for up to ten minutes for previous run to complete; abort if not
+      # done by then.
+      - name: Block Concurrent Executions
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+          same-branch-only: false
+          abort-after-seconds: 600
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run acceptance tests
       - name: Acceptance tests rollbar test1
         run: make testacc_rollbar_test1
         env:
@@ -63,8 +118,67 @@ jobs:
         run: |
           go get github.com/jandelgado/gcov2lcov
           go install github.com/jandelgado/gcov2lcov
-          cat coverage_client.out coverage_test1.out coverage_test2.out > coverage.out
-          ~/go/bin/gcov2lcov -infile coverage.out -outfile lcov.info
+          ~/go/bin/gcov2lcov -infile coverage_test1.out -outfile lcov.info
+      - uses: coverallsapp/github-action@v1.1.2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./lcov.info
+      - name: Upload coverage data to CodeClimate
+        uses: paambaati/codeclimate-action@v2.7.4
+        with:
+          coverageLocations: |
+            ${{github.workspace}}/*lcov*:lcov
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  
+  acceptance_tests_rollbar_test2:
+    name: Acceptance Rollbar Test2
+    runs-on: ubuntu-latest
+
+    env:
+      ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+
+    steps:
+
+      # Install Go and Terraform
+      - uses: actions/setup-go@v2
+
+      # Checkout
+      - uses: actions/checkout@v2
+
+      # Restore cache
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          # Blank version number means latest version of Go.
+          key: ${{ runner.os }}-go-v-${{ hashFiles('**/go.sum') }}
+
+      # Wait for up to ten minutes for previous run to complete; abort if not
+      # done by then.
+      - name: Block Concurrent Executions
+        uses: softprops/turnstyle@v1
+        with:
+          poll-interval-seconds: 10
+          same-branch-only: false
+          abort-after-seconds: 600
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Run acceptance tests
+      - name: Acceptance tests rollbar test2
+        run: make testacc_rollbar_test2
+        env:
+          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
+          GOMAXPROCS: 8
+          
+      # Report code coverage
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go get github.com/jandelgado/gcov2lcov
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage_test2.out -outfile lcov.info
       - uses: coverallsapp/github-action@v1.1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
