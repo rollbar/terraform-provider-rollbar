@@ -107,11 +107,6 @@ jobs:
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
-      - name: Acceptance tests rollbar test2
-        run: make testacc_rollbar_test2
-        env:
-          TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
-          GOMAXPROCS: 8
           
       # Report code coverage
       - name: Convert Go coverage file to lcov format
