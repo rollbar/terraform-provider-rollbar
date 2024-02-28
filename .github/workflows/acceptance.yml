@@ -107,24 +107,6 @@ jobs:
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
-          
-      # Report code coverage
-      - name: Convert Go coverage file to lcov format
-        run: |
-          go get github.com/jandelgado/gcov2lcov
-          go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage_test1.out -outfile lcov_test1.info
-      - uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov_test1.info
-      - name: Upload coverage data to CodeClimate
-        uses: paambaati/codeclimate-action@v2.7.4
-        with:
-          coverageLocations: |
-            ${{github.workspace}}/*lcov*:lcov
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   
   acceptance_tests_rollbar_test2:
     name: Acceptance Rollbar Test2
@@ -167,21 +149,3 @@ jobs:
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
-          
-      # Report code coverage
-      - name: Convert Go coverage file to lcov format
-        run: |
-          go get github.com/jandelgado/gcov2lcov
-          go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage_test2.out -outfile lcov_test2.info
-      - uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov_test2.info
-      - name: Upload coverage data to CodeClimate
-        uses: paambaati/codeclimate-action@v2.7.4
-        with:
-          coverageLocations: |
-            ${{github.workspace}}/*lcov*:lcov
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
