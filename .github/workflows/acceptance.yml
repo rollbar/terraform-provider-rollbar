@@ -107,7 +107,11 @@ jobs:
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
-  
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go get github.com/jandelgado/gcov2lcov
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage_test1.out -outfile lcov_test1.info
   acceptance_tests_rollbar_test2:
     name: Acceptance Rollbar Test2
     runs-on: ubuntu-latest
@@ -149,3 +153,8 @@ jobs:
         env:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
+      - name: Convert Go coverage file to lcov format
+        run: |
+          go get github.com/jandelgado/gcov2lcov
+          go install github.com/jandelgado/gcov2lcov
+          ~/go/bin/gcov2lcov -infile coverage_test2.out -outfile lcov_test2.info
