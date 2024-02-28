@@ -25,6 +25,7 @@ package client
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -39,6 +40,8 @@ const Version = "v1.13.1"
 type RollbarAPIClient struct {
 	BaseURL string // Base URL for Rollbar API
 	Resty   *resty.Client
+
+	m sync.Mutex
 }
 
 // NewTestClient sets up a new Rollbar API test client.
@@ -82,6 +85,18 @@ func NewTestClient(baseURL, token string) *RollbarAPIClient {
 	return &c
 }
 
+func (c *RollbarAPIClient) SetHeaderResource(header string) {
+	c.m.Lock()
+	defer c.m.Unlock()
+	c.Resty.SetHeader("X-Rollbar-Terraform-Resource", header)
+}
+
+func (c *RollbarAPIClient) SetHeaderDataSource(header string) {
+	c.m.Lock()
+	defer c.m.Unlock()
+	c.Resty.SetHeader("X-Rollbar-Terraform-DataSource", header)
+}
+
 // NewClient sets up a new Rollbar API client.
 func NewClient(baseURL, token string) *RollbarAPIClient {
 	log.Debug().Msg("Initializing Rollbar client")
@@ -118,7 +133,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 	} else {
 		log.Warn().Msg("Rollbar API token not set")
 	}
-	 
+
 	// Authentication
 	if baseURL == "" {
 		log.Error().Msg("Rollbar API base URL not set")

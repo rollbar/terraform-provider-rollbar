@@ -25,7 +25,6 @@ package rollbar
 import (
 	"context"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -98,10 +97,7 @@ func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interf
 // specified.
 func resourceUserCreateOrUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarUser)
 	email := d.Get("email").(string)
 	teamIDs := getTeamIDs(d)
 	l := log.With().
@@ -328,10 +324,7 @@ func resourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{
 		Logger()
 	l.Info().Msg("Reading rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarUser)
 	var err error
 
 	// If user ID is not in state, try to query it from Rollbar
@@ -391,10 +384,7 @@ func resourceUserDelete(_ context.Context, d *schema.ResourceData, meta interfac
 		Logger()
 	l.Info().Msg("Deleting rollbar_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarUser)
 
 	// Try to get user ID
 	userID := d.Get("user_id").(int)
@@ -448,10 +438,7 @@ func resourceUserImporter(ctx context.Context, d *schema.ResourceData, meta inte
 
 	teamIDs := []int{}
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarUser)
 
 	invitations, err := c.FindInvitations(email)
 	if err != nil && err != client.ErrNotFound {

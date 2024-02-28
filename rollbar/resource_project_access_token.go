@@ -28,7 +28,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -142,10 +141,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Creating new project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProjectAccessToken, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProjectAccessToken)
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
 		ProjectID:            projectID,
@@ -175,10 +171,8 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProjectAccessToken, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProjectAccessToken)
+
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
 
 	if err == client.ErrNotFound {
@@ -213,10 +207,7 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	l := log.With().Interface("args", args).Logger()
 	l.Debug().Msg("Updating resource project access token")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProjectAccessToken, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProjectAccessToken)
 
 	err := c.UpdateProjectAccessToken(args)
 	if err != nil {
@@ -238,10 +229,7 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProjectAccessToken, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProjectAccessToken)
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
 	if err != nil {
 		return diag.FromErr(err)

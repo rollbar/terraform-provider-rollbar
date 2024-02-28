@@ -28,7 +28,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -114,10 +113,7 @@ func resourceTeamUserCreate(ctx context.Context, d *schema.ResourceData, meta in
 	l.Info().Msg("Creating rollbar_team_user resource")
 
 	// Check if a Rollbar user exists for this email
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarTeamUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarTeamUser)
 	userID, err := c.FindUserID(email)
 
 	l = l.With().Int("user_id", userID).Logger()
@@ -168,10 +164,7 @@ func resourceTeamUserRead(_ context.Context, d *schema.ResourceData, meta interf
 		Logger()
 	l.Info().Msg("Reading rollbar_team_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarTeamUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarTeamUser)
 
 	// If user ID is not in state, try to query it from Rollbar
 	if userID == 0 {
@@ -239,10 +232,7 @@ func resourceTeamUserDelete(_ context.Context, d *schema.ResourceData, meta inte
 		Logger()
 	l.Info().Msg("Deleting rollbar_team_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarTeamUser, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarTeamUser)
 
 	userID := d.Get("user_id").(int)
 	if userID == 0 {

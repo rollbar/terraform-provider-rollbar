@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -72,10 +71,7 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 	var l zerolog.Logger
 	teamID, ok := d.GetOk("team_id")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setDataSourceHeader(rollbarTeam, c)
-		return nil
-	})
+	c.SetHeaderDataSource(rollbarTeam)
 
 	if ok {
 		l = log.With().

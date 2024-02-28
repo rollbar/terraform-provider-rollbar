@@ -72,6 +72,8 @@ type WebhookIntegration struct {
 
 // UpdateIntegration updates a new Rollbar integration.
 func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[string]interface{}) (interface{}, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathIntegration
 	l := log.With().
 		Str("integration", integration).
@@ -112,6 +114,8 @@ func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[str
 // ReadIntegration reads a Rollbar integration from the API. If no matching integration is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathIntegration
 
 	l := log.With().

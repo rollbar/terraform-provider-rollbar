@@ -28,7 +28,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -275,10 +274,8 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarNotification, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarNotification)
+
 	n, err := c.CreateNotification(channel, filters, trigger, config)
 
 	if err != nil {
@@ -306,10 +303,7 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarNotification, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarNotification)
 	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
 
 	if err != nil {
@@ -378,10 +372,7 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarNotification, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarNotification)
 	n, err := c.ReadNotification(id, channel)
 
 	if err == client.ErrNotFound {
@@ -405,11 +396,8 @@ func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m i
 	channel := d.Get("channel").(string)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
-	c := *m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarNotification, c)
-		return nil
-	})
+	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c.SetHeaderResource(rollbarNotification)
 	err := c.DeleteNotification(id, channel)
 
 	if err != nil {

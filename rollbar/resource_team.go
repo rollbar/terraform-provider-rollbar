@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -98,10 +97,7 @@ func resourceTeamCreate(ctx context.Context, d *schema.ResourceData, m interface
 	l := log.With().Str("name", name).Str("access_level", level).Logger()
 	l.Info().Msg("Creating rollbar_team resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarTeam, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarTeam)
 	t, err := c.CreateTeam(name, level)
 
 	if err != nil {
@@ -121,11 +117,8 @@ func resourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface{}
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_team resource")
-	c := *m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarTeam, c)
-		return nil
-	})
+	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	c.SetHeaderResource(rollbarTeam)
 	t, err := c.ReadTeam(id)
 
 	if err == client.ErrNotFound {
@@ -149,11 +142,8 @@ func resourceTeamDelete(ctx context.Context, d *schema.ResourceData, m interface
 
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_team resource")
-	c := *m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarTeam, c)
-		return nil
-	})
+	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	c.SetHeaderResource(rollbarTeam)
 	err := c.DeleteTeam(id)
 
 	if err != nil {

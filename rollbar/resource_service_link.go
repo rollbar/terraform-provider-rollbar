@@ -27,7 +27,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -68,10 +67,8 @@ func resourceServiceLinkCreate(ctx context.Context, d *schema.ResourceData, m in
 	l.Info().Msg("Creating rollbar_service_link resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarServiceLink, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarServiceLink)
+
 	sl, err := c.CreateServiceLink(name, template)
 
 	if err != nil {
@@ -98,10 +95,7 @@ func resourceServiceLinkUpdate(ctx context.Context, d *schema.ResourceData, m in
 	l.Info().Msg("Creating rollbar_service_link resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarServiceLink, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarServiceLink)
 	sl, err := c.UpdateServiceLink(id, name, template)
 
 	if err != nil {
@@ -128,10 +122,7 @@ func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m inte
 		Logger()
 	l.Info().Msg("Reading rollbar_service_link resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarServiceLink, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarServiceLink)
 
 	sl, err := c.ReadServiceLink(id)
 
@@ -156,10 +147,7 @@ func resourceServiceLinkDelete(ctx context.Context, d *schema.ResourceData, m in
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_service_link resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarServiceLink, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarServiceLink)
 	err := c.DeleteServiceLink(id)
 
 	if err != nil {

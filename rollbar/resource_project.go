@@ -27,7 +27,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -95,10 +94,7 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 	l.Info().Msg("Creating new Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProject, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProject)
 	p, err := c.CreateProject(name)
 
 	if err != nil {
@@ -168,10 +164,7 @@ func resourceProjectRead(ctx context.Context, d *schema.ResourceData, m interfac
 	l.Info().Msg("Reading Rollbar project resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProject, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProject)
 	proj, err := c.ReadProject(projectID)
 
 	if err == client.ErrNotFound {
@@ -214,10 +207,8 @@ func resourceProjectUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		Logger()
 	l.Debug().Msg("Updating rollbar_project resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProject, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProject)
+
 	err := c.UpdateProjectTeams(projectID, teamIDs)
 
 	if err != nil {
@@ -236,10 +227,7 @@ func resourceProjectDelete(ctx context.Context, d *schema.ResourceData, m interf
 		Logger()
 	l.Info().Msg("Deleting rollbar_project resource")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarProject, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarProject)
 	err := c.DeleteProject(projectID)
 
 	if err != nil {

@@ -40,6 +40,8 @@ type Notification struct {
 
 // CreateNotification creates a new Rollbar notification.
 func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, config interface{}) (*Notification, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationCreate
 	u = strings.ReplaceAll(u, "{channel}", channel)
 	l := log.With().
@@ -69,6 +71,8 @@ func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, 
 
 // UpdateNotification updates a Rollbar notification.
 func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string, filters, trigger, config interface{}) (*Notification, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
 	l := log.With().
 		Str("channel", channel).
@@ -102,6 +106,8 @@ func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string
 // ReadNotification reads a Rollbar notification from the API. If no matching notification is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) (*Notification, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
 
 	l := log.With().
@@ -140,6 +146,8 @@ func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) 
 // DeleteNotification deletes a Rollbar notification. If no matching notification is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) DeleteNotification(notificationID int, channel string) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
 	l := log.With().
 		Int("notificationID", notificationID).
@@ -167,6 +175,8 @@ func (c *RollbarAPIClient) DeleteNotification(notificationID int, channel string
 }
 
 func (c *RollbarAPIClient) ListNotifications(channel string) ([]Notification, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationCreate
 
 	l := log.With().

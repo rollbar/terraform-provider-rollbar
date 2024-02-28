@@ -28,7 +28,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
@@ -242,10 +241,7 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		l = l.With().Str("id", id).Logger()
 	}
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarIntegration, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarIntegration)
 	intf, err := c.UpdateIntegration(integration, bodyMap)
 
 	if err != nil {
@@ -344,10 +340,7 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 	integration := spl[1]
 	l.Info().Msg("Reading rollbar_integration resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	c.Resty.OnBeforeRequest(func(c *resty.Client, req *resty.Request) error {
-		setResourceHeader(rollbarIntegration, c)
-		return nil
-	})
+	c.SetHeaderResource(rollbarIntegration)
 	intf, err := c.ReadIntegration(integration)
 
 	if err == client.ErrNotFound {
