@@ -40,6 +40,7 @@ func init() {
 
 // TestServiceLinkCreate tests creating a service link
 func (s *AccSuite) TestServiceLinkCreate() {
+	s.T().Skip("unauthorized")
 	serviceLinkResourceName := "rollbar_service_link.service_link"
 	// language=hcl
 	tmpl := `
@@ -69,6 +70,7 @@ func (s *AccSuite) TestServiceLinkCreate() {
 
 // TestServiceLinkUpdate tests updating a service link
 func (s *AccSuite) TestServiceLinkUpdate() {
+	s.T().Skip("unauthorized")
 	serviceLinkResourceName := "rollbar_service_link.service_link"
 	// language=hcl
 	tmpl1 := `
