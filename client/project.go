@@ -261,8 +261,6 @@ func (c *RollbarAPIClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 // operation that makes multiple calls to the API.
 // https://github.com/rollbar/terraform-provider-rollbar/issues/104
 func (c *RollbarAPIClient) UpdateProjectTeams(projectID int, teamIDs []int) error {
-	c.m.Lock()
-	defer c.m.Unlock()
 	l := log.With().
 		Int("project_id", projectID).
 		Ints("team_ids", teamIDs).
