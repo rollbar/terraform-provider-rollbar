@@ -124,9 +124,8 @@ func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 // ProjectAccessTokenUpdateArgs encapsulates the required and optional arguments
 // for creating a Rollbar project access token.
 //
-// Currently not all attributes can be updated.
-//
-//	https://github.com/rollbar/terraform-provider-rollbar/issues/41
+// Curently not all attributes can be updated.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/41
 type ProjectAccessTokenUpdateArgs struct {
 	ProjectID            int    `json:"-"`
 	AccessToken          string `json:"-"`

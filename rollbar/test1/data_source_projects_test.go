@@ -24,7 +24,6 @@ package test1
 
 import (
 	"fmt"
-
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
