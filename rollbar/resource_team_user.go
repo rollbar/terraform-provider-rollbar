@@ -113,10 +113,8 @@ func resourceTeamUserCreate(ctx context.Context, d *schema.ResourceData, meta in
 	l.Info().Msg("Creating rollbar_team_user resource")
 
 	// Check if a Rollbar user exists for this email
-	client.Mutex.Lock()
-	setResourceHeader(rollbarTeamUser, c)
+	c.SetHeaderResource(rollbarTeamUser)
 	userID, err := c.FindUserID(email)
-	client.Mutex.Unlock()
 
 	l = l.With().Int("user_id", userID).Logger()
 	switch err {
@@ -124,9 +122,7 @@ func resourceTeamUserCreate(ctx context.Context, d *schema.ResourceData, meta in
 		l.Debug().Msg("Found existing user")
 		mustSet(d, "user_id", userID)
 		mustSet(d, "status", "registered")
-		client.Mutex.Lock()
 		er := c.AssignUserToTeam(teamID, userID)
-		client.Mutex.Unlock()
 		if er != nil {
 			l.Err(er).Msg("error assigning user to team")
 			return diag.FromErr(er)
@@ -136,9 +132,7 @@ func resourceTeamUserCreate(ctx context.Context, d *schema.ResourceData, meta in
 	case client.ErrNotFound: // User not found, send an invitation
 		l.Debug().Msg("Existing user not found")
 		mustSet(d, "status", "invited")
-		client.Mutex.Lock()
 		inv, er := c.CreateInvitation(teamID, email)
-		client.Mutex.Unlock()
 		if er != nil {
 			l.Err(er).Msg("error assigning user to team")
 			return diag.FromErr(er)
@@ -170,16 +164,11 @@ func resourceTeamUserRead(_ context.Context, d *schema.ResourceData, meta interf
 		Logger()
 	l.Info().Msg("Reading rollbar_team_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarTeamUser, c)
-	client.Mutex.Unlock()
+	c.SetHeaderResource(rollbarTeamUser)
 
 	// If user ID is not in state, try to query it from Rollbar
 	if userID == 0 {
-		client.Mutex.Lock()
 		userID, err = c.FindUserID(email)
-		client.Mutex.Unlock()
 		switch err {
 		case nil:
 			l = log.With().
@@ -200,9 +189,7 @@ func resourceTeamUserRead(_ context.Context, d *schema.ResourceData, meta interf
 
 	if userID != 0 {
 		// Check if user is assigned to the team
-		client.Mutex.Lock()
 		assigned, err := c.IsUserAssignedToTeam(teamID, userID)
-		client.Mutex.Unlock()
 		if err != nil {
 			l.Err(err).Msg("Error checking if user is assigned to team.")
 			return diag.FromErr(err)
@@ -215,9 +202,7 @@ func resourceTeamUserRead(_ context.Context, d *schema.ResourceData, meta interf
 		_ = d.Set("invite_id", nil)
 	} else {
 		// Check if user is invited to the team
-		client.Mutex.Lock()
 		invitations, err := c.ListPendingInvitations(teamID)
-		client.Mutex.Unlock()
 		if err != nil {
 			l.Err(err).Msg("Error checking if user has pending invitation.")
 			return diag.FromErr(err)
@@ -247,27 +232,20 @@ func resourceTeamUserDelete(_ context.Context, d *schema.ResourceData, meta inte
 		Logger()
 	l.Info().Msg("Deleting rollbar_team_user resource")
 	c := meta.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarTeamUser, c)
-	client.Mutex.Unlock()
+	c.SetHeaderResource(rollbarTeamUser)
 
 	userID := d.Get("user_id").(int)
 	if userID == 0 {
 		// Cancel invitation
 		inviteID := d.Get("invite_id").(int)
-		client.Mutex.Lock()
 		err := c.CancelInvitation(inviteID)
-		client.Mutex.Unlock()
 		if err != client.ErrNotFound {
 			l.Err(err).Send()
 			return diag.FromErr(err)
 		}
 	} else {
 		// Remove user from team
-		client.Mutex.Lock()
 		err := c.RemoveUserFromTeam(userID, teamID)
-		client.Mutex.Unlock()
 		if err != nil {
 			if err != client.ErrNotFound {
 				l.Err(err).Send()

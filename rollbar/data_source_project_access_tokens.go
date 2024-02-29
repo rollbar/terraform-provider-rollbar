@@ -135,10 +135,8 @@ func dataSourceProjectAccessTokensRead(ctx context.Context, d *schema.ResourceDa
 	l.Debug().Msg("Reading project access token data from Rollbar")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarProjectAccessTokens, c)
+	c.SetHeaderDataSource(rollbarProjectAccessTokens)
 	tokens, err := c.ListProjectAccessTokens(projectID)
-	client.Mutex.Unlock()
 	if err != nil {
 		return diag.FromErr(err)
 	}

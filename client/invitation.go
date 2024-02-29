@@ -43,7 +43,8 @@ type Invitation struct {
 
 // ListAllInvitationsPerEmail lists all invitations for all Rollbar teams.
 func (c *RollbarAPIClient) ListAllInvitationsPerEmail(email string) (invs []Invitation, err error) {
-
+	c.m.Lock()
+	defer c.m.Unlock()
 	hasNextPage := true
 	page := 1
 
@@ -85,7 +86,8 @@ func (c *RollbarAPIClient) ListAllInvitationsPerEmail(email string) (invs []Invi
 
 // ListInvitations lists all invitations for a Rollbar team.
 func (c *RollbarAPIClient) ListInvitations(teamID int) (invs []Invitation, err error) {
-
+	c.m.Lock()
+	defer c.m.Unlock()
 	hasNextPage := true
 	page := 1
 
@@ -171,6 +173,8 @@ func (c *RollbarAPIClient) FindPendingInvitations(email string) ([]Invitation, e
 
 // CreateInvitation sends a Rollbar team invitation to a user.
 func (c *RollbarAPIClient) CreateInvitation(teamID int, email string) (Invitation, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("teamID", teamID).
 		Str("email", email).
@@ -206,6 +210,8 @@ func (c *RollbarAPIClient) CreateInvitation(teamID int, email string) (Invitatio
 
 // ReadInvitation reads a Rollbar team invitation from the API.
 func (c *RollbarAPIClient) ReadInvitation(inviteID int) (inv Invitation, err error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("inviteID", inviteID).
 		Logger()
@@ -239,6 +245,8 @@ func (c *RollbarAPIClient) DeleteInvitation(id int) (err error) {
 
 // CancelInvitation cancels a Rollbar team invitation.
 func (c *RollbarAPIClient) CancelInvitation(id int) (err error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Canceling invitation")
 

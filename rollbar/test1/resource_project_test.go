@@ -20,16 +20,17 @@
  * SOFTWARE.
  */
 
-package rollbar
+package test1
 
 import (
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
-	"os"
-	"strings"
 )
 
 func init() {

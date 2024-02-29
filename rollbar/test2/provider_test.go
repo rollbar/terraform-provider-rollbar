@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2024 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,23 +20,31 @@
  * SOFTWARE.
  */
 
-package rollbar
+package test2
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"runtime"
+	"strconv"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
+	"github.com/rollbar/terraform-provider-rollbar/rollbar"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/suite"
-	"os"
-	"runtime"
-	"strconv"
-	"testing"
 )
+
+const schemaKeyToken = "api_key"
+const projectKeyToken = "project_api_key"
+const schemaKeyBaseURL = "api_url"
 
 func init() {
 	// Setup nice logging
@@ -66,6 +74,16 @@ type AccSuite struct {
 	randID   int    // ID of a Rollbar resource
 }
 
+// providerConfigure sets up authentication in a Resty HTTP client.
+func providerConfigureTest(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	token := d.Get(schemaKeyToken).(string)
+	projectToken := d.Get(projectKeyToken).(string)
+	baseURL := d.Get(schemaKeyBaseURL).(string)
+	c := client.NewTestClient(baseURL, token)
+	pc := client.NewTestClient(baseURL, projectToken)
+	return map[string]*client.RollbarAPIClient{schemaKeyToken: c, projectKeyToken: pc}, diags
+}
 func (s *AccSuite) SetupSuite() {
 	maxprocs := runtime.GOMAXPROCS(0)
 	log.Debug().
@@ -73,7 +91,8 @@ func (s *AccSuite) SetupSuite() {
 		Send()
 
 	// Setup testing
-	s.provider = Provider()
+	s.provider = rollbar.Provider()
+	s.provider.ConfigureContextFunc = providerConfigureTest
 	s.providers = map[string]*schema.Provider{
 		"rollbar": s.provider,
 	}

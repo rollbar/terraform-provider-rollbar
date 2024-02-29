@@ -77,6 +77,8 @@ type Project struct {
 
 // ListProjects lists all Rollbar projects.
 func (c *RollbarAPIClient) ListProjects() ([]Project, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathProjectList
 
 	resp, err := c.Resty.R().
@@ -113,6 +115,8 @@ func (c *RollbarAPIClient) ListProjects() ([]Project, error) {
 
 // CreateProject creates a new Rollbar project.
 func (c *RollbarAPIClient) CreateProject(name string) (*Project, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathProjectCreate
 	l := log.With().
 		Str("name", name).
@@ -142,6 +146,8 @@ func (c *RollbarAPIClient) CreateProject(name string) (*Project, error) {
 // ReadProject a Rollbar project from the API. If no matching project is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadProject(projectID int) (*Project, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathProjectRead
 
 	l := log.With().
@@ -180,6 +186,8 @@ func (c *RollbarAPIClient) ReadProject(projectID int) (*Project, error) {
 // DeleteProject deletes a Rollbar project. If no matching project is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) DeleteProject(projectID int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathProjectDelete
 	l := log.With().
 		Int("projectID", projectID).
@@ -209,6 +217,8 @@ func (c *RollbarAPIClient) DeleteProject(projectID int) error {
 // this is a potentially slow operation that makes multiple calls to the API.
 // https://github.com/rollbar/terraform-provider-rollbar/issues/104
 func (c *RollbarAPIClient) FindProjectTeamIDs(projectID int) ([]int, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().Int("project_id", projectID).Logger()
 	l.Debug().Msg("Finding teams assigned to project")
 	var projectTeamIDs []int

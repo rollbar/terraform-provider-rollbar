@@ -36,6 +36,8 @@ type ServiceLink struct {
 
 // CreateServiceLink creates a new Rollbar service_link.
 func (c *RollbarAPIClient) CreateServiceLink(name, template string) (*ServiceLink, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkCreate
 	l := log.With().
 		Str("name", name).
@@ -65,6 +67,8 @@ func (c *RollbarAPIClient) CreateServiceLink(name, template string) (*ServiceLin
 
 // UpdateServiceLink updates a Rollbar service link.
 func (c *RollbarAPIClient) UpdateServiceLink(id int, name, template string) (*ServiceLink, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
 	l := log.With().
 		Str("name", name).
@@ -97,6 +101,8 @@ func (c *RollbarAPIClient) UpdateServiceLink(id int, name, template string) (*Se
 // ReadServiceLink reads a Rollbar service link from the API. If no matching service link is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
 
 	l := log.With().
@@ -134,6 +140,8 @@ func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
 // DeleteServiceLink deletes a Rollbar service_link. If no matching service link is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) DeleteServiceLink(id int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
 	l := log.With().
 		Int("id", id).
@@ -160,6 +168,8 @@ func (c *RollbarAPIClient) DeleteServiceLink(id int) error {
 }
 
 func (c *RollbarAPIClient) ListSerivceLinks() ([]ServiceLink, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkCreate
 
 	l := log.With().

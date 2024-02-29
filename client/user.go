@@ -40,6 +40,8 @@ type User struct {
 
 // ListUsers lists all Rollbar users.
 func (c *RollbarAPIClient) ListUsers(email string) (users []User, err error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	log.Debug().Msg("Listing users with email: " + email)
 	u := c.BaseURL + pathUsers
 	resp, err := c.Resty.R().
@@ -66,6 +68,8 @@ func (c *RollbarAPIClient) ListUsers(email string) (users []User, err error) {
 
 // ListTestUsers is used only for testing purposes
 func (c *RollbarAPIClient) ListTestUsers() (users []User, err error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	log.Debug().Msg("Listing users")
 	u := c.BaseURL + pathUsers
 	resp, err := c.Resty.R().
@@ -91,6 +95,8 @@ func (c *RollbarAPIClient) ListTestUsers() (users []User, err error) {
 
 // ReadUser reads a Rollbar user from the API.
 func (c *RollbarAPIClient) ReadUser(id int) (user User, err error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().Int("id", id).Logger()
 	l.Debug().Msg("Reading user from API")
 	u := c.BaseURL + pathUser
@@ -136,6 +142,8 @@ func (c *RollbarAPIClient) FindUserID(email string) (int, error) {
 
 // ListUserTeams lists a Rollbar user's teams.
 func (c *RollbarAPIClient) ListUserTeams(userID int) (teams []Team, err error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().Int("userID", userID).Logger()
 	l.Debug().Msg("Reading teams for Rollbar user")
 	u := c.BaseURL + pathUserTeams

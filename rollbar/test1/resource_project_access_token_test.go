@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package rollbar
+package test1
 
 import (
 	"fmt"
@@ -167,6 +167,7 @@ func (s *AccSuite) TestAccTokenUpdateScope() {
 // TestAccTokenUpdateRateLimit tests updating the rate limit on a Rollbar
 // project access token.
 func (s *AccSuite) TestAccTokenUpdateRateLimit() {
+	s.T().Skip("Upgrade account to configure rate limits")
 	rn := "rollbar_project_access_token.test" // Resource name
 	// language=hcl
 	tmpl1 := `

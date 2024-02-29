@@ -41,6 +41,8 @@ type Team struct {
 
 // CreateTeam creates a new Rollbar team.
 func (c *RollbarAPIClient) CreateTeam(name, level string) (Team, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	var t Team
 	l := log.With().
 		Str("name", name).
@@ -82,6 +84,8 @@ func (c *RollbarAPIClient) CreateTeam(name, level string) (Team, error) {
 
 // ListTeams lists all Rollbar teams.
 func (c *RollbarAPIClient) ListTeams() ([]Team, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	log.Debug().Msg("Listing all teams")
 	var teams []Team
 	u := c.BaseURL + pathTeamList
@@ -125,6 +129,8 @@ func (c *RollbarAPIClient) ListCustomTeams() ([]Team, error) {
 // ReadTeam reads a Rollbar team from the API. If no matching team is found,
 // returns error ErrNotFound.
 func (c *RollbarAPIClient) ReadTeam(id int) (Team, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	var t Team
 	l := log.With().
 		Int("id", id).
@@ -163,6 +169,8 @@ func (c *RollbarAPIClient) ReadTeam(id int) (Team, error) {
 // DeleteTeam deletes a Rollbar team. If no matching team is found, returns
 // error ErrNotFound.
 func (c *RollbarAPIClient) DeleteTeam(id int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("id", id).
 		Logger()
@@ -193,6 +201,8 @@ func (c *RollbarAPIClient) DeleteTeam(id int) error {
 
 // AssignUserToTeam assigns a user to a Rollbar team.
 func (c *RollbarAPIClient) AssignUserToTeam(teamID, userID int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
 	l.Debug().Msg("Assigning user to team")
 	resp, err := c.Resty.R().
@@ -223,6 +233,8 @@ func (c *RollbarAPIClient) AssignUserToTeam(teamID, userID int) error {
 
 // IsUserAssignedToTeam checks if a user is assigned to a Rollbar team.
 func (c *RollbarAPIClient) IsUserAssignedToTeam(teamID, userID int) (bool, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("userID", userID).
 		Int("teamID", teamID).
@@ -254,6 +266,8 @@ func (c *RollbarAPIClient) IsUserAssignedToTeam(teamID, userID int) (bool, error
 
 // RemoveUserFromTeam removes a user from a Rollbar team.
 func (c *RollbarAPIClient) RemoveUserFromTeam(userID, teamID int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().Int("userID", userID).Int("teamID", teamID).Logger()
 	l.Debug().Msg("Removing user from team")
 	resp, err := c.Resty.R().
@@ -307,6 +321,8 @@ func (c *RollbarAPIClient) FindTeamID(name string) (int, error) {
 
 // AssignTeamToProject assigns a Rollbar team to a project.
 func (c *RollbarAPIClient) AssignTeamToProject(teamID, projectID int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("teamID", teamID).
 		Int("projectID", projectID).
@@ -334,6 +350,8 @@ func (c *RollbarAPIClient) AssignTeamToProject(teamID, projectID int) error {
 
 // RemoveTeamFromProject removes a Rollbar team from a project.
 func (c *RollbarAPIClient) RemoveTeamFromProject(teamID, projectID int) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("teamID", teamID).
 		Int("projectID", projectID).

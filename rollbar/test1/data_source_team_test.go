@@ -20,19 +20,19 @@
  * SOFTWARE.
  */
 
-package rollbar
+package test1
 
 import (
 	"fmt"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/rs/zerolog/log"
-	"regexp"
 )
 
-// TestAccProjectDataSource tests reading a project with `rollbar_project` data
-// source.
-func (s *AccSuite) TestAccProjectDataSource() {
-	rn := "data.rollbar_project.test"
+func (s *AccSuite) TestAccTeamDataSource() {
+	rn_name := "data.rollbar_team.test_name"
+	rn_id := "data.rollbar_team.test_id"
 
 	resource.ParallelTest(s.T(), resource.TestCase{
 		PreCheck:     func() { s.preCheck() },
@@ -41,50 +41,73 @@ func (s *AccSuite) TestAccProjectDataSource() {
 		Steps: []resource.TestStep{
 			{
 				PreConfig: func() {
-					log.Debug().Msg("Testing data source rollbar_project with invalid project name")
+					log.Debug().Msg("Testing data source rollbar_team with invalid name")
 				},
-				Config:      s.configDataSourceProjectNotFound(),
-				ExpectError: regexp.MustCompile("no project with the name"),
+				Config:      s.configDataSourceTeamNotFoundByName(),
+				ExpectError: regexp.MustCompile("Team not found by name"),
 			},
 			{
 				PreConfig: func() {
-					log.Debug().Msg("Testing data source rollbar_project")
+					log.Debug().Msg("Testing data source rollbar_team with invalid ID")
 				},
-				Config: s.configDataSourceProject(),
+				Config:      s.configDataSourceTeamNotFoundById(),
+				ExpectError: regexp.MustCompile("Team not found by ID"),
+			},
+			{
+				PreConfig: func() {
+					log.Debug().Msg("Testing data source rollbar_team")
+				},
+				Config: s.configDataSourceTeam(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(rn, "name", s.randName),
-					resource.TestCheckResourceAttrSet(rn, "id"),
-					resource.TestCheckResourceAttrSet(rn, "account_id"),
-					resource.TestCheckResourceAttrSet(rn, "date_created"),
-					resource.TestCheckResourceAttrSet(rn, "date_modified"),
-					resource.TestCheckResourceAttr(rn, "status", "enabled"),
+					resource.TestCheckResourceAttr(rn_name, "name", s.randName),
+					resource.TestCheckResourceAttr(rn_id, "name", s.randName),
+					resource.TestCheckResourceAttrSet(rn_name, "id"),
+					resource.TestCheckResourceAttrSet(rn_name, "account_id"),
+					resource.TestCheckResourceAttrSet(rn_name, "access_level"),
+					resource.TestCheckResourceAttrSet(rn_id, "id"),
+					resource.TestCheckResourceAttrSet(rn_id, "account_id"),
+					resource.TestCheckResourceAttrSet(rn_id, "access_level"),
 				),
 			},
 		},
 	})
 }
 
-func (s *AccSuite) configDataSourceProject() string {
+func (s *AccSuite) configDataSourceTeam() string {
 	// language=hcl
 	tmpl := `
-		resource "rollbar_project" "test" {
+		resource "rollbar_team" "test" {
 		  name         = "%s"
 		}
-		
-		data "rollbar_project" "test" {
+
+		data "rollbar_team" "test_name" {
 			name = "%s"
-			depends_on = [rollbar_project.test]
+			depends_on = [rollbar_team.test]
 		}
+
+        data "rollbar_team" "test_id" {
+            team_id = rollbar_team.test.id
+        }
 	`
 	return fmt.Sprintf(tmpl, s.randName, s.randName)
 }
 
-func (s *AccSuite) configDataSourceProjectNotFound() string {
+func (s *AccSuite) configDataSourceTeamNotFoundByName() string {
 	// language=hcl
 	tmpl := `
-		data "rollbar_project" "test" {
+		data "rollbar_team" "test" {
 			name = "%s"
 		}
 	`
 	return fmt.Sprintf(tmpl, s.randName)
+}
+
+func (s *AccSuite) configDataSourceTeamNotFoundById() string {
+	// language=hcl
+	tmpl := `
+		data "rollbar_team" "test" {
+			team_id = %d
+		}
+	`
+	return fmt.Sprintf(tmpl, s.randID)
 }

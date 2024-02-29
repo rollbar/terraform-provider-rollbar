@@ -36,12 +36,65 @@ import (
 const DefaultBaseURL = "https://api.rollbar.com"
 const Version = "v1.13.1"
 
-var Mutex sync.Mutex
-
 // RollbarAPIClient is a client for the Rollbar API.
 type RollbarAPIClient struct {
 	BaseURL string // Base URL for Rollbar API
 	Resty   *resty.Client
+
+	m sync.Mutex
+}
+
+// NewTestClient sets up a new Rollbar API test client.
+func NewTestClient(baseURL, token string) *RollbarAPIClient {
+	log.Debug().Msg("Initializing Rollbar client")
+
+	// New Resty HTTP client
+	r := resty.New()
+
+	// Use default transport - needed for VCR
+	r.SetTransport(http.DefaultTransport).
+		// set timeout on http client
+		SetTimeout(30 * time.Second).
+		// Set retry count to 1 (try 2 times before it fails)
+		SetRetryCount(1).
+		SetRetryWaitTime(1 * time.Second).
+		SetRetryMaxWaitTime(5 * time.Second)
+
+	// Authentication
+	if token != "" {
+		r = r.SetHeaders(map[string]string{
+			"X-Rollbar-Access-Token": token,
+			"X-Rollbar-Terraform":    "true"})
+	} else {
+		log.Warn().Msg("Rollbar API token not set")
+	}
+
+	// Authentication
+	if baseURL == "" {
+		log.Error().Msg("Rollbar API base URL not set")
+	}
+
+	// Configure Resty to use Zerolog for logging
+	r.SetLogger(restyZeroLogger{log.Logger})
+
+	// Rollbar client
+	c := RollbarAPIClient{
+		Resty:   r,
+		BaseURL: baseURL,
+	}
+	return &c
+}
+
+func (c *RollbarAPIClient) SetHeaderResource(header string) {
+	c.m.Lock()
+	defer c.m.Unlock()
+	c.Resty.SetHeader("X-Rollbar-Terraform-Resource", header)
+}
+
+func (c *RollbarAPIClient) SetHeaderDataSource(header string) {
+	c.m.Lock()
+	defer c.m.Unlock()
+	c.Resty.SetHeader("X-Rollbar-Terraform-DataSource", header)
 }
 
 // NewClient sets up a new Rollbar API client.
@@ -70,7 +123,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 					r.StatusCode() == http.StatusBadGateway
 			})
 	// Authentication
-	Mutex.Lock()
+
 	if token != "" {
 		r = r.SetHeaders(map[string]string{
 			"X-Rollbar-Access-Token":      token,
@@ -80,7 +133,7 @@ func NewClient(baseURL, token string) *RollbarAPIClient {
 	} else {
 		log.Warn().Msg("Rollbar API token not set")
 	}
-	Mutex.Unlock()
+
 	// Authentication
 	if baseURL == "" {
 		log.Error().Msg("Rollbar API base URL not set")

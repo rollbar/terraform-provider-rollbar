@@ -141,9 +141,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Creating new project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
+	c.SetHeaderResource(rollbarProjectAccessToken)
 	pat, err := c.CreateProjectAccessToken(client.ProjectAccessTokenCreateArgs{
 		Name:                 name,
 		ProjectID:            projectID,
@@ -152,7 +150,6 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		RateLimitWindowSize:  size,
 		RateLimitWindowCount: count,
 	})
-	client.Mutex.Unlock()
 
 	if err != nil {
 		return diag.FromErr(err)
@@ -174,11 +171,9 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	c.SetHeaderResource(rollbarProjectAccessToken)
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -212,12 +207,9 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	l := log.With().Interface("args", args).Logger()
 	l.Debug().Msg("Updating resource project access token")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
+	c.SetHeaderResource(rollbarProjectAccessToken)
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
 	err := c.UpdateProjectAccessToken(args)
-	client.Mutex.Unlock()
-
 	if err != nil {
 		log.Err(err).Send()
 		return diag.FromErr(err)
@@ -237,12 +229,8 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarProjectAccessToken, c)
+	c.SetHeaderResource(rollbarProjectAccessToken)
 	err := c.DeleteProjectAccessToken(projectID, accessToken)
-	client.Mutex.Unlock()
-	
 	if err != nil {
 		return diag.FromErr(err)
 	}

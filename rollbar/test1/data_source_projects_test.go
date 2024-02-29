@@ -20,14 +20,15 @@
  * SOFTWARE.
  */
 
-package rollbar
+package test1
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/rollbar/terraform-provider-rollbar/client"
-	"strconv"
 )
 
 // TestAccProjectsDataSource tests listing of all projects with

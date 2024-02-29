@@ -71,9 +71,7 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 	var l zerolog.Logger
 	teamID, ok := d.GetOk("team_id")
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-
-	client.Mutex.Lock()
-	setDataSourceHeader(rollbarTeam, c)
+	c.SetHeaderDataSource(rollbarTeam)
 
 	if ok {
 		l = log.With().
@@ -106,7 +104,6 @@ func dataSourceTeamRead(ctx context.Context, d *schema.ResourceData, m interface
 		}
 		team = t
 	}
-	client.Mutex.Unlock()
 	d.SetId(strconv.FormatInt(int64(team.ID), 10))
 	_ = d.Set("team_id", team.ID)
 	_ = d.Set("name", team.Name)

@@ -274,11 +274,9 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c.SetHeaderResource(rollbarNotification)
 
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
 	n, err := c.CreateNotification(channel, filters, trigger, config)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -305,10 +303,8 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 	l.Info().Msg("Creating rollbar_notification resource")
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c.SetHeaderResource(rollbarNotification)
 	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
-	client.Mutex.Unlock()
 
 	if err != nil {
 		l.Err(err).Send()
@@ -376,11 +372,8 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c.SetHeaderResource(rollbarNotification)
 	n, err := c.ReadNotification(id, channel)
-	client.Mutex.Unlock()
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -404,12 +397,9 @@ func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m i
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
-
-	client.Mutex.Lock()
-	setResourceHeader(rollbarNotification, c)
+	c.SetHeaderResource(rollbarNotification)
 	err := c.DeleteNotification(id, channel)
-	client.Mutex.Unlock()
-	
+
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_notification resource")
 		return diag.FromErr(err)

@@ -24,8 +24,9 @@ package client
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 // ProjectAccessToken represents a Rollbar project access token.
@@ -123,8 +124,8 @@ func (args *ProjectAccessTokenCreateArgs) sanityCheck() error {
 // ProjectAccessTokenUpdateArgs encapsulates the required and optional arguments
 // for creating a Rollbar project access token.
 //
-// Currently not all attributes can be updated.
-//  https://github.com/rollbar/terraform-provider-rollbar/issues/41
+// Curently not all attributes can be updated.
+// https://github.com/rollbar/terraform-provider-rollbar/issues/41
 type ProjectAccessTokenUpdateArgs struct {
 	ProjectID            int    `json:"-"`
 	AccessToken          string `json:"-"`
@@ -166,6 +167,8 @@ func (args *ProjectAccessTokenUpdateArgs) sanityCheck() error {
 // ListProjectAccessTokens lists the Rollbar project access tokens for the
 // specified Rollbar project.
 func (c *RollbarAPIClient) ListProjectAccessTokens(projectID int) ([]ProjectAccessToken, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("projectID", projectID).
 		Logger()
@@ -254,6 +257,8 @@ func (c *RollbarAPIClient) ReadProjectAccessTokenByName(projectID int, name stri
 
 // DeleteProjectAccessToken deletes a Rollbar project access token.
 func (c *RollbarAPIClient) DeleteProjectAccessToken(projectID int, token string) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Int("projectID", projectID).
 		Str("token", token).
@@ -282,6 +287,8 @@ func (c *RollbarAPIClient) DeleteProjectAccessToken(projectID int, token string)
 
 // CreateProjectAccessToken creates a Rollbar project access token.
 func (c *RollbarAPIClient) CreateProjectAccessToken(args ProjectAccessTokenCreateArgs) (ProjectAccessToken, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Interface("args", args).
 		Logger()
@@ -322,6 +329,8 @@ func (c *RollbarAPIClient) CreateProjectAccessToken(args ProjectAccessTokenCreat
 
 // UpdateProjectAccessToken updates a Rollbar project access token.
 func (c *RollbarAPIClient) UpdateProjectAccessToken(args ProjectAccessTokenUpdateArgs) error {
+	c.m.Lock()
+	defer c.m.Unlock()
 	l := log.With().
 		Interface("args", args).
 		Logger()
