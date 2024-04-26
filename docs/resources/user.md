@@ -3,7 +3,6 @@
 
 Rollbar user resource.
 
-
 Example Usage
 -------------
 
@@ -27,7 +26,6 @@ The following arguments are supported:
 * `email` - (Required) The user's email address
 * `team_ids` - (Required) IDs of the teams to which this user belongs
 
-
 Attribute Reference
 -------------------
 
@@ -37,12 +35,11 @@ In addition to all arguments above, the following attributes are exported:
 * `user_id` - The ID of the user
 * `status` - Status of the user.  Either `invited` or `subscribed`
 
-
 Import
 ------
 
-Users can be imported using the user ID, e.g.
+Users can be imported using their user email address, e.g.
 
 ```
-$ terraform import rollbar_user.foo 238101
+$ terraform import rollbar_user.some_dev some_dev@company.com
 ```
