@@ -41,8 +41,8 @@ In addition to all arguments above, the following attributes are exported:
 Import
 ------
 
-Users can be imported using the user ID, e.g.
+Users can be imported using their user email address, e.g.
 
 ```
-$ terraform import rollbar_user.foo 238101
+$ terraform import rollbar_user.some_dev some_dev@company.com
 ```
