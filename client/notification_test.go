@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Rollbar, Inc.
+ * Copyright (c) 2024 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,11 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/jarcoal/httpmock"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
 )
 
 // TestCreateNotification tests creating a Rollbar notification.
@@ -38,6 +39,7 @@ func (s *Suite) TestCreateNotification() {
 	u = strings.ReplaceAll(u, "{channel}", channel)
 	action := "send_email"
 	trigger := "new_item"
+	status := "enabled"
 	filters := []map[string]interface{}{}
 	config := map[string]interface{}{}
 
@@ -52,14 +54,15 @@ func (s *Suite) TestCreateNotification() {
 	}
 
 	httpmock.RegisterResponder("POST", u, r)
-	notification, err := s.client.CreateNotification(channel, filters, trigger, config)
+	notification, err := s.client.CreateNotification(channel, filters, trigger, config, status)
 	s.Nil(err)
 	s.Equal(trigger, notification.Trigger)
 	s.Equal(action, notification.Action)
 	s.Equal(id, notification.ID)
+	s.Equal(status, notification.Status)
 
 	s.checkServerErrors("POST", u, func() error {
-		_, err = s.client.CreateNotification(channel, filters, trigger, config)
+		_, err = s.client.CreateNotification(channel, filters, trigger, config, status)
 		return err
 	})
 }
@@ -74,6 +77,7 @@ func (s *Suite) TestUpdateNotification() {
 
 	action := "send_email"
 	trigger := "new_item"
+	status := "disabled"
 	filters := []map[string]interface{}{}
 	config := map[string]interface{}{}
 
@@ -88,14 +92,15 @@ func (s *Suite) TestUpdateNotification() {
 	}
 
 	httpmock.RegisterResponder("PUT", u, r)
-	notification, err := s.client.UpdateNotification(id, channel, filters, trigger, config)
+	notification, err := s.client.UpdateNotification(id, channel, filters, trigger, config, status)
 	s.Nil(err)
 	s.Equal(trigger, notification.Trigger)
 	s.Equal(action, notification.Action)
 	s.Equal(id, notification.ID)
+	s.Equal(status, notification.Status)
 
 	s.checkServerErrors("PUT", u, func() error {
-		_, err = s.client.UpdateNotification(id, channel, filters, trigger, config)
+		_, err = s.client.UpdateNotification(id, channel, filters, trigger, config, status)
 		return err
 	})
 }
@@ -115,6 +120,7 @@ func (s *Suite) TestReadNotification() {
 	n, err := s.client.ReadNotification(id, channel)
 	s.Nil(err)
 	s.Equal("new_item", n.Trigger)
+	s.Equal("disabled", n.Status)
 
 	s.checkServerErrors("GET", u, func() error {
 		_, err := s.client.ReadNotification(id, channel)

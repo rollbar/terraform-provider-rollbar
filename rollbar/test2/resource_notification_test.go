@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Rollbar, Inc.
+ * Copyright (c) 2024 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -77,6 +77,57 @@ func (s *AccSuite) TestNotificationCreate() {
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.0.type", "environment"),
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.1.type", "framework"),
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.trigger", "new_item"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.enabled", "true"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.url", "https://www.rollbar.com"),
+					resource.TestCheckResourceAttr(notificationResourceName, "config.0.format", "json"),
+				),
+			},
+		},
+	})
+}
+
+// TestNotificationCreate tests creating a notification
+func (s *AccSuite) TestNotificationCreateDisabledRule() {
+	s.T().Skip("unauthorized")
+	notificationResourceName := "rollbar_notification.webhook_notification"
+	// language=hcl
+	config := `
+		resource "rollbar_notification" "webhook_notification" {
+  rule  {
+	enabled = false
+    filters {
+        type =  "environment"
+        operation =  "eq"
+        value = "production"
+    }
+    filters {
+       type = "framework"
+       operation = "eq"
+       value = 13
+    }
+   trigger = "new_item"
+  }
+  channel = "webhook"
+  config  {
+     url = "https://www.rollbar.com"
+     format = "json"
+  }
+}
+	`
+	resource.ParallelTest(s.T(), resource.TestCase{
+		PreCheck:     func() { s.preCheck() },
+		Providers:    s.providers,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					s.checkResourceStateSanity(notificationResourceName),
+					resource.TestCheckResourceAttr(notificationResourceName, "channel", "webhook"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.0.type", "environment"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.1.type", "framework"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.trigger", "new_item"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.enabled", "false"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.url", "https://www.rollbar.com"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.format", "json"),
 				),
@@ -93,6 +144,7 @@ func (s *AccSuite) TestNotificationUpdate() {
 	config1 := `
 		resource "rollbar_notification" "webhook_notification" {
   rule  {
+	enabled = true
     filters {
         type =  "environment"
         operation =  "eq"
@@ -115,6 +167,7 @@ func (s *AccSuite) TestNotificationUpdate() {
 	config2 := `
 		resource "rollbar_notification" "webhook_notification" {
   rule  {
+ 	enabled = false
     filters {
         type =  "environment"
         operation =  "eq"
@@ -147,6 +200,7 @@ func (s *AccSuite) TestNotificationUpdate() {
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.0.type", "environment"),
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.1.type", "framework"),
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.trigger", "new_item"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.enabled", "true"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.url", "https://www.rollbar.com"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.format", "json"),
 				),
@@ -159,6 +213,7 @@ func (s *AccSuite) TestNotificationUpdate() {
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.0.type", "environment"),
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.filters.1.type", "framework"),
 					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.trigger", "new_item"),
+					resource.TestCheckResourceAttr(notificationResourceName, "rule.0.enabled", "false"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.url", "https://www.rollbar.com"),
 					resource.TestCheckResourceAttr(notificationResourceName, "config.0.format", "xml"),
 				),

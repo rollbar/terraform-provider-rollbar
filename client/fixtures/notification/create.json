@@ -2,6 +2,7 @@
   "result": [
     {
       "action": "send_email",
+      "status": "enabled",
       "trigger": "new_item",
       "config": {
         "teams": [

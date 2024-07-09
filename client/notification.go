@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Rollbar, Inc.
+ * Copyright (c) 2024 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import (
 
 type Notification struct {
 	ID      int                    `model:"id" mapstructure:"id"`
+	Status  string                 `model:"status" mapstructure:"status"`
 	Action  string                 `model:"action" mapstructure:"action"`
 	Trigger string                 `model:"trigger" mapstructure:"trigger"`
 	Channel string                 `model:"channel" mapstructure:"channel"`
@@ -39,7 +40,7 @@ type Notification struct {
 }
 
 // CreateNotification creates a new Rollbar notification.
-func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, config interface{}) (*Notification, error) {
+func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationCreate
@@ -50,7 +51,7 @@ func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, 
 	l.Debug().Msg("Creating new notification")
 
 	resp, err := c.Resty.R().
-		SetBody([]map[string]interface{}{{"filters": filters, "trigger": trigger, "config": config}}).
+		SetBody([]map[string]interface{}{{"filters": filters, "trigger": trigger, "config": config, "status": status}}).
 		SetResult(notificationsResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
@@ -70,7 +71,7 @@ func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, 
 }
 
 // UpdateNotification updates a Rollbar notification.
-func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string, filters, trigger, config interface{}) (*Notification, error) {
+func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
@@ -80,7 +81,7 @@ func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string
 	l.Debug().Msg("Updating notification")
 
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"filters": filters, "trigger": trigger, "config": config}).
+		SetBody(map[string]interface{}{"filters": filters, "trigger": trigger, "config": config, "status": status}).
 		SetResult(notificationResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
