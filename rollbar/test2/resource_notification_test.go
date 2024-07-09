@@ -88,6 +88,7 @@ func (s *AccSuite) TestNotificationCreate() {
 
 // TestNotificationCreateDisabledRule tests creating a disbaled notification
 func (s *AccSuite) TestNotificationCreateDisabledRule() {
+	s.T().Skip("unauthorized")
 	notificationResourceName := "rollbar_notification.webhook_notification"
 	// language=hcl
 	config := `
