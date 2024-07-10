@@ -87,7 +87,6 @@ func (s *AccSuite) TestNotificationCreate() {
 
 // TestNotificationCreateDisabledRule tests creating a disbaled notification
 func (s *AccSuite) TestNotificationCreateDisabledRule() {
-	s.T().Skip("unauthorized")
 	notificationResourceName := "rollbar_notification.webhook_notification"
 	// language=hcl
 	config := `
@@ -137,7 +136,6 @@ func (s *AccSuite) TestNotificationCreateDisabledRule() {
 
 // TestNotificationUpdate tests updating a notification
 func (s *AccSuite) TestNotificationUpdate() {
-	s.T().Skip("unauthorized")
 	notificationResourceName := "rollbar_notification.webhook_notification"
 	// language=hcl
 	config1 := `
@@ -222,7 +220,6 @@ func (s *AccSuite) TestNotificationUpdate() {
 }
 
 func (s *AccSuite) TestNotificationCreateSpecialEmail() {
-	s.T().Skip("unauthorized")
 	notificationResourceName := "rollbar_notification.email_notification"
 	// language=hcl
 	config := `
