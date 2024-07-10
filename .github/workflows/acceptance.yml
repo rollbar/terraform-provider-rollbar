@@ -118,6 +118,7 @@ jobs:
 
     env:
       ROLLBAR_API_KEY: ${{ secrets.ROLLBAR_API_KEY }}
+      ROLLBAR_PROJECT_API_KEY: ${{ secrets.ROLLBAR_PROJECT_API_KEY }}
 
     steps:
 
