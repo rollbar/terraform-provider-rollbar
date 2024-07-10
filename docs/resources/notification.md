@@ -32,6 +32,7 @@ provider "rollbar" {
 resource "rollbar_notification" "email" {
   channel = "email"
   rule {
+    enabled = true
     trigger = "occurrence_rate"
     filters {
       type   = "rate"
@@ -56,6 +57,7 @@ The following arguments are supported:
 * `config` - (Required) An array of configurations for notification rules.  Structure is [documented below](#nested_config)
 
 <a name="nested_rule"></a>The `rule` block supports:
+* `enabled` - (Optional) Boolean that enables the rule notification. The default value is `true`.
 * `trigger` - (Required) The category of trigger evaluations using the expressions defined in filters block(s).
 * `filters` - (Required) One or more nested configuration blocks that define filter expressions.  Structure is [documented below](#nested_filters)
 
