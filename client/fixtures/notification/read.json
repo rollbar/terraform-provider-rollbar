@@ -2,6 +2,7 @@
   "result": {
     "action": "send_email",
     "trigger": "new_item",
+    "status": "disabled",
     "config": {},
     "id": 5127954,
     "filters": [

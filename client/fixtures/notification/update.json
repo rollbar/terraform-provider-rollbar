@@ -2,6 +2,7 @@
   "result": {
     "action": "send_email",
     "trigger": "new_item",
+    "status": "disabled",
     "config": {
       "teams": [
         "Owners"

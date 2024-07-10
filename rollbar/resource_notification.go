@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Rollbar, Inc.
+ * Copyright (c) 2024 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,11 @@ var configMap = map[string][]string{
 	"webhook":   {"url", "format"},
 }
 
+const (
+	enabledStatus  = "enabled"
+	disabledStatus = "disabled"
+)
+
 var emailDailySummaryConfigList = []string{"summary_time", "environments", "send_only_if_data", "min_item_level"}
 
 func CustomNotificationImport(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
@@ -81,6 +86,12 @@ func resourceNotification() *schema.Resource {
 							Description: "Trigger",
 							Type:        schema.TypeString,
 							Required:    true,
+						},
+						"enabled": {
+							Description: "Enabled",
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     true,
 						},
 						"filters": {
 							Description: "Filters",
@@ -227,16 +238,23 @@ func parseSet(setName string, d *schema.ResourceData) map[string]interface{} {
 	return map[string]interface{}{}
 }
 
-func parseRule(d *schema.ResourceData) (trigger string, filters interface{}) {
+func parseRule(d *schema.ResourceData) (trigger string, filters interface{}, status string) {
 	rule := parseSet("rule", d)
 	for key, value := range rule {
-		if key == "trigger" {
+		switch key {
+		case "trigger":
 			trigger = value.(string)
-		} else {
+		case "enabled":
+			v := value.(bool)
+			status = disabledStatus
+			if v {
+				status = enabledStatus
+			}
+		default:
 			filters = value
 		}
 	}
-	return trigger, filters
+	return trigger, filters, status
 }
 
 func cleanConfig(channel, trigger string, config map[string]interface{}) map[string]interface{} {
@@ -265,7 +283,7 @@ func cleanConfig(channel, trigger string, config map[string]interface{}) map[str
 
 func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
-	trigger, filters := parseRule(d)
+	trigger, filters, status := parseRule(d)
 	channel := d.Get("channel").(string)
 	config := parseSet("config", d)
 	config = cleanConfig(channel, trigger, config)
@@ -276,7 +294,7 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	c.SetHeaderResource(rollbarNotification)
 
-	n, err := c.CreateNotification(channel, filters, trigger, config)
+	n, err := c.CreateNotification(channel, filters, trigger, config, status)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -294,7 +312,7 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 
 	id := mustGetID(d)
-	trigger, filters := parseRule(d)
+	trigger, filters, status := parseRule(d)
 	channel := d.Get("channel").(string)
 	config := parseSet("config", d)
 	config = cleanConfig(channel, trigger, config)
@@ -304,7 +322,7 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
 	c.SetHeaderResource(rollbarNotification)
-	n, err := c.UpdateNotification(id, channel, filters, trigger, config)
+	n, err := c.UpdateNotification(id, channel, filters, trigger, config, status)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -332,7 +350,7 @@ func flattenConfig(config map[string]interface{}) *schema.Set {
 	return set
 }
 
-func flattenRule(filters []interface{}, trigger string) *schema.Set {
+func flattenRule(filters []interface{}, trigger, status string) *schema.Set {
 	var out = make([]interface{}, 0)
 	m := make(map[string]interface{})
 	for _, filter := range filters {
@@ -354,6 +372,12 @@ func flattenRule(filters []interface{}, trigger string) *schema.Set {
 		case float64:
 			filterConv["value"] = strconv.FormatFloat(v, 'f', -1, 64)
 		}
+	}
+	if status == enabledStatus {
+		m["enabled"] = true
+	}
+	if status == disabledStatus {
+		m["enabled"] = false
 	}
 	m["filters"] = filters
 	out = append(out, m)
@@ -386,7 +410,7 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 	}
 
 	mustSet(d, "config", flattenConfig(n.Config))
-	mustSet(d, "rule", flattenRule(n.Filters, n.Trigger))
+	mustSet(d, "rule", flattenRule(n.Filters, n.Trigger, n.Status))
 	l.Debug().Msg("Successfully read rollbar_notification resource")
 	return nil
 }
