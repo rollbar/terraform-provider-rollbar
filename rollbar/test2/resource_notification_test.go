@@ -39,7 +39,6 @@ func init() {
 
 // TestNotificationCreate tests creating a notification
 func (s *AccSuite) TestNotificationCreate() {
-	s.T().Skip("unauthorized")
 	notificationResourceName := "rollbar_notification.webhook_notification"
 	// language=hcl
 	config := `
