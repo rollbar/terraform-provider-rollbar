@@ -6,8 +6,8 @@
     "@semantic-release/git",
     ["@semantic-release/exec",
       {
-        "prepareCmd": "goreleaser build  --snapshot; rm -rv dist",
-        "publishCmd": "goreleaser release"
+        "prepareCmd": "goreleaser build  --rm-dist --snapshot; rm -rv dist",
+        "publishCmd": "goreleaser release --rm-dist"
       }
     ]
   ],
