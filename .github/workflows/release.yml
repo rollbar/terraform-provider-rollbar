@@ -51,6 +51,7 @@ jobs:
       - name: Install GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
+          version: 'v1.26.2'
           install-only: true
 
       - name: Install dependencies
