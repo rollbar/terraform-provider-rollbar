@@ -24,16 +24,23 @@ package rollbar
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 )
+
+func getMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
 
 func resourceProjectAccessToken() *schema.Resource {
 	return &schema.Resource{
@@ -157,7 +164,7 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(getMD5Hash(pat.AccessToken))
 	mustSet(d, "access_token", pat.AccessToken)
 	return resourceProjectAccessTokenRead(ctx, d, m)
 }
@@ -260,6 +267,6 @@ func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceDat
 		Send()
 	mustSet(d, "project_id", projectID)
 	mustSet(d, "access_token", accessToken)
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 10))
+	d.SetId(getMD5Hash(accessToken))
 	return []*schema.ResourceData{d}, nil
 }
