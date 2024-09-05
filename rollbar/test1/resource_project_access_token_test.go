@@ -446,13 +446,13 @@ func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 // properties.
 func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
-		accessToken, err := s.getResourceIDString(ts, resourceName)
-		if err != nil {
-			return err
-		}
 		rs, ok := ts.RootModule().Resources[resourceName]
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
+		}
+		accessToken := rs.Primary.Attributes["access_token"]
+		if accessToken == "" {
+			return fmt.Errorf("access token is empty")
 		}
 		projectIDString := rs.Primary.Attributes["project_id"]
 		projectID, err := strconv.Atoi(projectIDString)
@@ -506,7 +506,7 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 // project access token is present in the list of all project access tokens.
 func (s *AccSuite) checkProjectAccessTokenInTokenList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
-		accessToken, err := s.getResourceIDString(ts, rn)
+		accessToken, err := s.getResourceAttrString(ts, rn, "access_token")
 		s.Nil(err)
 		projectID, err := s.getResourceAttrInt(ts, rn, "project_id")
 		s.Nil(err)
@@ -531,7 +531,7 @@ func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc 
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
 		projectID := rs.Primary.Attributes["project_id"]
-		accessToken := rs.Primary.ID
+		accessToken := rs.Primary.Attributes["access_token"]
 
 		return fmt.Sprintf("%s/%s", projectID, accessToken), nil
 	}

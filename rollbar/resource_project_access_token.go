@@ -24,6 +24,8 @@ package rollbar
 
 import (
 	"context"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"strconv"
 	"strings"
@@ -33,6 +35,12 @@ import (
 	"github.com/rollbar/terraform-provider-rollbar/client"
 	"github.com/rs/zerolog/log"
 )
+
+func getMD5Hash(text string) string {
+	hasher := md5.New()
+	hasher.Write([]byte(text))
+	return hex.EncodeToString(hasher.Sum(nil))
+}
 
 func resourceProjectAccessToken() *schema.Resource {
 	return &schema.Resource{
@@ -156,15 +164,15 @@ func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	d.SetId(pat.AccessToken)
-
+	d.SetId(getMD5Hash(pat.AccessToken))
+	mustSet(d, "access_token", pat.AccessToken)
 	return resourceProjectAccessTokenRead(ctx, d, m)
 }
 
 func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	accessToken := d.Id()
+	accessToken := d.Get("access_token").(string)
 	projectID := d.Get("project_id").(int)
 	l := log.With().
 		Str("accessToken", accessToken).
@@ -195,7 +203,7 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 }
 
 func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accessToken := d.Id()
+	accessToken := d.Get("access_token").(string)
 	projectID := d.Get("project_id").(int)
 	size := d.Get("rate_limit_window_size").(int)
 	count := d.Get("rate_limit_window_count").(int)
@@ -220,7 +228,7 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 }
 
 func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	accessToken := d.Id()
+	accessToken := d.Get("access_token").(string)
 	projectID := d.Get("project_id").(int)
 
 	l := log.With().
@@ -258,6 +266,7 @@ func resourceProjectAccessTokenImporter(_ context.Context, d *schema.ResourceDat
 		Str("access_token", accessToken).
 		Send()
 	mustSet(d, "project_id", projectID)
-	d.SetId(accessToken)
+	mustSet(d, "access_token", accessToken)
+	d.SetId(getMD5Hash(accessToken))
 	return []*schema.ResourceData{d}, nil
 }
