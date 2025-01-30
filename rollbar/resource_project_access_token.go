@@ -69,7 +69,7 @@ func resourceProjectAccessToken() *schema.Resource {
 			},
 			"scopes": {
 				Description: `List of access scopes granted to the token.  Possible values are "read", "write", "post_server_item", and "post_client_server".`,
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Required:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				ForceNew:    true, // FIXME: https://github.com/rollbar/terraform-provider-rollbar/issues/41
@@ -130,9 +130,9 @@ func resourceProjectAccessToken() *schema.Resource {
 func resourceProjectAccessTokenCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	projectID := d.Get("project_id").(int)
 	name := d.Get("name").(string)
-	scopesInterface := d.Get("scopes").([]interface{})
+	scopesInterface := d.Get("scopes").(*schema.Set)
 	scopes := []client.Scope{}
-	for _, v := range scopesInterface {
+	for _, v := range scopesInterface.List() {
 		s := v.(string)
 		scopes = append(scopes, client.Scope(s))
 	}
