@@ -130,7 +130,11 @@ func resourceProjectCreate(ctx context.Context, d *schema.ResourceData, m interf
 			return diag.FromErr(err)
 		}
 		// Deletion
-		err = c.DeleteProjectAccessToken(projectID, t.AccessToken)
+		if t.PublicID != "" {
+			err = c.DeleteProjectAccessToken(projectID, t.PublicID)
+		} else {
+			err = c.DeleteProjectAccessToken(projectID, t.AccessToken)
+		}
 		if err != nil {
 			l.Err(err).Send()
 			return diag.FromErr(err)

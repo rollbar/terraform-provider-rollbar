@@ -34,6 +34,8 @@ type ProjectAccessToken struct {
 	Name                    string  `mapstructure:"name"`
 	ProjectID               int     `json:"project_id" mapstructure:"project_id"`
 	AccessToken             string  `json:"access_token" mapstructure:"access_token"`
+	PublicID                string  `json:"public_id" mapstructure:"public_id"`
+	TokenType               string  `json:"token_type" mapstructure:"token_type"`
 	Scopes                  []Scope `mapstructure:"scopes"`
 	Status                  Status  `mapstructure:"status"`
 	RateLimitWindowSize     int     `json:"rate_limit_window_size" mapstructure:"rate_limit_window_size"`
@@ -62,6 +64,7 @@ type ProjectAccessTokenCreateArgs struct {
 	Name                 string  `json:"name"`
 	Scopes               []Scope `json:"scopes"`
 	Status               Status  `json:"status"`
+	TokenType            string  `json:"token_type"`
 	RateLimitWindowSize  int     `json:"rate_limit_window_size"`
 	RateLimitWindowCount int     `json:"rate_limit_window_count"`
 }
@@ -215,6 +218,12 @@ func (c *RollbarAPIClient) ReadProjectAccessToken(projectID int, token string) (
 
 	for _, t := range tokens {
 		if t.AccessToken == token {
+			l.Debug().
+				Interface("token", t).
+				Msg("Found matching project access token")
+			return t, nil
+		}
+		if t.PublicID == token {
 			l.Debug().
 				Interface("token", t).
 				Msg("Found matching project access token")
