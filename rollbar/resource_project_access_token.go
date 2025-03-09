@@ -80,7 +80,7 @@ func resourceProjectAccessToken() *schema.Resource {
 				Description: "Access token type for Rollbar API",
 				Type:        schema.TypeString,
 				Optional:    true,
-				//Default:     "v2",
+				Default:     "legacy",
 			},
 			"status": {
 				Description: `Status of the token.  Possible values are "enabled" and "disabled"`,
