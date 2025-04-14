@@ -24,11 +24,12 @@ package client
 
 import (
 	"encoding/json"
-	"github.com/jarcoal/httpmock"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/jarcoal/httpmock"
+	"github.com/rs/zerolog/log"
 )
 
 // TestListProjectAccessTokens tests listing Rollbar project access tokens.
@@ -290,6 +291,91 @@ func (s *Suite) TestCreateProjectAccessToken() {
 	t, err := s.client.CreateProjectAccessToken(args)
 	s.Nil(err)
 	s.NotEmpty(t.AccessToken)
+	s.Equal(args.Name, t.Name)
+	s.Equal(args.Scopes, t.Scopes)
+	s.Equal(args.ProjectID, t.ProjectID)
+
+	s.checkServerErrors("POST", u, func() error {
+		_, err = s.client.CreateProjectAccessToken(args)
+		return err
+	})
+}
+
+func (s *Suite) TestCreateProjectAccessTokenWithPublicID() {
+	projID := 411334
+
+	args := ProjectAccessTokenCreateArgs{
+		ProjectID: projID,
+		Name:      "foobar",
+		Scopes:    []Scope{ScopeRead, ScopeWrite},
+		Status:    StatusEnabled,
+	}
+	u := s.client.BaseURL + pathProjectTokens
+	u = strings.ReplaceAll(u, "{projectID}", strconv.Itoa(projID))
+	rs := responseFromFixture("project_access_token/create_with_public_id.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		a := ProjectAccessTokenCreateArgs{}
+		err := json.NewDecoder(req.Body).Decode(&a)
+		log.Debug().
+			Interface("args", a).
+			Msg("arguments sent to API")
+		s.Nil(err)
+		s.Equal(args.Name, a.Name)
+		s.Equal(args.Scopes, a.Scopes)
+		return rs, nil
+	}
+	httpmock.RegisterResponder("POST", u, r)
+
+	//
+	// Sanity Checks
+	//
+	// Invalid project ID
+	badArgs := args
+	badArgs.ProjectID = 0
+	_, err := s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	badArgs = args
+	badArgs.ProjectID = -234
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid project name
+	badArgs = args
+	badArgs.Name = ""
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// No scopes specified
+	badArgs = args
+	badArgs.Scopes = []Scope{}
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid scope
+	badArgs = args
+	derpScope := Scope("derp!")
+	badArgs.Scopes = []Scope{derpScope}
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid status
+	badArgs = args
+	derpStatus := Status("derp!")
+	badArgs.Status = derpStatus
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid rate limit window size
+	badArgs = args
+	badArgs.RateLimitWindowSize = -33
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+	// Invalid rate limit window count
+	badArgs = args
+	badArgs.RateLimitWindowCount = -54
+	_, err = s.client.CreateProjectAccessToken(badArgs)
+	s.NotNil(err)
+
+	// Success
+	t, err := s.client.CreateProjectAccessToken(args)
+	s.Nil(err)
+	s.NotEmpty(t.AccessToken)
+	s.NotEmpty(t.PublicID)
 	s.Equal(args.Name, t.Name)
 	s.Equal(args.Scopes, t.Scopes)
 	s.Equal(args.ProjectID, t.ProjectID)
