@@ -111,6 +111,19 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 							Computed:    true,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
+						"token_type": {
+							Description: "Access token type for Rollbar API",
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+						},
+						"public_id": {
+							Description: "Public ID for Rollbar API",
+							Type:        schema.TypeString,
+							Computed:    true,
+							Sensitive:   false,
+						},
 						"status": {
 							Description: "Status of the token",
 							Type:        schema.TypeString,
