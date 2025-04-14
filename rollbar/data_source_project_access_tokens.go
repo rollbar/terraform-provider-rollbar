@@ -90,6 +90,12 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 							Type:        schema.TypeInt,
 							Computed:    true,
 						},
+						"public_id": {
+							Description: "Public ID for Rollbar API",
+							Type:        schema.TypeString,
+							Computed:    true,
+							Sensitive:   false,
+						},
 						"name": {
 							Description: "Name of the token",
 							Type:        schema.TypeString,
@@ -117,12 +123,6 @@ func dataSourceProjectAccessTokens() *schema.Resource {
 							Optional:    true,
 							ForceNew:    true,
 							Computed:    true,
-						},
-						"public_id": {
-							Description: "Public ID for Rollbar API",
-							Type:        schema.TypeString,
-							Computed:    true,
-							Sensitive:   false,
 						},
 						"status": {
 							Description: "Status of the token",
