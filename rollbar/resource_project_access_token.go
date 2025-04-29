@@ -191,19 +191,21 @@ func resourceProjectAccessTokenRead(ctx context.Context, d *schema.ResourceData,
 	accessToken := d.Get("access_token").(string)
 	publicID := d.Get("public_id").(string)
 
-	if publicID != "" {
-		accessToken = publicID
+	tokenIdentifier := publicID
+	if tokenIdentifier == "" {
+		tokenIdentifier = accessToken
 	}
+
 	projectID := d.Get("project_id").(int)
 	l := log.With().
-		Str("accessToken", accessToken).
+		Str("tokenIdentifier", tokenIdentifier).
 		Logger()
 	l.Debug().Msg("Reading resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	c.SetHeaderResource(rollbarProjectAccessToken)
 
-	pat, err := c.ReadProjectAccessToken(projectID, accessToken)
+	pat, err := c.ReadProjectAccessToken(projectID, tokenIdentifier)
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -230,15 +232,16 @@ func resourceProjectAccessTokenUpdate(ctx context.Context, d *schema.ResourceDat
 	accessToken := d.Get("access_token").(string)
 	publicID := d.Get("public_id").(string)
 
-	if publicID != "" {
-		accessToken = publicID
+	tokenIdentifier := publicID
+	if tokenIdentifier == "" {
+		tokenIdentifier = accessToken
 	}
 	projectID := d.Get("project_id").(int)
 	size := d.Get("rate_limit_window_size").(int)
 	count := d.Get("rate_limit_window_count").(int)
 	args := client.ProjectAccessTokenUpdateArgs{
 		ProjectID:            projectID,
-		AccessToken:          accessToken,
+		AccessToken:          tokenIdentifier,
 		RateLimitWindowSize:  size,
 		RateLimitWindowCount: count,
 	}
@@ -261,18 +264,19 @@ func resourceProjectAccessTokenDelete(ctx context.Context, d *schema.ResourceDat
 	projectID := d.Get("project_id").(int)
 	publicID := d.Get("public_id").(string)
 
-	if publicID != "" {
-		accessToken = publicID
+	tokenIdentifier := publicID
+	if tokenIdentifier == "" {
+		tokenIdentifier = accessToken
 	}
 	l := log.With().
 		Int("projectID", projectID).
-		Str("accessToken", accessToken).
+		Str("tokenIdentifier", tokenIdentifier).
 		Logger()
 	l.Debug().Msg("Deleting resource project access token")
 
 	c := m.(map[string]*client.RollbarAPIClient)[schemaKeyToken]
 	c.SetHeaderResource(rollbarProjectAccessToken)
-	err := c.DeleteProjectAccessToken(projectID, accessToken)
+	err := c.DeleteProjectAccessToken(projectID, tokenIdentifier)
 	if err != nil {
 		return diag.FromErr(err)
 	}
