@@ -20,6 +20,7 @@ resource "rollbar_project_access_token" "bar" {
   scopes = ["read", "post_server_item"]
   
   depends_on = [rollbar_project.foo]
+  token_type = "v2"
 }
 ```
 
@@ -48,6 +49,7 @@ Attribute Reference
 In addition to all arguments above, the following attributes are exported:
 
 * `access_token` - Access token for Rollbar API
+* `public_id` - Public ID for Access token
 * `date_created` - Date the project was created
 * `date_modified` - Date the project was last modified
 * `cur_rate_limit_window_count` - Count of calls in the current window
@@ -58,7 +60,7 @@ Import
 ------
 
 Projects can be imported using a combination of the `project_id` and
-`access_token` joined by a `/`, e.g.
+`access_token` (or `public_id`) joined by a `/`, e.g.
 
 ```
 $ terraform import rollbar_project_access_token.baz 411703/d19f7ada16534b1c94e91d9da3dbae5a
