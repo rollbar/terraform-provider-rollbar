@@ -291,7 +291,7 @@ func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID i
 		}
 		if err != nil && err != client.ErrNotFound {
 			l.Err(err).Send()
-			return
+			return currentTeams, err
 		}
 		for _, t := range teams {
 			currentTeams[t.ID] = true
@@ -303,7 +303,7 @@ func resourceUserCurrentTeams(c *client.RollbarAPIClient, email string, userID i
 	invitations, err = c.FindPendingInvitations(email)
 	if err != nil && err != client.ErrNotFound {
 		l.Err(err).Send()
-		return
+		return currentTeams, err
 	}
 	for _, inv := range invitations {
 		currentTeams[inv.TeamID] = true
