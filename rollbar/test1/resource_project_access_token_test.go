@@ -101,7 +101,9 @@ func (s *AccSuite) TestAccTokenImport() {
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateIdFunc: importIdProjectAccessToken(rn),
-				ImportStateVerify: true,
+				// we cannot verify the states anymore because, although the resource gets created,
+				// their ID's will be different (old access token vs new public_id), hence setting ImportStateVerify: false
+				ImportStateVerify: false,
 			},
 		},
 	})
