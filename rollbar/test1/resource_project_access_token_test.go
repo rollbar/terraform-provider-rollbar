@@ -241,6 +241,7 @@ func (s *AccSuite) TestAccTokenCreate() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+            token_type = "v2"
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
