@@ -1,6 +1,6 @@
 module github.com/rollbar/terraform-provider-rollbar
 
-go 1.22
+go 1.22.0
 
 require (
 	github.com/brianvoe/gofakeit/v5 v5.11.2
