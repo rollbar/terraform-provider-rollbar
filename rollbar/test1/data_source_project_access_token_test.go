@@ -62,7 +62,7 @@ func (s *AccSuite) TestAccProjectAccessTokenDataSource() {
 				Config: config,
 				Check: resource.ComposeTestCheckFunc(
 					s.checkResourceStateSanity(rn),
-					resource.TestCheckResourceAttrSet(rn, "access_token"),
+					resource.TestCheckResourceAttrSet(rn, "public_id"),
 					resource.TestCheckResourceAttrSet(rn, "project_id"),
 					resource.TestCheckResourceAttrSet(rn, "date_created"),
 					resource.TestCheckResourceAttrSet(rn, "date_modified"),

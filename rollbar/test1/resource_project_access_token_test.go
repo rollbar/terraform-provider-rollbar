@@ -543,9 +543,9 @@ func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc 
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
 		projectID := rs.Primary.Attributes["project_id"]
-		accessToken := rs.Primary.Attributes["access_token"]
+		token := rs.Primary.Attributes["public_id"]
 
-		return fmt.Sprintf("%s/%s", projectID, accessToken), nil
+		return fmt.Sprintf("%s/%s", projectID, token), nil
 	}
 }
 
