@@ -42,12 +42,14 @@ func (s *AccSuite) TestAccProjectAccessTokenDataSource() {
 			name = "test-token"
 			project_id = rollbar_project.test.id
 			scopes = ["read"]
+			token_type = "v2"
 		}
 
 		data "rollbar_project_access_token" "test" {
 			project_id = rollbar_project.test.id
 			name = "test-token"
 			depends_on = [rollbar_project_access_token.test]
+			token_type = "v2"
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
