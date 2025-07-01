@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Rollbar, Inc.
+ * Copyright (c) 2025 Rollbar, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,7 @@ func (s *AccSuite) TestAccTokenImportInvalidID() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+			token_type ="v2"
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
@@ -84,6 +85,7 @@ func (s *AccSuite) TestAccTokenImport() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+			token_type = "v2"
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
@@ -99,7 +101,9 @@ func (s *AccSuite) TestAccTokenImport() {
 				ResourceName:      rn,
 				ImportState:       true,
 				ImportStateIdFunc: importIdProjectAccessToken(rn),
-				ImportStateVerify: true,
+				// we cannot verify the states anymore because, although the resource gets created,
+				// their ID's will be different (old access token vs new public_id), hence setting ImportStateVerify: false
+				ImportStateVerify: false,
 			},
 		},
 	})
@@ -120,6 +124,7 @@ func (s *AccSuite) TestAccTokenUpdateScope() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+			token_type = "v2"
 		}
 	`
 	config1 := fmt.Sprintf(tmpl1, s.randName)
@@ -136,6 +141,7 @@ func (s *AccSuite) TestAccTokenUpdateScope() {
 			status = "enabled"
 			rate_limit_window_size = 60
 			rate_limit_window_count = 500
+			token_type = "v2"
 		}
 	`
 	config2 := fmt.Sprintf(tmpl2, s.randName)
@@ -241,6 +247,7 @@ func (s *AccSuite) TestAccTokenCreate() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+            token_type = "v2"
 		}
 	`
 	config := fmt.Sprintf(tmpl, s.randName)
@@ -281,6 +288,7 @@ func (s *AccSuite) TestAccTokenDelete() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+			token_type = "v2"
 		}
 	`
 	config1 := fmt.Sprintf(tmpl1, s.randName)
@@ -355,6 +363,7 @@ func (s *AccSuite) TestAccTokenCreateWithNonExistentProjectID() {
 			status = "enabled"
 			rate_limit_window_size = 60
 			rate_limit_window_count = 500
+			token_type = "v2"
 		}
 	`
 	resource.ParallelTest(s.T(), resource.TestCase{
@@ -393,6 +402,7 @@ func (s *AccSuite) TestAccTokenDeleteOnAPIBeforeApply() {
 			name = "test-token"
 			scopes = ["read"]
 			status = "enabled"
+			token_type = "v2"
 		}
 	`
 	config := fmt.Sprintf(tmpl, projectName)
@@ -450,9 +460,13 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 		if !ok {
 			return fmt.Errorf("not found: %s", resourceName)
 		}
-		accessToken := rs.Primary.Attributes["access_token"]
-		if accessToken == "" {
+		token := rs.Primary.Attributes["access_token"]
+		if token == "" {
 			return fmt.Errorf("access token is empty")
+		}
+		publicID := rs.Primary.Attributes["public_id"]
+		if publicID != "" {
+			token = publicID
 		}
 		projectIDString := rs.Primary.Attributes["project_id"]
 		projectID, err := strconv.Atoi(projectIDString)
@@ -460,11 +474,11 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 			return err
 		}
 		c := s.provider.Meta().(map[string]*client.RollbarAPIClient)[schemaKeyToken]
-		pat, err := c.ReadProjectAccessToken(projectID, accessToken)
+		pat, err := c.ReadProjectAccessToken(projectID, token)
 		if err != nil {
 			return err
 		}
-		if pat.AccessToken != accessToken {
+		if pat.PublicID != token {
 			return fmt.Errorf("access token from API does not match access token in Terraform config")
 		}
 		name := rs.Primary.Attributes["name"]
@@ -506,7 +520,7 @@ func (s *AccSuite) checkProjectAccessToken(resourceName string) resource.TestChe
 // project access token is present in the list of all project access tokens.
 func (s *AccSuite) checkProjectAccessTokenInTokenList(rn string) resource.TestCheckFunc {
 	return func(ts *terraform.State) error {
-		accessToken, err := s.getResourceAttrString(ts, rn, "access_token")
+		token, err := s.getResourceAttrString(ts, rn, "public_id")
 		s.Nil(err)
 		projectID, err := s.getResourceAttrInt(ts, rn, "project_id")
 		s.Nil(err)
@@ -515,7 +529,7 @@ func (s *AccSuite) checkProjectAccessTokenInTokenList(rn string) resource.TestCh
 		s.Nil(err)
 		found := false
 		for _, t := range pats {
-			if t.AccessToken == accessToken {
+			if t.PublicID == token {
 				found = true
 			}
 		}
@@ -531,9 +545,9 @@ func importIdProjectAccessToken(resourceName string) resource.ImportStateIdFunc 
 			return "", fmt.Errorf("not found: %s", resourceName)
 		}
 		projectID := rs.Primary.Attributes["project_id"]
-		accessToken := rs.Primary.Attributes["access_token"]
+		token := rs.Primary.Attributes["public_id"]
 
-		return fmt.Sprintf("%s/%s", projectID, accessToken), nil
+		return fmt.Sprintf("%s/%s", projectID, token), nil
 	}
 }
 

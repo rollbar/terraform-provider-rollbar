@@ -77,12 +77,14 @@ func (s *AccSuite) TestAccProjectAccessTokensDataSourceTwoTokensNoPrefix() {
 			name = "test-token-1"
 			project_id = rollbar_project.test.id
 			scopes = ["read"]
+			token_type = "v2"
 		}
 
 		resource "rollbar_project_access_token" "test2" {
 			name = "test-token-2"
 			project_id = rollbar_project.test.id
 			scopes = ["post_server_item"]
+			token_type = "v2"
 		}
 
 		data "rollbar_project_access_tokens" "test" {
@@ -161,12 +163,14 @@ func (s *AccSuite) TestAccProjectAccessTokensDataSourceWithTokensWithPrefix() {
 			name = "foo-token"
 			project_id = rollbar_project.test.id
 			scopes = ["read"]
+            token_type = "v2"
 		}
 
 		resource "rollbar_project_access_token" "test2" {
 			name = "bar-token"
 			project_id = rollbar_project.test.id
 			scopes = ["post_server_item"]
+			token_type = "v2"
 		}
 
 		data "rollbar_project_access_tokens" "test" {
