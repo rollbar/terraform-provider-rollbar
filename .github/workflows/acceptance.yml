@@ -48,46 +48,6 @@ jobs:
           TERRAFORM_PROVIDER_ROLLBAR_DEBUG: 1
           GOMAXPROCS: 8
           
-      # Report code coverage
-      - name: Convert Go coverage file to lcov format
-        run: |
-          go get github.com/jandelgado/gcov2lcov
-          go install github.com/jandelgado/gcov2lcov
-          ~/go/bin/gcov2lcov -infile coverage_client.out -outfile lcov_client.info
-      - uses: coverallsapp/github-action@v1.1.2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: ./lcov_client.info
-      - name: Upload coverage data to Code Climate
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-          
-          # Download the exact asset from the release
-          gh release download v0.11.1 \
-            -R qltysh-archive/test-reporter \
-            -p "artifacts.tar.gz"
-          
-          file artifacts.tar.gz
-          
-          mkdir -p ccbin
-          tar -xaf artifacts.tar.gz -C ccbin
-          
-          echo "Extracted files:"
-          find ccbin -maxdepth 3 -type f -print
-          
-          CC=$(find ccbin -type f \( -name '*linux*amd64' -o -name '*linux*x86_64*' \) | head -n 1)
-          [ -n "${CC:-}" ] || { echo "No linux-amd64 reporter found"; exit 1; }
-          
-          chmod +x "$CC"
-          "$CC" --version
-          
-          "$CC" before-build
-          "$CC" format-coverage -t lcov -o codeclimate.json ./lcov_client.info
-          "$CC" upload-coverage -i codeclimate.json
-  
   acceptance_tests_rollbar_test1:
     name: Acceptance Rollbar Test1
     runs-on: ubuntu-latest
