@@ -73,7 +73,7 @@ jobs:
           file artifacts.tar.gz
           
           mkdir -p ccbin
-          tar -xzf artifacts.tar.gz -C ccbin
+          tar -xaf artifacts.tar.gz -C ccbin
           
           echo "Extracted files:"
           find ccbin -maxdepth 3 -type f -print
