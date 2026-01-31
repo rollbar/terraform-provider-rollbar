@@ -64,23 +64,21 @@ jobs:
         run: |
           set -euo pipefail
           
-          # Download release bundle (contains multiple platform binaries)
-          curl -fsSL -o artifacts.tar.gz \
-            https://github.com/qltysh-archive/test-reporter/releases/download/v0.11.1/artifacts.tar.gz
+          # Download the exact asset from the release
+          gh release download v0.11.1 \
+            -R qltysh-archive/test-reporter \
+            -p "artifacts.tar.gz"
+          
+          file artifacts.tar.gz
           
           mkdir -p ccbin
           tar -xzf artifacts.tar.gz -C ccbin
           
           echo "Extracted files:"
-          find ccbin -maxdepth 2 -type f -print
+          find ccbin -maxdepth 3 -type f -print
           
-          # Pick the linux-amd64 binary from the extracted artifacts
-          CC=$(find ccbin -type f -name '*linux*amd64' -o -name '*linux*x86_64*' | head -n 1)
-          
-          if [ -z "${CC:-}" ]; then
-            echo "Could not find linux-amd64 cc-test-reporter in the artifacts bundle."
-            exit 1
-          fi
+          CC=$(find ccbin -type f \( -name '*linux*amd64' -o -name '*linux*x86_64*' \) | head -n 1)
+          [ -n "${CC:-}" ] || { echo "No linux-amd64 reporter found"; exit 1; }
           
           chmod +x "$CC"
           "$CC" --version
