@@ -63,20 +63,31 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
           set -euo pipefail
-
-          # Find the linux-amd64 asset URL from the latest release
-          url=$(curl -fsSL https://api.github.com/repos/qltysh-archive/test-reporter/releases/latest \
-            | grep -oE '"browser_download_url":[ ]*"[^"]+"' \
-            | cut -d'"' -f4)
-
-          echo "Downloading: $url"
-          curl -fsSL -o cc-test-reporter "$url"
-          chmod +x cc-test-reporter
-          ./cc-test-reporter --version
-
-          ./cc-test-reporter before-build
-          ./cc-test-reporter format-coverage -t lcov -o codeclimate.json ./lcov_client.info
-          ./cc-test-reporter upload-coverage -i codeclimate.json
+          
+          # Download release bundle (contains multiple platform binaries)
+          curl -fsSL -o artifacts.tar.gz \
+            https://github.com/qltysh-archive/test-reporter/releases/download/v0.11.1/artifacts.tar.gz
+          
+          mkdir -p ccbin
+          tar -xzf artifacts.tar.gz -C ccbin
+          
+          echo "Extracted files:"
+          find ccbin -maxdepth 2 -type f -print
+          
+          # Pick the linux-amd64 binary from the extracted artifacts
+          CC=$(find ccbin -type f -name '*linux*amd64' -o -name '*linux*x86_64*' | head -n 1)
+          
+          if [ -z "${CC:-}" ]; then
+            echo "Could not find linux-amd64 cc-test-reporter in the artifacts bundle."
+            exit 1
+          fi
+          
+          chmod +x "$CC"
+          "$CC" --version
+          
+          "$CC" before-build
+          "$CC" format-coverage -t lcov -o codeclimate.json ./lcov_client.info
+          "$CC" upload-coverage -i codeclimate.json
   
   acceptance_tests_rollbar_test1:
     name: Acceptance Rollbar Test1
