@@ -58,13 +58,16 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./lcov_client.info
-      - name: Upload coverage data to CodeClimate
-        uses: paambaati/codeclimate-action@v2.7.4
-        with:
-          coverageLocations: |
-            ${{github.workspace}}/*lcov*:lcov
+      - name: Upload coverage data to Code Climate
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        run: |
+          curl -fsSL -o cc-test-reporter https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+          chmod +x cc-test-reporter
+
+          ./cc-test-reporter before-build
+          ./cc-test-reporter format-coverage -t lcov -o codeclimate.json ./lcov_client.info
+          ./cc-test-reporter upload-coverage -i codeclimate.json
   
   acceptance_tests_rollbar_test1:
     name: Acceptance Rollbar Test1
