@@ -62,8 +62,17 @@ jobs:
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         run: |
-          curl -fsSL -o cc-test-reporter https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64
+          set -euo pipefail
+
+          # Find the linux-amd64 asset URL from the latest release
+          url=$(curl -fsSL https://api.github.com/repos/qltysh-archive/test-reporter/releases/latest \
+            | grep -oE '"browser_download_url":[ ]*"[^"]+"' \
+            | cut -d'"' -f4)
+
+          echo "Downloading: $url"
+          curl -fsSL -o cc-test-reporter "$url"
           chmod +x cc-test-reporter
+          ./cc-test-reporter --version
 
           ./cc-test-reporter before-build
           ./cc-test-reporter format-coverage -t lcov -o codeclimate.json ./lcov_client.info
