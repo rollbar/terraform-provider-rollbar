@@ -29,7 +29,6 @@ linters-settings:
 linters:
  disable-all: true
  enable:
-   - deadcode
    - dupl
    - gas
    - gocritic
@@ -41,12 +40,11 @@ linters:
    - misspell
    - nakedret
    - prealloc
-   - structcheck
    - stylecheck
    - typecheck
    - unconvert
    - unparam
-   - varcheck
+   - unused
  fast: false
 
 run:
