@@ -315,7 +315,7 @@ interactions:
     headers:
       User-Agent:
       - go-resty/2.3.0 (https://github.com/go-resty/resty)
-    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_builtin_teams=true
+    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_owners_team=true
     method: GET
   response:
     body: |-
@@ -370,7 +370,7 @@ interactions:
     headers:
       User-Agent:
         - go-resty/2.3.0 (https://github.com/go-resty/resty)
-    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_builtin_teams=true
+    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_owners_team=true
     method: GET
   response:
     body: |-
@@ -425,7 +425,7 @@ interactions:
     headers:
       User-Agent:
         - go-resty/2.3.0 (https://github.com/go-resty/resty)
-    url: https://api.rollbar.com/api/1/project/0/teams?exclude_builtin_teams=true
+    url: https://api.rollbar.com/api/1/project/0/teams?exclude_owners_team=true
     method: GET
   response:
     body: |-
@@ -471,7 +471,7 @@ interactions:
     headers:
       User-Agent:
         - go-resty/2.3.0 (https://github.com/go-resty/resty)
-    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_builtin_teams=true
+    url: https://api.rollbar.com/api/1/project/423511/teams?exclude_owners_team=true
     method: GET
   response:
     body: |-
