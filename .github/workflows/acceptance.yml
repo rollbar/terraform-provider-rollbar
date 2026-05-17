@@ -62,7 +62,7 @@ jobs:
 
       # Checkout
       - uses: actions/checkout@v2
-      # Install Terraform CLI  <-- ADD THIS
+      # Install Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -114,7 +114,7 @@ jobs:
 
       # Checkout
       - uses: actions/checkout@v2
-      # Install Terraform CLI  <-- ADD THIS
+      # Install Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
