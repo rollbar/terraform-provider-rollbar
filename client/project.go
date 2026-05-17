@@ -228,7 +228,7 @@ func (c *RollbarAPIClient) FindProjectTeamIDs(projectID int) ([]int, error) {
 		SetResult(teamProjectListResponse{}).
 		SetError(ErrorResult{}).
 		SetQueryParams(map[string]string{
-			"exclude_builtin_teams": "true"}).
+			"exclude_owners_team": "true"}).
 		SetPathParams(map[string]string{
 			"projectID": strconv.Itoa(projectID),
 		}).
