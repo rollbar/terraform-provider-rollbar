@@ -40,7 +40,7 @@ type Notification struct {
 }
 
 // CreateNotification creates a new Rollbar notification.
-func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
+func (c *RollbarAPIClient) CreateNotification(projectID int, channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationCreate
@@ -50,7 +50,7 @@ func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, 
 		Logger()
 	l.Debug().Msg("Creating new notification")
 
-	resp, err := c.Resty.R().
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
 		SetBody([]map[string]interface{}{{"filters": filters, "trigger": trigger, "config": config, "status": status}}).
 		SetResult(notificationsResponse{}).
 		SetError(ErrorResult{}).
@@ -71,7 +71,7 @@ func (c *RollbarAPIClient) CreateNotification(channel string, filters, trigger, 
 }
 
 // UpdateNotification updates a Rollbar notification.
-func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
+func (c *RollbarAPIClient) UpdateNotification(projectID int, notificationID int, channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
@@ -80,8 +80,10 @@ func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string
 		Logger()
 	l.Debug().Msg("Updating notification")
 
-	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"filters": filters, "trigger": trigger, "config": config, "status": status}).
+	body := map[string]interface{}{"filters": filters, "trigger": trigger, "config": config, "status": status}
+
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
+		SetBody(body).
 		SetResult(notificationResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
@@ -106,7 +108,7 @@ func (c *RollbarAPIClient) UpdateNotification(notificationID int, channel string
 
 // ReadNotification reads a Rollbar notification from the API. If no matching notification is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) (*Notification, error) {
+func (c *RollbarAPIClient) ReadNotification(projectID int, notificationID int, channel string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
@@ -116,7 +118,7 @@ func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) 
 		Logger()
 	l.Debug().Msg("Reading notification from API")
 
-	resp, err := c.Resty.R().
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
 		SetResult(notificationResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
@@ -146,7 +148,7 @@ func (c *RollbarAPIClient) ReadNotification(notificationID int, channel string) 
 
 // DeleteNotification deletes a Rollbar notification. If no matching notification is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) DeleteNotification(notificationID int, channel string) error {
+func (c *RollbarAPIClient) DeleteNotification(projectID int, notificationID int, channel string) error {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
@@ -155,7 +157,7 @@ func (c *RollbarAPIClient) DeleteNotification(notificationID int, channel string
 		Logger()
 	l.Debug().Msg("Deleting notification")
 
-	resp, err := c.Resty.R().
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"notificationID": strconv.Itoa(notificationID),

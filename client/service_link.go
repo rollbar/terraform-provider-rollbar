@@ -35,7 +35,7 @@ type ServiceLink struct {
 }
 
 // CreateServiceLink creates a new Rollbar service_link.
-func (c *RollbarAPIClient) CreateServiceLink(name, template string) (*ServiceLink, error) {
+func (c *RollbarAPIClient) CreateServiceLink(projectID int, name, template string) (*ServiceLink, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkCreate
@@ -44,8 +44,12 @@ func (c *RollbarAPIClient) CreateServiceLink(name, template string) (*ServiceLin
 		Logger()
 	l.Debug().Msg("Creating new service link")
 
+	body := map[string]interface{}{"name": name, "template": template}
+	if projectID != 0 {
+		body["project_id"] = projectID
+	}
 	resp, err := c.Resty.R().
-		SetBody(map[string]string{"name": name, "template": template}).
+		SetBody(body).
 		SetResult(serviceLinkResponse{}).
 		SetError(ErrorResult{}).
 		Post(u)
@@ -66,7 +70,7 @@ func (c *RollbarAPIClient) CreateServiceLink(name, template string) (*ServiceLin
 }
 
 // UpdateServiceLink updates a Rollbar service link.
-func (c *RollbarAPIClient) UpdateServiceLink(id int, name, template string) (*ServiceLink, error) {
+func (c *RollbarAPIClient) UpdateServiceLink(projectID int, id int, name, template string) (*ServiceLink, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
@@ -75,8 +79,12 @@ func (c *RollbarAPIClient) UpdateServiceLink(id int, name, template string) (*Se
 		Logger()
 	l.Debug().Msg("Updating service link")
 
+	body := map[string]interface{}{"name": name, "template": template}
+	if projectID != 0 {
+		body["project_id"] = projectID
+	}
 	resp, err := c.Resty.R().
-		SetBody(map[string]interface{}{"name": name, "template": template}).
+		SetBody(body).
 		SetResult(serviceLinkResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
@@ -100,7 +108,7 @@ func (c *RollbarAPIClient) UpdateServiceLink(id int, name, template string) (*Se
 
 // ReadServiceLink reads a Rollbar service link from the API. If no matching service link is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
+func (c *RollbarAPIClient) ReadServiceLink(projectID int, id int) (*ServiceLink, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
@@ -110,7 +118,7 @@ func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
 		Logger()
 	l.Debug().Msg("Reading Service Link from API")
 
-	resp, err := c.Resty.R().
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
 		SetResult(serviceLinkResponse{}).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
@@ -139,7 +147,7 @@ func (c *RollbarAPIClient) ReadServiceLink(id int) (*ServiceLink, error) {
 
 // DeleteServiceLink deletes a Rollbar service_link. If no matching service link is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) DeleteServiceLink(id int) error {
+func (c *RollbarAPIClient) DeleteServiceLink(projectID int, id int) error {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
@@ -148,7 +156,7 @@ func (c *RollbarAPIClient) DeleteServiceLink(id int) error {
 		Logger()
 	l.Debug().Msg("Deleting Service Link")
 
-	resp, err := c.Resty.R().
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
 			"id": strconv.Itoa(id),

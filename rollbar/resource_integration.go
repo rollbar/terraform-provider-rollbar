@@ -52,6 +52,11 @@ func resourceIntegraion() *schema.Resource {
 		DeleteContext: resourceIntegrationDelete,
 
 		Schema: map[string]*schema.Schema{
+			"project_id": {
+				Description: "ID of the Rollbar project. When set, the account access token is used with project_id as a query parameter instead of requiring a project API key.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+			},
 			client.EMAIL: {
 				Description: "Email integration",
 				Type:        schema.TypeSet,
@@ -240,9 +245,9 @@ func resourceIntegrationCreateUpdateDelete(integration string, bodyMap map[strin
 		id = d.Id()
 		l = l.With().Str("id", id).Logger()
 	}
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, pid := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarIntegration)
-	intf, err := c.UpdateIntegration(integration, bodyMap)
+	intf, err := c.UpdateIntegration(pid, integration, bodyMap)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -339,9 +344,9 @@ func resourceIntegrationRead(ctx context.Context, d *schema.ResourceData, m inte
 	spl := strings.Split(id, ComplexImportSeparator)
 	integration := spl[1]
 	l.Info().Msg("Reading rollbar_integration resource")
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, pid := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarIntegration)
-	intf, err := c.ReadIntegration(integration)
+	intf, err := c.ReadIntegration(pid, integration)
 
 	if err == client.ErrNotFound {
 		d.SetId("")
