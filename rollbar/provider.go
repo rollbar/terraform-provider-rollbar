@@ -115,7 +115,7 @@ func (es *errSetter) Set(key string, value interface{}) {
 // If the resource has a project_id attribute set, the account-level client is
 // returned with the project ID so callers can pass it to API methods.
 // Otherwise, the project access token client is returned with projectID 0.
-func clientProjectLevel(d *schema.ResourceData, m interface{}) (*client.RollbarAPIClient, int) {
+func clientProjectLevel(d *schema.ResourceData, m interface{}) (c *client.RollbarAPIClient, projectID int) {
 	clients := m.(map[string]*client.RollbarAPIClient)
 	if v, ok := d.GetOk("project_id"); ok {
 		return clients[schemaKeyToken], v.(int)

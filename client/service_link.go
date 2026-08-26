@@ -70,7 +70,7 @@ func (c *RollbarAPIClient) CreateServiceLink(projectID int, name, template strin
 }
 
 // UpdateServiceLink updates a Rollbar service link.
-func (c *RollbarAPIClient) UpdateServiceLink(projectID int, id int, name, template string) (*ServiceLink, error) {
+func (c *RollbarAPIClient) UpdateServiceLink(projectID, id int, name, template string) (*ServiceLink, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
@@ -108,7 +108,7 @@ func (c *RollbarAPIClient) UpdateServiceLink(projectID int, id int, name, templa
 
 // ReadServiceLink reads a Rollbar service link from the API. If no matching service link is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) ReadServiceLink(projectID int, id int) (*ServiceLink, error) {
+func (c *RollbarAPIClient) ReadServiceLink(projectID, id int) (*ServiceLink, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
@@ -147,7 +147,7 @@ func (c *RollbarAPIClient) ReadServiceLink(projectID int, id int) (*ServiceLink,
 
 // DeleteServiceLink deletes a Rollbar service_link. If no matching service link is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) DeleteServiceLink(projectID int, id int) error {
+func (c *RollbarAPIClient) DeleteServiceLink(projectID, id int) error {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathServiceLinkReadOrDeleteOrUpdate

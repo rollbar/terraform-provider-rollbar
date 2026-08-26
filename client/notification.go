@@ -71,7 +71,7 @@ func (c *RollbarAPIClient) CreateNotification(projectID int, channel string, fil
 }
 
 // UpdateNotification updates a Rollbar notification.
-func (c *RollbarAPIClient) UpdateNotification(projectID int, notificationID int, channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
+func (c *RollbarAPIClient) UpdateNotification(projectID, notificationID int, channel string, filters, trigger, config interface{}, status string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
@@ -110,7 +110,7 @@ func (c *RollbarAPIClient) UpdateNotification(projectID int, notificationID int,
 
 // ReadNotification reads a Rollbar notification from the API. If no matching notification is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) ReadNotification(projectID int, notificationID int, channel string) (*Notification, error) {
+func (c *RollbarAPIClient) ReadNotification(projectID, notificationID int, channel string) (*Notification, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
@@ -150,7 +150,7 @@ func (c *RollbarAPIClient) ReadNotification(projectID int, notificationID int, c
 
 // DeleteNotification deletes a Rollbar notification. If no matching notification is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) DeleteNotification(projectID int, notificationID int, channel string) error {
+func (c *RollbarAPIClient) DeleteNotification(projectID, notificationID int, channel string) error {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathNotificationReadOrDeleteOrUpdate
