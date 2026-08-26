@@ -269,7 +269,7 @@ func sweepResourceNotification(_ string) error {
 		return err
 	}
 	for _, n := range notifications {
-		err = c.DeleteNotification(n.ID, "webhook")
+		err = c.DeleteNotification(0, n.ID, "webhook")
 		if err != nil {
 			log.Err(err).Send()
 			return err
@@ -282,7 +282,7 @@ func sweepResourceNotification(_ string) error {
 		return err
 	}
 	for _, n := range notifications {
-		err = c.DeleteNotification(n.ID, "email")
+		err = c.DeleteNotification(0, n.ID, "email")
 		if err != nil {
 			log.Err(err).Send()
 			return err

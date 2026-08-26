@@ -81,8 +81,10 @@ func (c *RollbarAPIClient) UpdateNotification(projectID int, notificationID int,
 	l.Debug().Msg("Updating notification")
 
 	body := map[string]interface{}{"filters": filters, "trigger": trigger, "config": config, "status": status}
-
-	resp, err := ApplyProjectID(c.Resty.R(), projectID).
+	if projectID != 0 {
+		body["project_id"] = projectID
+	}
+	resp, err := c.Resty.R().
 		SetBody(body).
 		SetResult(notificationResponse{}).
 		SetError(ErrorResult{}).

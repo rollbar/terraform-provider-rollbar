@@ -50,14 +50,14 @@ func (s *Suite) TestCreateServiceLink() {
 	}
 
 	httpmock.RegisterResponder("POST", u, r)
-	serviceLink, err := s.client.CreateServiceLink(name, template)
+	serviceLink, err := s.client.CreateServiceLink(0, name, template)
 	s.Nil(err)
 	s.Equal(name, serviceLink.Name)
 	s.Equal(template, serviceLink.Template)
 	s.Equal(id, serviceLink.ID)
 
 	s.checkServerErrors("POST", u, func() error {
-		_, err = s.client.CreateServiceLink(name, template)
+		_, err = s.client.CreateServiceLink(0, name, template)
 		return err
 	})
 }
@@ -82,14 +82,14 @@ func (s *Suite) TestUpdateServiceLink() {
 	}
 
 	httpmock.RegisterResponder("PUT", u, r)
-	serviceLink, err := s.client.UpdateServiceLink(id, name, template)
+	serviceLink, err := s.client.UpdateServiceLink(0, id, name, template)
 	s.Nil(err)
 	s.Equal(name, serviceLink.Name)
 	s.Equal(template, serviceLink.Template)
 	s.Equal(id, serviceLink.ID)
 
 	s.checkServerErrors("PUT", u, func() error {
-		_, err = s.client.UpdateServiceLink(id, name, template)
+		_, err = s.client.UpdateServiceLink(0, id, name, template)
 		return err
 	})
 }
@@ -106,21 +106,21 @@ func (s *Suite) TestReadServiceLink() {
 	// Success
 	r := responderFromFixture("service_link/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	serviceLink, err := s.client.ReadServiceLink(id)
+	serviceLink, err := s.client.ReadServiceLink(0, id)
 	s.Nil(err)
 	s.Equal(name, serviceLink.Name)
 	s.Equal(template, serviceLink.Template)
 	s.Equal(id, serviceLink.ID)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ReadServiceLink(id)
+		_, err := s.client.ReadServiceLink(0, id)
 		return err
 	})
 
 	// Try to read a deleted notification
 	r = responderFromFixture("service_link/read_deleted.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	serviceLink, err = s.client.ReadServiceLink(id)
+	serviceLink, err = s.client.ReadServiceLink(0, id)
 	s.Equal(ErrNotFound, err)
 	s.Nil(serviceLink)
 }
@@ -134,10 +134,10 @@ func (s *Suite) TestDeleteServiceLink() {
 	// Success
 	r := responderFromFixture("service_link/delete.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err := s.client.DeleteServiceLink(id)
+	err := s.client.DeleteServiceLink(0, id)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
-		return s.client.DeleteServiceLink(id)
+		return s.client.DeleteServiceLink(0, id)
 	})
 }

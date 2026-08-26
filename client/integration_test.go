@@ -58,13 +58,13 @@ func (s *Suite) TestUpdateIntegraion() {
 	}
 
 	httpmock.RegisterResponder("PUT", u, r)
-	integ, err := s.client.UpdateIntegration(integration, bodyMap)
+	integ, err := s.client.UpdateIntegration(0, integration, bodyMap)
 	slackIntegration := integ.(*SlackIntegration)
 	s.Nil(err)
 	s.Equal(id, slackIntegration.ProjectID)
 
 	s.checkServerErrors("PUT", u, func() error {
-		_, err = s.client.UpdateIntegration(integration, bodyMap)
+		_, err = s.client.UpdateIntegration(0, integration, bodyMap)
 
 		return err
 	})
@@ -86,7 +86,7 @@ func (s *Suite) TestReadIntegration() {
 	// Success
 	r := responderFromFixture("integration/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	integ, err := s.client.ReadIntegration(integration)
+	integ, err := s.client.ReadIntegration(0, integration)
 	slackIntegration := integ.(*SlackIntegration)
 	s.Nil(err)
 	s.Equal(serviceAccountID, slackIntegration.Settings.ServiceAccountID)
@@ -95,7 +95,7 @@ func (s *Suite) TestReadIntegration() {
 	s.Equal(channel, slackIntegration.Settings.Channel)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ReadIntegration(integration)
+		_, err := s.client.ReadIntegration(0, integration)
 		return err
 	})
 }

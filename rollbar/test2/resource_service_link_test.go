@@ -121,7 +121,7 @@ func sweepResourceServiceLink(_ string) error {
 		return err
 	}
 	for _, s := range serviceLinks {
-		err = c.DeleteServiceLink(s.ID)
+		err = c.DeleteServiceLink(0, s.ID)
 		if err != nil {
 			log.Err(err).Send()
 			return err
