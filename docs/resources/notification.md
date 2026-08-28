@@ -14,21 +14,14 @@ This resource can manage notification rules for different integration channels. 
 Example Usage
 -------------
 
-```hcl
-# Set the rollbar provider to manage a project
-#
-# NOTE: the account access token `api_key` is not required
-# for managing project however it should be set if you want
-# to use the provider for managing account-level resources
-# in addition to project-level resources
+**Option 1: Using a project access token**
 
+```hcl
 provider "rollbar" {
     api_key         = "my-account-access-token"  # optional for this resource
     project_api_key = "my-project-access-token"
 }
 
-# Create an email notification for the project
-#
 resource "rollbar_notification" "email" {
   channel = "email"
   rule {
@@ -41,7 +34,35 @@ resource "rollbar_notification" "email" {
     }
   }
   config {
-    users = ["travis.mattera@rollbar.com"]
+    users = ["user@rollbar.com"]
+    teams = ["test-team-example"]
+  }
+}
+```
+
+**Option 2: Using an account access token with `project_id`**
+
+If you prefer not to configure a separate project access token, you can use the account access token and specify `project_id` on each resource:
+
+```hcl
+provider "rollbar" {
+    api_key = "my-account-access-token"
+}
+
+resource "rollbar_notification" "email" {
+  project_id = 123456
+  channel    = "email"
+  rule {
+    enabled = true
+    trigger = "occurrence_rate"
+    filters {
+      type   = "rate"
+      period = 300
+      count  = 10
+    }
+  }
+  config {
+    users = ["user@rollbar.com"]
     teams = ["test-team-example"]
   }
 }
@@ -52,6 +73,7 @@ Argument Reference
 
 The following arguments are supported:
 
+* `project_id` - (Optional) The Rollbar project ID. When set, the account access token (`api_key`) is used with this project ID instead of requiring a separate project access token (`project_api_key`).
 * `channel` - (Required) The notification channel (eg. `slack`, `pagerduty`, `email`, `webhook`) to configure a notification rule(s) for
 * `rule` - (Required) An array of expression configurations for notification rules.  Structure is [documented below](#nested_rule)
 * `config` - (Required) An array of configurations for notification rules.  Structure is [documented below](#nested_config)
