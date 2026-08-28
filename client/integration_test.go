@@ -70,6 +70,46 @@ func (s *Suite) TestUpdateIntegraion() {
 	})
 }
 
+// TestUpdateIntegrationWithProjectID tests updating an integration with a non-zero project ID.
+func (s *Suite) TestUpdateIntegrationWithProjectID() {
+	projectID := 696779
+	integration := "slack"
+	u := s.client.BaseURL + pathIntegration
+	u = strings.ReplaceAll(u, "{integration}", integration)
+	bodyMap := map[string]interface{}{"channel": "#demo", "enabled": false}
+
+	rs := responseFromFixture("integration/update.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		var body map[string]interface{}
+		err := json.NewDecoder(req.Body).Decode(&body)
+		s.Nil(err)
+		s.Equal(float64(projectID), body["project_id"])
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("PUT", u, r)
+	_, err := s.client.UpdateIntegration(projectID, integration, bodyMap)
+	s.Nil(err)
+}
+
+// TestReadIntegrationWithProjectID tests reading an integration with a non-zero project ID.
+func (s *Suite) TestReadIntegrationWithProjectID() {
+	projectID := 696779
+	integration := "slack"
+	u := s.client.BaseURL + pathIntegration
+	u = strings.ReplaceAll(u, "{integration}", integration)
+
+	rs := responseFromFixture("integration/read.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		s.Equal(strconv.Itoa(projectID), req.URL.Query().Get("project_id"))
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("GET", u, r)
+	_, err := s.client.ReadIntegration(projectID, integration)
+	s.Nil(err)
+}
+
 // TestReadIntegration tests reading a Rollbar integration.
 func (s *Suite) TestReadIntegration() {
 

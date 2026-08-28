@@ -67,6 +67,28 @@ func (s *Suite) TestCreateNotification() {
 	})
 }
 
+// TestCreateNotificationWithProjectID tests creating a notification with a non-zero project ID.
+func (s *Suite) TestCreateNotificationWithProjectID() {
+	channel := "email"
+	projectID := 696779
+	u := s.client.BaseURL + pathNotificationCreate
+	u = strings.ReplaceAll(u, "{channel}", channel)
+	trigger := "new_item"
+	status := "enabled"
+	filters := []map[string]interface{}{}
+	config := map[string]interface{}{}
+
+	rs := responseFromFixture("notification/create.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		s.Equal(strconv.Itoa(projectID), req.URL.Query().Get("project_id"))
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("POST", u, r)
+	_, err := s.client.CreateNotification(projectID, channel, filters, trigger, config, status)
+	s.Nil(err)
+}
+
 // TestUpdateNotification tests updating a Rollbar notification.
 func (s *Suite) TestUpdateNotification() {
 	id := 5127954
@@ -105,6 +127,34 @@ func (s *Suite) TestUpdateNotification() {
 	})
 }
 
+// TestUpdateNotificationWithProjectID tests updating a notification with a non-zero project ID.
+func (s *Suite) TestUpdateNotificationWithProjectID() {
+	id := 5127954
+	projectID := 696779
+	channel := "email"
+	u := s.client.BaseURL + pathNotificationReadOrDeleteOrUpdate
+	u = strings.ReplaceAll(u, "{notificationID}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{channel}", channel)
+
+	trigger := "new_item"
+	status := "disabled"
+	filters := []map[string]interface{}{}
+	config := map[string]interface{}{}
+
+	rs := responseFromFixture("notification/update.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		var body map[string]interface{}
+		err := json.NewDecoder(req.Body).Decode(&body)
+		s.Nil(err)
+		s.Equal(float64(projectID), body["project_id"])
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("PUT", u, r)
+	_, err := s.client.UpdateNotification(projectID, id, channel, filters, trigger, config, status)
+	s.Nil(err)
+}
+
 // TestReadNotification tests reading a Rollbar notification.
 func (s *Suite) TestReadNotification() {
 
@@ -133,6 +183,46 @@ func (s *Suite) TestReadNotification() {
 	n, err = s.client.ReadNotification(0, id, channel)
 	s.Equal(ErrNotFound, err)
 	s.Nil(n)
+}
+
+// TestReadNotificationWithProjectID tests reading a notification with a non-zero project ID.
+func (s *Suite) TestReadNotificationWithProjectID() {
+	id := 5127954
+	projectID := 696779
+	channel := "email"
+	u := s.client.BaseURL + pathNotificationReadOrDeleteOrUpdate
+	u = strings.ReplaceAll(u, "{notificationID}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{channel}", channel)
+
+	rs := responseFromFixture("notification/read.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		s.Equal(strconv.Itoa(projectID), req.URL.Query().Get("project_id"))
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("GET", u, r)
+	_, err := s.client.ReadNotification(projectID, id, channel)
+	s.Nil(err)
+}
+
+// TestDeleteNotificationWithProjectID tests deleting a notification with a non-zero project ID.
+func (s *Suite) TestDeleteNotificationWithProjectID() {
+	id := 5127954
+	projectID := 696779
+	channel := "email"
+	u := s.client.BaseURL + pathNotificationReadOrDeleteOrUpdate
+	u = strings.ReplaceAll(u, "{notificationID}", strconv.Itoa(id))
+	u = strings.ReplaceAll(u, "{channel}", channel)
+
+	rs := responseFromFixture("project/delete.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		s.Equal(strconv.Itoa(projectID), req.URL.Query().Get("project_id"))
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("DELETE", u, r)
+	err := s.client.DeleteNotification(projectID, id, channel)
+	s.Nil(err)
 }
 
 // TestDeleteNotification tests deleting a Rollbar notification.
