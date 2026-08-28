@@ -42,6 +42,11 @@ func resourceServiceLink() *schema.Resource {
 		DeleteContext: resourceServiceLinkDelete,
 
 		Schema: map[string]*schema.Schema{
+			"project_id": {
+				Description: "ID of the Rollbar project. When set, the account access token is used with project_id as a query parameter instead of requiring a project API key.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+			},
 			// Required
 			"name": {
 				Description: "Name",
@@ -66,10 +71,10 @@ func resourceServiceLinkCreate(ctx context.Context, d *schema.ResourceData, m in
 
 	l.Info().Msg("Creating rollbar_service_link resource")
 
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarServiceLink)
 
-	sl, err := c.CreateServiceLink(name, template)
+	sl, err := c.CreateServiceLink(projectID, name, template)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -94,9 +99,9 @@ func resourceServiceLinkUpdate(ctx context.Context, d *schema.ResourceData, m in
 
 	l.Info().Msg("Creating rollbar_service_link resource")
 
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarServiceLink)
-	sl, err := c.UpdateServiceLink(id, name, template)
+	sl, err := c.UpdateServiceLink(projectID, id, name, template)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -121,10 +126,10 @@ func resourceServiceLinkRead(ctx context.Context, d *schema.ResourceData, m inte
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_service_link resource")
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarServiceLink)
 
-	sl, err := c.ReadServiceLink(id)
+	sl, err := c.ReadServiceLink(projectID, id)
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -146,9 +151,9 @@ func resourceServiceLinkDelete(ctx context.Context, d *schema.ResourceData, m in
 	id := mustGetID(d)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_service_link resource")
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarServiceLink)
-	err := c.DeleteServiceLink(id)
+	err := c.DeleteServiceLink(projectID, id)
 
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_service_link resource")

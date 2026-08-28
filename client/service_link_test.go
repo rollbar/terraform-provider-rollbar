@@ -50,16 +50,37 @@ func (s *Suite) TestCreateServiceLink() {
 	}
 
 	httpmock.RegisterResponder("POST", u, r)
-	serviceLink, err := s.client.CreateServiceLink(name, template)
+	serviceLink, err := s.client.CreateServiceLink(0, name, template)
 	s.Nil(err)
 	s.Equal(name, serviceLink.Name)
 	s.Equal(template, serviceLink.Template)
 	s.Equal(id, serviceLink.ID)
 
 	s.checkServerErrors("POST", u, func() error {
-		_, err = s.client.CreateServiceLink(name, template)
+		_, err = s.client.CreateServiceLink(0, name, template)
 		return err
 	})
+}
+
+// TestCreateServiceLinkWithProjectID tests creating a service link with a non-zero project ID.
+func (s *Suite) TestCreateServiceLinkWithProjectID() {
+	projectID := 696779
+	u := s.client.BaseURL + pathServiceLinkCreate
+	name := "some_name"
+	template := "some_template.{{aaa}}"
+
+	rs := responseFromFixture("service_link/create.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		var body map[string]interface{}
+		err := json.NewDecoder(req.Body).Decode(&body)
+		s.Nil(err)
+		s.Equal(float64(projectID), body["project_id"])
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("POST", u, r)
+	_, err := s.client.CreateServiceLink(projectID, name, template)
+	s.Nil(err)
 }
 
 // TestUpdateServiceLink tests updating a Rollbar service_link.
@@ -82,16 +103,39 @@ func (s *Suite) TestUpdateServiceLink() {
 	}
 
 	httpmock.RegisterResponder("PUT", u, r)
-	serviceLink, err := s.client.UpdateServiceLink(id, name, template)
+	serviceLink, err := s.client.UpdateServiceLink(0, id, name, template)
 	s.Nil(err)
 	s.Equal(name, serviceLink.Name)
 	s.Equal(template, serviceLink.Template)
 	s.Equal(id, serviceLink.ID)
 
 	s.checkServerErrors("PUT", u, func() error {
-		_, err = s.client.UpdateServiceLink(id, name, template)
+		_, err = s.client.UpdateServiceLink(0, id, name, template)
 		return err
 	})
+}
+
+// TestUpdateServiceLinkWithProjectID tests updating a service link with a non-zero project ID.
+func (s *Suite) TestUpdateServiceLinkWithProjectID() {
+	id := 5127954
+	projectID := 696779
+	u := s.client.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
+	u = strings.ReplaceAll(u, "{id}", strconv.Itoa(id))
+	name := "some_name"
+	template := "some_template.{{aaa}}"
+
+	rs := responseFromFixture("service_link/update.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		var body map[string]interface{}
+		err := json.NewDecoder(req.Body).Decode(&body)
+		s.Nil(err)
+		s.Equal(float64(projectID), body["project_id"])
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("PUT", u, r)
+	_, err := s.client.UpdateServiceLink(projectID, id, name, template)
+	s.Nil(err)
 }
 
 // TestReadServiceLink tests reading a Rollbar service_link.
@@ -106,23 +150,59 @@ func (s *Suite) TestReadServiceLink() {
 	// Success
 	r := responderFromFixture("service_link/read.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	serviceLink, err := s.client.ReadServiceLink(id)
+	serviceLink, err := s.client.ReadServiceLink(0, id)
 	s.Nil(err)
 	s.Equal(name, serviceLink.Name)
 	s.Equal(template, serviceLink.Template)
 	s.Equal(id, serviceLink.ID)
 
 	s.checkServerErrors("GET", u, func() error {
-		_, err := s.client.ReadServiceLink(id)
+		_, err := s.client.ReadServiceLink(0, id)
 		return err
 	})
 
 	// Try to read a deleted notification
 	r = responderFromFixture("service_link/read_deleted.json", http.StatusOK)
 	httpmock.RegisterResponder("GET", u, r)
-	serviceLink, err = s.client.ReadServiceLink(id)
+	serviceLink, err = s.client.ReadServiceLink(0, id)
 	s.Equal(ErrNotFound, err)
 	s.Nil(serviceLink)
+}
+
+// TestReadServiceLinkWithProjectID tests reading a service link with a non-zero project ID.
+func (s *Suite) TestReadServiceLinkWithProjectID() {
+	id := 5127954
+	projectID := 696779
+	u := s.client.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
+	u = strings.ReplaceAll(u, "{id}", strconv.Itoa(id))
+
+	rs := responseFromFixture("service_link/read.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		s.Equal(strconv.Itoa(projectID), req.URL.Query().Get("project_id"))
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("GET", u, r)
+	_, err := s.client.ReadServiceLink(projectID, id)
+	s.Nil(err)
+}
+
+// TestDeleteServiceLinkWithProjectID tests deleting a service link with a non-zero project ID.
+func (s *Suite) TestDeleteServiceLinkWithProjectID() {
+	id := 5127954
+	projectID := 696779
+	u := s.client.BaseURL + pathServiceLinkReadOrDeleteOrUpdate
+	u = strings.ReplaceAll(u, "{id}", strconv.Itoa(id))
+
+	rs := responseFromFixture("service_link/delete.json", http.StatusOK)
+	r := func(req *http.Request) (*http.Response, error) {
+		s.Equal(strconv.Itoa(projectID), req.URL.Query().Get("project_id"))
+		return rs, nil
+	}
+
+	httpmock.RegisterResponder("DELETE", u, r)
+	err := s.client.DeleteServiceLink(projectID, id)
+	s.Nil(err)
 }
 
 // TestDeleteServiceLink tests deleting a Rollbar service_link.
@@ -134,10 +214,10 @@ func (s *Suite) TestDeleteServiceLink() {
 	// Success
 	r := responderFromFixture("service_link/delete.json", http.StatusOK)
 	httpmock.RegisterResponder("DELETE", u, r)
-	err := s.client.DeleteServiceLink(id)
+	err := s.client.DeleteServiceLink(0, id)
 	s.Nil(err)
 
 	s.checkServerErrors("DELETE", u, func() error {
-		return s.client.DeleteServiceLink(id)
+		return s.client.DeleteServiceLink(0, id)
 	})
 }

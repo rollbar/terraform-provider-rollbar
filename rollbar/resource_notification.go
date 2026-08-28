@@ -70,6 +70,11 @@ func resourceNotification() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
+			"project_id": {
+				Description: "ID of the Rollbar project. When set, the account access token is used with project_id as a query parameter instead of requiring a project API key.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+			},
 			// Required
 			"channel": {
 				Description: "Channel",
@@ -291,10 +296,10 @@ func resourceNotificationCreate(ctx context.Context, d *schema.ResourceData, m i
 
 	l.Info().Msg("Creating rollbar_notification resource")
 
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarNotification)
 
-	n, err := c.CreateNotification(channel, filters, trigger, config, status)
+	n, err := c.CreateNotification(projectID, channel, filters, trigger, config, status)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -320,9 +325,9 @@ func resourceNotificationUpdate(ctx context.Context, d *schema.ResourceData, m i
 
 	l.Info().Msg("Creating rollbar_notification resource")
 
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarNotification)
-	n, err := c.UpdateNotification(id, channel, filters, trigger, config, status)
+	n, err := c.UpdateNotification(projectID, id, channel, filters, trigger, config, status)
 
 	if err != nil {
 		l.Err(err).Send()
@@ -395,9 +400,9 @@ func resourceNotificationRead(ctx context.Context, d *schema.ResourceData, m int
 		Int("id", id).
 		Logger()
 	l.Info().Msg("Reading rollbar_notification resource")
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarNotification)
-	n, err := c.ReadNotification(id, channel)
+	n, err := c.ReadNotification(projectID, id, channel)
 
 	if err == client.ErrNotFound {
 		d.SetId("")
@@ -420,9 +425,9 @@ func resourceNotificationDelete(ctx context.Context, d *schema.ResourceData, m i
 	channel := d.Get("channel").(string)
 	l := log.With().Int("id", id).Logger()
 	l.Info().Msg("Deleting rollbar_notification resource")
-	c := m.(map[string]*client.RollbarAPIClient)[projectKeyToken]
+	c, projectID := clientProjectLevel(d, m)
 	c.SetHeaderResource(rollbarNotification)
-	err := c.DeleteNotification(id, channel)
+	err := c.DeleteNotification(projectID, id, channel)
 
 	if err != nil {
 		l.Err(err).Msg("Error deleting rollbar_notification resource")

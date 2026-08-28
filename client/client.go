@@ -25,6 +25,7 @@ package client
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -42,6 +43,14 @@ type RollbarAPIClient struct {
 	Resty   *resty.Client
 
 	m sync.Mutex
+}
+
+// ApplyProjectID adds the project_id query parameter to a Resty request if projectID is non-zero.
+func ApplyProjectID(r *resty.Request, projectID int) *resty.Request {
+	if projectID != 0 {
+		r.SetQueryParam("project_id", strconv.Itoa(projectID))
+	}
+	return r
 }
 
 // NewTestClient sets up a new Rollbar API test client.

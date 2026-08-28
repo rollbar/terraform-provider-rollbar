@@ -71,7 +71,7 @@ type WebhookIntegration struct {
 }
 
 // UpdateIntegration updates a new Rollbar integration.
-func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[string]interface{}) (interface{}, error) {
+func (c *RollbarAPIClient) UpdateIntegration(projectID int, integration string, bodyMap map[string]interface{}) (interface{}, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathIntegration
@@ -79,6 +79,9 @@ func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[str
 		Str("integration", integration).
 		Logger()
 	l.Debug().Msg("Update integration")
+	if projectID != 0 {
+		bodyMap["project_id"] = projectID
+	}
 	resp, err := c.Resty.R().
 		SetBody(bodyMap).
 		SetResult(Integrations[integration]).
@@ -113,7 +116,7 @@ func (c *RollbarAPIClient) UpdateIntegration(integration string, bodyMap map[str
 
 // ReadIntegration reads a Rollbar integration from the API. If no matching integration is found,
 // returns error ErrNotFound.
-func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, error) {
+func (c *RollbarAPIClient) ReadIntegration(projectID int, integration string) (interface{}, error) {
 	c.m.Lock()
 	defer c.m.Unlock()
 	u := c.BaseURL + pathIntegration
@@ -123,7 +126,7 @@ func (c *RollbarAPIClient) ReadIntegration(integration string) (interface{}, err
 		Logger()
 	l.Debug().Msg("Reading Integration from API")
 
-	resp, err := c.Resty.R().
+	resp, err := ApplyProjectID(c.Resty.R(), projectID).
 		SetResult(Integrations[integration]).
 		SetError(ErrorResult{}).
 		SetPathParams(map[string]string{
