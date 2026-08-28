@@ -35,7 +35,7 @@ import (
 
 // DefaultBaseURL is the default base URL for the Rollbar API.
 const DefaultBaseURL = "https://api.rollbar.com"
-const Version = "v1.17.0"
+const Version = "v1.18.0"
 
 // RollbarAPIClient is a client for the Rollbar API.
 type RollbarAPIClient struct {
